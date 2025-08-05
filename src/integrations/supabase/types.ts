@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          aoc: string | null
+          bottles_per_year: number | null
+          campaigns_remaining: number | null
+          created_at: string
+          cuvees: string[] | null
+          domain_name: string | null
+          grape_varieties: string[] | null
+          id: string
+          location: string | null
+          organic_conversion: boolean | null
+          social_media: Json | null
+          subscription_plan: string | null
+          surface_area: number | null
+          updated_at: string
+          user_id: string
+          website: string | null
+          wine_colors: string[] | null
+        }
+        Insert: {
+          aoc?: string | null
+          bottles_per_year?: number | null
+          campaigns_remaining?: number | null
+          created_at?: string
+          cuvees?: string[] | null
+          domain_name?: string | null
+          grape_varieties?: string[] | null
+          id?: string
+          location?: string | null
+          organic_conversion?: boolean | null
+          social_media?: Json | null
+          subscription_plan?: string | null
+          surface_area?: number | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+          wine_colors?: string[] | null
+        }
+        Update: {
+          aoc?: string | null
+          bottles_per_year?: number | null
+          campaigns_remaining?: number | null
+          created_at?: string
+          cuvees?: string[] | null
+          domain_name?: string | null
+          grape_varieties?: string[] | null
+          id?: string
+          location?: string | null
+          organic_conversion?: boolean | null
+          social_media?: Json | null
+          subscription_plan?: string | null
+          surface_area?: number | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          wine_colors?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
