@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Grape, Settings, LogOut, CreditCard, Globe } from 'lucide-react';
@@ -201,12 +202,14 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" disabled>
-                <Settings className="h-4 w-4 mr-2" />
-                Configurer mon domaine
+              <Button className="w-full" asChild>
+                <Link to="/profile">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configurer mon domaine
+                </Link>
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
-                Fonctionnalité en cours de développement
+                Renseignez vos informations viticoles
               </p>
             </CardContent>
           </Card>
