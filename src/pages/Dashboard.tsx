@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Grape, Settings, LogOut, CreditCard, Globe } from 'lucide-react';
+import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -17,15 +17,25 @@ interface Profile {
   aoc: string | null;
 }
 
+interface Campaign {
+  id: string;
+  name: string;
+  status: string;
+  target_markets: string[];
+  created_at: string;
+}
+
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchCampaigns();
     }
   }, [user]);
 
@@ -51,6 +61,24 @@ const Dashboard = () => {
       console.error('Unexpected error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCampaigns = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching campaigns:', error);
+      } else {
+        setCampaigns(data || []);
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching campaigns:', error);
     }
   };
 
@@ -226,12 +254,19 @@ const Dashboard = () => {
                 className="w-full" 
                 disabled={!profile?.campaigns_remaining}
                 variant={profile?.campaigns_remaining ? "default" : "outline"}
+                asChild={!!profile?.campaigns_remaining}
               >
-                <Globe className="h-4 w-4 mr-2" />
-                {profile?.campaigns_remaining 
-                  ? 'Nouvelle campagne' 
-                  : 'Aucune campagne disponible'
-                }
+                {profile?.campaigns_remaining ? (
+                  <Link to="/create-campaign">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Nouvelle campagne
+                  </Link>
+                ) : (
+                  <>
+                    <Globe className="h-4 w-4 mr-2" />
+                    Aucune campagne disponible
+                  </>
+                )}
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
                 {profile?.campaigns_remaining 
@@ -242,6 +277,54 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Campagnes */}
+        {campaigns.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Vos Campagnes
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {campaigns.map((campaign) => (
+                <Card key={campaign.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{campaign.name}</CardTitle>
+                    <div className="flex items-center space-x-2">
+                      {campaign.status === 'pending_validation' ? (
+                        <>
+                          <Clock className="h-4 w-4 text-orange-500" />
+                          <Badge variant="outline" className="text-orange-600 border-orange-200">
+                            En attente de validation
+                          </Badge>
+                        </>
+                      ) : campaign.status === 'active' ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                            Active
+                          </Badge>
+                        </>
+                      ) : (
+                        <Badge variant="outline">{campaign.status}</Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Marchés: {campaign.target_markets.slice(0, 3).join(', ')}
+                        {campaign.target_markets.length > 3 && ` +${campaign.target_markets.length - 3}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Créée le {new Date(campaign.created_at).toLocaleDateString('fr-FR')}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
