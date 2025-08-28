@@ -46,6 +46,8 @@ const DomainProfile = () => {
   useEffect(() => {
     if (user) {
       loadProfile();
+    } else {
+      setInitialLoading(false);
     }
   }, [user]);
 
