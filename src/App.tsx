@@ -5,10 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import DashboardLayout from "@/components/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
+import Profile from "./pages/Profile";
 import CreateCampaign from "./pages/CreateCampaign";
 import NotFound from "./pages/NotFound";
 
@@ -43,9 +45,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<AuthenticatedApp />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><DomainProfile /></ProtectedRoute>} />
-            <Route path="/create-campaign" element={<ProtectedRoute><CreateCampaign /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+            <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
+            <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

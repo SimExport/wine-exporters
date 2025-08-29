@@ -47,6 +47,96 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          cuvee: string | null
+          file_name: string
+          file_size: number
+          file_url: string
+          format: string | null
+          id: string
+          language: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          vintage: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          cuvee?: string | null
+          file_name: string
+          file_size: number
+          file_url: string
+          format?: string | null
+          id?: string
+          language?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          vintage?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          cuvee?: string | null
+          file_name?: string
+          file_size?: number
+          file_url?: string
+          format?: string | null
+          id?: string
+          language?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          vintage?: number | null
+        }
+        Relationships: []
+      }
+      media: {
+        Row: {
+          created_at: string
+          credit: string | null
+          file_url: string
+          id: string
+          sort_index: number | null
+          thumbnail_url: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit?: string | null
+          file_url: string
+          id?: string
+          sort_index?: number | null
+          thumbnail_url?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credit?: string | null
+          file_url?: string
+          id?: string
+          sort_index?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           aoc: string | null
@@ -54,12 +144,17 @@ export type Database = {
           campaigns_remaining: number | null
           created_at: string
           cuvees: string[] | null
+          description: string | null
           domain_name: string | null
           grape_varieties: string[] | null
           id: string
+          is_published: boolean | null
           location: string | null
+          organic_body: string | null
           organic_conversion: boolean | null
+          organic_year: number | null
           social_media: Json | null
+          strengths: string[] | null
           subscription_plan: string | null
           surface_area: number | null
           updated_at: string
@@ -73,12 +168,17 @@ export type Database = {
           campaigns_remaining?: number | null
           created_at?: string
           cuvees?: string[] | null
+          description?: string | null
           domain_name?: string | null
           grape_varieties?: string[] | null
           id?: string
+          is_published?: boolean | null
           location?: string | null
+          organic_body?: string | null
           organic_conversion?: boolean | null
+          organic_year?: number | null
           social_media?: Json | null
+          strengths?: string[] | null
           subscription_plan?: string | null
           surface_area?: number | null
           updated_at?: string
@@ -92,12 +192,17 @@ export type Database = {
           campaigns_remaining?: number | null
           created_at?: string
           cuvees?: string[] | null
+          description?: string | null
           domain_name?: string | null
           grape_varieties?: string[] | null
           id?: string
+          is_published?: boolean | null
           location?: string | null
+          organic_body?: string | null
           organic_conversion?: boolean | null
+          organic_year?: number | null
           social_media?: Json | null
+          strengths?: string[] | null
           subscription_plan?: string | null
           surface_area?: number | null
           updated_at?: string
