@@ -14,38 +14,178 @@ export type Database = {
   }
   public: {
     Tables: {
-      campaigns: {
+      campaign_events: {
         Row: {
+          campaign_id: string
           created_at: string
           id: string
-          launched_at: string | null
-          name: string
-          status: string
-          target_markets: string[]
-          updated_at: string
-          user_id: string
+          payload: Json | null
+          type: string
         }
         Insert: {
+          campaign_id: string
           created_at?: string
           id?: string
-          launched_at?: string | null
-          name: string
-          status?: string
-          target_markets: string[]
-          updated_at?: string
-          user_id: string
+          payload?: Json | null
+          type: string
         }
         Update: {
+          campaign_id?: string
           created_at?: string
           id?: string
+          payload?: Json | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          audience_estimate: number | null
+          blacklist_buyer_ids: string[] | null
+          channels: string[] | null
+          created_at: string
+          cuvees: string[] | null
+          daily_cap: number | null
+          doc_presentation: string | null
+          doc_pricelist: string | null
+          doc_techs: string[] | null
+          exclude_recent_days: number | null
+          id: string
+          language: string | null
+          launched_at: string | null
+          managed_by_bo: boolean | null
+          message_html: string | null
+          message_text: string | null
+          name: string
+          price_max: number | null
+          price_min: number | null
+          reply_to: string | null
+          schedule_at: string | null
+          segments: string[] | null
+          send_as_name: string | null
+          send_now: boolean | null
+          seq2_delay_days: number | null
+          seq3_delay_days: number | null
+          sequence_enabled: boolean | null
+          stats_bounces: number | null
+          stats_clicks: number | null
+          stats_opens: number | null
+          stats_replies: number | null
+          status: string
+          subject_selected: string | null
+          subject_variants: string[] | null
+          target_markets: string[]
+          techs_link: string | null
+          updated_at: string
+          user_id: string
+          volume_band: string | null
+        }
+        Insert: {
+          audience_estimate?: number | null
+          blacklist_buyer_ids?: string[] | null
+          channels?: string[] | null
+          created_at?: string
+          cuvees?: string[] | null
+          daily_cap?: number | null
+          doc_presentation?: string | null
+          doc_pricelist?: string | null
+          doc_techs?: string[] | null
+          exclude_recent_days?: number | null
+          id?: string
+          language?: string | null
           launched_at?: string | null
-          name?: string
+          managed_by_bo?: boolean | null
+          message_html?: string | null
+          message_text?: string | null
+          name: string
+          price_max?: number | null
+          price_min?: number | null
+          reply_to?: string | null
+          schedule_at?: string | null
+          segments?: string[] | null
+          send_as_name?: string | null
+          send_now?: boolean | null
+          seq2_delay_days?: number | null
+          seq3_delay_days?: number | null
+          sequence_enabled?: boolean | null
+          stats_bounces?: number | null
+          stats_clicks?: number | null
+          stats_opens?: number | null
+          stats_replies?: number | null
           status?: string
+          subject_selected?: string | null
+          subject_variants?: string[] | null
+          target_markets: string[]
+          techs_link?: string | null
+          updated_at?: string
+          user_id: string
+          volume_band?: string | null
+        }
+        Update: {
+          audience_estimate?: number | null
+          blacklist_buyer_ids?: string[] | null
+          channels?: string[] | null
+          created_at?: string
+          cuvees?: string[] | null
+          daily_cap?: number | null
+          doc_presentation?: string | null
+          doc_pricelist?: string | null
+          doc_techs?: string[] | null
+          exclude_recent_days?: number | null
+          id?: string
+          language?: string | null
+          launched_at?: string | null
+          managed_by_bo?: boolean | null
+          message_html?: string | null
+          message_text?: string | null
+          name?: string
+          price_max?: number | null
+          price_min?: number | null
+          reply_to?: string | null
+          schedule_at?: string | null
+          segments?: string[] | null
+          send_as_name?: string | null
+          send_now?: boolean | null
+          seq2_delay_days?: number | null
+          seq3_delay_days?: number | null
+          sequence_enabled?: boolean | null
+          stats_bounces?: number | null
+          stats_clicks?: number | null
+          stats_opens?: number | null
+          stats_replies?: number | null
+          status?: string
+          subject_selected?: string | null
+          subject_variants?: string[] | null
           target_markets?: string[]
+          techs_link?: string | null
           updated_at?: string
           user_id?: string
+          volume_band?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_doc_presentation_fkey"
+            columns: ["doc_presentation"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_doc_pricelist_fkey"
+            columns: ["doc_pricelist"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
@@ -97,6 +237,50 @@ export type Database = {
           vintage?: number | null
         }
         Relationships: []
+      }
+      leads: {
+        Row: {
+          buyer_id: string
+          campaign_id: string
+          created_at: string
+          id: string
+          market: string
+          message_snippet: string | null
+          owner_notes: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          campaign_id: string
+          created_at?: string
+          id?: string
+          market: string
+          message_snippet?: string | null
+          owner_notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          market?: string
+          message_snippet?: string | null
+          owner_notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       media: {
         Row: {
