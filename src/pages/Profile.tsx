@@ -19,6 +19,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import WineManagement from '@/components/profile/WineManagement';
 // Note: Drag and drop functionality will be implemented later
 
 interface ProfileData {
@@ -414,11 +415,12 @@ const Profile = () => {
 
       <div className="max-w-[1100px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="general">Général</TabsTrigger>
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="strengths">Points forts</TabsTrigger>
             <TabsTrigger value="website">Site web</TabsTrigger>
+            <TabsTrigger value="wines">Vins</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="tech-sheets">Fiches tech</TabsTrigger>
             <TabsTrigger value="media">Médias</TabsTrigger>
@@ -718,6 +720,10 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="wines" className="space-y-6">
+              <WineManagement />
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-6">

@@ -25,6 +25,16 @@ interface Document {
   file_name: string;
 }
 
+interface Wine {
+  id: string;
+  name: string;
+  appellation?: string;
+  color: string;
+  exw_price_eur: number;
+  vintages?: number[];
+  is_active: boolean;
+}
+
 interface CampaignData {
   id?: string;
   name: string;
@@ -40,7 +50,8 @@ interface CampaignData {
   blacklistBuyerIds: string[];
   audienceEstimate: number;
   // Step 2
-  cuvees: string[];
+  cuvees: string[]; // Keep for backward compatibility
+  selectedWines: string[]; // New wine IDs array
   presentationDocId: string | null;
   pricelistDocId: string | null;
   techDocsIds: string[];
@@ -72,6 +83,7 @@ const CreateCampaign = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [availableDocuments, setAvailableDocuments] = useState<Document[]>([]);
   const [availableCuvees, setAvailableCuvees] = useState<string[]>([]);
+  const [availableWines, setAvailableWines] = useState<Wine[]>([]);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
 
   const [campaignData, setCampaignData] = useState<CampaignData>({
@@ -87,6 +99,7 @@ const CreateCampaign = () => {
     blacklistBuyerIds: [],
     audienceEstimate: 0,
     cuvees: [],
+    selectedWines: [],
     presentationDocId: null,
     pricelistDocId: null,
     techDocsIds: [],
@@ -132,6 +145,7 @@ const CreateCampaign = () => {
     if (user) {
       loadDocuments();
       loadProfile();
+      loadWines();
     }
   }, [user]);
 
@@ -184,6 +198,22 @@ const CreateCampaign = () => {
     }
   };
 
+  const loadWines = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('wines')
+        .select('id, name, appellation, color, exw_price_eur, vintages, is_active')
+        .eq('user_id', user?.id)
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      setAvailableWines(data || []);
+    } catch (error) {
+      console.error('Error loading wines:', error);
+    }
+  };
+
   const saveDraft = async () => {
     if (!user) return;
     
@@ -202,6 +232,7 @@ const CreateCampaign = () => {
         exclude_recent_days: campaignData.excludeRecentDays,
         blacklist_buyer_ids: campaignData.blacklistBuyerIds,
         cuvees: campaignData.cuvees,
+        selected_wines: campaignData.selectedWines,
         doc_presentation: campaignData.presentationDocId,
         doc_pricelist: campaignData.pricelistDocId,
         doc_techs: campaignData.techDocsIds,
@@ -268,7 +299,7 @@ const CreateCampaign = () => {
       errors.push({ id: 'audience', message: 'Audience entre 20 et 500 contacts', anchor: 'step-1' });
     }
     
-    if (campaignData.cuvees.length === 0) {
+    if (campaignData.selectedWines.length === 0 && campaignData.cuvees.length === 0) {
       errors.push({ id: 'cuvees', message: 'Au moins 1 cuvée requise', anchor: 'step-2' });
     }
     
@@ -298,6 +329,15 @@ const CreateCampaign = () => {
       `Import ${campaignData.markets[0] || '[Pays]'} — dégustation échantillons possible`
     ];
     updateCampaignData({ subjectVariants: variants });
+  };
+
+  const getSelectedCuveeNames = () => {
+    if (campaignData.selectedWines.length > 0) {
+      return availableWines
+        .filter(wine => campaignData.selectedWines.includes(wine.id))
+        .map(wine => wine.name);
+    }
+    return campaignData.cuvees;
   };
 
   const launchCampaign = async () => {
@@ -332,7 +372,7 @@ const CreateCampaign = () => {
         language: campaignData.language,
         exclude_recent_days: campaignData.excludeRecentDays,
         blacklist_buyer_ids: campaignData.blacklistBuyerIds,
-        cuvees: campaignData.cuvees,
+        cuvees: getSelectedCuveeNames(),
         doc_urls: {
           presentation: availableDocuments.find(d => d.id === campaignData.presentationDocId)?.file_url,
           pricelist: availableDocuments.find(d => d.id === campaignData.pricelistDocId)?.file_url,
@@ -536,23 +576,72 @@ const CreateCampaign = () => {
     <div className="space-y-6" id="step-2">
       <div>
         <Label className="text-base font-semibold">Sélection des cuvées</Label>
-        <div className="space-y-2 mt-2">
-          {availableCuvees.map((cuvee) => (
-            <div key={cuvee} className="flex items-center space-x-2">
-              <Checkbox
-                id={cuvee}
-                checked={campaignData.cuvees.includes(cuvee)}
-                onCheckedChange={(checked) => {
-                  const newCuvees = checked
-                    ? [...campaignData.cuvees, cuvee]
-                    : campaignData.cuvees.filter(c => c !== cuvee);
-                  updateCampaignData({ cuvees: newCuvees });
-                }}
-              />
-              <Label htmlFor={cuvee} className="text-sm">{cuvee}</Label>
-            </div>
-          ))}
-        </div>
+        
+        {availableWines.length > 0 ? (
+          <div className="space-y-3 mt-4">
+            {availableWines.map((wine) => {
+              const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${wine.exw_price_eur.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€${wine.vintages?.length ? ` - ${Math.max(...wine.vintages)}` : ''}`;
+              
+              return (
+                <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/30">
+                  <Checkbox
+                    id={wine.id}
+                    checked={campaignData.selectedWines.includes(wine.id)}
+                    onCheckedChange={(checked) => {
+                      const newSelectedWines = checked
+                        ? [...campaignData.selectedWines, wine.id]
+                        : campaignData.selectedWines.filter(id => id !== wine.id);
+                      updateCampaignData({ selectedWines: newSelectedWines });
+                    }}
+                  />
+                  <Label htmlFor={wine.id} className="text-sm flex-1 cursor-pointer">
+                    {displayText}
+                  </Label>
+                  <Badge variant="secondary" className="text-xs">
+                    {wine.color}
+                  </Badge>
+                </div>
+              );
+            })}
+          </div>
+        ) : availableCuvees.length > 0 ? (
+          <div className="space-y-2 mt-2">
+            <p className="text-sm text-muted-foreground mb-2">
+              Anciennes cuvées (ajoutez vos cuvées dans votre profil pour une meilleure gestion) :
+            </p>
+            {availableCuvees.map((cuvee) => (
+              <div key={cuvee} className="flex items-center space-x-2">
+                <Checkbox
+                  id={cuvee}
+                  checked={campaignData.cuvees.includes(cuvee)}
+                  onCheckedChange={(checked) => {
+                    const newCuvees = checked
+                      ? [...campaignData.cuvees, cuvee]
+                      : campaignData.cuvees.filter(c => c !== cuvee);
+                    updateCampaignData({ cuvees: newCuvees });
+                  }}
+                />
+                <Label htmlFor={cuvee} className="text-sm">{cuvee}</Label>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-yellow-50 p-4 rounded-lg mt-4">
+            <p className="text-sm text-yellow-800">
+              Aucune cuvée disponible. Ajoutez vos cuvées dans votre{' '}
+              <Button 
+                variant="link" 
+                onClick={() => {
+                  const newTab = window.open('/profile#vins', '_blank');
+                  if (newTab) newTab.focus();
+                }} 
+                className="p-0 h-auto text-yellow-800 underline"
+              >
+                Profil
+              </Button>
+            </p>
+          </div>
+        )}
       </div>
 
       <div>
@@ -677,7 +766,7 @@ const CreateCampaign = () => {
           onChange={(e) => updateCampaignData({ messageText: e.target.value })}
           placeholder={`Bonjour {buyer_company},
 
-Nous sommes ${campaignData.sendAsName}, domaine viticole spécialisé en ${campaignData.cuvees.join(', ')}.
+Nous sommes ${campaignData.sendAsName}, domaine viticole spécialisé en ${getSelectedCuveeNames().join(', ')}.
 
 Nous recherchons des partenaires en ${campaignData.markets.join(', ')} pour développer nos ventes export.
 
@@ -716,7 +805,7 @@ ${campaignData.sendAsName}`}
           <div>
             <h4 className="font-medium mb-2">Contenu</h4>
             <p className="text-sm text-muted-foreground">
-              <strong>Cuvées:</strong> {campaignData.cuvees.join(', ') || 'Aucune'}
+              <strong>Cuvées:</strong> {getSelectedCuveeNames().join(', ') || 'Aucune'}
             </p>
             <p className="text-sm text-muted-foreground">
               <strong>Objet:</strong> {campaignData.subjectSelected || 'Non défini'}
@@ -816,7 +905,7 @@ ${campaignData.sendAsName}`}
               priceRange: { min: campaignData.priceMin || 0, max: campaignData.priceMax || 0 },
               language: campaignData.language,
               audienceEstimate: campaignData.audienceEstimate,
-              cuvees: campaignData.cuvees,
+              cuvees: getSelectedCuveeNames(),
               hasPresentationDoc: !!campaignData.presentationDocId,
               hasPricelistDoc: !!campaignData.pricelistDocId,
               subject: campaignData.subjectSelected,

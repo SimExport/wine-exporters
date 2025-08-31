@@ -109,6 +109,7 @@ export type Database = {
           reply_to: string | null
           schedule_at: string | null
           segments: string[] | null
+          selected_wines: string[] | null
           send_as_name: string | null
           send_now: boolean | null
           seq2_delay_days: number | null
@@ -150,6 +151,7 @@ export type Database = {
           reply_to?: string | null
           schedule_at?: string | null
           segments?: string[] | null
+          selected_wines?: string[] | null
           send_as_name?: string | null
           send_now?: boolean | null
           seq2_delay_days?: number | null
@@ -191,6 +193,7 @@ export type Database = {
           reply_to?: string | null
           schedule_at?: string | null
           segments?: string[] | null
+          selected_wines?: string[] | null
           send_as_name?: string | null
           send_now?: boolean | null
           seq2_delay_days?: number | null
@@ -237,6 +240,7 @@ export type Database = {
           format: string | null
           id: string
           language: string | null
+          related_wine: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -253,6 +257,7 @@ export type Database = {
           format?: string | null
           id?: string
           language?: string | null
+          related_wine?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -269,6 +274,7 @@ export type Database = {
           format?: string | null
           id?: string
           language?: string | null
+          related_wine?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -432,6 +438,57 @@ export type Database = {
           user_id?: string
           website?: string | null
           wine_colors?: string[] | null
+        }
+        Relationships: []
+      }
+      wines: {
+        Row: {
+          appellation: string | null
+          awards: string | null
+          color: string
+          created_at: string
+          description: string | null
+          exw_price_eur: number
+          grapes: string[] | null
+          id: string
+          is_active: boolean
+          name: string
+          organic: boolean
+          updated_at: string
+          user_id: string
+          vintages: number[] | null
+        }
+        Insert: {
+          appellation?: string | null
+          awards?: string | null
+          color: string
+          created_at?: string
+          description?: string | null
+          exw_price_eur: number
+          grapes?: string[] | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organic?: boolean
+          updated_at?: string
+          user_id: string
+          vintages?: number[] | null
+        }
+        Update: {
+          appellation?: string | null
+          awards?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          exw_price_eur?: number
+          grapes?: string[] | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organic?: boolean
+          updated_at?: string
+          user_id?: string
+          vintages?: number[] | null
         }
         Relationships: []
       }
