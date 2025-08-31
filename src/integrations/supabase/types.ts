@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      buyer_contacts: {
+        Row: {
+          company_name: string
+          contact_first_name: string
+          contact_last_name: string
+          country: string
+          created_at: string
+          email: string
+          id: string
+          type: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          company_name: string
+          contact_first_name: string
+          contact_last_name: string
+          country: string
+          created_at?: string
+          email: string
+          id?: string
+          type: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          company_name?: string
+          contact_first_name?: string
+          contact_last_name?: string
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          type?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       campaign_events: {
         Row: {
           campaign_id: string

@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
 import Profile from "./pages/Profile";
 import CreateCampaign from "./pages/CreateCampaign";
+import Importers from "./pages/Importers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
             <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
+            <Route path="/importers" element={<DashboardLayout><Importers /></DashboardLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
