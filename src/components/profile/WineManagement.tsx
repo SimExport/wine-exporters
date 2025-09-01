@@ -38,7 +38,7 @@ const WineManagement = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingWine, setEditingWine] = useState<Wine | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [colorFilter, setColorFilter] = useState('');
+  const [colorFilter, setColorFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [formData, setFormData] = useState({
@@ -237,7 +237,7 @@ const WineManagement = () => {
     const matchesSearch = !searchTerm || 
       wine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       wine.appellation?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesColor = !colorFilter || wine.color === colorFilter;
+    const matchesColor = colorFilter === 'all' || wine.color === colorFilter;
     return matchesSearch && matchesColor;
   });
 
@@ -448,7 +448,7 @@ const WineManagement = () => {
                 <SelectValue placeholder="Filtrer par couleur" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les couleurs</SelectItem>
+                <SelectItem value="all">Toutes les couleurs</SelectItem>
                 {WINE_COLORS.map(color => (
                   <SelectItem key={color} value={color}>{color}</SelectItem>
                 ))}
