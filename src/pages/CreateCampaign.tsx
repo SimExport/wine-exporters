@@ -146,6 +146,7 @@ const CreateCampaign = () => {
       loadDocuments();
       loadProfile();
       loadWines();
+      loadUserSettings();
     }
   }, [user]);
 
@@ -211,6 +212,27 @@ const CreateCampaign = () => {
       setAvailableWines(data || []);
     } catch (error) {
       console.error('Error loading wines:', error);
+    }
+  };
+
+  const loadUserSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('reply_to_default, display_name')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+
+      if (data?.reply_to_default && !campaignData.replyTo) {
+        updateCampaignData({ 
+          replyTo: data.reply_to_default,
+          sendAsName: data.display_name || campaignData.sendAsName
+        });
+      }
+    } catch (error) {
+      console.error('Error loading user settings:', error);
     }
   };
 
