@@ -441,6 +441,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          created_at: string
+          daily_digest_enabled: boolean
+          display_name: string | null
+          id: string
+          notify_on_approved: boolean
+          notify_on_high_bounce: boolean
+          notify_on_reply: boolean
+          notify_on_results: boolean
+          notify_on_sending: boolean
+          reply_to_default: string | null
+          ui_language: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_digest_enabled?: boolean
+          display_name?: string | null
+          id?: string
+          notify_on_approved?: boolean
+          notify_on_high_bounce?: boolean
+          notify_on_reply?: boolean
+          notify_on_results?: boolean
+          notify_on_sending?: boolean
+          reply_to_default?: string | null
+          ui_language?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_digest_enabled?: boolean
+          display_name?: string | null
+          id?: string
+          notify_on_approved?: boolean
+          notify_on_high_bounce?: boolean
+          notify_on_reply?: boolean
+          notify_on_results?: boolean
+          notify_on_sending?: boolean
+          reply_to_default?: string | null
+          ui_language?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wines: {
         Row: {
           appellation: string | null
