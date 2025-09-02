@@ -30,7 +30,7 @@ const navigationItems = [
   { title: "Profile", url: "/profile", icon: User },
   { title: "Base Importateurs", url: "/importers", icon: Database },
   { title: "Campagnes", url: "/campaigns", icon: Target },
-  { title: "Prospects", url: "/leads", icon: Users },
+  { title: "Prospects", url: "/prospects", icon: Users },
 ]
 
 const settingsItems = [

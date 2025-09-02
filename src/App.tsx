@@ -14,6 +14,8 @@ import Profile from "./pages/Profile";
 import CreateCampaign from "./pages/CreateCampaign";
 import Importers from "./pages/Importers";
 import Settings from "./pages/Settings";
+import Prospects from "./pages/Prospects";
+import ProspectDetail from "./pages/ProspectDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +54,8 @@ const App = () => (
             <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
             <Route path="/importers" element={<DashboardLayout><Importers /></DashboardLayout>} />
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
+            <Route path="/prospects" element={<DashboardLayout><Prospects /></DashboardLayout>} />
+            <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
