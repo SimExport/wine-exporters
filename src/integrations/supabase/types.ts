@@ -285,39 +285,119 @@ export type Database = {
       }
       leads: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          buyer_contact_id: string | null
           buyer_id: string
           campaign_id: string
+          city: string | null
+          company_name: string | null
+          country: string | null
           created_at: string
+          created_by: string | null
+          email: string | null
+          estimated_amount: number | null
+          first_name: string | null
           id: string
+          last_activity_at: string | null
+          last_name: string | null
+          lost_reason: string | null
           market: string
           message_snippet: string | null
           owner_notes: string | null
+          phone: string | null
+          postal_code: string | null
+          prospect_status: Database["public"]["Enums"]["prospect_status"] | null
+          requested_actions:
+            | Database["public"]["Enums"]["requested_action"][]
+            | null
+          requested_other: string | null
           status: string | null
+          tally_response_id: string | null
+          tally_response_url: string | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          buyer_contact_id?: string | null
           buyer_id: string
           campaign_id: string
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
           created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_amount?: number | null
+          first_name?: string | null
           id?: string
+          last_activity_at?: string | null
+          last_name?: string | null
+          lost_reason?: string | null
           market: string
           message_snippet?: string | null
           owner_notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          prospect_status?:
+            | Database["public"]["Enums"]["prospect_status"]
+            | null
+          requested_actions?:
+            | Database["public"]["Enums"]["requested_action"][]
+            | null
+          requested_other?: string | null
           status?: string | null
+          tally_response_id?: string | null
+          tally_response_url?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          buyer_contact_id?: string | null
           buyer_id?: string
           campaign_id?: string
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
           created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_amount?: number | null
+          first_name?: string | null
           id?: string
+          last_activity_at?: string | null
+          last_name?: string | null
+          lost_reason?: string | null
           market?: string
           message_snippet?: string | null
           owner_notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          prospect_status?:
+            | Database["public"]["Enums"]["prospect_status"]
+            | null
+          requested_actions?:
+            | Database["public"]["Enums"]["requested_action"][]
+            | null
+          requested_other?: string | null
           status?: string | null
+          tally_response_id?: string | null
+          tally_response_url?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_campaign_id_fkey"
             columns: ["campaign_id"]
@@ -441,6 +521,83 @@ export type Database = {
         }
         Relationships: []
       }
+      prospect_notes: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          lead_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_notes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sample_items: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          lead_id: string
+          quantity: number
+          updated_at: string
+          wine_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          lead_id: string
+          quantity: number
+          updated_at?: string
+          wine_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string
+          quantity?: number
+          updated_at?: string
+          wine_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sample_items_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sample_items_wine_id_fkey"
+            columns: ["wine_id"]
+            isOneToOne: false
+            referencedRelation: "wines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_settings: {
         Row: {
           created_at: string
@@ -548,7 +705,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      prospect_status:
+        | "new"
+        | "samples_requested"
+        | "samples_sent"
+        | "received"
+        | "tasted"
+        | "negotiation"
+        | "won"
+        | "lost"
+      requested_action:
+        | "price_list"
+        | "samples"
+        | "video_call"
+        | "tech_sheets"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -675,6 +846,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      prospect_status: [
+        "new",
+        "samples_requested",
+        "samples_sent",
+        "received",
+        "tasted",
+        "negotiation",
+        "won",
+        "lost",
+      ],
+      requested_action: [
+        "price_list",
+        "samples",
+        "video_call",
+        "tech_sheets",
+        "other",
+      ],
+    },
   },
 } as const
