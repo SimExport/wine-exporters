@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/DashboardLayout";
+import AdminRoute from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +17,7 @@ import Importers from "./pages/Importers";
 import Settings from "./pages/Settings";
 import Prospects from "./pages/Prospects";
 import ProspectDetail from "./pages/ProspectDetail";
+import AdminCampaigns from "./pages/AdminCampaigns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +58,13 @@ const App = () => (
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
             <Route path="/prospects" element={<DashboardLayout><Prospects /></DashboardLayout>} />
             <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
+            <Route path="/admin/campaigns" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminCampaigns />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

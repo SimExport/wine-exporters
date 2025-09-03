@@ -6,10 +6,12 @@ import {
   Settings, 
   CreditCard,
   Grape,
-  LogOut 
+  LogOut,
+  Shield
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useAuth } from '@/hooks/useAuth'
+import { useRole } from '@/hooks/useRole'
 import { useToast } from '@/hooks/use-toast'
 
 import {
@@ -40,6 +42,7 @@ const settingsItems = [
 
 export function AppSidebar() {
   const { user, signOut } = useAuth()
+  const { isAdmin } = useRole()
   const { toast } = useToast()
   const location = useLocation()
   const currentPath = location.pathname
@@ -99,6 +102,24 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/campaigns" end className={getNavCls}>
+                      <Shield className="h-4 w-4" />
+                      <span>Campagnes Admin</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup>
           <SidebarGroupLabel>Configuration</SidebarGroupLabel>
