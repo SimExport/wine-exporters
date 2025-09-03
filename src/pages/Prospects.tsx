@@ -75,9 +75,9 @@ export default function Prospects() {
 
   // Filters
   const [filters, setFilters] = useState({
-    campaign: searchParams.get('campaign') || '',
+    campaign: searchParams.get('campaign') || 'all',
     country: searchParams.get('country') || '',
-    status: searchParams.get('status') || '',
+    status: searchParams.get('status') || 'all',
     requestedActions: searchParams.get('actions')?.split(',') || [],
     period: searchParams.get('period') || '30',
     search: searchParams.get('search') || ''
@@ -143,7 +143,7 @@ export default function Prospects() {
         .order('created_at', { ascending: false })
 
       // Apply filters
-      if (filters.campaign) {
+      if (filters.campaign && filters.campaign !== 'all') {
         query = query.eq('campaign_id', filters.campaign)
       }
       
@@ -151,7 +151,7 @@ export default function Prospects() {
         query = query.eq('country', filters.country)
       }
       
-      if (filters.status) {
+      if (filters.status && filters.status !== 'all') {
         query = query.eq('prospect_status', filters.status as any)
       }
       
@@ -316,12 +316,12 @@ export default function Prospects() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="campaign-filter">Campagne</Label>
-                <Select value={filters.campaign} onValueChange={(value) => setFilters(prev => ({ ...prev, campaign: value }))}>
+                <Select value={filters.campaign} onValueChange={(value) => setFilters(prev => ({ ...prev, campaign: value === 'all' ? '' : value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Toutes les campagnes" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toutes les campagnes</SelectItem>
+                    <SelectItem value="all">Toutes les campagnes</SelectItem>
                     {campaigns.map(campaign => (
                       <SelectItem key={campaign.id} value={campaign.id}>
                         {campaign.name}
@@ -333,12 +333,12 @@ export default function Prospects() {
 
               <div>
                 <Label htmlFor="status-filter">Statut</Label>
-                <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
+                <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? '' : value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Tous les statuts" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tous les statuts</SelectItem>
+                    <SelectItem value="all">Tous les statuts</SelectItem>
                     {Object.entries(PROSPECT_STATUS_LABELS).map(([key, label]) => (
                       <SelectItem key={key} value={key}>{label}</SelectItem>
                     ))}
