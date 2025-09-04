@@ -12,7 +12,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
 import Profile from "./pages/Profile";
-import CreateCampaign from "./pages/CreateCampaign";
+import Campaigns from "./pages/Campaigns";
 import Importers from "./pages/Importers";
 import Settings from "./pages/Settings";
 import Prospects from "./pages/Prospects";
@@ -53,7 +53,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
-            <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
+            <Route path="/campaigns" element={<DashboardLayout><Campaigns /></DashboardLayout>} />
+            <Route path="/create-campaign" element={<Navigate to="/campaigns" replace />} />
             <Route path="/importers" element={<DashboardLayout><Importers /></DashboardLayout>} />
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
             <Route path="/prospects" element={<DashboardLayout><Prospects /></DashboardLayout>} />

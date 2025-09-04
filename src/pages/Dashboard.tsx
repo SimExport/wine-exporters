@@ -257,7 +257,7 @@ const Dashboard = () => {
                 asChild={!!profile?.campaigns_remaining}
               >
                 {profile?.campaigns_remaining ? (
-                  <Link to="/create-campaign">
+                  <Link to="/campaigns">
                     <Globe className="h-4 w-4 mr-2" />
                     Nouvelle campagne
                   </Link>

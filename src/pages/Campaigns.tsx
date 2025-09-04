@@ -14,8 +14,11 @@ import { Badge } from '@/components/ui/badge';
 import { Stepper } from '@/components/ui/stepper';
 import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
-import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface Document {
   id: string;
@@ -33,6 +36,19 @@ interface Wine {
   exw_price_eur: number;
   vintages?: number[];
   is_active: boolean;
+}
+
+interface Campaign {
+  id: string;
+  name: string;
+  status: string;
+  target_markets: string[];
+  created_at: string;
+  schedule_at: string | null;
+  stats_opens: number | null;
+  stats_clicks: number | null;
+  stats_replies: number | null;
+  prospect_count?: number;
 }
 
 interface CampaignData {
@@ -74,7 +90,25 @@ interface CampaignData {
   status: string;
 }
 
-const CreateCampaign = () => {
+const CAMPAIGN_STATUS_LABELS = {
+  draft: 'Brouillon',
+  pending_validation: 'En attente',
+  approved: 'Approuvée',
+  sending: 'Envoi en cours',
+  results: 'Terminée',
+  failed: 'Échec'
+};
+
+const CAMPAIGN_STATUS_COLORS = {
+  draft: 'secondary',
+  pending_validation: 'yellow',
+  approved: 'green',
+  sending: 'blue',
+  results: 'purple',
+  failed: 'red'
+} as const;
+
+const Campaigns = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -85,6 +119,11 @@ const CreateCampaign = () => {
   const [availableCuvees, setAvailableCuvees] = useState<string[]>([]);
   const [availableWines, setAvailableWines] = useState<Wine[]>([]);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  // Campaign listing state
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const [campaignData, setCampaignData] = useState<CampaignData>({
     name: '',
@@ -140,15 +179,57 @@ const CreateCampaign = () => {
   const segmentOptions = ['Bio/Conversion', 'Premium', 'MDD', 'Entrée de gamme', 'Milieu de gamme', 'Haut de gamme'];
   const volumeBandOptions = ['<3k bouteilles/an', '3-10k bouteilles/an', '10-50k bouteilles/an', '50k+ bouteilles/an'];
 
-  // Load initial data
+  // Load campaigns list
   useEffect(() => {
-    if (user) {
+    if (user && !showCreateForm) {
+      fetchCampaigns();
+    }
+  }, [user, showCreateForm]);
+
+  // Load initial data for campaign creation
+  useEffect(() => {
+    if (user && showCreateForm) {
       loadDocuments();
       loadProfile();
       loadWines();
       loadUserSettings();
     }
-  }, [user]);
+  }, [user, showCreateForm]);
+
+  const fetchCampaigns = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch prospect counts for each campaign
+      const campaignsWithCounts = await Promise.all(
+        (data || []).map(async (campaign) => {
+          const { count } = await supabase
+            .from('leads')
+            .select('*', { count: 'exact', head: true })
+            .eq('campaign_id', campaign.id);
+
+          return { ...campaign, prospect_count: count || 0 };
+        })
+      );
+
+      setCampaigns(campaignsWithCounts as any);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les campagnes",
+        variant: "destructive"
+      });
+    } finally {
+      setListLoading(false);
+    }
+  };
 
   // Auto-save functionality
   const triggerAutoSave = useCallback(() => {
@@ -378,55 +459,16 @@ const CreateCampaign = () => {
       // Update campaign status
       await supabase
         .from('campaigns')
-        .update({ status: 'pending' })
+        .update({ status: 'pending_validation' })
         .eq('id', campaignData.id);
-
-      // Send webhook to Make.com (reuse existing endpoint if configured)
-      const webhookPayload = {
-        campaign_id: campaignData.id,
-        winery_id: user?.id,
-        markets: campaignData.markets,
-        channels: campaignData.channels,
-        segments: campaignData.segments,
-        volume_band: campaignData.volumeBand,
-        price_min: campaignData.priceMin,
-        price_max: campaignData.priceMax,
-        language: campaignData.language,
-        exclude_recent_days: campaignData.excludeRecentDays,
-        blacklist_buyer_ids: campaignData.blacklistBuyerIds,
-        cuvees: getSelectedCuveeNames(),
-        doc_urls: {
-          presentation: availableDocuments.find(d => d.id === campaignData.presentationDocId)?.file_url,
-          pricelist: availableDocuments.find(d => d.id === campaignData.pricelistDocId)?.file_url,
-          techs: campaignData.techDocsIds.map(id => availableDocuments.find(d => d.id === id)?.file_url).filter(Boolean),
-          techs_link: campaignData.techsLink
-        },
-        sender: {
-          send_as_name: campaignData.sendAsName,
-          reply_to: campaignData.replyTo
-        },
-        subject: campaignData.subjectSelected,
-        message_html: campaignData.messageHtml,
-        message_text: campaignData.messageText,
-        sequence: {
-          enabled: campaignData.sequenceEnabled,
-          seq2_delay_days: campaignData.seq2DelayDays,
-          seq3_delay_days: campaignData.seq3DelayDays
-        },
-        schedule_at: campaignData.scheduleAt,
-        daily_cap: campaignData.dailyCap,
-        managed_by_bo: campaignData.managedByBo
-      };
-
-      // TODO: Add actual webhook URL when configured
-      console.log('Webhook payload:', webhookPayload);
 
       toast({
         title: "Campagne lancée !",
         description: "Votre campagne est en cours de traitement.",
       });
 
-      navigate('/dashboard');
+      // Reset form and go back to list
+      resetCreateForm();
     } catch (error) {
       console.error('Error launching campaign:', error);
       toast({
@@ -437,6 +479,54 @@ const CreateCampaign = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetCreateForm = () => {
+    setCampaignData({
+      name: '',
+      markets: [],
+      channels: [],
+      segments: [],
+      volumeBand: '',
+      priceMin: null,
+      priceMax: null,
+      language: 'FR',
+      excludeRecentDays: 90,
+      blacklistBuyerIds: [],
+      audienceEstimate: 0,
+      cuvees: [],
+      selectedWines: [],
+      presentationDocId: null,
+      pricelistDocId: null,
+      techDocsIds: [],
+      techsLink: '',
+      sendAsName: '',
+      replyTo: '',
+      subjectVariants: [],
+      subjectSelected: '',
+      messageHtml: '',
+      messageText: '',
+      sequenceEnabled: true,
+      seq2DelayDays: 3,
+      seq3DelayDays: 10,
+      scheduleAt: null,
+      sendNow: true,
+      dailyCap: 200,
+      managedByBo: false,
+      status: 'draft'
+    });
+    setCurrentStep(0);
+    setShowCreateForm(false);
+    fetchCampaigns(); // Refresh list
+  };
+
+  const getStatusBadge = (status: string) => {
+    const color = CAMPAIGN_STATUS_COLORS[status as keyof typeof CAMPAIGN_STATUS_COLORS] || 'secondary';
+    return (
+      <Badge variant={color as any}>
+        {CAMPAIGN_STATUS_LABELS[status as keyof typeof CAMPAIGN_STATUS_LABELS] || status}
+      </Badge>
+    );
   };
 
   const renderStepContent = () => {
@@ -856,6 +946,132 @@ ${campaignData.sendAsName}`}
     </div>
   );
 
+  // Campaign list view
+  if (!showCreateForm) {
+    if (listLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Campagnes</h1>
+            <p className="text-muted-foreground mt-1">
+              Gérez vos campagnes de prospection internationale
+            </p>
+          </div>
+          <Button onClick={() => setShowCreateForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvelle campagne
+          </Button>
+        </div>
+
+        {campaigns.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Aucune campagne</h3>
+                <p className="text-muted-foreground mb-4">
+                  Créez votre première campagne de prospection pour développer vos ventes à l'international.
+                </p>
+                <Button onClick={() => setShowCreateForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Créer ma première campagne
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Vos campagnes ({campaigns.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Marchés</TableHead>
+                    <TableHead>Prospects</TableHead>
+                    <TableHead>KPIs</TableHead>
+                    <TableHead>Créée le</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {campaigns.map((campaign) => (
+                    <TableRow key={campaign.id}>
+                      <TableCell className="font-medium">
+                        {campaign.name}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(campaign.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {campaign.target_markets.slice(0, 2).map(market => (
+                            <Badge key={market} variant="outline" className="text-xs">
+                              {market.slice(0, 3)}
+                            </Badge>
+                          ))}
+                          {campaign.target_markets.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{campaign.target_markets.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {campaign.prospect_count || 0} prospects
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm space-y-1">
+                          {campaign.stats_opens && (
+                            <div>
+                              {Math.round(((campaign.stats_opens || 0) / (campaign.prospect_count || 1)) * 100)}% ouvertures
+                            </div>
+                          )}
+                          {campaign.stats_replies && (
+                            <div>
+                              {Math.round(((campaign.stats_replies || 0) / (campaign.prospect_count || 1)) * 100)}% réponses
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(campaign.created_at), 'dd/MM/yyyy', { locale: fr })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Voir prospects
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Campaign creation form
   return (
     <div className="flex h-screen bg-background">
       <div className="flex-1 flex flex-col max-w-6xl mx-auto p-6">
@@ -864,10 +1080,10 @@ ${campaignData.sendAsName}`}
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              onClick={() => navigate('/dashboard')}
+              onClick={resetCreateForm}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
+              Retour aux campagnes
             </Button>
             <h1 className="text-2xl font-bold">Créer une campagne</h1>
           </div>
@@ -918,22 +1134,24 @@ ${campaignData.sendAsName}`}
           </div>
 
           {/* Sidebar */}
-          <CampaignSidebar 
-            data={{
-              markets: campaignData.markets,
-              channels: campaignData.channels,
-              segments: campaignData.segments,
-              volumeBand: campaignData.volumeBand,
-              priceRange: { min: campaignData.priceMin || 0, max: campaignData.priceMax || 0 },
-              language: campaignData.language,
-              audienceEstimate: campaignData.audienceEstimate,
-              cuvees: getSelectedCuveeNames(),
-              hasPresentationDoc: !!campaignData.presentationDocId,
-              hasPricelistDoc: !!campaignData.pricelistDocId,
-              subject: campaignData.subjectSelected,
-              scheduleAt: campaignData.scheduleAt
-            }}
-          />
+          <div className="w-80">
+            <CampaignSidebar 
+              data={{
+                markets: campaignData.markets,
+                channels: campaignData.channels,
+                segments: campaignData.segments,
+                volumeBand: campaignData.volumeBand,
+                priceRange: { min: campaignData.priceMin || 0, max: campaignData.priceMax || 0 },
+                language: campaignData.language,
+                audienceEstimate: campaignData.audienceEstimate,
+                cuvees: getSelectedCuveeNames(),
+                hasPresentationDoc: !!campaignData.presentationDocId,
+                hasPricelistDoc: !!campaignData.pricelistDocId,
+                subject: campaignData.subjectSelected,
+                scheduleAt: campaignData.scheduleAt
+              }}
+            />
+          </div>
         </div>
 
         {/* Navigation */}
@@ -946,18 +1164,27 @@ ${campaignData.sendAsName}`}
             <ArrowLeft className="h-4 w-4 mr-2" />
             Précédent
           </Button>
-
-          <Button
-            onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
-            disabled={currentStep === steps.length - 1}
-          >
-            Suivant
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          
+          {currentStep < steps.length - 1 ? (
+            <Button
+              onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+            >
+              Suivant
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={launchCampaign}
+              disabled={loading || getPreflightErrors().length > 0}
+            >
+              <Rocket className="h-4 w-4 mr-2" />
+              {loading ? 'Lancement...' : 'Lancer la campagne'}
+            </Button>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default CreateCampaign;
+export default Campaigns;
