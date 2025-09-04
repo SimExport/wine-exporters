@@ -15,7 +15,7 @@ import { Stepper } from '@/components/ui/stepper';
 import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -202,6 +202,7 @@ const Campaigns = () => {
         .from('campaigns')
         .select('*')
         .eq('user_id', user?.id)
+        .neq('status', 'archived') // Exclude archived campaigns
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -228,6 +229,76 @@ const Campaigns = () => {
       });
     } finally {
       setListLoading(false);
+    }
+  };
+
+  const deleteCampaign = async (campaignId: string, campaignName: string, status: string) => {
+    // Cannot delete campaigns that are currently sending
+    if (status === 'sending') {
+      toast({
+        title: "Impossible de supprimer",
+        description: "Vous ne pouvez pas supprimer une campagne en cours d'envoi",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer la campagne "${campaignName}" ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .delete()
+        .eq('id', campaignId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Campagne supprimée",
+        description: `La campagne "${campaignName}" a été supprimée avec succès`,
+      });
+
+      fetchCampaigns(); // Refresh list
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la campagne",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const archiveCampaign = async (campaignId: string, campaignName: string) => {
+    if (!confirm(`Êtes-vous sûr de vouloir archiver la campagne "${campaignName}" ?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ status: 'archived' })
+        .eq('id', campaignId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Campagne archivée",
+        description: `La campagne "${campaignName}" a été archivée`,
+      });
+
+      fetchCampaigns(); // Refresh list
+    } catch (error) {
+      console.error('Error archiving campaign:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'archiver la campagne",
+        variant: "destructive"
+      });
     }
   };
 
@@ -1057,6 +1128,24 @@ ${campaignData.sendAsName}`}
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             Voir prospects
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => archiveCampaign(campaign.id, campaign.name)}
+                          >
+                            <Archive className="h-4 w-4 mr-1" />
+                            Archiver
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteCampaign(campaign.id, campaign.name, campaign.status)}
+                            disabled={campaign.status === 'sending'}
+                            className={campaign.status === 'sending' ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Supprimer
                           </Button>
                         </div>
                       </TableCell>
