@@ -83,7 +83,7 @@ export default function AdminCampaigns() {
     status: ['pending_validation', 'approved', 'sending'],
     winery: '',
     period: '30',
-    market: '',
+      market: 'all',
     search: ''
   });
 
@@ -126,7 +126,7 @@ export default function AdminCampaigns() {
         .from('campaigns')
         .select(`
           *,
-          profiles:user_id (domain_name)
+          profiles!inner(domain_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -175,7 +175,7 @@ export default function AdminCampaigns() {
     }
 
     // Market filter
-    if (filters.market) {
+    if (filters.market && filters.market !== 'all') {
       filtered = filtered.filter(campaign =>
         campaign.target_markets?.includes(filters.market)
       );
@@ -209,7 +209,7 @@ export default function AdminCampaigns() {
       status: ['pending_validation', 'approved', 'sending'],
       winery: '',
       period: '30',
-      market: '',
+      market: 'all',
       search: ''
     });
   };
@@ -486,7 +486,7 @@ export default function AdminCampaigns() {
                   <SelectValue placeholder="Tous les marchés" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les marchés</SelectItem>
+                  <SelectItem value="all">Tous les marchés</SelectItem>
                   {COUNTRIES.map(country => (
                     <SelectItem key={country} value={country}>{country}</SelectItem>
                   ))}
