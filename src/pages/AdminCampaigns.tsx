@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Plus, RotateCcw, ExternalLink } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -212,6 +212,99 @@ export default function AdminCampaigns() {
       market: 'all',
       search: ''
     });
+  };
+
+  const validateCampaign = async (campaignId: string, campaignName: string) => {
+    if (!confirm(`Valider la campagne "${campaignName}" ?`)) {
+      return;
+    }
+
+    try {
+      // Update campaign status
+      const { error: campaignError } = await supabase
+        .from('campaigns')
+        .update({ 
+          status: 'approved',
+          validated_at: new Date().toISOString(),
+          admin_reviewer: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', campaignId);
+
+      if (campaignError) throw campaignError;
+
+      // Update admin task
+      const { error: taskError } = await supabase
+        .from('admin_tasks')
+        .update({ 
+          status: 'done',
+          resolved_at: new Date().toISOString(),
+          assignee: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('campaign_id', campaignId)
+        .eq('type', 'campaign_validation');
+
+      if (taskError) throw taskError;
+
+      toast({
+        title: "Campagne validée",
+        description: `La campagne "${campaignName}" a été validée avec succès`,
+      });
+
+      fetchCampaigns(); // Refresh list
+    } catch (error) {
+      console.error('Error validating campaign:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de valider la campagne",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const rejectCampaign = async (campaignId: string, campaignName: string) => {
+    const comment = prompt(`Motif de refus pour "${campaignName}" :`);
+    if (!comment) return;
+
+    try {
+      // Update campaign status
+      const { error: campaignError } = await supabase
+        .from('campaigns')
+        .update({ 
+          status: 'failed',
+          admin_reviewer: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', campaignId);
+
+      if (campaignError) throw campaignError;
+
+      // Update admin task
+      const { error: taskError } = await supabase
+        .from('admin_tasks')
+        .update({ 
+          status: 'rejected',
+          resolved_at: new Date().toISOString(),
+          assignee: (await supabase.auth.getUser()).data.user?.id,
+          admin_comment: comment
+        })
+        .eq('campaign_id', campaignId)
+        .eq('type', 'campaign_validation');
+
+      if (taskError) throw taskError;
+
+      toast({
+        title: "Campagne refusée",
+        description: `La campagne "${campaignName}" a été refusée`,
+      });
+
+      fetchCampaigns(); // Refresh list
+    } catch (error) {
+      console.error('Error rejecting campaign:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de refuser la campagne",
+        variant: "destructive"
+      });
+    }
   };
 
   const openProspectDrawer = async (campaign: Campaign) => {
@@ -574,26 +667,47 @@ export default function AdminCampaigns() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openProspectDrawer(campaign)}
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Ajouter prospect
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(`/prospects?campaign=${campaign.id}`, '_blank')}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Voir prospects
-                        </Button>
-                      </div>
-                    </TableCell>
+                     <TableCell>
+                       <div className="flex gap-2">
+                         {campaign.status === 'pending_validation' && (
+                           <>
+                             <Button
+                               size="sm"
+                               variant="default"
+                               onClick={() => validateCampaign(campaign.id, campaign.name)}
+                               className="bg-green-600 hover:bg-green-700"
+                             >
+                               <CheckCircle className="h-4 w-4 mr-1" />
+                               Valider
+                             </Button>
+                             <Button
+                               size="sm"
+                               variant="destructive"
+                               onClick={() => rejectCampaign(campaign.id, campaign.name)}
+                             >
+                               <X className="h-4 w-4 mr-1" />
+                               Refuser
+                             </Button>
+                           </>
+                         )}
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => openProspectDrawer(campaign)}
+                         >
+                           <Plus className="h-4 w-4 mr-1" />
+                           Ajouter prospect
+                         </Button>
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => window.open(`/prospects?campaign=${campaign.id}`, '_blank')}
+                         >
+                           <Eye className="h-4 w-4 mr-1" />
+                           Voir prospects
+                         </Button>
+                       </div>
+                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

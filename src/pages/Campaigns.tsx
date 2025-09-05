@@ -16,6 +16,7 @@ import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive } from 'lucide-react';
+import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -92,7 +93,7 @@ interface CampaignData {
 
 const CAMPAIGN_STATUS_LABELS = {
   draft: 'Brouillon',
-  pending_validation: 'En attente',
+  pending_validation: 'En attente de validation',
   approved: 'Approuvée',
   sending: 'Envoi en cours',
   results: 'Terminée',
@@ -1036,7 +1037,7 @@ ${campaignData.sendAsName}`}
               Gérez vos campagnes de prospection internationale
             </p>
           </div>
-          <Button onClick={() => setShowCreateForm(true)}>
+          <Button onClick={() => navigate('/create-campaign')}>
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle campagne
           </Button>
@@ -1051,7 +1052,7 @@ ${campaignData.sendAsName}`}
                 <p className="text-muted-foreground mb-4">
                   Créez votre première campagne de prospection pour développer vos ventes à l'international.
                 </p>
-                <Button onClick={() => setShowCreateForm(true)}>
+                <Button onClick={() => navigate('/create-campaign')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Créer ma première campagne
                 </Button>

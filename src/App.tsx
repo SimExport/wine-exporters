@@ -13,6 +13,8 @@ import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
 import Profile from "./pages/Profile";
 import Campaigns from "./pages/Campaigns";
+import CreateCampaign from "./pages/CreateCampaign";
+import CampaignDetail from "./pages/CampaignDetail";
 import Importers from "./pages/Importers";
 import Settings from "./pages/Settings";
 import Prospects from "./pages/Prospects";

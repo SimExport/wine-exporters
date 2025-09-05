@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_tasks: {
+        Row: {
+          admin_comment: string | null
+          assignee: string | null
+          campaign_id: string | null
+          created_at: string
+          id: string
+          resolved_at: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          admin_comment?: string | null
+          assignee?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+          type: string
+        }
+        Update: {
+          admin_comment?: string | null
+          assignee?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_tasks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buyer_contacts: {
         Row: {
           company_name: string
@@ -87,9 +128,11 @@ export type Database = {
       }
       campaigns: {
         Row: {
+          admin_reviewer: string | null
           audience_estimate: number | null
           blacklist_buyer_ids: string[] | null
           channels: string[] | null
+          client_note: string | null
           created_at: string
           cuvees: string[] | null
           daily_cap: number | null
@@ -101,6 +144,7 @@ export type Database = {
           language: string | null
           launched_at: string | null
           managed_by_bo: boolean | null
+          markets: string[] | null
           message_html: string | null
           message_text: string | null
           name: string
@@ -126,12 +170,16 @@ export type Database = {
           techs_link: string | null
           updated_at: string
           user_id: string
+          validated_at: string | null
+          validation_requested_at: string | null
           volume_band: string | null
         }
         Insert: {
+          admin_reviewer?: string | null
           audience_estimate?: number | null
           blacklist_buyer_ids?: string[] | null
           channels?: string[] | null
+          client_note?: string | null
           created_at?: string
           cuvees?: string[] | null
           daily_cap?: number | null
@@ -143,6 +191,7 @@ export type Database = {
           language?: string | null
           launched_at?: string | null
           managed_by_bo?: boolean | null
+          markets?: string[] | null
           message_html?: string | null
           message_text?: string | null
           name: string
@@ -168,12 +217,16 @@ export type Database = {
           techs_link?: string | null
           updated_at?: string
           user_id: string
+          validated_at?: string | null
+          validation_requested_at?: string | null
           volume_band?: string | null
         }
         Update: {
+          admin_reviewer?: string | null
           audience_estimate?: number | null
           blacklist_buyer_ids?: string[] | null
           channels?: string[] | null
+          client_note?: string | null
           created_at?: string
           cuvees?: string[] | null
           daily_cap?: number | null
@@ -185,6 +238,7 @@ export type Database = {
           language?: string | null
           launched_at?: string | null
           managed_by_bo?: boolean | null
+          markets?: string[] | null
           message_html?: string | null
           message_text?: string | null
           name?: string
@@ -210,6 +264,8 @@ export type Database = {
           techs_link?: string | null
           updated_at?: string
           user_id?: string
+          validated_at?: string | null
+          validation_requested_at?: string | null
           volume_band?: string | null
         }
         Relationships: [
