@@ -22,6 +22,8 @@ interface Wine {
   color: string;
   exw_price_eur: number;
   organic: boolean;
+  is_biodynamic?: boolean;
+  is_natural?: boolean;
   awards?: string;
   vintages?: number[];
   description?: string;
@@ -48,6 +50,8 @@ const WineManagement = () => {
     color: '',
     exw_price_eur: '',
     organic: false,
+    is_biodynamic: false,
+    is_natural: false,
     awards: '',
     vintages: [] as number[],
     description: ''
@@ -110,6 +114,8 @@ const WineManagement = () => {
         color: formData.color,
         exw_price_eur: price,
         organic: formData.organic,
+        is_biodynamic: formData.is_biodynamic,
+        is_natural: formData.is_natural,
         awards: formData.awards || null,
         vintages: formData.vintages.length > 0 ? formData.vintages : null,
         description: formData.description || null,
@@ -152,6 +158,8 @@ const WineManagement = () => {
       color: wine.color,
       exw_price_eur: wine.exw_price_eur.toString(),
       organic: wine.organic,
+      is_biodynamic: wine.is_biodynamic || false,
+      is_natural: wine.is_natural || false,
       awards: wine.awards || '',
       vintages: wine.vintages || [],
       description: wine.description || ''
@@ -188,6 +196,8 @@ const WineManagement = () => {
       color: '',
       exw_price_eur: '',
       organic: false,
+      is_biodynamic: false,
+      is_natural: false,
       awards: '',
       vintages: [],
       description: ''
@@ -203,6 +213,8 @@ const WineManagement = () => {
       color: wine.color,
       exw_price_eur: wine.exw_price_eur.toString(),
       organic: wine.organic,
+      is_biodynamic: wine.is_biodynamic || false,
+      is_natural: wine.is_natural || false,
       awards: wine.awards || '',
       vintages: wine.vintages || [],
       description: wine.description || ''
@@ -383,13 +395,34 @@ const WineManagement = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="organic"
-                    checked={formData.organic}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, organic: checked }))}
-                  />
-                  <Label htmlFor="organic">Bio</Label>
+                <div className="space-y-3">
+                  <Label>Certifications du vin</Label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="organic"
+                        checked={formData.organic}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, organic: checked }))}
+                      />
+                      <Label htmlFor="organic">Bio</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="biodynamic"
+                        checked={formData.is_biodynamic}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_biodynamic: checked }))}
+                      />
+                      <Label htmlFor="biodynamic">Biodynamie</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="natural"
+                        checked={formData.is_natural}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_natural: checked }))}
+                      />
+                      <Label htmlFor="natural">Nature</Label>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

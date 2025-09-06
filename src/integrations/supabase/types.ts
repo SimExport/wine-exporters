@@ -507,6 +507,7 @@ export type Database = {
           aoc: string | null
           bottles_per_year: number | null
           campaigns_remaining: number | null
+          certifications: string[] | null
           created_at: string
           cuvees: string[] | null
           description: string | null
@@ -526,11 +527,13 @@ export type Database = {
           user_id: string
           website: string | null
           wine_colors: string[] | null
+          wine_types: string[] | null
         }
         Insert: {
           aoc?: string | null
           bottles_per_year?: number | null
           campaigns_remaining?: number | null
+          certifications?: string[] | null
           created_at?: string
           cuvees?: string[] | null
           description?: string | null
@@ -550,11 +553,13 @@ export type Database = {
           user_id: string
           website?: string | null
           wine_colors?: string[] | null
+          wine_types?: string[] | null
         }
         Update: {
           aoc?: string | null
           bottles_per_year?: number | null
           campaigns_remaining?: number | null
+          certifications?: string[] | null
           created_at?: string
           cuvees?: string[] | null
           description?: string | null
@@ -574,6 +579,7 @@ export type Database = {
           user_id?: string
           website?: string | null
           wine_colors?: string[] | null
+          wine_types?: string[] | null
         }
         Relationships: []
       }
@@ -734,6 +740,8 @@ export type Database = {
           grapes: string[] | null
           id: string
           is_active: boolean
+          is_biodynamic: boolean | null
+          is_natural: boolean | null
           name: string
           organic: boolean
           updated_at: string
@@ -750,6 +758,8 @@ export type Database = {
           grapes?: string[] | null
           id?: string
           is_active?: boolean
+          is_biodynamic?: boolean | null
+          is_natural?: boolean | null
           name: string
           organic?: boolean
           updated_at?: string
@@ -766,6 +776,8 @@ export type Database = {
           grapes?: string[] | null
           id?: string
           is_active?: boolean
+          is_biodynamic?: boolean | null
+          is_natural?: boolean | null
           name?: string
           organic?: boolean
           updated_at?: string

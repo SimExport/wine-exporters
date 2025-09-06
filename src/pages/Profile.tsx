@@ -33,6 +33,8 @@ interface ProfileData {
   organic_body: string;
   organic_year: number | null;
   wine_colors: string[];
+  wine_types: string[];
+  certifications: string[];
   grape_varieties: string[];
   cuvees: string[];
   description: string;
@@ -82,6 +84,8 @@ const Profile = () => {
     organic_body: '',
     organic_year: null,
     wine_colors: [],
+    wine_types: [],
+    certifications: [],
     grape_varieties: [],
     cuvees: [],
     description: '',
@@ -93,13 +97,13 @@ const Profile = () => {
   const [media, setMedia] = useState<Media[]>([]);
   const [activeTab, setActiveTab] = useState('general');
 
-  const wineColorOptions = ['Rouge', 'Blanc', 'Rosé', 'Pétillant'];
+  const wineTypeOptions = ['Rouge', 'Blanc', 'Rosé', 'Pétillant', 'Orange', 'Nature'];
+  const certificationOptions = ['Biologique', 'Conversion bio', 'Biodynamique', 'HVE3'];
 
   // Validation logic
   const canPublish = () => {
     return (
       formData.description.length >= 300 &&
-      formData.strengths.every(s => s.trim().length > 0) &&
       isValidUrl(formData.website) &&
       documents.some(d => d.category === 'presentation') &&
       documents.some(d => d.category === 'price_list')
@@ -171,6 +175,17 @@ const Profile = () => {
       if (error) throw error;
 
       if (data) {
+        // Migrate old organic data to certifications if needed
+        const migrateCertifications = () => {
+          if (data.certifications && data.certifications.length > 0) {
+            return data.certifications;
+          }
+          if (data.organic_conversion) {
+            return data.organic_body ? ['Biologique'] : ['Conversion bio'];
+          }
+          return [];
+        };
+
         setFormData({
           domain_name: data.domain_name || '',
           location: data.location || '',
@@ -182,6 +197,8 @@ const Profile = () => {
           organic_body: data.organic_body || '',
           organic_year: data.organic_year,
           wine_colors: data.wine_colors || [],
+          wine_types: data.wine_types || [],
+          certifications: migrateCertifications(),
           grape_varieties: data.grape_varieties || [],
           cuvees: data.cuvees || [],
           description: data.description || '',
@@ -300,12 +317,21 @@ const Profile = () => {
     }
   };
 
-  const handleWineColorChange = (color: string, checked: boolean) => {
+  const handleWineTypeChange = (type: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      wine_colors: checked 
-        ? [...prev.wine_colors, color]
-        : prev.wine_colors.filter(c => c !== color)
+      wine_types: checked 
+        ? [...prev.wine_types, type]
+        : prev.wine_types.filter(t => t !== type)
+    }));
+  };
+
+  const handleCertificationChange = (certification: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      certifications: checked 
+        ? [...prev.certifications, certification]
+        : prev.certifications.filter(c => c !== certification)
     }));
   };
 
@@ -415,10 +441,9 @@ const Profile = () => {
 
       <div className="max-w-[1100px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="general">Général</TabsTrigger>
             <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="strengths">Points forts</TabsTrigger>
             <TabsTrigger value="website">Site web</TabsTrigger>
             <TabsTrigger value="wines">Vins</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -446,25 +471,16 @@ const Profile = () => {
                         placeholder="Domaine de la Vallée"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Localisation</Label>
-                      <Input
-                        id="location"
-                        value={formData.location}
-                        onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                        placeholder="Bordeaux, France"
-                      />
-                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="aoc">AOC / Appellation</Label>
+                      <Label htmlFor="aoc">AOC / Appellations</Label>
                       <Input
                         id="aoc"
                         value={formData.aoc}
                         onChange={(e) => setFormData(prev => ({ ...prev, aoc: e.target.value }))}
-                        placeholder="AOC Bordeaux"
+                        placeholder="Ajoutez vos appellations..."
                       />
                     </div>
                     <div className="space-y-2">
@@ -485,10 +501,11 @@ const Profile = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="bottles_per_year">Bouteilles par an</Label>
+                      <Label htmlFor="bottles_per_year">Volume annuel (nb de bouteilles)</Label>
                       <Input
                         id="bottles_per_year"
                         type="number"
+                        min="0"
                         value={formData.bottles_per_year || ''}
                         onChange={(e) => setFormData(prev => ({ 
                           ...prev, 
@@ -501,18 +518,18 @@ const Profile = () => {
 
                   <div className="space-y-3">
                     <Label>Types de vins produits</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {wineColorOptions.map((color) => (
-                        <div key={color} className="flex items-center space-x-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {wineTypeOptions.map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
                           <Checkbox
-                            id={color}
-                            checked={formData.wine_colors.includes(color)}
+                            id={type}
+                            checked={formData.wine_types.includes(type)}
                             onCheckedChange={(checked) => 
-                              handleWineColorChange(color, checked as boolean)
+                              handleWineTypeChange(type, checked as boolean)
                             }
                           />
-                          <Label htmlFor={color} className="text-sm font-normal">
-                            {color}
+                          <Label htmlFor={type} className="text-sm font-normal">
+                            {type}
                           </Label>
                         </div>
                       ))}
@@ -520,45 +537,26 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="organic_conversion"
-                        checked={formData.organic_conversion}
-                        onCheckedChange={(checked) => 
-                          setFormData(prev => ({ ...prev, organic_conversion: checked as boolean }))
-                        }
-                      />
-                      <Label htmlFor="organic_conversion">
-                        En conversion biologique ou certifié bio
-                      </Label>
+                    <Label>Certifications</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
+                      {certificationOptions.map((certification) => (
+                        <div key={certification} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={certification}
+                            checked={formData.certifications.includes(certification)}
+                            onCheckedChange={(checked) => 
+                              handleCertificationChange(certification, checked as boolean)
+                            }
+                          />
+                          <Label htmlFor={certification} className="text-sm font-normal">
+                            {certification}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                    
-                    {formData.organic_conversion && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="organic_body">Organisme certificateur</Label>
-                          <Input
-                            id="organic_body"
-                            value={formData.organic_body}
-                            onChange={(e) => setFormData(prev => ({ ...prev, organic_body: e.target.value }))}
-                            placeholder="Ecocert, Certipaq..."
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="organic_year">Année de certification</Label>
-                          <Input
-                            id="organic_year"
-                            type="number"
-                            value={formData.organic_year || ''}
-                            onChange={(e) => setFormData(prev => ({ 
-                              ...prev, 
-                              organic_year: e.target.value ? parseInt(e.target.value) : null 
-                            }))}
-                            placeholder="2020"
-                          />
-                        </div>
-                      </div>
-                    )}
+                    <p className="text-sm text-muted-foreground">
+                      Sélectionnez toutes les certifications applicables.
+                    </p>
                   </div>
 
                   <div className="space-y-4">
@@ -589,32 +587,6 @@ const Profile = () => {
                       </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label>Cuvées produites</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.cuvees.map((cuvee, index) => (
-                          <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {cuvee}
-                            <X 
-                              className="h-3 w-3 cursor-pointer"
-                              onClick={() => removeCuvee(index)}
-                            />
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Ajouter une cuvée"
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              addCuvee(e.currentTarget.value);
-                              e.currentTarget.value = '';
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -649,38 +621,6 @@ const Profile = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="strengths" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Points forts (obligatoire - exactement 3)</CardTitle>
-                  <CardDescription>
-                    Indiquez les 3 principaux atouts de votre domaine (80 caractères maximum chacun)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {formData.strengths.map((strength, index) => (
-                    <div key={index} className="space-y-2">
-                      <Label htmlFor={`strength-${index}`}>Point fort {index + 1}</Label>
-                      <Input
-                        id={`strength-${index}`}
-                        value={strength}
-                        onChange={(e) => handleStrengthChange(index, e.target.value)}
-                        placeholder={`Point fort ${index + 1}`}
-                        maxLength={80}
-                      />
-                      <div className="text-sm text-muted-foreground">
-                        {strength.length}/80 caractères
-                      </div>
-                    </div>
-                  ))}
-                  {formData.strengths.filter(s => s.trim().length === 0).length > 0 && (
-                    <div className="text-destructive text-sm">
-                      Ajoutez encore {formData.strengths.filter(s => s.trim().length === 0).length} point(s) fort(s)
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
 
             <TabsContent value="website" className="space-y-6">
               <Card>
@@ -730,7 +670,7 @@ const Profile = () => {
               <div className="grid gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Présentation du domaine (obligatoire)</CardTitle>
+                    <CardTitle>Présentation du domaine</CardTitle>
                     <CardDescription>
                       Brochure ou document de présentation (.pdf/.doc/.docx ≤ 15 Mo)
                     </CardDescription>
@@ -775,7 +715,7 @@ const Profile = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Liste des prix (obligatoire)</CardTitle>
+                    <CardTitle>Liste des prix</CardTitle>
                     <CardDescription>
                       Tarifs de vos vins (.pdf/.xls/.xlsx/.csv ≤ 15 Mo)
                     </CardDescription>
