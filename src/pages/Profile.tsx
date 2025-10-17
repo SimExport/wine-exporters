@@ -137,6 +137,8 @@ const Profile = () => {
         .upsert({
           user_id: user?.id,
           ...formData
+        }, {
+          onConflict: 'user_id'
         });
 
       if (!error) {
@@ -257,6 +259,8 @@ const Profile = () => {
         .upsert({
           user_id: user?.id,
           ...formData
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
@@ -296,6 +300,8 @@ const Profile = () => {
           user_id: user?.id,
           ...formData,
           is_published: true
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
