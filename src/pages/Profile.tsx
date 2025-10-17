@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -72,6 +72,15 @@ const Profile = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  // Refs for file inputs
+  const presentationInputRef = useRef<HTMLInputElement>(null);
+  const priceListInputRef = useRef<HTMLInputElement>(null);
+  const otherDocsInputRef = useRef<HTMLInputElement>(null);
+  const techSheetsInputRef = useRef<HTMLInputElement>(null);
+  const photosInputRef = useRef<HTMLInputElement>(null);
+  const videosInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<ProfileData>({
     domain_name: '',
@@ -379,6 +388,240 @@ const Profile = () => {
     }));
   };
 
+  const refetchDocuments = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) setDocuments(data);
+  };
+
+  const refetchMedia = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('media')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('sort_index');
+    
+    if (data) setMedia(data as Media[]);
+  };
+
+  const handleDocumentUpload = async (
+    file: File, 
+    category: 'presentation' | 'price_list' | 'other' | 'tech_sheet',
+    additionalData?: { cuvee?: string; vintage?: number; format?: string; language?: string }
+  ) => {
+    if (!user) return;
+
+    const maxSize = 15 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: "Fichier trop volumineux",
+        description: "La taille maximale est de 15 Mo",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const allowedTypes: { [key: string]: string[] } = {
+      presentation: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+      price_list: ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
+      other: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
+      tech_sheet: ['application/pdf']
+    };
+
+    if (!allowedTypes[category].includes(file.type)) {
+      toast({
+        title: "Type de fichier non accepté",
+        description: "Veuillez sélectionner un fichier au bon format",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      const filePath = `${user.id}/${category}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      const { error: dbError } = await supabase
+        .from('documents')
+        .insert({
+          user_id: user.id,
+          title: file.name,
+          category: category,
+          file_url: publicUrl,
+          file_name: file.name,
+          file_size: file.size,
+          ...additionalData
+        });
+
+      if (dbError) throw dbError;
+
+      await refetchDocuments();
+
+      toast({
+        title: "Document ajouté",
+        description: "Le document a été uploadé avec succès"
+      });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Erreur d'upload",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleMediaUpload = async (file: File, type: 'image' | 'video') => {
+    if (!user) return;
+
+    const maxSize = type === 'image' ? 10 * 1024 * 1024 : 200 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: "Fichier trop volumineux",
+        description: `La taille maximale est de ${type === 'image' ? '10' : '200'} Mo`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const allowedTypes = type === 'image' 
+      ? ['image/jpeg', 'image/jpg', 'image/png']
+      : ['video/mp4'];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Type de fichier non accepté",
+        description: "Veuillez sélectionner un fichier au bon format",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      const filePath = `${user.id}/${type}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('media')
+        .getPublicUrl(filePath);
+
+      const { error: dbError } = await supabase
+        .from('media')
+        .insert({
+          user_id: user.id,
+          title: file.name,
+          type: type,
+          file_url: publicUrl
+        });
+
+      if (dbError) throw dbError;
+
+      await refetchMedia();
+
+      toast({
+        title: "Média ajouté",
+        description: "Le fichier a été uploadé avec succès"
+      });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Erreur d'upload",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string, fileUrl: string) => {
+    try {
+      const filePath = fileUrl.split('/documents/')[1];
+      
+      const { error: storageError } = await supabase.storage
+        .from('documents')
+        .remove([filePath]);
+
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', docId);
+
+      if (dbError) throw dbError;
+
+      await refetchDocuments();
+
+      toast({
+        title: "Document supprimé",
+        description: "Le document a été supprimé avec succès"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur de suppression",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteMedia = async (mediaId: string, fileUrl: string) => {
+    try {
+      const filePath = fileUrl.split('/media/')[1];
+      
+      const { error: storageError } = await supabase.storage
+        .from('media')
+        .remove([filePath]);
+
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
+        .from('media')
+        .delete()
+        .eq('id', mediaId);
+
+      if (dbError) throw dbError;
+
+      await refetchMedia();
+
+      toast({
+        title: "Média supprimé",
+        description: "Le fichier a été supprimé avec succès"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur de suppression",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   if (initialLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -682,13 +925,30 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <input 
+                      ref={presentationInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleDocumentUpload(file, 'presentation');
+                        e.target.value = '';
+                      }}
+                    />
                     {documents.filter(d => d.category === 'presentation').length === 0 ? (
                       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
                         <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
                           Ajoutez votre brochure (.pdf)
                         </p>
-                        <Button variant="outline" className="mt-2">
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          className="mt-2"
+                          onClick={() => presentationInputRef.current?.click()}
+                          disabled={uploading}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Ajouter un document
                         </Button>
@@ -708,9 +968,35 @@ const Profile = () => {
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">Voir</Button>
-                              <Button variant="outline" size="sm">Télécharger</Button>
-                              <Button variant="destructive" size="sm">Supprimer</Button>
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(doc.file_url, '_blank')}
+                              >
+                                Voir
+                              </Button>
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = doc.file_url;
+                                  link.download = doc.file_name;
+                                  link.click();
+                                }}
+                              >
+                                Télécharger
+                              </Button>
+                              <Button 
+                                type="button"
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                              >
+                                Supprimer
+                              </Button>
                             </div>
                           </div>
                         ))}
@@ -727,13 +1013,30 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <input 
+                      ref={priceListInputRef}
+                      type="file"
+                      accept=".pdf,.xls,.xlsx,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleDocumentUpload(file, 'price_list');
+                        e.target.value = '';
+                      }}
+                    />
                     {documents.filter(d => d.category === 'price_list').length === 0 ? (
                       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
                         <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
                           Ajoutez votre liste de prix
                         </p>
-                        <Button variant="outline" className="mt-2">
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          className="mt-2"
+                          onClick={() => priceListInputRef.current?.click()}
+                          disabled={uploading}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Ajouter la liste des prix
                         </Button>
@@ -752,9 +1055,35 @@ const Profile = () => {
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">Voir</Button>
-                              <Button variant="outline" size="sm">Télécharger</Button>
-                              <Button variant="destructive" size="sm">Supprimer</Button>
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(doc.file_url, '_blank')}
+                              >
+                                Voir
+                              </Button>
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = doc.file_url;
+                                  link.download = doc.file_name;
+                                  link.click();
+                                }}
+                              >
+                                Télécharger
+                              </Button>
+                              <Button 
+                                type="button"
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                              >
+                                Supprimer
+                              </Button>
                             </div>
                           </div>
                         ))}
@@ -771,16 +1100,81 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+                    <input 
+                      ref={otherDocsInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleDocumentUpload(file, 'other');
+                        e.target.value = '';
+                      }}
+                    />
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         Glissez-déposez vos documents ou cliquez pour parcourir
                       </p>
-                      <Button variant="outline" className="mt-2">
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className="mt-2"
+                        onClick={() => otherDocsInputRef.current?.click()}
+                        disabled={uploading}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Ajouter des documents
                       </Button>
                     </div>
+                    {documents.filter(d => d.category === 'other').length > 0 && (
+                      <div className="space-y-2">
+                        {documents.filter(d => d.category === 'other').map(doc => (
+                          <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <File className="h-5 w-5 text-muted-foreground" />
+                              <div>
+                                <p className="font-medium">{doc.title}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {(doc.file_size / 1024 / 1024).toFixed(1)} Mo
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(doc.file_url, '_blank')}
+                              >
+                                Voir
+                              </Button>
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = doc.file_url;
+                                  link.download = doc.file_name;
+                                  link.click();
+                                }}
+                              >
+                                Télécharger
+                              </Button>
+                              <Button 
+                                type="button"
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                              >
+                                Supprimer
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -795,12 +1189,29 @@ const Profile = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <input 
+                    ref={techSheetsInputRef}
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleDocumentUpload(file, 'tech_sheet');
+                      e.target.value = '';
+                    }}
+                  />
                   <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
                       Glissez-déposez vos fiches techniques (PDF) ou cliquez pour parcourir
                     </p>
-                    <Button variant="outline" className="mt-2">
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      className="mt-2"
+                      onClick={() => techSheetsInputRef.current?.click()}
+                      disabled={uploading}
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Ajouter des fiches techniques
                     </Button>
@@ -854,8 +1265,22 @@ const Profile = () => {
                                 </td>
                                 <td className="border border-border p-2">
                                   <div className="flex gap-1">
-                                    <Button variant="outline" size="sm">Voir</Button>
-                                    <Button variant="destructive" size="sm">Supprimer</Button>
+                                    <Button 
+                                      type="button"
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => window.open(doc.file_url, '_blank')}
+                                    >
+                                      Voir
+                                    </Button>
+                                    <Button 
+                                      type="button"
+                                      variant="destructive" 
+                                      size="sm"
+                                      onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                                    >
+                                      Supprimer
+                                    </Button>
                                   </div>
                                 </td>
                               </tr>
@@ -879,12 +1304,29 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <input 
+                      ref={photosInputRef}
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleMediaUpload(file, 'image');
+                        e.target.value = '';
+                      }}
+                    />
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         Glissez-déposez vos photos ou cliquez pour parcourir
                       </p>
-                      <Button variant="outline" className="mt-2">
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className="mt-2"
+                        onClick={() => photosInputRef.current?.click()}
+                        disabled={uploading}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Ajouter des photos
                       </Button>
@@ -914,7 +1356,12 @@ const Profile = () => {
                               />
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="destructive" size="sm">
+                              <Button 
+                                type="button"
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDeleteMedia(item.id, item.file_url)}
+                              >
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
@@ -933,12 +1380,29 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <input 
+                      ref={videosInputRef}
+                      type="file"
+                      accept=".mp4"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleMediaUpload(file, 'video');
+                        e.target.value = '';
+                      }}
+                    />
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <Play className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         Glissez-déposez vos vidéos ou cliquez pour parcourir
                       </p>
-                      <Button variant="outline" className="mt-2">
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className="mt-2"
+                        onClick={() => videosInputRef.current?.click()}
+                        disabled={uploading}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Ajouter des vidéos
                       </Button>
@@ -974,7 +1438,12 @@ const Profile = () => {
                               />
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="destructive" size="sm">
+                              <Button 
+                                type="button"
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDeleteMedia(item.id, item.file_url)}
+                              >
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
