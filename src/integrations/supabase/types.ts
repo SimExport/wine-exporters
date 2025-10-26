@@ -57,38 +57,44 @@ export type Database = {
       }
       buyer_contacts: {
         Row: {
-          company_name: string
-          contact_first_name: string
-          contact_last_name: string
+          city: string | null
+          company_name: string | null
           country: string
           created_at: string
           email: string
           id: string
-          type: string
+          phone: string | null
+          postal_code: string | null
+          state: string | null
+          street: string | null
           updated_at: string
           website_url: string | null
         }
         Insert: {
-          company_name: string
-          contact_first_name: string
-          contact_last_name: string
+          city?: string | null
+          company_name?: string | null
           country: string
           created_at?: string
           email: string
           id?: string
-          type: string
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          street?: string | null
           updated_at?: string
           website_url?: string | null
         }
         Update: {
-          company_name?: string
-          contact_first_name?: string
-          contact_last_name?: string
+          city?: string | null
+          company_name?: string | null
           country?: string
           created_at?: string
           email?: string
           id?: string
-          type?: string
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          street?: string | null
           updated_at?: string
           website_url?: string | null
         }
