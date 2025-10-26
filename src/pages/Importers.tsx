@@ -10,35 +10,47 @@ import { useToast } from '@/hooks/use-toast';
 interface BuyerContact {
   id: string;
   company_name: string;
-  contact_first_name: string;
-  contact_last_name: string;
-  type: string;
   country: string;
   email: string;
   website_url?: string;
+  street?: string;
+  city?: string;
+  postal_code?: string;
+  phone?: string;
+  state?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const COUNTRIES = [
-  { code: 'DE', name: 'Allemagne' },
-  { code: 'UK', name: 'Royaume-Uni' },
-  { code: 'DK', name: 'Danemark' },
-  { code: 'SE', name: 'Suède' },
-  { code: 'NO', name: 'Norvège' },
-  { code: 'FI', name: 'Finlande' },
-  { code: 'NL', name: 'Pays-Bas' },
-  { code: 'BE', name: 'Belgique' },
-  { code: 'CH', name: 'Suisse' },
-  { code: 'AT', name: 'Autriche' },
-  { code: 'IT', name: 'Italie' },
-  { code: 'ES', name: 'Espagne' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'US', name: 'États-Unis' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'JP', name: 'Japon' },
-  { code: 'KR', name: 'Corée du Sud' },
-  { code: 'HK', name: 'Hong Kong' },
-  { code: 'SG', name: 'Singapour' },
-  { code: 'AU', name: 'Australie' },
+  { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
+  { code: 'UK', name: 'Royaume-Uni', englishName: 'United Kingdom' },
+  { code: 'DK', name: 'Danemark', englishName: 'Denmark' },
+  { code: 'SE', name: 'Suède', englishName: 'Sweden' },
+  { code: 'NO', name: 'Norvège', englishName: 'Norway' },
+  { code: 'FI', name: 'Finlande', englishName: 'Finland' },
+  { code: 'NL', name: 'Pays-Bas', englishName: 'Netherlands' },
+  { code: 'BE', name: 'Belgique', englishName: 'Belgium' },
+  { code: 'CH', name: 'Suisse', englishName: 'Switzerland' },
+  { code: 'AT', name: 'Autriche', englishName: 'Austria' },
+  { code: 'IT', name: 'Italie', englishName: 'Italy' },
+  { code: 'ES', name: 'Espagne', englishName: 'Spain' },
+  { code: 'PT', name: 'Portugal', englishName: 'Portugal' },
+  { code: 'US', name: 'États-Unis', englishName: 'United States' },
+  { code: 'CA', name: 'Canada', englishName: 'Canada' },
+  { code: 'JP', name: 'Japon', englishName: 'Japan' },
+  { code: 'KR', name: 'Corée du Sud', englishName: 'South Korea' },
+  { code: 'HK', name: 'Hong Kong', englishName: 'Hong Kong' },
+  { code: 'SG', name: 'Singapour', englishName: 'Singapore' },
+  { code: 'AU', name: 'Australie', englishName: 'Australia' },
+  { code: 'BR', name: 'Brésil', englishName: 'Brazil' },
+  { code: 'MX', name: 'Mexique', englishName: 'Mexico' },
+  { code: 'CN', name: 'Chine', englishName: 'China' },
+  { code: 'EE', name: 'Estonie', englishName: 'Estonia' },
+  { code: 'IE', name: 'Irlande', englishName: 'Ireland' },
+  { code: 'PL', name: 'Pologne', englishName: 'Poland' },
+  { code: 'CZ', name: 'République tchèque', englishName: 'Czech Republic' },
+  { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
 ];
 
 const Importers = () => {
@@ -50,8 +62,8 @@ const Importers = () => {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const { toast } = useToast();
 
-  const fetchContacts = async (country: string, page = 1, limit = 20) => {
-    if (!country) {
+  const fetchContacts = async (countryCode: string, page = 1, limit = 20) => {
+    if (!countryCode) {
       setContacts([]);
       setTotalCount(0);
       return;
@@ -62,10 +74,19 @@ const Importers = () => {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
+      // Find the English name from the country code
+      const country = COUNTRIES.find(c => c.code === countryCode);
+      if (!country) {
+        setContacts([]);
+        setTotalCount(0);
+        setLoading(false);
+        return;
+      }
+
       const { data, error, count } = await supabase
         .from('buyer_contacts')
         .select('*', { count: 'exact' })
-        .eq('country', country)
+        .eq('country', country.englishName)
         .order('company_name', { ascending: true })
         .range(from, to);
 
@@ -113,10 +134,14 @@ const Importers = () => {
     }
 
     try {
+      // Find the English name from the country code
+      const country = COUNTRIES.find(c => c.code === selectedCountry);
+      if (!country) return;
+
       const { data, error } = await supabase
         .from('buyer_contacts')
         .select('*')
-        .eq('country', selectedCountry)
+        .eq('country', country.englishName)
         .order('company_name', { ascending: true })
         .limit(10000);
 
@@ -131,7 +156,7 @@ const Importers = () => {
       }
 
       // Create CSV content
-      const headers = ['company_name', 'contact_first_name', 'contact_last_name', 'type', 'country', 'email', 'website_url'];
+      const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
       const csvContent = [
         headers.join(','),
         ...(data || []).map(contact => 
@@ -240,10 +265,10 @@ const Importers = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nom de la société</TableHead>
-                    <TableHead>Contact principal</TableHead>
-                    <TableHead>Type</TableHead>
                     <TableHead>Pays</TableHead>
+                    <TableHead>Ville</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Téléphone</TableHead>
                     <TableHead>Site web</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -254,15 +279,10 @@ const Importers = () => {
                         {contact.company_name}
                       </TableCell>
                       <TableCell>
-                        {contact.contact_first_name} {contact.contact_last_name}
+                        {contact.country}
                       </TableCell>
                       <TableCell>
-                        <span className="px-2 py-1 bg-muted rounded-md text-sm">
-                          {contact.type}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {COUNTRIES.find(c => c.code === contact.country)?.name || contact.country}
+                        {contact.city || '-'}
                       </TableCell>
                       <TableCell>
                         <a 
@@ -272,6 +292,9 @@ const Importers = () => {
                           <Mail className="h-3 w-3" />
                           {contact.email}
                         </a>
+                      </TableCell>
+                      <TableCell>
+                        {contact.phone || '-'}
                       </TableCell>
                       <TableCell>
                         {contact.website_url ? (
