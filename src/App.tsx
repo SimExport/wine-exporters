@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminRoute from "@/components/AdminRoute";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
@@ -52,6 +53,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<AuthenticatedApp />} />
+            <Route path="/lp" element={<LandingPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
