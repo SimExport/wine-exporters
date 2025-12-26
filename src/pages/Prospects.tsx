@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Download, ExternalLink, Search, Filter } from 'lucide-react'
+import { Plus, Download, ExternalLink, Search, Filter, Kanban } from 'lucide-react'
 import { format, subDays, isAfter } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -382,6 +382,12 @@ export default function Prospects() {
             <Button onClick={handleExportCSV} variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Exporter CSV
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/pipeline">
+                <Kanban className="w-4 h-4 mr-2" />
+                Vue Kanban
+              </Link>
             </Button>
           </div>
           

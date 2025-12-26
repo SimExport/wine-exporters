@@ -7,7 +7,9 @@ import {
   CreditCard,
   Grape,
   LogOut,
-  Shield
+  Shield,
+  List,
+  Kanban
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useAuth } from '@/hooks/useAuth'
@@ -32,7 +34,8 @@ const navigationItems = [
   { title: "Profile", url: "/profile", icon: User },
   { title: "Base Importateurs", url: "/importers", icon: Database },
   { title: "Campagnes", url: "/campaigns", icon: Target },
-  { title: "Prospects", url: "/prospects", icon: Users },
+  { title: "CRM - Liste", url: "/prospects", icon: List },
+  { title: "CRM - Kanban", url: "/pipeline", icon: Kanban },
 ]
 
 const settingsItems = [
