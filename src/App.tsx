@@ -20,6 +20,7 @@ import Importers from "./pages/Importers";
 import Settings from "./pages/Settings";
 import Prospects from "./pages/Prospects";
 import ProspectDetail from "./pages/ProspectDetail";
+import Pipeline from "./pages/Pipeline";
 import AdminCampaigns from "./pages/AdminCampaigns";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
             <Route path="/prospects" element={<DashboardLayout><Prospects /></DashboardLayout>} />
             <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
+            <Route path="/pipeline" element={<DashboardLayout><Pipeline /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
               <DashboardLayout>
                 <AdminRoute>
