@@ -26,14 +26,14 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Component to handle authenticated routes
+// Component to handle authenticated routes - redirects to dashboard if logged in
 const AuthenticatedApp = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -42,7 +42,7 @@ const AuthenticatedApp = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return <Index />;
+  return <LandingPage />;
 };
 
 const App = () => (
@@ -54,7 +54,6 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<AuthenticatedApp />} />
-            <Route path="/lp" element={<LandingPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />

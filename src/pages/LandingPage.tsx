@@ -25,12 +25,12 @@ const LandingPage = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                <Grape className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <Grape className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">WineExporters</h1>
-                <p className="text-xs text-muted-foreground">by ExportVins</p>
+                <h1 className="text-xl font-bold text-foreground">ExportVins</h1>
+                <p className="text-xs text-muted-foreground">Développez vos exports</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -38,7 +38,7 @@ const LandingPage = () => {
                 <Button variant="ghost">Se connecter</Button>
               </Link>
               <Link to="/auth">
-                <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                <Button className="bg-primary hover:bg-primary/90">
                   Commencer
                 </Button>
               </Link>
@@ -51,13 +51,13 @@ const LandingPage = () => {
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-primary text-sm font-medium mb-8">
               <Sparkles className="h-4 w-4" />
               Plateforme de prospection pour vignerons
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
               Développez vos exports <br />
-              <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-primary">
                 vers le monde entier
               </span>
             </h1>
@@ -67,7 +67,7 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-lg px-8 py-6">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-6">
                   Démarrer gratuitement
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -85,19 +85,19 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <p className="text-4xl font-bold text-purple-600 mb-2">15 000+</p>
+              <p className="text-4xl font-bold text-primary mb-2">15 000+</p>
               <p className="text-muted-foreground">Importateurs qualifiés</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-purple-600 mb-2">45+</p>
+              <p className="text-4xl font-bold text-primary mb-2">45+</p>
               <p className="text-muted-foreground">Pays couverts</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-purple-600 mb-2">500+</p>
+              <p className="text-4xl font-bold text-primary mb-2">500+</p>
               <p className="text-muted-foreground">Domaines utilisateurs</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-purple-600 mb-2">25%</p>
+              <p className="text-4xl font-bold text-primary mb-2">25%</p>
               <p className="text-muted-foreground">Taux de réponse moyen</p>
             </div>
           </div>
@@ -119,8 +119,8 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-6">
-                  <Users className="h-7 w-7 text-purple-600" />
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
+                  <Users className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Base d'importateurs</h3>
                 <p className="text-muted-foreground">
@@ -131,8 +131,8 @@ const LandingPage = () => {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-6">
-                  <Target className="h-7 w-7 text-indigo-600" />
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
+                  <Target className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Ciblage précis</h3>
                 <p className="text-muted-foreground">
@@ -143,8 +143,8 @@ const LandingPage = () => {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6">
-                  <Mail className="h-7 w-7 text-blue-600" />
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
+                  <Mail className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Campagnes email</h3>
                 <p className="text-muted-foreground">
@@ -155,8 +155,8 @@ const LandingPage = () => {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
-                  <MessageSquare className="h-7 w-7 text-green-600" />
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
+                  <MessageSquare className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Suivi des prospects</h3>
                 <p className="text-muted-foreground">
@@ -167,8 +167,8 @@ const LandingPage = () => {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-6">
-                  <BarChart3 className="h-7 w-7 text-orange-600" />
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
+                  <BarChart3 className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Analytics détaillées</h3>
                 <p className="text-muted-foreground">
@@ -179,8 +179,8 @@ const LandingPage = () => {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-6">
-                  <FileText className="h-7 w-7 text-rose-600" />
+                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
+                  <FileText className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Fiches marchés</h3>
                 <p className="text-muted-foreground">
@@ -206,7 +206,7 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold flex items-center justify-center mx-auto mb-6">
                 1
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Créez votre profil</h3>
@@ -216,7 +216,7 @@ const LandingPage = () => {
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold flex items-center justify-center mx-auto mb-6">
                 2
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Lancez une campagne</h3>
@@ -226,7 +226,7 @@ const LandingPage = () => {
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold flex items-center justify-center mx-auto mb-6">
                 3
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Suivez vos leads</h3>
@@ -251,7 +251,7 @@ const LandingPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border-2 border-border hover:border-purple-300 transition-colors">
+            <Card className="border-2 border-border hover:border-primary/30 transition-colors">
               <CardContent className="p-8">
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-foreground mb-2">Abonnement</h3>
@@ -284,13 +284,13 @@ const LandingPage = () => {
                   </li>
                 </ul>
                 <Link to="/auth" className="block">
-                  <Button className="w-full" size="lg">Choisir l'abonnement</Button>
+                  <Button className="w-full" size="lg" variant="outline">Choisir l'abonnement</Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-purple-300 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium px-4 py-1 rounded-bl-lg">
+            <Card className="border-2 border-primary relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-bl-lg">
                 Populaire
               </div>
               <CardContent className="p-8">
@@ -325,7 +325,7 @@ const LandingPage = () => {
                   </li>
                 </ul>
                 <Link to="/auth" className="block">
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" size="lg">
+                  <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
                     Commencer maintenant
                   </Button>
                 </Link>
@@ -336,13 +336,13 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-purple-600 to-indigo-700">
+      <section className="py-24 px-4 bg-primary">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
             Prêt à développer vos exports ?
           </h2>
-          <p className="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">
-            Rejoignez les 500+ domaines qui utilisent WineExporters pour conquérir de nouveaux marchés.
+          <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
+            Rejoignez les 500+ domaines qui utilisent ExportVins pour conquérir de nouveaux marchés.
           </p>
           <Link to="/auth">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
@@ -358,12 +358,12 @@ const LandingPage = () => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                <Grape className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <Grape className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground">WineExporters</h1>
-                <p className="text-xs text-muted-foreground">by ExportVins</p>
+                <h1 className="text-lg font-bold text-foreground">ExportVins</h1>
+                <p className="text-xs text-muted-foreground">Développez vos exports</p>
               </div>
             </div>
             <p className="text-muted-foreground text-sm">
