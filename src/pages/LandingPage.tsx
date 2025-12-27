@@ -4,16 +4,13 @@ import {
   Grape, 
   Users, 
   Globe, 
-  TrendingUp, 
   Mail, 
-  Target, 
-  BarChart3, 
-  FileText, 
+  Kanban,
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  Building2,
-  MessageSquare
+  UserCheck,
+  FileText
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -39,7 +36,7 @@ const LandingPage = () => {
               </Link>
               <Link to="/auth">
                 <Button className="bg-primary hover:bg-primary/90">
-                  Commencer
+                  Demander une démo
                 </Button>
               </Link>
             </div>
@@ -53,28 +50,24 @@ const LandingPage = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-primary text-sm font-medium mb-8">
               <Sparkles className="h-4 w-4" />
-              Plateforme de prospection pour vignerons
+              Service Done-For-You pour vignerons
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Développez vos exports <br />
+              Trouvez des acheteurs pour vos vins <br />
               <span className="text-primary">
-                vers le monde entier
+                tous les mois.
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              La plateforme tout-en-un qui connecte les vignerons français aux importateurs internationaux. 
-              Créez des campagnes ciblées et suivez vos prospects.
+              La solution clé en main pour les domaines viticoles. Accédez à un réseau mondial, laissez-nous gérer vos campagnes de prospection et convertissez vos contacts en commandes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-6">
-                  Démarrer gratuitement
+                  Demander une démo
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                Voir une démo
-              </Button>
             </div>
           </div>
         </div>
@@ -83,60 +76,44 @@ const LandingPage = () => {
       {/* Stats Section */}
       <section className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <p className="text-4xl font-bold text-primary mb-2">15 000+</p>
-              <p className="text-muted-foreground">Importateurs qualifiés</p>
+              <p className="text-4xl font-bold text-primary mb-2">20 000+</p>
+              <p className="text-muted-foreground">Importateurs et acheteurs</p>
             </div>
             <div className="text-center">
               <p className="text-4xl font-bold text-primary mb-2">45+</p>
               <p className="text-muted-foreground">Pays couverts</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-primary mb-2">500+</p>
-              <p className="text-muted-foreground">Domaines utilisateurs</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-bold text-primary mb-2">25%</p>
-              <p className="text-muted-foreground">Taux de réponse moyen</p>
+              <p className="text-4xl font-bold text-primary mb-2">100+</p>
+              <p className="text-muted-foreground">Domaines accompagnés</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - 3 Pillars */}
       <section className="py-24 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Tout ce dont vous avez besoin pour exporter
+              Les 3 Piliers de notre service
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Une suite complète d'outils pour identifier, contacter et convertir des importateurs qualifiés.
+              Un accompagnement complet pour développer vos exports sans effort.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
                 <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
-                  <Users className="h-7 w-7 text-primary" />
+                  <Globe className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Base d'importateurs</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Une base de 20 000+ acheteurs internationaux</h3>
                 <p className="text-muted-foreground">
-                  Accédez à notre base de données de 15 000+ importateurs qualifiés, mise à jour régulièrement.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
-                  <Target className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Ciblage précis</h3>
-                <p className="text-muted-foreground">
-                  Filtrez par pays, type de vin recherché, volume et segment de marché pour un ciblage optimal.
+                  Ne perdez plus de temps à chercher des contacts. Accédez instantanément à notre liste exhaustive d'importateurs, distributeurs et acheteurs clés dans plus de 45 pays. Une vision globale du marché pour votre domaine viticole.
                 </p>
               </CardContent>
             </Card>
@@ -146,9 +123,9 @@ const LandingPage = () => {
                 <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
                   <Mail className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Campagnes email</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Nous gérons votre prospection, vous évitez les spams</h3>
                 <p className="text-muted-foreground">
-                  Créez et envoyez des campagnes personnalisées avec des séquences de relance automatiques.
+                  Oubliez la technique. Mettez simplement à jour vos infos et lancez votre campagne mensuelle en un clic. Nos experts créent pour vous des emails optimisés qui arrivent en boîte de réception. Nous nous assurons que votre domaine brille auprès des bons interlocuteurs.
                 </p>
               </CardContent>
             </Card>
@@ -156,35 +133,11 @@ const LandingPage = () => {
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
                 <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
-                  <MessageSquare className="h-7 w-7 text-primary" />
+                  <Kanban className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Suivi des prospects</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Transformez les importateurs qualifiés en commandes</h3>
                 <p className="text-muted-foreground">
-                  Gérez vos leads avec un CRM intégré : statuts, notes, demandes d'échantillons et plus.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
-                  <BarChart3 className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Analytics détaillées</h3>
-                <p className="text-muted-foreground">
-                  Suivez vos performances : ouvertures, clics, réponses et conversions en temps réel.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
-                  <FileText className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Fiches marchés</h3>
-                <p className="text-muted-foreground">
-                  Téléchargez des analyses détaillées de chaque marché : réglementation, tendances, conseils.
+                  Centralisez tout votre suivi. Nos équipes ajoutent directement les importateurs intéressés par vos campagnes dans votre CRM. Utilisez la vue Kanban pour suivre l'avancée des négociations, ajoutez vos notes et ne manquez aucune opportunité de vente.
                 </p>
               </CardContent>
             </Card>
@@ -211,7 +164,7 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Créez votre profil</h3>
               <p className="text-muted-foreground">
-                Renseignez votre domaine, vos vins et vos documents commerciaux (tarifs, fiches techniques).
+                Renseignez les informations de votre domaine viticole et téléchargez vos fiches techniques.
               </p>
             </div>
 
@@ -219,9 +172,9 @@ const LandingPage = () => {
               <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold flex items-center justify-center mx-auto mb-6">
                 2
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Lancez une campagne</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Activez votre campagne</h3>
               <p className="text-muted-foreground">
-                Sélectionnez vos marchés cibles, personnalisez votre message et validez l'envoi.
+                Chaque mois, validez l'envoi. Nous nous occupons de la rédaction, du ciblage et de la délivrabilité technique.
               </p>
             </div>
 
@@ -231,102 +184,65 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Suivez vos leads</h3>
               <p className="text-muted-foreground">
-                Recevez les réponses, gérez les demandes d'échantillons et convertissez vos prospects.
+                Retrouvez les réponses et les prospects chauds directement dans votre CRM. Négociez et concluez vos ventes.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Pricing Section - Single Card */}
       <section className="py-24 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Tarifs transparents
+              Tarif simple et transparent
             </h2>
             <p className="text-xl text-muted-foreground">
-              Choisissez la formule adaptée à vos besoins
+              Votre service export externalisé, tout inclus
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border-2 border-border hover:border-primary/30 transition-colors">
+          <div className="max-w-lg mx-auto">
+            <Card className="border-2 border-primary relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-bl-lg">
+                Formule unique
+              </div>
               <CardContent className="p-8">
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">Abonnement</h3>
-                  <p className="text-muted-foreground">Pour une prospection régulière</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Votre service export externalisé</h3>
+                  <p className="text-muted-foreground">Tout inclus, sans surprise</p>
                 </div>
                 <div className="mb-8">
-                  <span className="text-5xl font-bold text-foreground">90€</span>
+                  <span className="text-5xl font-bold text-foreground">149€</span>
                   <span className="text-muted-foreground"> HT/mois</span>
                 </div>
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">1 campagne par mois incluse</span>
+                    <span className="text-foreground">Accès à la base de 20 000+ acheteurs</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Accès complet à la base importateurs</span>
+                    <span className="text-foreground">1 campagne par mois créée et gérée par nos soins</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Fiches marchés téléchargeables</span>
+                    <span className="text-foreground">Garantie de délivrabilité (Anti-Spam)</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">CRM et suivi des prospects</span>
+                    <span className="text-foreground">CRM complet (Vue Kanban, Notes, Import de leads)</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Support prioritaire</span>
-                  </li>
-                </ul>
-                <Link to="/auth" className="block">
-                  <Button className="w-full" size="lg" variant="outline">Choisir l'abonnement</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-primary relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-bl-lg">
-                Populaire
-              </div>
-              <CardContent className="p-8">
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">À la carte</h3>
-                  <p className="text-muted-foreground">Flexibilité maximale</p>
-                </div>
-                <div className="mb-8">
-                  <span className="text-5xl font-bold text-foreground">150€</span>
-                  <span className="text-muted-foreground"> HT/campagne</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Packs de 1 à 5 campagnes</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Prix dégressif selon volume</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Accès aux fiches pays sélectionnés</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">CRM et suivi des prospects</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-foreground">Sans engagement</span>
+                    <span className="text-foreground">Support dédié aux domaines viticoles</span>
                   </li>
                 </ul>
                 <Link to="/auth" className="block">
                   <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
-                    Commencer maintenant
+                    Demander une démo
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
               </CardContent>
@@ -339,14 +255,14 @@ const LandingPage = () => {
       <section className="py-24 px-4 bg-primary">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
-            Prêt à développer vos exports ?
+            Rejoignez les 100+ domaines qui nous font confiance.
           </h2>
           <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
-            Rejoignez les 500+ domaines qui utilisent ExportVins pour conquérir de nouveaux marchés.
+            Externalisez votre prospection export et concentrez-vous sur ce que vous faites de mieux : produire des vins d'exception.
           </p>
           <Link to="/auth">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
-              Créer mon compte gratuitement
+              Demander une démo
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
