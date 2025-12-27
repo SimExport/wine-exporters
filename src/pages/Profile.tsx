@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Eye, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play } from 'lucide-react';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,12 +20,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import WineManagement from '@/components/profile/WineManagement';
-// Note: Drag and drop functionality will be implemented later
 
 interface ProfileData {
   domain_name: string;
   location: string;
-  aoc: string;
+  aoc: string[];
   website: string;
   surface_area: number | null;
   bottles_per_year: number | null;
@@ -85,7 +84,7 @@ const Profile = () => {
   const [formData, setFormData] = useState<ProfileData>({
     domain_name: '',
     location: '',
-    aoc: '',
+    aoc: [],
     website: '',
     surface_area: null,
     bottles_per_year: null,
@@ -109,16 +108,6 @@ const Profile = () => {
   const wineTypeOptions = ['Rouge', 'Blanc', 'Rosé', 'Pétillant', 'Orange', 'Nature'];
   const certificationOptions = ['Biologique', 'Conversion bio', 'Biodynamique', 'HVE3'];
 
-  // Validation logic
-  const canPublish = () => {
-    return (
-      formData.description.length >= 300 &&
-      isValidUrl(formData.website) &&
-      documents.some(d => d.category === 'presentation') &&
-      documents.some(d => d.category === 'price_list')
-    );
-  };
-
   const isValidUrl = (url: string) => {
     try {
       new URL(url);
@@ -141,11 +130,17 @@ const Profile = () => {
 
   const handleAutoSave = async () => {
     try {
+      // Convert aoc array to string for database storage
+      const dataToSave = {
+        ...formData,
+        aoc: formData.aoc.join(', ')
+      };
+      
       const { error } = await supabase
         .from('profiles')
         .upsert({
           user_id: user?.id,
-          ...formData
+          ...dataToSave
         }, {
           onConflict: 'user_id'
         });
@@ -197,10 +192,21 @@ const Profile = () => {
           return [];
         };
 
+        // Migrate AOC from string to array if needed
+        const migrateAoc = () => {
+          if (Array.isArray(data.aoc)) {
+            return data.aoc;
+          }
+          if (typeof data.aoc === 'string' && data.aoc.trim()) {
+            return [data.aoc.trim()];
+          }
+          return [];
+        };
+
         setFormData({
           domain_name: data.domain_name || '',
           location: data.location || '',
-          aoc: data.aoc || '',
+          aoc: migrateAoc(),
           website: data.website || '',
           surface_area: data.surface_area,
           bottles_per_year: data.bottles_per_year,
@@ -263,11 +269,17 @@ const Profile = () => {
     setLoading(true);
 
     try {
+      // Convert aoc array to string for database storage
+      const dataToSave = {
+        ...formData,
+        aoc: formData.aoc.join(', ')
+      };
+      
       const { error } = await supabase
         .from('profiles')
         .upsert({
           user_id: user?.id,
-          ...formData
+          ...dataToSave
         }, {
           onConflict: 'user_id'
         });
@@ -284,47 +296,6 @@ const Profile = () => {
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder les informations.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePublish = async () => {
-    if (!canPublish()) {
-      toast({
-        title: "Publication impossible",
-        description: "Veuillez compléter tous les champs requis avant de publier.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: user?.id,
-          ...formData,
-          is_published: true
-        }, {
-          onConflict: 'user_id'
-        });
-
-      if (error) throw error;
-
-      setFormData(prev => ({ ...prev, is_published: true }));
-      toast({
-        title: "Profil publié",
-        description: "Votre profil est maintenant visible publiquement."
-      });
-    } catch (error) {
-      console.error('Error publishing profile:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de publier le profil.",
         variant: "destructive"
       });
     } finally {
@@ -354,6 +325,23 @@ const Profile = () => {
     const newStrengths = [...formData.strengths];
     newStrengths[index] = value.slice(0, 80); // Max 80 characters
     setFormData(prev => ({ ...prev, strengths: newStrengths }));
+  };
+
+  // AOC management functions
+  const addAoc = (aoc: string) => {
+    if (aoc.trim() && !formData.aoc.includes(aoc.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        aoc: [...prev.aoc, aoc.trim()]
+      }));
+    }
+  };
+
+  const removeAoc = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      aoc: prev.aoc.filter((_, i) => i !== index)
+    }));
   };
 
   const addGrapeVariety = (variety: string) => {
@@ -410,6 +398,52 @@ const Profile = () => {
     if (data) setMedia(data as Media[]);
   };
 
+  // Document update function
+  const handleUpdateDocument = async (id: string, updates: Partial<Document>) => {
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setDocuments(prev => prev.map(doc => 
+        doc.id === id ? { ...doc, ...updates } : doc
+      ));
+    } catch (error) {
+      console.error('Error updating document:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le document.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Media update function
+  const handleUpdateMedia = async (id: string, updates: Partial<Media>) => {
+    try {
+      const { error } = await supabase
+        .from('media')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setMedia(prev => prev.map(m => 
+        m.id === id ? { ...m, ...updates } : m
+      ));
+    } catch (error) {
+      console.error('Error updating media:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le média.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleDocumentUpload = async (
     file: File, 
     category: 'presentation' | 'price_list' | 'other' | 'tech_sheet',
@@ -427,10 +461,45 @@ const Profile = () => {
       return;
     }
 
+    // Extended MIME types for better compatibility
     const allowedTypes: { [key: string]: string[] } = {
-      presentation: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-      price_list: ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
-      other: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
+      presentation: [
+        'application/pdf', 
+        'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ],
+      price_list: [
+        'application/pdf', 
+        'application/vnd.ms-excel', 
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+        'text/csv',
+        'text/plain',
+        'application/csv',
+        'text/x-csv',
+        'application/x-csv',
+        'text/comma-separated-values',
+        'text/x-comma-separated-values',
+        'application/excel',
+        'application/x-excel',
+        'application/x-msexcel'
+      ],
+      other: [
+        'application/pdf', 
+        'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+        'application/vnd.ms-excel', 
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+        'text/csv',
+        'text/plain',
+        'application/csv',
+        'text/x-csv',
+        'application/x-csv',
+        'text/comma-separated-values',
+        'text/x-comma-separated-values',
+        'application/excel',
+        'application/x-excel',
+        'application/x-msexcel'
+      ],
       tech_sheet: ['application/pdf']
     };
 
@@ -558,6 +627,22 @@ const Profile = () => {
     }
   };
 
+  // Multiple file upload handlers
+  const handleMultipleDocumentUpload = async (
+    files: FileList,
+    category: 'presentation' | 'price_list' | 'other' | 'tech_sheet'
+  ) => {
+    for (const file of Array.from(files)) {
+      await handleDocumentUpload(file, category);
+    }
+  };
+
+  const handleMultipleMediaUpload = async (files: FileList, type: 'image' | 'video') => {
+    for (const file of Array.from(files)) {
+      await handleMediaUpload(file, type);
+    }
+  };
+
   const handleDeleteDocument = async (docId: string, fileUrl: string) => {
     try {
       const filePath = fileUrl.split('/documents/')[1];
@@ -648,7 +733,10 @@ const Profile = () => {
           
           <div className="flex items-center justify-between mt-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Profil du domaine</h1>
+              <h1 className="text-2xl font-bold text-foreground">Votre profil</h1>
+              <p className="text-muted-foreground mt-1">
+                Gérez les informations de votre domaine visibles par les importateurs.
+              </p>
               {lastSaved && (
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs">
@@ -674,14 +762,6 @@ const Profile = () => {
                     Enregistrer
                   </>
                 )}
-              </Button>
-              <Button 
-                onClick={handlePublish}
-                disabled={!canPublish() || loading}
-                variant="secondary"
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Publier
               </Button>
             </div>
           </div>
@@ -722,16 +802,32 @@ const Profile = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="aoc">AOC / Appellations</Label>
-                      <Input
-                        id="aoc"
-                        value={formData.aoc}
-                        onChange={(e) => setFormData(prev => ({ ...prev, aoc: e.target.value }))}
-                        placeholder="Ajoutez vos appellations..."
-                      />
+                  <div className="space-y-2">
+                    <Label>AOC / Appellations</Label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.aoc.map((appellation, index) => (
+                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                          {appellation}
+                          <X 
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => removeAoc(index)}
+                          />
+                        </Badge>
+                      ))}
                     </div>
+                    <Input
+                      placeholder="Ajouter une appellation et appuyez sur Entrée"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addAoc(e.currentTarget.value);
+                          e.currentTarget.value = '';
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="surface_area">Surface (hectares)</Label>
                       <Input
@@ -746,9 +842,6 @@ const Profile = () => {
                         placeholder="25.5"
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="bottles_per_year">Volume annuel (nb de bouteilles)</Label>
                       <Input
@@ -835,7 +928,33 @@ const Profile = () => {
                         />
                       </div>
                     </div>
-                    
+
+                    <div className="space-y-2">
+                      <Label>Cuvées</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.cuvees.map((cuvee, index) => (
+                          <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                            {cuvee}
+                            <X 
+                              className="h-3 w-3 cursor-pointer"
+                              onClick={() => removeCuvee(index)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ajouter une cuvée"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              addCuvee(e.currentTarget.value);
+                              e.currentTarget.value = '';
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -929,10 +1048,13 @@ const Profile = () => {
                       ref={presentationInputRef}
                       type="file"
                       accept=".pdf,.doc,.docx"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleDocumentUpload(file, 'presentation');
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          handleMultipleDocumentUpload(files, 'presentation');
+                        }
                         e.target.value = '';
                       }}
                     />
@@ -963,7 +1085,6 @@ const Profile = () => {
                                 <p className="font-medium">{doc.title}</p>
                                 <p className="text-sm text-muted-foreground">
                                   {(doc.file_size / 1024 / 1024).toFixed(1)} Mo
-                                  {doc.language && <Badge variant="outline" className="ml-2">{doc.language}</Badge>}
                                 </p>
                               </div>
                             </div>
@@ -1017,10 +1138,13 @@ const Profile = () => {
                       ref={priceListInputRef}
                       type="file"
                       accept=".pdf,.xls,.xlsx,.csv"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleDocumentUpload(file, 'price_list');
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          handleMultipleDocumentUpload(files, 'price_list');
+                        }
                         e.target.value = '';
                       }}
                     />
@@ -1104,10 +1228,13 @@ const Profile = () => {
                       ref={otherDocsInputRef}
                       type="file"
                       accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleDocumentUpload(file, 'other');
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          handleMultipleDocumentUpload(files, 'other');
+                        }
                         e.target.value = '';
                       }}
                     />
@@ -1193,10 +1320,13 @@ const Profile = () => {
                     ref={techSheetsInputRef}
                     type="file"
                     accept=".pdf"
+                    multiple
                     className="hidden"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleDocumentUpload(file, 'tech_sheet');
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        handleMultipleDocumentUpload(files, 'tech_sheet');
+                      }
                       e.target.value = '';
                     }}
                   />
@@ -1239,6 +1369,7 @@ const Profile = () => {
                                     value={doc.cuvee || ''} 
                                     placeholder="Cuvée"
                                     className="w-full"
+                                    onChange={(e) => handleUpdateDocument(doc.id, { cuvee: e.target.value })}
                                   />
                                 </td>
                                 <td className="border border-border p-2">
@@ -1247,6 +1378,7 @@ const Profile = () => {
                                     placeholder="2023"
                                     type="number"
                                     className="w-full"
+                                    onChange={(e) => handleUpdateDocument(doc.id, { vintage: e.target.value ? parseInt(e.target.value) : undefined })}
                                   />
                                 </td>
                                 <td className="border border-border p-2">
@@ -1254,6 +1386,7 @@ const Profile = () => {
                                     value={doc.format || ''} 
                                     placeholder="75cl"
                                     className="w-full"
+                                    onChange={(e) => handleUpdateDocument(doc.id, { format: e.target.value })}
                                   />
                                 </td>
                                 <td className="border border-border p-2">
@@ -1261,6 +1394,7 @@ const Profile = () => {
                                     value={doc.language || ''} 
                                     placeholder="FR"
                                     className="w-full"
+                                    onChange={(e) => handleUpdateDocument(doc.id, { language: e.target.value })}
                                   />
                                 </td>
                                 <td className="border border-border p-2">
@@ -1308,10 +1442,13 @@ const Profile = () => {
                       ref={photosInputRef}
                       type="file"
                       accept=".jpg,.jpeg,.png"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleMediaUpload(file, 'image');
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          handleMultipleMediaUpload(files, 'image');
+                        }
                         e.target.value = '';
                       }}
                     />
@@ -1348,11 +1485,13 @@ const Profile = () => {
                                 value={item.title}
                                 placeholder="Titre"
                                 className="text-xs"
+                                onChange={(e) => handleUpdateMedia(item.id, { title: e.target.value })}
                               />
                               <Input 
-                                value={item.credit}
+                                value={item.credit || ''}
                                 placeholder="Crédit"
                                 className="text-xs"
+                                onChange={(e) => handleUpdateMedia(item.id, { credit: e.target.value })}
                               />
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1384,10 +1523,13 @@ const Profile = () => {
                       ref={videosInputRef}
                       type="file"
                       accept=".mp4"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleMediaUpload(file, 'video');
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          handleMultipleMediaUpload(files, 'video');
+                        }
                         e.target.value = '';
                       }}
                     />
@@ -1430,11 +1572,13 @@ const Profile = () => {
                                 value={item.title}
                                 placeholder="Titre"
                                 className="text-sm"
+                                onChange={(e) => handleUpdateMedia(item.id, { title: e.target.value })}
                               />
                               <Input 
-                                value={item.credit}
+                                value={item.credit || ''}
                                 placeholder="Crédit"
                                 className="text-sm"
+                                onChange={(e) => handleUpdateMedia(item.id, { credit: e.target.value })}
                               />
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
