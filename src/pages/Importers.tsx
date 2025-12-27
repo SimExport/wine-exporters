@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ExternalLink, Download, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface BuyerContact {
@@ -200,46 +200,32 @@ const Importers = () => {
     <div className="container mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
       <div className="mb-6">
-        <div className="text-sm text-muted-foreground mb-2">
-          Dashboard / Importers DB
-        </div>
-        <h1 className="text-3xl font-bold text-foreground">Base d'acheteurs par pays</h1>
+        <h1 className="text-3xl font-bold text-foreground">Base de données des importateurs et acheteurs</h1>
         <p className="text-muted-foreground mt-2">
           Consultez les contacts importateurs disponibles et découvrez leurs informations essentielles.
         </p>
       </div>
 
       {/* Controls */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="Choisir un marché" />
-            </SelectTrigger>
-            <SelectContent>
-              {COUNTRIES.map((country) => (
-                <SelectItem key={country.code} value={country.code}>
-                  {country.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {selectedCountry && (
-            <div className="text-sm text-muted-foreground">
-              {totalCount} contacts
-            </div>
-          )}
-        </div>
+      <div className="flex items-center gap-4 mb-6">
+        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Choisir un marché" />
+          </SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map((country) => (
+              <SelectItem key={country.code} value={country.code}>
+                {country.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         
-        <Button 
-          onClick={exportToCSV} 
-          disabled={!selectedCountry || totalCount === 0}
-          variant="outline"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Télécharger en CSV
-        </Button>
+        {selectedCountry && (
+          <div className="text-sm text-muted-foreground">
+            {totalCount} contacts
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
