@@ -22,6 +22,7 @@ import Prospects from "./pages/Prospects";
 import ProspectDetail from "./pages/ProspectDetail";
 import Pipeline from "./pages/Pipeline";
 import AdminCampaigns from "./pages/AdminCampaigns";
+import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/prospects" element={<DashboardLayout><Prospects /></DashboardLayout>} />
             <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
             <Route path="/pipeline" element={<DashboardLayout><Pipeline /></DashboardLayout>} />
+            <Route path="/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
               <DashboardLayout>
                 <AdminRoute>
