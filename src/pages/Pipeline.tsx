@@ -72,16 +72,35 @@ export default function Pipeline() {
     last_name: '',
     company_name: '',
     email: '',
+    phone: '',
+    website_url: '',
+    address_line1: '',
+    city: '',
+    postal_code: '',
     country: '',
     requested_actions: [] as string[],
-    tally_response_url: ''
+    requested_samples: [] as string[]
   })
+  const [profileCuvees, setProfileCuvees] = useState<string[]>([])
 
   useEffect(() => {
     if (user) {
       loadData()
+      loadProfileCuvees()
     }
   }, [user])
+
+  const loadProfileCuvees = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('cuvees')
+      .eq('user_id', user?.id)
+      .single()
+    
+    if (data?.cuvees) {
+      setProfileCuvees(data.cuvees)
+    }
+  }
 
   const loadData = async () => {
     try {
@@ -188,13 +207,26 @@ export default function Pipeline() {
       const { error } = await supabase
         .from('leads')
         .insert({
-          ...newProspect,
+          campaign_id: newProspect.campaign_id,
+          first_name: newProspect.first_name,
+          last_name: newProspect.last_name,
+          company_name: newProspect.company_name,
+          email: newProspect.email,
+          phone: newProspect.phone,
+          website_url: newProspect.website_url,
+          address_line1: newProspect.address_line1,
+          city: newProspect.city,
+          postal_code: newProspect.postal_code,
+          country: newProspect.country,
           buyer_id: newProspect.email || 'unknown',
           market: newProspect.country || 'unknown',
           prospect_status: 'new' as any,
           last_activity_at: new Date().toISOString(),
           created_by: user?.id,
-          requested_actions: newProspect.requested_actions as any
+          requested_actions: newProspect.requested_actions as any,
+          message_snippet: newProspect.requested_samples.length > 0 
+            ? `Échantillons demandés: ${newProspect.requested_samples.join(', ')}`
+            : null
         })
 
       if (error) throw error
@@ -211,9 +243,14 @@ export default function Pipeline() {
         last_name: '',
         company_name: '',
         email: '',
+        phone: '',
+        website_url: '',
+        address_line1: '',
+        city: '',
+        postal_code: '',
         country: '',
         requested_actions: [],
-        tally_response_url: ''
+        requested_samples: []
       })
       loadData()
 
@@ -339,6 +376,53 @@ export default function Pipeline() {
                     />
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone">Téléphone</Label>
+                      <Input
+                        value={newProspect.phone}
+                        onChange={(e) => setNewProspect(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="+33 6 12 34 56 78"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="website_url">Site web</Label>
+                      <Input
+                        value={newProspect.website_url}
+                        onChange={(e) => setNewProspect(prev => ({ ...prev, website_url: e.target.value }))}
+                        placeholder="https://example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="address">Adresse</Label>
+                    <Input
+                      value={newProspect.address_line1}
+                      onChange={(e) => setNewProspect(prev => ({ ...prev, address_line1: e.target.value }))}
+                      placeholder="123 rue du Commerce"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">Ville</Label>
+                      <Input
+                        value={newProspect.city}
+                        onChange={(e) => setNewProspect(prev => ({ ...prev, city: e.target.value }))}
+                        placeholder="Paris"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="postal_code">Code postal</Label>
+                      <Input
+                        value={newProspect.postal_code}
+                        onChange={(e) => setNewProspect(prev => ({ ...prev, postal_code: e.target.value }))}
+                        placeholder="75001"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <Label>Actions demandées</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
@@ -356,12 +440,29 @@ export default function Pipeline() {
                   </div>
 
                   <div>
-                    <Label htmlFor="tally_url">URL Tally (optionnel)</Label>
-                    <Input
-                      value={newProspect.tally_response_url}
-                      onChange={(e) => setNewProspect(prev => ({ ...prev, tally_response_url: e.target.value }))}
-                      placeholder="https://tally.so/..."
-                    />
+                    <Label>Échantillons demandés</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {profileCuvees.map((cuvee) => (
+                        <div key={cuvee} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`pipeline-sample-${cuvee}`}
+                            checked={newProspect.requested_samples.includes(cuvee)}
+                            onCheckedChange={(checked) => {
+                              setNewProspect(prev => ({
+                                ...prev,
+                                requested_samples: checked
+                                  ? [...prev.requested_samples, cuvee]
+                                  : prev.requested_samples.filter(c => c !== cuvee)
+                              }))
+                            }}
+                          />
+                          <Label htmlFor={`pipeline-sample-${cuvee}`} className="text-sm">{cuvee}</Label>
+                        </div>
+                      ))}
+                      {profileCuvees.length === 0 && (
+                        <p className="text-sm text-muted-foreground col-span-2">Aucune cuvée dans votre profil</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 

@@ -171,6 +171,22 @@ export default function ProspectDetail() {
 
       setWines(winesData || [])
 
+      // Also load cuvées from profile as fallback
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('cuvees')
+        .eq('user_id', user?.id)
+        .single()
+
+      // If no wines but has cuvées in profile, use those
+      if ((!winesData || winesData.length === 0) && profileData?.cuvees?.length > 0) {
+        // Create pseudo-wines from cuvées for the dropdown
+        setWines(profileData.cuvees.map((cuvee: string, index: number) => ({
+          id: `cuvee-${index}`,
+          name: cuvee
+        })))
+      }
+
     } catch (error) {
       console.error('Error loading prospect:', error)
       toast({
@@ -276,13 +292,17 @@ export default function ProspectDetail() {
     if (!newSample.wine_id || !prospect) return
 
     try {
+      // Check if this is a cuvée from profile (starts with "cuvee-") or a real wine
+      const isCuveeFromProfile = newSample.wine_id.startsWith('cuvee-')
+      const selectedWine = wines.find(w => w.id === newSample.wine_id)
+
       const { data, error } = await supabase
         .from('sample_items')
         .insert({
           lead_id: prospect.id,
-          wine_id: newSample.wine_id,
+          wine_id: isCuveeFromProfile ? null : newSample.wine_id,
           quantity: newSample.quantity,
-          comment: newSample.comment
+          comment: isCuveeFromProfile ? `Cuvée: ${selectedWine?.name}${newSample.comment ? ` - ${newSample.comment}` : ''}` : newSample.comment
         })
         .select(`
           *,
@@ -292,7 +312,13 @@ export default function ProspectDetail() {
 
       if (error) throw error
 
-      setSampleItems(prev => [data, ...prev])
+      // For cuvées from profile, manually set the wine name for display
+      const itemToAdd = {
+        ...data,
+        wines: isCuveeFromProfile ? { name: selectedWine?.name || 'Cuvée' } : data.wines
+      }
+
+      setSampleItems(prev => [itemToAdd, ...prev])
       setNewSample({ wine_id: '', quantity: 1, comment: '' })
       setShowAddSample(false)
 
@@ -595,7 +621,15 @@ export default function ProspectDetail() {
               )}
 
               <div className="pt-4">
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={() => {
+                    if (prospect.email) {
+                      window.location.href = `mailto:${prospect.email}?subject=${encodeURIComponent(`[Performance Export] ${prospect.company_name || ''} — suite à votre intérêt`)}`
+                    }
+                  }}
+                  disabled={!prospect.email}
+                >
                   <Mail className="w-4 h-4 mr-2" />
                   Envoyer un email
                 </Button>
