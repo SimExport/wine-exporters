@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Wine {
@@ -121,14 +121,6 @@ const CreateCampaign = () => {
       toast({
         title: "Nom de campagne requis",
         description: "Veuillez saisir un nom pour votre campagne",
-        variant: "destructive"
-      });
-      return false;
-    }
-    if (selectedMarkets.length === 0) {
-      toast({
-        title: "Marchés requis",
-        description: "Veuillez sélectionner au moins un marché prioritaire",
         variant: "destructive"
       });
       return false;
@@ -342,9 +334,9 @@ const CreateCampaign = () => {
                   />
                 </div>
 
-                {/* Markets */}
+                {/* Markets to avoid */}
                 <div>
-                  <Label>Marchés prioritaires * (sélection multiple)</Label>
+                  <Label>Marchés à éviter (sélection multiple)</Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
                     {AVAILABLE_MARKETS.map((market) => (
                       <div key={market} className="flex items-center space-x-2">
@@ -360,6 +352,14 @@ const CreateCampaign = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Info block */}
+                <Alert className="bg-muted/50 border-primary/20">
+                  <Lightbulb className="h-4 w-4 text-primary" />
+                  <AlertDescription className="text-sm text-muted-foreground">
+                    Merci d'indiquer les marchés à éviter, ainsi que les marchés sur lesquels vous êtes déjà présents ou que vous ne souhaitez pas prospecter. Notre équipe sélectionnera les marchés prioritaires et pertinents en fonction de ce que vous avez renseigné dans votre profil (la typologie de vos vins, la taille de votre domaine, etc.).
+                  </AlertDescription>
+                </Alert>
 
                 {/* Wines */}
                 <div>
@@ -424,7 +424,7 @@ const CreateCampaign = () => {
                         <SelectValue placeholder="Sélectionner une liste de prix" />
                       </SelectTrigger>
                       <SelectContent>
-                        {documents.filter(doc => doc.category === 'pricelist').map((doc) => (
+                        {documents.filter(doc => doc.category === 'price_list').map((doc) => (
                           <SelectItem key={doc.id} value={doc.id}>
                             {doc.title}
                           </SelectItem>
@@ -436,32 +436,45 @@ const CreateCampaign = () => {
                   {/* Tech docs */}
                   <div>
                     <Label>Fiches techniques (facultatif)</Label>
-                    <div className="space-y-2 mt-2">
-                      {documents.filter(doc => doc.category === 'tech').map((doc) => (
-                        <div key={doc.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={doc.id}
-                            checked={techDocs.includes(doc.id)}
-                            onCheckedChange={() => handleTechDocToggle(doc.id)}
-                          />
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <Label htmlFor={doc.id} className="text-sm">
+                    <Select 
+                      value={techDocs.length > 0 ? techDocs[0] : ''} 
+                      onValueChange={(value) => {
+                        if (value && !techDocs.includes(value)) {
+                          setTechDocs(prev => [...prev, value]);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Sélectionner une fiche technique" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {documents.filter(doc => doc.category === 'tech_sheet').map((doc) => (
+                          <SelectItem key={doc.id} value={doc.id}>
                             {doc.title}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="mt-3">
-                      <Label htmlFor="techsLink">Ou lien sécurisé vers fiches techniques</Label>
-                      <Input
-                        id="techsLink"
-                        value={techsLink}
-                        onChange={(e) => setTechsLink(e.target.value)}
-                        placeholder="https://..."
-                        className="mt-1"
-                      />
-                    </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {techDocs.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {techDocs.map((docId) => {
+                          const doc = documents.find(d => d.id === docId);
+                          return doc ? (
+                            <div key={docId} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm">
+                              <FileText className="h-3 w-3" />
+                              {doc.title}
+                              <button
+                                type="button"
+                                onClick={() => setTechDocs(prev => prev.filter(id => id !== docId))}
+                                className="ml-1 text-muted-foreground hover:text-foreground"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Client note */}
