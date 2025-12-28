@@ -1148,37 +1148,14 @@ const Profile = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => window.open(doc.file_url, '_blank')}
-                              >
-                                Voir
-                              </Button>
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  const link = document.createElement('a');
-                                  link.href = doc.file_url;
-                                  link.download = doc.file_name;
-                                  link.click();
-                                }}
-                              >
-                                Télécharger
-                              </Button>
-                              <Button 
-                                type="button"
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
-                              >
-                                Supprimer
-                              </Button>
-                            </div>
+                            <Button 
+                              type="button"
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                            >
+                              Supprimer
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -1237,37 +1214,14 @@ const Profile = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => window.open(doc.file_url, '_blank')}
-                              >
-                                Voir
-                              </Button>
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  const link = document.createElement('a');
-                                  link.href = doc.file_url;
-                                  link.download = doc.file_name;
-                                  link.click();
-                                }}
-                              >
-                                Télécharger
-                              </Button>
-                              <Button 
-                                type="button"
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
-                              >
-                                Supprimer
-                              </Button>
-                            </div>
+                            <Button 
+                              type="button"
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                            >
+                              Supprimer
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -1326,37 +1280,14 @@ const Profile = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => window.open(doc.file_url, '_blank')}
-                              >
-                                Voir
-                              </Button>
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  const link = document.createElement('a');
-                                  link.href = doc.file_url;
-                                  link.download = doc.file_name;
-                                  link.click();
-                                }}
-                              >
-                                Télécharger
-                              </Button>
-                              <Button 
-                                type="button"
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
-                              >
-                                Supprimer
-                              </Button>
-                            </div>
+                            <Button 
+                              type="button"
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                            >
+                              Supprimer
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -1457,24 +1388,14 @@ const Profile = () => {
                                   />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <div className="flex gap-1">
-                                    <Button 
-                                      type="button"
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => window.open(doc.file_url, '_blank')}
-                                    >
-                                      Voir
-                                    </Button>
-                                    <Button 
-                                      type="button"
-                                      variant="destructive" 
-                                      size="sm"
-                                      onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
-                                    >
-                                      Supprimer
-                                    </Button>
-                                  </div>
+                                  <Button 
+                                    type="button"
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => handleDeleteDocument(doc.id, doc.file_url)}
+                                  >
+                                    Supprimer
+                                  </Button>
                                 </td>
                               </tr>
                             ))}
