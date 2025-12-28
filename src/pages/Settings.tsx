@@ -287,31 +287,12 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="language">Langue de l'interface</Label>
-              <Select 
-                value={settings.ui_language} 
-                onValueChange={(value) => {
-                  setSettings(prev => prev ? { ...prev, ui_language: value } : null);
-                  debouncedUpdate({ ui_language: value });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Mot de passe</Label>
-              <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">Changer le mot de passe</Button>
-                </DialogTrigger>
+          <div className="space-y-2">
+            <Label>Mot de passe</Label>
+            <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">Changer le mot de passe</Button>
+              </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Changer le mot de passe</DialogTitle>
@@ -354,8 +335,7 @@ const Settings = () => {
                     </div>
                   </div>
                 </DialogContent>
-              </Dialog>
-            </div>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
@@ -422,39 +402,6 @@ const Settings = () => {
               onCheckedChange={(checked) => {
                 setSettings(prev => prev ? { ...prev, notify_on_results: checked } : null);
                 updateSettings({ notify_on_results: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifyReply">Nouvelle réponse (lead)</Label>
-            <Switch
-              id="notifyReply"
-              checked={settings.notify_on_reply}
-              onCheckedChange={(checked) => {
-                setSettings(prev => prev ? { ...prev, notify_on_reply: checked } : null);
-                updateSettings({ notify_on_reply: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifyBounce">Alerte taux de rebond élevé</Label>
-            <Switch
-              id="notifyBounce"
-              checked={settings.notify_on_high_bounce}
-              onCheckedChange={(checked) => {
-                setSettings(prev => prev ? { ...prev, notify_on_high_bounce: checked } : null);
-                updateSettings({ notify_on_high_bounce: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="dailyDigest">Récap quotidien</Label>
-            <Switch
-              id="dailyDigest"
-              checked={settings.daily_digest_enabled}
-              onCheckedChange={(checked) => {
-                setSettings(prev => prev ? { ...prev, daily_digest_enabled: checked } : null);
-                updateSettings({ daily_digest_enabled: checked });
               }}
             />
           </div>

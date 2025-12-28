@@ -15,6 +15,7 @@ interface Profile {
   campaigns_remaining: number;
   location: string | null;
   aoc: string | null;
+  contact_name: string | null;
 }
 
 interface Campaign {
@@ -184,7 +185,7 @@ const Dashboard = () => {
             Tableau de Bord
           </h2>
           <p className="text-muted-foreground">
-            Bienvenue {profile?.domain_name || 'sur votre espace vigneron'}
+            Bienvenue {profile?.contact_name || 'Vigneron'}
           </p>
         </div>
 

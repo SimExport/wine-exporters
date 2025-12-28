@@ -11,18 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play } from 'lucide-react';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import WineManagement from '@/components/profile/WineManagement';
 
 interface ProfileData {
   domain_name: string;
+  contact_name: string;
   location: string;
   aoc: string[];
   website: string;
@@ -39,6 +32,10 @@ interface ProfileData {
   description: string;
   strengths: string[];
   is_published: boolean;
+  priority_markets: string;
+  current_markets: string;
+  avoid_markets: string;
+  target_buyer_description: string;
 }
 
 interface Document {
@@ -83,6 +80,7 @@ const Profile = () => {
   
   const [formData, setFormData] = useState<ProfileData>({
     domain_name: '',
+    contact_name: '',
     location: '',
     aoc: [],
     website: '',
@@ -98,7 +96,11 @@ const Profile = () => {
     cuvees: [],
     description: '',
     strengths: ['', '', ''],
-    is_published: false
+    is_published: false,
+    priority_markets: '',
+    current_markets: '',
+    avoid_markets: '',
+    target_buyer_description: ''
   });
 
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -205,6 +207,7 @@ const Profile = () => {
 
         setFormData({
           domain_name: data.domain_name || '',
+          contact_name: data.contact_name || '',
           location: data.location || '',
           aoc: migrateAoc(),
           website: data.website || '',
@@ -220,7 +223,11 @@ const Profile = () => {
           cuvees: data.cuvees || [],
           description: data.description || '',
           strengths: data.strengths?.length === 3 ? data.strengths : ['', '', ''],
-          is_published: data.is_published || false
+          is_published: data.is_published || false,
+          priority_markets: data.priority_markets || '',
+          current_markets: data.current_markets || '',
+          avoid_markets: data.avoid_markets || '',
+          target_buyer_description: data.target_buyer_description || ''
         });
       }
     } catch (error) {
@@ -719,19 +726,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background">
       <div className="border-b border-border bg-card">
         <div className="max-w-[1100px] mx-auto px-6 py-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Profile</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Votre profil</h1>
               <p className="text-muted-foreground mt-1">
@@ -770,8 +765,9 @@ const Profile = () => {
 
       <div className="max-w-[1100px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="general">Général</TabsTrigger>
+            <TabsTrigger value="markets">Marchés</TabsTrigger>
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="website">Site web</TabsTrigger>
             <TabsTrigger value="wines">Vins</TabsTrigger>
@@ -791,6 +787,15 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="contact_name">Votre nom</Label>
+                      <Input
+                        id="contact_name"
+                        value={formData.contact_name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+                        placeholder="Jean Dupont"
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="domain_name">Nom du domaine</Label>
                       <Input
@@ -955,6 +960,62 @@ const Profile = () => {
                         />
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="markets" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Préférences de marché</CardTitle>
+                  <CardDescription>
+                    Définissez vos marchés cibles et vos préférences pour la prospection
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="priority_markets">Quels marchés souhaitez-vous prioriser ?</Label>
+                    <Textarea
+                      id="priority_markets"
+                      value={formData.priority_markets}
+                      onChange={(e) => setFormData(prev => ({ ...prev, priority_markets: e.target.value }))}
+                      placeholder="Ex: États-Unis, Japon, Royaume-Uni..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="current_markets">Sur quels marchés êtes-vous déjà présents ?</Label>
+                    <Textarea
+                      id="current_markets"
+                      value={formData.current_markets}
+                      onChange={(e) => setFormData(prev => ({ ...prev, current_markets: e.target.value }))}
+                      placeholder="Ex: France, Belgique, Suisse..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="avoid_markets">Quels marchés souhaitez-vous éviter ?</Label>
+                    <Textarea
+                      id="avoid_markets"
+                      value={formData.avoid_markets}
+                      onChange={(e) => setFormData(prev => ({ ...prev, avoid_markets: e.target.value }))}
+                      placeholder="Ex: Marchés où vous avez déjà un distributeur exclusif..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="target_buyer_description">Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler</Label>
+                    <Textarea
+                      id="target_buyer_description"
+                      value={formData.target_buyer_description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, target_buyer_description: e.target.value }))}
+                      placeholder="Ex: Importateurs spécialisés en vins bio, cavistes haut de gamme, restaurateurs étoilés..."
+                      className="min-h-[120px]"
+                    />
                   </div>
                 </CardContent>
               </Card>
