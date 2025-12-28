@@ -812,6 +812,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_subscription_tier: { Args: { _user_id: string }; Returns: string }
+      has_paid_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -837,6 +839,7 @@ export type Database = {
         | "video_call"
         | "tech_sheets"
         | "other"
+      subscription_tier: "free" | "paid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -982,6 +985,7 @@ export const Constants = {
         "tech_sheets",
         "other",
       ],
+      subscription_tier: ["free", "paid"],
     },
   },
 } as const

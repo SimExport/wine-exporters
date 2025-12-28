@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,6 +39,7 @@ const AVAILABLE_MARKETS = [
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isFreeUser, loading: subscriptionLoading } = useSubscription();
   
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -205,6 +207,16 @@ const CreateCampaign = () => {
   };
 
   const submitForValidation = async () => {
+    // Block free users from submitting
+    if (isFreeUser) {
+      toast({
+        title: "Abonnement requis",
+        description: "Vous devez avoir un abonnement actif pour lancer une campagne.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!validateStep1()) return;
 
     setLoading(true);

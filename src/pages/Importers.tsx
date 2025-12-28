@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ExternalLink, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
+import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 
 interface BuyerContact {
   id: string;
@@ -61,6 +63,7 @@ const Importers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const { toast } = useToast();
+  const { hasPaidAccess, loading: subscriptionLoading } = useSubscription();
 
   const fetchContacts = async (countryCode: string, page = 1, limit = 20) => {
     if (!countryCode) {
@@ -195,6 +198,35 @@ const Importers = () => {
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalCount);
+
+  // Show loading state while checking subscription
+  if (subscriptionLoading) {
+    return (
+      <div className="container mx-auto max-w-7xl px-4 py-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show premium-only state for free users
+  if (!hasPaidAccess) {
+    return (
+      <div className="container mx-auto max-w-7xl px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground">Base de données des importateurs et acheteurs</h1>
+          <p className="text-muted-foreground mt-2">
+            Consultez les contacts importateurs disponibles et découvrez leurs informations essentielles.
+          </p>
+        </div>
+        <PremiumOnlyState 
+          title="Accès réservé aux membres abonnés"
+          description="Passez Premium pour accéder à 15 000+ acheteurs qualifiés dans le monde entier."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-6">
