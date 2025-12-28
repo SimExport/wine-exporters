@@ -59,7 +59,7 @@ export function AppSidebar() {
       await signOut();
       toast({
         title: "Déconnexion réussie",
-        description: "À bientôt sur ExportVins !",
+        description: "À bientôt sur WineExporters !",
       });
     } catch (error) {
       toast({
@@ -80,8 +80,11 @@ export function AppSidebar() {
             <Grape className="h-4 w-4" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-sidebar-foreground">
-              ExportVins
+            <span className="text-xs font-semibold text-sidebar-foreground leading-tight">
+              WineExporters
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              by ExportVins
             </span>
           </div>
         </div>
