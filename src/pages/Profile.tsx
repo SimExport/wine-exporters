@@ -1119,24 +1119,23 @@ const Profile = () => {
                         e.target.value = '';
                       }}
                     />
-                    {documents.filter(d => d.category === 'presentation').length === 0 ? (
-                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          Ajoutez votre brochure (.pdf)
-                        </p>
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          className="mt-2"
-                          onClick={() => presentationInputRef.current?.click()}
-                          disabled={uploading}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Ajouter un document
-                        </Button>
-                      </div>
-                    ) : (
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Ajoutez votre brochure (.pdf)
+                      </p>
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className="mt-2"
+                        onClick={() => presentationInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter un document
+                      </Button>
+                    </div>
+                    {documents.filter(d => d.category === 'presentation').length > 0 && (
                       <div className="space-y-2">
                         {documents.filter(d => d.category === 'presentation').map(doc => (
                           <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -1209,24 +1208,23 @@ const Profile = () => {
                         e.target.value = '';
                       }}
                     />
-                    {documents.filter(d => d.category === 'price_list').length === 0 ? (
-                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          Ajoutez votre liste de prix
-                        </p>
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          className="mt-2"
-                          onClick={() => priceListInputRef.current?.click()}
-                          disabled={uploading}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Ajouter la liste des prix
-                        </Button>
-                      </div>
-                    ) : (
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Ajoutez votre liste de prix
+                      </p>
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className="mt-2"
+                        onClick={() => priceListInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter la liste des prix
+                      </Button>
+                    </div>
+                    {documents.filter(d => d.category === 'price_list').length > 0 && (
                       <div className="space-y-2">
                         {documents.filter(d => d.category === 'price_list').map(doc => (
                           <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
