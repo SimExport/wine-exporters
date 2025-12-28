@@ -511,10 +511,13 @@ export type Database = {
       profiles: {
         Row: {
           aoc: string | null
+          avoid_markets: string | null
           bottles_per_year: number | null
           campaigns_remaining: number | null
           certifications: string[] | null
+          contact_name: string | null
           created_at: string
+          current_markets: string | null
           cuvees: string[] | null
           description: string | null
           domain_name: string | null
@@ -525,10 +528,12 @@ export type Database = {
           organic_body: string | null
           organic_conversion: boolean | null
           organic_year: number | null
+          priority_markets: string | null
           social_media: Json | null
           strengths: string[] | null
           subscription_plan: string | null
           surface_area: number | null
+          target_buyer_description: string | null
           updated_at: string
           user_id: string
           website: string | null
@@ -537,10 +542,13 @@ export type Database = {
         }
         Insert: {
           aoc?: string | null
+          avoid_markets?: string | null
           bottles_per_year?: number | null
           campaigns_remaining?: number | null
           certifications?: string[] | null
+          contact_name?: string | null
           created_at?: string
+          current_markets?: string | null
           cuvees?: string[] | null
           description?: string | null
           domain_name?: string | null
@@ -551,10 +559,12 @@ export type Database = {
           organic_body?: string | null
           organic_conversion?: boolean | null
           organic_year?: number | null
+          priority_markets?: string | null
           social_media?: Json | null
           strengths?: string[] | null
           subscription_plan?: string | null
           surface_area?: number | null
+          target_buyer_description?: string | null
           updated_at?: string
           user_id: string
           website?: string | null
@@ -563,10 +573,13 @@ export type Database = {
         }
         Update: {
           aoc?: string | null
+          avoid_markets?: string | null
           bottles_per_year?: number | null
           campaigns_remaining?: number | null
           certifications?: string[] | null
+          contact_name?: string | null
           created_at?: string
+          current_markets?: string | null
           cuvees?: string[] | null
           description?: string | null
           domain_name?: string | null
@@ -577,10 +590,12 @@ export type Database = {
           organic_body?: string | null
           organic_conversion?: boolean | null
           organic_year?: number | null
+          priority_markets?: string | null
           social_media?: Json | null
           strengths?: string[] | null
           subscription_plan?: string | null
           surface_area?: number | null
+          target_buyer_description?: string | null
           updated_at?: string
           user_id?: string
           website?: string | null

@@ -31,7 +31,7 @@ import {
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: Target },
-  { title: "Profile", url: "/profile", icon: User },
+  { title: "Profil", url: "/profile", icon: User },
   { title: "Importateurs", url: "/importers", icon: Database },
   { title: "Campagnes", url: "/campaigns", icon: Target },
   { title: "CRM - Liste", url: "/prospects", icon: List },
