@@ -193,7 +193,7 @@ const CreateCampaign = () => {
         description: "Votre campagne a été sauvegardée en brouillon",
       });
 
-      navigate(`/campaigns/${data.id}`);
+      navigate('/campaigns');
     } catch (error) {
       console.error('Error saving draft:', error);
       toast({
@@ -260,7 +260,7 @@ const CreateCampaign = () => {
         description: "En attente de validation (≤72h)",
       });
 
-      navigate(`/campaigns/${campaign.id}`);
+      navigate('/campaigns');
     } catch (error) {
       console.error('Error submitting campaign:', error);
       toast({
