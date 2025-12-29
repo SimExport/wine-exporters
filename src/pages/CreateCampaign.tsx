@@ -330,7 +330,7 @@ const CreateCampaign = () => {
                   Étape 1 — Marchés & Vins
                 </CardTitle>
                 <CardDescription>
-                  Définissez vos marchés prioritaires et sélectionnez vos cuvées
+                  Définissez vos marchés à éviter et sélectionnez vos cuvées
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -538,7 +538,7 @@ const CreateCampaign = () => {
                   </div>
 
                   <div>
-                    <Label className="font-medium">Marchés prioritaires ({selectedMarkets.length})</Label>
+                    <Label className="font-medium">Marchés à éviter ({selectedMarkets.length})</Label>
                     <p className="text-sm text-muted-foreground mt-1">
                       {selectedMarkets.join(', ')}
                     </p>
