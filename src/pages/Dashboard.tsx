@@ -229,7 +229,7 @@ const Dashboard = () => {
               <Button className="w-full" asChild>
                 <Link to="/profile">
                   <Settings className="h-4 w-4 mr-2" />
-                  Configurer mon domaine
+                  Configurer mon profil
                 </Link>
               </Button>
               <p className="text-xs text-muted-foreground mt-2">Renseignez vos informations en cliquant sur configurer mon profil</p>
