@@ -44,7 +44,7 @@ const LandingPage = () => {
               
             </h1>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              La solution clé en main pour les domaines viticoles. Accédez à un réseau mondial, laissez-nous gérer vos campagnes de prospection et convertissez vos contacts en commandes.
+              La solution clé en main pour les domaines viticoles qui souhaitent prospecter efficacement sur les marchés export.         
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
