@@ -161,7 +161,7 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Suivez vos opportunités  </h3>
               <p className="text-muted-foreground">
-                Retrouvez les réponses et les prospects chauds directement dans votre CRM. Négociez et concluez vos ventes.
+                Retrouvez les acheteurs intéressez par vos campagnes, ajoutez desnotes et gérez le suivi  directement dans votre CRM. Négociez et concluez vos commandes.
               </p>
             </div>
           </div>
