@@ -187,7 +187,7 @@ const LandingPage = () => {
               </div>
               <CardContent className="p-8">
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">Votre service export externalisé</h3>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Essentiel</h3>
                   <p className="text-muted-foreground">Tout inclus, sans surprise</p>
                 </div>
                 <div className="mb-8">
