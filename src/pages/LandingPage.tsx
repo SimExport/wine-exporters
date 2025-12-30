@@ -1,22 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Grape, 
-  Users, 
-  Globe, 
-  Mail, 
-  Kanban,
-  CheckCircle2,
-  ArrowRight,
-  Sparkles,
-  UserCheck,
-  FileText
-} from 'lucide-react';
+import { Grape, Users, Globe, Mail, Kanban, CheckCircle2, ArrowRight, UserCheck, FileText, Compass } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const LandingPage = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -49,8 +36,8 @@ const LandingPage = () => {
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-primary text-sm font-medium mb-8">
-              <Sparkles className="h-4 w-4" />
-              Service Done-For-You pour vignerons
+              <Compass className="h-4 w-4" />
+              Plateforme de prospection pour les domaines viticoles       
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
               Trouvez des acheteurs pour vos vins <br />
@@ -288,8 +275,6 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default LandingPage;
