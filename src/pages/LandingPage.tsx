@@ -14,7 +14,7 @@ const LandingPage = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Wine Exporters </h1>
-                <p className="text-xs text-muted-foreground">Développez vos exports</p>
+                <p className="text-xs text-muted-foreground">by ExportVins </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
