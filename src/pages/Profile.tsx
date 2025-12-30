@@ -779,7 +779,7 @@ const Profile = () => {
             <TabsContent value="markets" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Préférences de marché</CardTitle>
+                  <CardTitle>Préférences de prospection</CardTitle>
                   <CardDescription>
                     Définissez vos marchés cibles et vos préférences pour la prospection
                   </CardDescription>
