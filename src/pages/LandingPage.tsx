@@ -83,11 +83,9 @@ const LandingPage = () => {
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Les 3 Piliers de notre service
+              Pourquoi choisir notre plateforme   
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Un accompagnement complet pour développer vos exports sans effort.
-            </p>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Accédez à un réseau mondial, laissez-nous gérer vos campagnes de prospection et convertissez vos contacts en commandes.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
