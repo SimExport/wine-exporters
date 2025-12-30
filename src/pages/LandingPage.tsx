@@ -82,9 +82,7 @@ const LandingPage = () => {
       <section className="py-24 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Pourquoi choisir notre plateforme   
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Pourquoi choisir notre plateforme ?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Accédez à notre réseau d'importateurs et acheteurs, laissez-nous gérer vos campagnes de prospection et convertissez les opportunités en commandes.</p>
           </div>
 
