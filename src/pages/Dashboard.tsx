@@ -244,7 +244,7 @@ const Dashboard = () => {
             <CardContent>
               {hasNoCampaignsRemaining ? <>
                   <Button className="w-full" variant="outline" asChild>
-                    <Link to="/settings">
+                    <Link to="/billing">
                       <CreditCard className="h-4 w-4 mr-2" />
                       Souscrire un abonnement
                     </Link>
