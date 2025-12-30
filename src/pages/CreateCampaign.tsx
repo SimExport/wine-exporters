@@ -266,7 +266,7 @@ const CreateCampaign = () => {
                   <Globe className="h-5 w-5" />
                   Étape 1 — Marchés & Vins
                 </CardTitle>
-                <CardDescription>Définissez les marchés à éviter, sélectionnez les cuvées et les d</CardDescription>
+                <CardDescription>Définissez les marchés à éviter, sélectionnez les cuvées et les documents liés à la campagne</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Campaign Name */}
