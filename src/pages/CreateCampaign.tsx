@@ -13,7 +13,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-
 interface Wine {
   id: string;
   name: string;
@@ -21,31 +20,27 @@ interface Wine {
   appellation: string;
   exw_price_eur: number;
 }
-
 interface Document {
   id: string;
   title: string;
   category: string;
   file_name: string;
 }
-
-const AVAILABLE_MARKETS = [
-  'France', 'Allemagne', 'Belgique', 'Pays-Bas', 'Royaume-Uni', 'Suisse',
-  'États-Unis', 'Canada', 'Japon', 'Chine', 'Hong Kong', 'Singapour',
-  'Australie', 'Nouvelle-Zélande', 'Brésil', 'Mexique', 'Corée du Sud',
-  'Danemark', 'Suède', 'Norvège'
-];
-
+const AVAILABLE_MARKETS = ['France', 'Allemagne', 'Belgique', 'Pays-Bas', 'Royaume-Uni', 'Suisse', 'États-Unis', 'Canada', 'Japon', 'Chine', 'Hong Kong', 'Singapour', 'Australie', 'Nouvelle-Zélande', 'Brésil', 'Mexique', 'Corée du Sud', 'Danemark', 'Suède', 'Norvège'];
 const CreateCampaign = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isFreeUser, loading: subscriptionLoading } = useSubscription();
-  
+  const {
+    user
+  } = useAuth();
+  const {
+    isFreeUser,
+    loading: subscriptionLoading
+  } = useSubscription();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [wines, setWines] = useState<Wine[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
-  
+
   // Form data
   const [campaignName, setCampaignName] = useState('');
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
@@ -55,69 +50,45 @@ const CreateCampaign = () => {
   const [techDocs, setTechDocs] = useState<string[]>([]);
   const [techsLink, setTechsLink] = useState('');
   const [clientNote, setClientNote] = useState('');
-
   useEffect(() => {
     if (user) {
       fetchWines();
       fetchDocuments();
     }
   }, [user]);
-
   const fetchWines = async () => {
     try {
-      const { data, error } = await supabase
-        .from('wines')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('is_active', true)
-        .order('name');
-
+      const {
+        data,
+        error
+      } = await supabase.from('wines').select('*').eq('user_id', user?.id).eq('is_active', true).order('name');
       if (error) throw error;
       setWines(data || []);
     } catch (error) {
       console.error('Error fetching wines:', error);
     }
   };
-
   const fetchDocuments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('title');
-
+      const {
+        data,
+        error
+      } = await supabase.from('documents').select('*').eq('user_id', user?.id).order('title');
       if (error) throw error;
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
     }
   };
-
   const handleMarketToggle = (market: string) => {
-    setSelectedMarkets(prev => 
-      prev.includes(market) 
-        ? prev.filter(m => m !== market)
-        : [...prev, market]
-    );
+    setSelectedMarkets(prev => prev.includes(market) ? prev.filter(m => m !== market) : [...prev, market]);
   };
-
   const handleWineToggle = (wineId: string) => {
-    setSelectedWines(prev => 
-      prev.includes(wineId) 
-        ? prev.filter(id => id !== wineId)
-        : [...prev, wineId]
-    );
+    setSelectedWines(prev => prev.includes(wineId) ? prev.filter(id => id !== wineId) : [...prev, wineId]);
   };
-
   const handleTechDocToggle = (docId: string) => {
-    setTechDocs(prev => 
-      prev.includes(docId) 
-        ? prev.filter(id => id !== docId)
-        : [...prev, docId]
-    );
+    setTechDocs(prev => prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]);
   };
-
   const validateStep1 = () => {
     if (!campaignName.trim()) {
       toast({
@@ -153,7 +124,6 @@ const CreateCampaign = () => {
     }
     return true;
   };
-
   const saveDraft = async () => {
     if (!campaignName.trim()) {
       toast({
@@ -163,7 +133,6 @@ const CreateCampaign = () => {
       });
       return;
     }
-
     setLoading(true);
     try {
       const campaignData = {
@@ -177,22 +146,17 @@ const CreateCampaign = () => {
         doc_pricelist: pricelistDoc || null,
         doc_techs: techDocs.length > 0 ? techDocs : null,
         techs_link: techsLink || null,
-        client_note: clientNote || null,
+        client_note: clientNote || null
       };
-
-      const { data, error } = await supabase
-        .from('campaigns')
-        .insert(campaignData)
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('campaigns').insert(campaignData).select().single();
       if (error) throw error;
-
       toast({
         title: "Brouillon sauvegardé",
-        description: "Votre campagne a été sauvegardée en brouillon",
+        description: "Votre campagne a été sauvegardée en brouillon"
       });
-
       navigate('/campaigns');
     } catch (error) {
       console.error('Error saving draft:', error);
@@ -205,7 +169,6 @@ const CreateCampaign = () => {
       setLoading(false);
     }
   };
-
   const submitForValidation = async () => {
     // Block free users from submitting
     if (isFreeUser) {
@@ -216,9 +179,7 @@ const CreateCampaign = () => {
       });
       return;
     }
-
     if (!validateStep1()) return;
-
     setLoading(true);
     try {
       const campaignData = {
@@ -233,33 +194,27 @@ const CreateCampaign = () => {
         doc_techs: techDocs.length > 0 ? techDocs : null,
         techs_link: techsLink || null,
         client_note: clientNote || null,
-        validation_requested_at: new Date().toISOString(),
+        validation_requested_at: new Date().toISOString()
       };
-
-      const { data: campaign, error: campaignError } = await supabase
-        .from('campaigns')
-        .insert(campaignData)
-        .select()
-        .single();
-
+      const {
+        data: campaign,
+        error: campaignError
+      } = await supabase.from('campaigns').insert(campaignData).select().single();
       if (campaignError) throw campaignError;
 
       // Create admin task
-      const { error: taskError } = await supabase
-        .from('admin_tasks')
-        .insert({
-          type: 'campaign_validation',
-          campaign_id: campaign.id,
-          status: 'open'
-        });
-
+      const {
+        error: taskError
+      } = await supabase.from('admin_tasks').insert({
+        type: 'campaign_validation',
+        campaign_id: campaign.id,
+        status: 'open'
+      });
       if (taskError) throw taskError;
-
       toast({
         title: "Campagne soumise",
-        description: "En attente de validation (≤72h)",
+        description: "En attente de validation (≤72h)"
       });
-
       navigate('/campaigns');
     } catch (error) {
       console.error('Error submitting campaign:', error);
@@ -272,27 +227,19 @@ const CreateCampaign = () => {
       setLoading(false);
     }
   };
-
   const getSelectedWineNames = () => {
     return wines.filter(wine => selectedWines.includes(wine.id)).map(wine => wine.name);
   };
-
   const getDocumentTitle = (docId: string) => {
     const doc = documents.find(d => d.id === docId);
     return doc ? doc.title : '';
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/campaigns')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => navigate('/campaigns')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
@@ -300,68 +247,44 @@ const CreateCampaign = () => {
           </div>
           
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={saveDraft}
-              disabled={loading}
-            >
+            <Button variant="outline" onClick={saveDraft} disabled={loading}>
               <Save className="h-4 w-4 mr-2" />
               Enregistrer brouillon
             </Button>
-            {step === 2 && (
-              <Button
-                onClick={submitForValidation}
-                disabled={loading}
-              >
+            {step === 2 && <Button onClick={submitForValidation} disabled={loading}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Soumettre pour validation
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
 
         {/* Step 1: Markets & Wines */}
-        {step === 1 && (
-          <div className="space-y-6">
+        {step === 1 && <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
                   Étape 1 — Marchés & Vins
                 </CardTitle>
-                <CardDescription>
-                  Définissez vos marchés à éviter et sélectionnez vos cuvées
-                </CardDescription>
+                <CardDescription>Définissez les marchés à éviter, sélectionnez les cuvées et les d</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Campaign Name */}
                 <div>
                   <Label htmlFor="campaignName">Nom de la campagne *</Label>
-                  <Input
-                    id="campaignName"
-                    value={campaignName}
-                    onChange={(e) => setCampaignName(e.target.value)}
-                    placeholder="Ex: Lancement Millésime 2023"
-                    className="mt-1"
-                  />
+                  <Input id="campaignName" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder="Ex: Lancement Millésime 2023" className="mt-1" />
                 </div>
 
                 {/* Markets to avoid */}
                 <div>
                   <Label>Marchés à éviter (sélection multiple)</Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                    {AVAILABLE_MARKETS.map((market) => (
-                      <div key={market} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={market}
-                          checked={selectedMarkets.includes(market)}
-                          onCheckedChange={() => handleMarketToggle(market)}
-                        />
+                    {AVAILABLE_MARKETS.map(market => <div key={market} className="flex items-center space-x-2">
+                        <Checkbox id={market} checked={selectedMarkets.includes(market)} onCheckedChange={() => handleMarketToggle(market)} />
                         <Label htmlFor={market} className="text-sm">
                           {market}
                         </Label>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </div>
 
@@ -376,22 +299,14 @@ const CreateCampaign = () => {
                 {/* Wines */}
                 <div>
                   <Label>Sélection des cuvées *</Label>
-                  {wines.length === 0 ? (
-                    <Alert className="mt-2">
+                  {wines.length === 0 ? <Alert className="mt-2">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
                         Aucun vin actif trouvé. Veuillez d'abord ajouter des vins dans votre profil.
                       </AlertDescription>
-                    </Alert>
-                  ) : (
-                    <div className="space-y-2 mt-2">
-                      {wines.map((wine) => (
-                        <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg">
-                          <Checkbox
-                            id={wine.id}
-                            checked={selectedWines.includes(wine.id)}
-                            onCheckedChange={() => handleWineToggle(wine.id)}
-                          />
+                    </Alert> : <div className="space-y-2 mt-2">
+                      {wines.map(wine => <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg">
+                          <Checkbox id={wine.id} checked={selectedWines.includes(wine.id)} onCheckedChange={() => handleWineToggle(wine.id)} />
                           <Wine className="h-4 w-4 text-muted-foreground" />
                           <div className="flex-1">
                             <Label htmlFor={wine.id} className="font-medium">
@@ -401,10 +316,8 @@ const CreateCampaign = () => {
                               {wine.color} - {wine.appellation} - {wine.exw_price_eur}€ EXW
                             </p>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        </div>)}
+                    </div>}
                 </div>
 
                 {/* Documents */}
@@ -419,11 +332,9 @@ const CreateCampaign = () => {
                         <SelectValue placeholder="Sélectionner une présentation" />
                       </SelectTrigger>
                       <SelectContent>
-                        {documents.filter(doc => doc.category === 'presentation').map((doc) => (
-                          <SelectItem key={doc.id} value={doc.id}>
+                        {documents.filter(doc => doc.category === 'presentation').map(doc => <SelectItem key={doc.id} value={doc.id}>
                             {doc.title}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -436,11 +347,9 @@ const CreateCampaign = () => {
                         <SelectValue placeholder="Sélectionner une liste de prix" />
                       </SelectTrigger>
                       <SelectContent>
-                        {documents.filter(doc => doc.category === 'price_list').map((doc) => (
-                          <SelectItem key={doc.id} value={doc.id}>
+                        {documents.filter(doc => doc.category === 'price_list').map(doc => <SelectItem key={doc.id} value={doc.id}>
                             {doc.title}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -448,80 +357,55 @@ const CreateCampaign = () => {
                   {/* Tech docs */}
                   <div>
                     <Label>Fiches techniques (facultatif)</Label>
-                    <Select 
-                      value={techDocs.length > 0 ? techDocs[0] : ''} 
-                      onValueChange={(value) => {
-                        if (value && !techDocs.includes(value)) {
-                          setTechDocs(prev => [...prev, value]);
-                        }
-                      }}
-                    >
+                    <Select value={techDocs.length > 0 ? techDocs[0] : ''} onValueChange={value => {
+                  if (value && !techDocs.includes(value)) {
+                    setTechDocs(prev => [...prev, value]);
+                  }
+                }}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Sélectionner une fiche technique" />
                       </SelectTrigger>
                       <SelectContent>
-                        {documents.filter(doc => doc.category === 'tech_sheet').map((doc) => (
-                          <SelectItem key={doc.id} value={doc.id}>
+                        {documents.filter(doc => doc.category === 'tech_sheet').map(doc => <SelectItem key={doc.id} value={doc.id}>
                             {doc.title}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
-                    {techDocs.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {techDocs.map((docId) => {
-                          const doc = documents.find(d => d.id === docId);
-                          return doc ? (
-                            <div key={docId} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm">
+                    {techDocs.length > 0 && <div className="flex flex-wrap gap-2 mt-2">
+                        {techDocs.map(docId => {
+                    const doc = documents.find(d => d.id === docId);
+                    return doc ? <div key={docId} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm">
                               <FileText className="h-3 w-3" />
                               {doc.title}
-                              <button
-                                type="button"
-                                onClick={() => setTechDocs(prev => prev.filter(id => id !== docId))}
-                                className="ml-1 text-muted-foreground hover:text-foreground"
-                              >
+                              <button type="button" onClick={() => setTechDocs(prev => prev.filter(id => id !== docId))} className="ml-1 text-muted-foreground hover:text-foreground">
                                 ×
                               </button>
-                            </div>
-                          ) : null;
-                        })}
-                      </div>
-                    )}
+                            </div> : null;
+                  })}
+                      </div>}
                   </div>
 
                   {/* Client note */}
                   <div>
                     <Label htmlFor="clientNote">Note à l'équipe (optionnel)</Label>
-                    <Textarea
-                      id="clientNote"
-                      value={clientNote}
-                      onChange={(e) => setClientNote(e.target.value)}
-                      placeholder="Objectifs, précisions, demandes particulières..."
-                      className="mt-1"
-                      rows={3}
-                    />
+                    <Textarea id="clientNote" value={clientNote} onChange={e => setClientNote(e.target.value)} placeholder="Objectifs, précisions, demandes particulières..." className="mt-1" rows={3} />
                   </div>
                 </div>
 
-                <Button
-                  onClick={() => {
-                    if (validateStep1()) {
-                      setStep(2);
-                    }
-                  }}
-                  className="w-full"
-                >
+                <Button onClick={() => {
+              if (validateStep1()) {
+                setStep(2);
+              }
+            }} className="w-full">
                   Continuer vers le récapitulatif
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </div>}
 
         {/* Step 2: Recap & Submission */}
-        {step === 2 && (
-          <div className="space-y-6">
+        {step === 2 && <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Étape 2 — Récapitulatif & Soumission</CardTitle>
@@ -556,21 +440,15 @@ const CreateCampaign = () => {
                     <div className="text-sm text-muted-foreground mt-1 space-y-1">
                       <p>• Présentation: {getDocumentTitle(presentationDoc)}</p>
                       <p>• Liste des prix: {getDocumentTitle(pricelistDoc)}</p>
-                      {techDocs.length > 0 && (
-                        <p>• Fiches techniques: {techDocs.map(id => getDocumentTitle(id)).join(', ')}</p>
-                      )}
-                      {techsLink && (
-                        <p>• Lien fiches techniques: {techsLink}</p>
-                      )}
+                      {techDocs.length > 0 && <p>• Fiches techniques: {techDocs.map(id => getDocumentTitle(id)).join(', ')}</p>}
+                      {techsLink && <p>• Lien fiches techniques: {techsLink}</p>}
                     </div>
                   </div>
 
-                  {clientNote && (
-                    <div>
+                  {clientNote && <div>
                       <Label className="font-medium">Note à l'équipe</Label>
                       <p className="text-sm text-muted-foreground mt-1">{clientNote}</p>
-                    </div>
-                  )}
+                    </div>}
                 </div>
 
                 {/* Warning */}
@@ -584,29 +462,19 @@ const CreateCampaign = () => {
                 </Alert>
 
                 <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setStep(1)}
-                  >
+                  <Button variant="outline" onClick={() => setStep(1)}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Retour à l'étape 1
                   </Button>
-                  <Button
-                    onClick={submitForValidation}
-                    disabled={loading}
-                    className="flex-1"
-                  >
+                  <Button onClick={submitForValidation} disabled={loading} className="flex-1">
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Soumettre pour validation
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CreateCampaign;
