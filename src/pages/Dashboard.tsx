@@ -241,9 +241,7 @@ const Dashboard = () => {
           <Card className={`${hasNoCampaignsRemaining ? 'opacity-90' : 'cursor-pointer hover:shadow-md'} transition-shadow`} onClick={() => !hasNoCampaignsRemaining && navigate('/create-campaign')}>
             <CardHeader>
               <CardTitle>Lancer une Campagne</CardTitle>
-              <CardDescription>
-                Démarrez une campagne de prospection internationale
-              </CardDescription>
+              <CardDescription>Démarrez une campagne de prospection</CardDescription>
             </CardHeader>
             <CardContent>
               {hasNoCampaignsRemaining ? <>
