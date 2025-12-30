@@ -102,7 +102,7 @@ const LandingPage = () => {
                 <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
                   <Mail className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Nous gérons votre prospection, vous évitez les spams</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Une campagne par mois, nousgérons la prospection pour vous</h3>
                 <p className="text-muted-foreground">
                   Oubliez la technique. Mettez simplement à jour vos infos et lancez votre campagne mensuelle en un clic. Nos experts créent pour vous des emails optimisés qui arrivent en boîte de réception. Nous nous assurons que votre domaine brille auprès des bons interlocuteurs.
                 </p>
