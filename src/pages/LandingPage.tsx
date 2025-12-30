@@ -212,7 +212,7 @@ const LandingPage = () => {
                     <span className="text-foreground">CRM complet (Vue Kanban, Notes, Import de leads)</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
                     <span className="text-foreground">Support dédié aux domaines viticoles</span>
                   </li>
                 </ul>
