@@ -141,7 +141,7 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Créez votre profil</h3>
               <p className="text-muted-foreground">
-                Renseignez les informations de votre domaine viticole et téléchargez vos fiches techniques.
+                Renseignez vos informations dans votre profil, ajoutez ovs cuvées, vos préférences et vos documents. 
               </p>
             </div>
 
@@ -151,7 +151,7 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Activez votre campagne</h3>
               <p className="text-muted-foreground">
-                Chaque mois, validez l'envoi. Nous nous occupons de la rédaction, du ciblage et de la délivrabilité technique.
+                Chaque mois, définissez les paramètres de votre campagne (acheteurs, cuvées, prix, etc.) Nous nous occupons de la rédaction, du ciblage et de la délivrabilité technique.
               </p>
             </div>
 
