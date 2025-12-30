@@ -141,7 +141,7 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Créez votre profil</h3>
               <p className="text-muted-foreground">
-                Renseignez vos informations dans votre profil, ajoutez ovs cuvées, vos préférences et vos documents. 
+                Renseignez vos informations dans votre profil, ajoutez vos cuvées, vos préférences et vos documents. 
               </p>
             </div>
 
