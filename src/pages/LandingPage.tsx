@@ -71,7 +71,7 @@ const LandingPage = () => {
               <p className="text-muted-foreground">Pays couverts</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-primary mb-2">100+</p>
+              <p className="text-4xl font-bold text-primary mb-2">70+</p>
               <p className="text-muted-foreground">Domaines accompagnés</p>
             </div>
           </div>
