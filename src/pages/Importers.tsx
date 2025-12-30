@@ -295,7 +295,7 @@ const Importers = () => {
   return <div className="container mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Base de données des importateurs et acheteurs</h1>
+        <h1 className="text-3xl font-bold text-foreground">Liste des importateurs et acheteurs</h1>
         <p className="text-muted-foreground mt-2">Choisissez un marché pour afficher la liste des importateurs et acheteurs.</p>
       </div>
 
