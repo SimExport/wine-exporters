@@ -133,9 +133,9 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Grape className="h-8 w-8 text-purple-600 mr-3" />
+              <Grape className="h-8 w-8 mr-3 text-primary" />
               <h1 className="text-xl font-semibold text-foreground">
-                ExportVins
+                Wine Exporters    
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -184,7 +184,7 @@ const Dashboard = () => {
               <Globe className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-primary">
                 {profile?.campaigns_remaining || 0}
               </div>
               <p className="text-xs text-muted-foreground">
