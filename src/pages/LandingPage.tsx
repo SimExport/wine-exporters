@@ -228,7 +228,7 @@ const LandingPage = () => {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">Rejoignez les 70 domaines qui nous font confiance.</h2>
           <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
-            Externalisez votre prospection export et concentrez-vous sur ce que vous faites de mieux : produire des vins d'exception.
+            Accédez à notre réseau d'importateurs et acheteurs, laissez-nous gérer vos campagnes de prospection et convertissez les opportunités en commandes.
           </p>
           <Link to="/auth">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
