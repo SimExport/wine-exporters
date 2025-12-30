@@ -203,13 +203,10 @@ const LandingPage = () => {
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
                     <span className="text-foreground">1 campagne par mois créée et gérée par nos soins</span>
                   </li>
+                  
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
-                    <span className="text-foreground">Garantie de délivrabilité (Anti-Spam)</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
-                    <span className="text-foreground">CRM complet (Vue Kanban, Notes, Import de leads)</span>
+                    <span className="text-foreground">Accès au CRM complet (Vue Kanban, Notes, etc.)</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
