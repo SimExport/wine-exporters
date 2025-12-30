@@ -176,7 +176,7 @@ const LandingPage = () => {
               Combien ça coûte ?      
             </h2>
             <p className="text-xl text-muted-foreground">
-              Votre service export externalisé, tout inclus
+              Votre accès complet à la plateforme et à tous ses services         
             </p>
           </div>
 
