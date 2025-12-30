@@ -95,9 +95,7 @@ const LandingPage = () => {
                   <Globe className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Une base de données avec plus de      15 000 acheteurs</h3>
-                <p className="text-muted-foreground">
-                  Ne perdez plus de temps à chercher des contacts. Accédez instantanément à notre liste exhaustive d'importateurs, distributeurs et acheteurs clés dans plus de 45 pays. Une vision globale du marché pour votre domaine viticole.
-                </p>
+                <p className="text-muted-foreground">Ne perdez plus de temps à chercher des contacts. Accédez instantanément à notre liste exhaustive d'importateurs, distributeurs et acheteurs clés dans le monde.</p>
               </CardContent>
             </Card>
 
