@@ -197,7 +197,7 @@ const LandingPage = () => {
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
-                    <span className="text-foreground">Accès à la base de 20 000+ acheteurs</span>
+                    <span className="text-foreground">Accès à la base de 15 000+ acheteurs</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary" />
