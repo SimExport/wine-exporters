@@ -79,7 +79,7 @@ const Auth = () => {
             <Grape className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Wine Exporters by ExportVins</CardTitle>
-          <CardDescription className="text-gray-600 dark:text-gray-300">Plateforme de prospection tout-en-un pour els domain</CardDescription>
+          <CardDescription className="text-gray-600 dark:text-gray-300">Plateforme de prospection tout-en-un pour les domaines viticoles. </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
