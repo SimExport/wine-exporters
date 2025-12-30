@@ -232,9 +232,7 @@ const Dashboard = () => {
                   Configurer mon domaine
                 </Link>
               </Button>
-              <p className="text-xs text-muted-foreground mt-2">
-                Renseignez vos informations viticoles
-              </p>
+              <p className="text-xs text-muted-foreground mt-2">Renseignez vos informations en cliquant sur configurer mon profil</p>
             </CardContent>
           </Card>
 
