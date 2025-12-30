@@ -39,11 +39,9 @@ const LandingPage = () => {
               <Compass className="h-4 w-4" />
               Plateforme de prospection pour les domaines viticoles       
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Trouvez des acheteurs pour vos vins <br />
-              <span className="text-primary">
-                tous les mois.
-              </span>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-primary">Prospectez, trouvez des acheteurs pour vos vins
+            <br />
+              
             </h1>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
               La solution clé en main pour les domaines viticoles. Accédez à un réseau mondial, laissez-nous gérer vos campagnes de prospection et convertissez vos contacts en commandes.
