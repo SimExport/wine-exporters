@@ -13,7 +13,7 @@ const LandingPage = () => {
                 <Grape className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">ExportVins</h1>
+                <h1 className="text-xl font-bold text-foreground">Wine Exporters </h1>
                 <p className="text-xs text-muted-foreground">Développez vos exports</p>
               </div>
             </div>
