@@ -239,9 +239,7 @@ const LandingPage = () => {
       {/* CTA Section */}
       <section className="py-24 px-4 bg-primary">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
-            Rejoignez les 100+ domaines qui nous font confiance.
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">Rejoignez les 70+ domaines qui nous font confiance.</h2>
           <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
             Externalisez votre prospection export et concentrez-vous sur ce que vous faites de mieux : produire des vins d'exception.
           </p>
