@@ -173,7 +173,7 @@ const LandingPage = () => {
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Tarif simple et transparent
+              Combien ça coûte ?      
             </h2>
             <p className="text-xl text-muted-foreground">
               Votre service export externalisé, tout inclus
