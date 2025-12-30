@@ -456,8 +456,7 @@ const CreateCampaign = () => {
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     <strong>À la soumission, votre campagne passe en attente de validation.</strong><br />
-                    Notre équipe la prépare sous 72h. Vous serez notifié(e) à la validation. 
-                    Sous 7 jours, les importateurs intéressés apparaîtront dans votre espace Prospects.
+                    Notre équipe prépare votre campagne sous 72h. Vous serez notifié(e) à la validation. Par la suite, sous 7 jours, les importateurs et acheteurs intéressés apparaîtront dans vos espaces Prospects et Pipeline.
                   </AlertDescription>
                 </Alert>
 
