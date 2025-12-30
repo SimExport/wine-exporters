@@ -7,7 +7,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus } from 'lucide-react';
-
 interface Profile {
   id: string;
   domain_name: string | null;
@@ -17,7 +16,6 @@ interface Profile {
   aoc: string | null;
   contact_name: string | null;
 }
-
 interface Campaign {
   id: string;
   name: string;
@@ -25,44 +23,35 @@ interface Campaign {
   target_markets: string[];
   created_at: string;
 }
-
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
+  const {
+    user,
+    signOut
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!user) return;
-
     const loadDashboardData = async () => {
       try {
-        const [profileResult, campaignsResult] = await Promise.all([
-          supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle(),
-          supabase
-            .from('campaigns')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-        ]);
-
+        const [profileResult, campaignsResult] = await Promise.all([supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(), supabase.from('campaigns').select('*').eq('user_id', user.id).order('created_at', {
+          ascending: false
+        })]);
         if (profileResult.error) {
           console.error('Error fetching profile:', profileResult.error);
           toast({
             title: "Erreur",
             description: "Impossible de charger votre profil",
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           setProfile(profileResult.data);
         }
-
         if (campaignsResult.error) {
           console.error('Error fetching campaigns:', campaignsResult.error);
         } else {
@@ -74,26 +63,23 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
     loadDashboardData();
   }, [user, toast]);
-
   const handleSignOut = async () => {
     try {
       await signOut();
       toast({
         title: "Déconnexion réussie",
-        description: "À bientôt sur ExportVins !",
+        description: "À bientôt sur ExportVins !"
       });
     } catch (error) {
       toast({
         title: "Erreur",
         description: "Erreur lors de la déconnexion",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const getSubscriptionBadge = (plan: string) => {
     switch (plan) {
       case 'monthly':
@@ -104,57 +90,44 @@ const Dashboard = () => {
         return <Badge variant="outline" className="bg-muted/50">Aucun Abonnement</Badge>;
     }
   };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending_validation':
-        return (
-          <div className="flex items-center space-x-2">
+        return <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4 text-orange-500" />
             <Badge className="bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-50">
               En attente de validation
             </Badge>
-          </div>
-        );
+          </div>;
       case 'active':
-        return (
-          <div className="flex items-center space-x-2">
+        return <div className="flex items-center space-x-2">
             <CheckCircle className="h-4 w-4 text-green-500" />
             <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
               Active
             </Badge>
-          </div>
-        );
+          </div>;
       case 'completed':
-        return (
-          <div className="flex items-center space-x-2">
+        return <div className="flex items-center space-x-2">
             <CheckCircle className="h-4 w-4 text-gray-500" />
             <Badge variant="outline" className="text-muted-foreground">
               Terminée
             </Badge>
-          </div>
-        );
+          </div>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Grape className="h-12 w-12 text-purple-600 mx-auto mb-4 animate-pulse" />
           <p className="text-muted-foreground">Chargement de votre tableau de bord...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const hasNoCampaignsRemaining = !profile?.campaigns_remaining || profile.campaigns_remaining === 0;
   const isProfileIncomplete = !profile?.domain_name;
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -181,9 +154,7 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Tableau de Bord
-          </h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Tableau de Bord</h2>
           <p className="text-muted-foreground">
             Bienvenue {profile?.contact_name || 'Vigneron'}
           </p>
@@ -200,12 +171,7 @@ const Dashboard = () => {
               <div className="space-y-2">
                 {getSubscriptionBadge(profile?.subscription_plan || 'none')}
                 <p className="text-xs text-muted-foreground">
-                  {profile?.subscription_plan === 'monthly' 
-                    ? 'Accès complet à la base de données'
-                    : profile?.subscription_plan === 'pay_per_campaign'
-                    ? 'Accès limité aux pays sélectionnés'
-                    : 'Aucun accès premium'
-                  }
+                  {profile?.subscription_plan === 'monthly' ? 'Accès complet à la base de données' : profile?.subscription_plan === 'pay_per_campaign' ? 'Accès limité aux pays sélectionnés' : 'Aucun accès premium'}
                 </p>
               </div>
             </CardContent>
@@ -235,26 +201,18 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
-                {isProfileIncomplete ? (
-                  <div className="flex items-center space-x-2">
+                {isProfileIncomplete ? <div className="flex items-center space-x-2">
                     <AlertCircle className="h-4 w-4 text-orange-500" />
                     <span className="text-sm font-medium text-orange-600">Profil incomplet</span>
-                  </div>
-                ) : (
-                  <p className="text-sm font-medium">
+                  </div> : <p className="text-sm font-medium">
                     {profile.domain_name}
-                  </p>
-                )}
-                {profile?.location && (
-                  <p className="text-xs text-muted-foreground">
+                  </p>}
+                {profile?.location && <p className="text-xs text-muted-foreground">
                     {profile.location}
-                  </p>
-                )}
-                {profile?.aoc && (
-                  <Badge variant="outline" className="text-xs">
+                  </p>}
+                {profile?.aoc && <Badge variant="outline" className="text-xs">
                     AOC {profile.aoc}
-                  </Badge>
-                )}
+                  </Badge>}
               </div>
             </CardContent>
           </Card>
@@ -262,15 +220,10 @@ const Dashboard = () => {
 
         {/* Actions principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate('/profile')}
-          >
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/profile')}>
             <CardHeader>
               <CardTitle>Configuration du Domaine</CardTitle>
-              <CardDescription>
-                Renseignez les informations de votre domaine viticole
-              </CardDescription>
+              <CardDescription>Renseignez les informations concernant votre domaine</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full" asChild>
@@ -285,10 +238,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card 
-            className={`${hasNoCampaignsRemaining ? 'opacity-90' : 'cursor-pointer hover:shadow-md'} transition-shadow`}
-            onClick={() => !hasNoCampaignsRemaining && navigate('/create-campaign')}
-          >
+          <Card className={`${hasNoCampaignsRemaining ? 'opacity-90' : 'cursor-pointer hover:shadow-md'} transition-shadow`} onClick={() => !hasNoCampaignsRemaining && navigate('/create-campaign')}>
             <CardHeader>
               <CardTitle>Lancer une Campagne</CardTitle>
               <CardDescription>
@@ -296,13 +246,8 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {hasNoCampaignsRemaining ? (
-                <>
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    asChild
-                  >
+              {hasNoCampaignsRemaining ? <>
+                  <Button className="w-full" variant="outline" asChild>
                     <Link to="/settings">
                       <CreditCard className="h-4 w-4 mr-2" />
                       Souscrire un abonnement
@@ -311,9 +256,7 @@ const Dashboard = () => {
                   <p className="text-xs text-orange-600 mt-2">
                     Souscrivez à un plan pour lancer des campagnes
                   </p>
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Button className="w-full" asChild>
                     <Link to="/create-campaign">
                       <Globe className="h-4 w-4 mr-2" />
@@ -323,8 +266,7 @@ const Dashboard = () => {
                   <p className="text-xs text-muted-foreground mt-2">
                     Sélectionnez vos marchés cibles
                   </p>
-                </>
-              )}
+                </>}
             </CardContent>
           </Card>
         </div>
@@ -335,8 +277,7 @@ const Dashboard = () => {
             Vos Campagnes
           </h3>
           
-          {campaigns.length === 0 ? (
-            <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
+          {campaigns.length === 0 ? <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
               <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h4 className="text-lg font-medium text-foreground mb-2">
                 Aucune campagne pour le moment
@@ -344,19 +285,14 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Créez votre première campagne de prospection pour toucher des importateurs à l'international.
               </p>
-              {!hasNoCampaignsRemaining && (
-                <Button asChild>
+              {!hasNoCampaignsRemaining && <Button asChild>
                   <Link to="/create-campaign">
                     <Plus className="h-4 w-4 mr-2" />
                     Créer ma première campagne
                   </Link>
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {campaigns.map((campaign) => (
-                <Card key={campaign.id} className="hover:shadow-md transition-shadow">
+                </Button>}
+            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {campaigns.map(campaign => <Card key={campaign.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{campaign.name}</CardTitle>
                     {getStatusBadge(campaign.status)}
@@ -372,14 +308,10 @@ const Dashboard = () => {
                       </p>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                </Card>)}
+            </div>}
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
