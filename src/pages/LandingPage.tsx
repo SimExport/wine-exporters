@@ -182,9 +182,7 @@ const LandingPage = () => {
 
           <div className="max-w-lg mx-auto">
             <Card className="border-2 border-primary relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-bl-lg">
-                Formule unique
-              </div>
+              
               <CardContent className="p-8">
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-foreground mb-2">Essentiel</h3>
