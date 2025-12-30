@@ -114,7 +114,7 @@ const LandingPage = () => {
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">Un CRM pour transformer les opportunités en commandes</h3>
                 <p className="text-muted-foreground">
-                  Centralisez tout votre suivi. Nos équipes ajoutent directement les importateurs intéressés par vos campagnes dans votre CRM. Utilisez la vue Kanban pour suivre l'avancée des négociations, ajoutez vos notes et ne manquez aucune opportunité de vente.
+                  Centralisez tout votre suivi sur notre plateforme. Notre équipe ajoute directement les acheteurs intéressés dans votre CRM.  Vous utilisez ensuite votre CRM pour suivre l'avancée des négociations, ajoutez vos notes et transformer les opportunités en commandes.    
                 </p>
               </CardContent>
             </Card>
