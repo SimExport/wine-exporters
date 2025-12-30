@@ -222,7 +222,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/profile')}>
             <CardHeader>
-              <CardTitle>Configuration du Domaine</CardTitle>
+              <CardTitle>Configuration du Profil</CardTitle>
               <CardDescription>Renseignez les informations concernant votre domaine</CardDescription>
             </CardHeader>
             <CardContent>
