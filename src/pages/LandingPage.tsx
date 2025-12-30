@@ -112,7 +112,7 @@ const LandingPage = () => {
                 <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
                   <Kanban className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Transformez les importateurs qualifiés en commandes</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Un CRM pour transformer les opportunités en commandes</h3>
                 <p className="text-muted-foreground">
                   Centralisez tout votre suivi. Nos équipes ajoutent directement les importateurs intéressés par vos campagnes dans votre CRM. Utilisez la vue Kanban pour suivre l'avancée des négociations, ajoutez vos notes et ne manquez aucune opportunité de vente.
                 </p>
