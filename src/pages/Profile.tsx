@@ -610,7 +610,7 @@ const Profile = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Votre profil</h1>
-              <p className="text-muted-foreground mt-1">Gérez les informations concernant votre domaiet vos vins.</p>
+              <p className="text-muted-foreground mt-1">Gérez les informations concernant votre domaine et vos vins.</p>
               {lastSaved && <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs">
                     Enregistré à {lastSaved.toLocaleTimeString()}
