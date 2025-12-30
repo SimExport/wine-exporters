@@ -20,7 +20,6 @@ import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 interface Document {
   id: string;
   title: string;
@@ -28,7 +27,6 @@ interface Document {
   file_url: string;
   file_name: string;
 }
-
 interface Wine {
   id: string;
   name: string;
@@ -38,7 +36,6 @@ interface Wine {
   vintages?: number[];
   is_active: boolean;
 }
-
 interface Campaign {
   id: string;
   name: string;
@@ -51,7 +48,6 @@ interface Campaign {
   stats_replies: number | null;
   prospect_count?: number;
 }
-
 interface CampaignData {
   id?: string;
   name: string;
@@ -90,7 +86,6 @@ interface CampaignData {
   managedByBo: boolean;
   status: string;
 }
-
 const CAMPAIGN_STATUS_LABELS = {
   draft: 'Brouillon',
   pending_validation: 'En attente de validation',
@@ -99,7 +94,6 @@ const CAMPAIGN_STATUS_LABELS = {
   results: 'Terminée',
   failed: 'Échec'
 };
-
 const CAMPAIGN_STATUS_COLORS = {
   draft: 'secondary',
   pending_validation: 'yellow',
@@ -108,9 +102,10 @@ const CAMPAIGN_STATUS_COLORS = {
   results: 'purple',
   failed: 'red'
 } as const;
-
 const Campaigns = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -120,12 +115,11 @@ const Campaigns = () => {
   const [availableCuvees, setAvailableCuvees] = useState<string[]>([]);
   const [availableWines, setAvailableWines] = useState<Wine[]>([]);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
-  
+
   // Campaign listing state
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-
   const [campaignData, setCampaignData] = useState<CampaignData>({
     name: '',
     markets: [],
@@ -159,23 +153,12 @@ const Campaigns = () => {
     managedByBo: false,
     status: 'draft'
   });
-
   const steps = ['Marchés & ciblage', 'Vins & documents', 'Message & envoi', 'Relecture & lancement'];
-
   const markets = {
-    'Europe': [
-      'France', 'Allemagne', 'Italie', 'Espagne', 'Royaume-Uni', 
-      'Pays-Bas', 'Belgique', 'Suisse', 'Autriche', 'Suède'
-    ],
-    'Amérique du Nord': [
-      'États-Unis', 'Canada', 'Mexique'
-    ],
-    'Asie': [
-      'Japon', 'Chine', 'Corée du Sud', 'Singapour', 'Hong Kong', 
-      'Thaïlande', 'Vietnam', 'Malaisie'
-    ]
+    'Europe': ['France', 'Allemagne', 'Italie', 'Espagne', 'Royaume-Uni', 'Pays-Bas', 'Belgique', 'Suisse', 'Autriche', 'Suède'],
+    'Amérique du Nord': ['États-Unis', 'Canada', 'Mexique'],
+    'Asie': ['Japon', 'Chine', 'Corée du Sud', 'Singapour', 'Hong Kong', 'Thaïlande', 'Vietnam', 'Malaisie']
   };
-
   const channelOptions = ['Importateur', 'Distributeur', 'Caviste/Indépendant', 'On-trade (Horeca)', 'Online'];
   const segmentOptions = ['Bio/Conversion', 'Premium', 'MDD', 'Entrée de gamme', 'Milieu de gamme', 'Haut de gamme'];
   const volumeBandOptions = ['<3k bouteilles/an', '3-10k bouteilles/an', '10-50k bouteilles/an', '50k+ bouteilles/an'];
@@ -196,30 +179,30 @@ const Campaigns = () => {
       loadUserSettings();
     }
   }, [user, showCreateForm]);
-
   const fetchCampaigns = async () => {
     try {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('user_id', user?.id)
-        .neq('status', 'archived') // Exclude archived campaigns
-        .order('created_at', { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from('campaigns').select('*').eq('user_id', user?.id).neq('status', 'archived') // Exclude archived campaigns
+      .order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
 
       // Fetch prospect counts for each campaign
-      const campaignsWithCounts = await Promise.all(
-        (data || []).map(async (campaign) => {
-          const { count } = await supabase
-            .from('leads')
-            .select('*', { count: 'exact', head: true })
-            .eq('campaign_id', campaign.id);
-
-          return { ...campaign, prospect_count: count || 0 };
-        })
-      );
-
+      const campaignsWithCounts = await Promise.all((data || []).map(async campaign => {
+        const {
+          count
+        } = await supabase.from('leads').select('*', {
+          count: 'exact',
+          head: true
+        }).eq('campaign_id', campaign.id);
+        return {
+          ...campaign,
+          prospect_count: count || 0
+        };
+      }));
       setCampaigns(campaignsWithCounts as any);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
@@ -232,7 +215,6 @@ const Campaigns = () => {
       setListLoading(false);
     }
   };
-
   const deleteCampaign = async (campaignId: string, campaignName: string, status: string) => {
     // Cannot delete campaigns that are currently sending
     if (status === 'sending') {
@@ -243,25 +225,18 @@ const Campaigns = () => {
       });
       return;
     }
-
     if (!confirm(`Êtes-vous sûr de vouloir supprimer la campagne "${campaignName}" ? Cette action est irréversible.`)) {
       return;
     }
-
     try {
-      const { error } = await supabase
-        .from('campaigns')
-        .delete()
-        .eq('id', campaignId)
-        .eq('user_id', user?.id);
-
+      const {
+        error
+      } = await supabase.from('campaigns').delete().eq('id', campaignId).eq('user_id', user?.id);
       if (error) throw error;
-
       toast({
         title: "Campagne supprimée",
-        description: `La campagne "${campaignName}" a été supprimée avec succès`,
+        description: `La campagne "${campaignName}" a été supprimée avec succès`
       });
-
       fetchCampaigns(); // Refresh list
     } catch (error) {
       console.error('Error deleting campaign:', error);
@@ -272,26 +247,21 @@ const Campaigns = () => {
       });
     }
   };
-
   const archiveCampaign = async (campaignId: string, campaignName: string) => {
     if (!confirm(`Êtes-vous sûr de vouloir archiver la campagne "${campaignName}" ?`)) {
       return;
     }
-
     try {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ status: 'archived' })
-        .eq('id', campaignId)
-        .eq('user_id', user?.id);
-
+      const {
+        error
+      } = await supabase.from('campaigns').update({
+        status: 'archived'
+      }).eq('id', campaignId).eq('user_id', user?.id);
       if (error) throw error;
-
       toast({
         title: "Campagne archivée",
-        description: `La campagne "${campaignName}" a été archivée`,
+        description: `La campagne "${campaignName}" a été archivée`
       });
-
       fetchCampaigns(); // Refresh list
     } catch (error) {
       console.error('Error archiving campaign:', error);
@@ -311,75 +281,67 @@ const Campaigns = () => {
     const timer = setTimeout(saveDraft, 1000);
     setAutoSaveTimer(timer);
   }, [autoSaveTimer]);
-
   const updateCampaignData = (updates: Partial<CampaignData>) => {
-    setCampaignData(prev => ({ ...prev, ...updates }));
+    setCampaignData(prev => ({
+      ...prev,
+      ...updates
+    }));
     triggerAutoSave();
   };
-
   const loadDocuments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('user_id', user?.id);
-      
+      const {
+        data,
+        error
+      } = await supabase.from('documents').select('*').eq('user_id', user?.id);
       if (error) throw error;
       setAvailableDocuments(data || []);
     } catch (error) {
       console.error('Error loading documents:', error);
     }
   };
-
   const loadProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('cuvees, domain_name')
-        .eq('user_id', user?.id)
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('cuvees, domain_name').eq('user_id', user?.id).single();
       if (error) throw error;
       if (data) {
         setAvailableCuvees(data.cuvees || []);
-        updateCampaignData({ 
+        updateCampaignData({
           sendAsName: data.domain_name || '',
-          name: `Campagne - ${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`
+          name: `Campagne - ${new Date().toLocaleDateString('fr-FR', {
+            month: 'long',
+            year: 'numeric'
+          })}`
         });
       }
     } catch (error) {
       console.error('Error loading profile:', error);
     }
   };
-
   const loadWines = async () => {
     try {
-      const { data, error } = await supabase
-        .from('wines')
-        .select('id, name, appellation, color, exw_price_eur, vintages, is_active')
-        .eq('user_id', user?.id)
-        .eq('is_active', true)
-        .order('name');
-      
+      const {
+        data,
+        error
+      } = await supabase.from('wines').select('id, name, appellation, color, exw_price_eur, vintages, is_active').eq('user_id', user?.id).eq('is_active', true).order('name');
       if (error) throw error;
       setAvailableWines(data || []);
     } catch (error) {
       console.error('Error loading wines:', error);
     }
   };
-
   const loadUserSettings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('reply_to_default, display_name')
-        .eq('user_id', user?.id)
-        .maybeSingle();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('user_settings').select('reply_to_default, display_name').eq('user_id', user?.id).maybeSingle();
       if (error) throw error;
-
       if (data?.reply_to_default && !campaignData.replyTo) {
-        updateCampaignData({ 
+        updateCampaignData({
           replyTo: data.reply_to_default,
           sendAsName: data.display_name || campaignData.sendAsName
         });
@@ -388,10 +350,8 @@ const Campaigns = () => {
       console.error('Error loading user settings:', error);
     }
   };
-
   const saveDraft = async () => {
     if (!user) return;
-    
     setSaving(true);
     try {
       const payload = {
@@ -428,23 +388,22 @@ const Campaigns = () => {
         audience_estimate: campaignData.audienceEstimate,
         status: campaignData.status
       };
-
       if (campaignData.id) {
-        const { error } = await supabase
-          .from('campaigns')
-          .update(payload)
-          .eq('id', campaignData.id);
+        const {
+          error
+        } = await supabase.from('campaigns').update(payload).eq('id', campaignData.id);
         if (error) throw error;
       } else {
-        const { data, error } = await supabase
-          .from('campaigns')
-          .insert(payload)
-          .select()
-          .single();
+        const {
+          data,
+          error
+        } = await supabase.from('campaigns').insert(payload).select().single();
         if (error) throw error;
-        setCampaignData(prev => ({ ...prev, id: data.id }));
+        setCampaignData(prev => ({
+          ...prev,
+          id: data.id
+        }));
       }
-      
       setLastSaved(new Date());
     } catch (error) {
       console.error('Error saving draft:', error);
@@ -452,69 +411,81 @@ const Campaigns = () => {
       setSaving(false);
     }
   };
-
   const handleMarketToggle = (market: string) => {
-    const newMarkets = campaignData.markets.includes(market)
-      ? campaignData.markets.filter(m => m !== market)
-      : [...campaignData.markets, market];
-    
-    updateCampaignData({ markets: newMarkets });
+    const newMarkets = campaignData.markets.includes(market) ? campaignData.markets.filter(m => m !== market) : [...campaignData.markets, market];
+    updateCampaignData({
+      markets: newMarkets
+    });
     // Simulate audience calculation
-    updateCampaignData({ audienceEstimate: Math.max(10, Math.min(500, newMarkets.length * 45)) });
+    updateCampaignData({
+      audienceEstimate: Math.max(10, Math.min(500, newMarkets.length * 45))
+    });
   };
-
   const getPreflightErrors = () => {
     const errors = [];
-    
     if (campaignData.markets.length === 0) {
-      errors.push({ id: 'markets', message: 'Au moins 1 marché requis', anchor: 'step-1' });
+      errors.push({
+        id: 'markets',
+        message: 'Au moins 1 marché requis',
+        anchor: 'step-1'
+      });
     }
-    
     if (campaignData.audienceEstimate < 20 || campaignData.audienceEstimate > 500) {
-      errors.push({ id: 'audience', message: 'Audience entre 20 et 500 contacts', anchor: 'step-1' });
+      errors.push({
+        id: 'audience',
+        message: 'Audience entre 20 et 500 contacts',
+        anchor: 'step-1'
+      });
     }
-    
     if (campaignData.selectedWines.length === 0 && campaignData.cuvees.length === 0) {
-      errors.push({ id: 'cuvees', message: 'Au moins 1 cuvée requise', anchor: 'step-2' });
+      errors.push({
+        id: 'cuvees',
+        message: 'Au moins 1 cuvée requise',
+        anchor: 'step-2'
+      });
     }
-    
     if (!campaignData.presentationDocId) {
-      errors.push({ id: 'presentation', message: 'Document de présentation requis', anchor: 'step-2' });
+      errors.push({
+        id: 'presentation',
+        message: 'Document de présentation requis',
+        anchor: 'step-2'
+      });
     }
-    
     if (!campaignData.pricelistDocId) {
-      errors.push({ id: 'pricelist', message: 'Liste des prix requise', anchor: 'step-2' });
+      errors.push({
+        id: 'pricelist',
+        message: 'Liste des prix requise',
+        anchor: 'step-2'
+      });
     }
-    
     if (!campaignData.sendAsName) {
-      errors.push({ id: 'sender', message: 'Expéditeur requis', anchor: 'step-3' });
+      errors.push({
+        id: 'sender',
+        message: 'Expéditeur requis',
+        anchor: 'step-3'
+      });
     }
-    
     if (!campaignData.subjectSelected) {
-      errors.push({ id: 'subject', message: 'Objet requis', anchor: 'step-3' });
+      errors.push({
+        id: 'subject',
+        message: 'Objet requis',
+        anchor: 'step-3'
+      });
     }
-    
     return errors;
   };
-
   const generateSubjectVariants = () => {
-    const variants = [
-      `Sélection AOC - ouverture de marché ${campaignData.markets[0] || '[Pays]'}`,
-      `${campaignData.sendAsName} — cuvées disponibles & tarifs export`,
-      `Import ${campaignData.markets[0] || '[Pays]'} — dégustation échantillons possible`
-    ];
-    updateCampaignData({ subjectVariants: variants });
+    const variants = [`Sélection AOC - ouverture de marché ${campaignData.markets[0] || '[Pays]'}`, `${campaignData.sendAsName} — cuvées disponibles & tarifs export`, `Import ${campaignData.markets[0] || '[Pays]'} — dégustation échantillons possible`];
+    updateCampaignData({
+      subjectVariants: variants
+    });
   };
-
   const getSelectedCuveeNames = () => {
     if (campaignData.selectedWines.length > 0) {
-      return availableWines
-        .filter(wine => campaignData.selectedWines.includes(wine.id))
-        .map(wine => wine.name);
+      return availableWines.filter(wine => campaignData.selectedWines.includes(wine.id)).map(wine => wine.name);
     }
     return campaignData.cuvees;
   };
-
   const launchCampaign = async () => {
     const errors = getPreflightErrors();
     if (errors.length > 0) {
@@ -525,18 +496,15 @@ const Campaigns = () => {
       });
       return;
     }
-
     setLoading(true);
     try {
       // Update campaign status
-      await supabase
-        .from('campaigns')
-        .update({ status: 'pending_validation' })
-        .eq('id', campaignData.id);
-
+      await supabase.from('campaigns').update({
+        status: 'pending_validation'
+      }).eq('id', campaignData.id);
       toast({
         title: "Campagne lancée !",
-        description: "Votre campagne est en cours de traitement.",
+        description: "Votre campagne est en cours de traitement."
       });
 
       // Reset form and go back to list
@@ -552,7 +520,6 @@ const Campaigns = () => {
       setLoading(false);
     }
   };
-
   const resetCreateForm = () => {
     setCampaignData({
       name: '',
@@ -591,16 +558,12 @@ const Campaigns = () => {
     setShowCreateForm(false);
     fetchCampaigns(); // Refresh list
   };
-
   const getStatusBadge = (status: string) => {
     const color = CAMPAIGN_STATUS_COLORS[status as keyof typeof CAMPAIGN_STATUS_COLORS] || 'secondary';
-    return (
-      <Badge variant={color as any}>
+    return <Badge variant={color as any}>
         {CAMPAIGN_STATUS_LABELS[status as keyof typeof CAMPAIGN_STATUS_LABELS] || status}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -615,85 +578,59 @@ const Campaigns = () => {
         return null;
     }
   };
-
-  const renderStep1 = () => (
-    <div className="space-y-6" id="step-1">
+  const renderStep1 = () => <div className="space-y-6" id="step-1">
       <div>
         <Label htmlFor="campaignName">Nom de la campagne</Label>
-        <Input
-          id="campaignName"
-          value={campaignData.name}
-          onChange={(e) => updateCampaignData({ name: e.target.value })}
-          placeholder="Ex: Campagne Printemps 2024"
-          className="mt-1"
-        />
+        <Input id="campaignName" value={campaignData.name} onChange={e => updateCampaignData({
+        name: e.target.value
+      })} placeholder="Ex: Campagne Printemps 2024" className="mt-1" />
       </div>
 
       <div>
         <Label className="text-base font-semibold">
           Marchés prioritaires ({campaignData.markets.length} sélectionnés)
         </Label>
-        {Object.entries(markets).map(([region, countryList]) => (
-          <div key={region} className="mb-6">
+        {Object.entries(markets).map(([region, countryList]) => <div key={region} className="mb-6">
             <h3 className="font-semibold text-lg mb-3">{region}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {countryList.map((country) => (
-                <div key={country} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={country}
-                    checked={campaignData.markets.includes(country)}
-                    onCheckedChange={() => handleMarketToggle(country)}
-                  />
+              {countryList.map(country => <div key={country} className="flex items-center space-x-2">
+                  <Checkbox id={country} checked={campaignData.markets.includes(country)} onCheckedChange={() => handleMarketToggle(country)} />
                   <Label htmlFor={country} className="text-sm">
                     {country}
                   </Label>
-                </div>
-              ))}
+                </div>)}
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Label className="text-base font-semibold">Canaux</Label>
           <div className="space-y-2 mt-2">
-            {channelOptions.map((channel) => (
-              <div key={channel} className="flex items-center space-x-2">
-                <Checkbox
-                  id={channel}
-                  checked={campaignData.channels.includes(channel)}
-                  onCheckedChange={(checked) => {
-                    const newChannels = checked
-                      ? [...campaignData.channels, channel]
-                      : campaignData.channels.filter(c => c !== channel);
-                    updateCampaignData({ channels: newChannels });
-                  }}
-                />
+            {channelOptions.map(channel => <div key={channel} className="flex items-center space-x-2">
+                <Checkbox id={channel} checked={campaignData.channels.includes(channel)} onCheckedChange={checked => {
+              const newChannels = checked ? [...campaignData.channels, channel] : campaignData.channels.filter(c => c !== channel);
+              updateCampaignData({
+                channels: newChannels
+              });
+            }} />
                 <Label htmlFor={channel} className="text-sm">{channel}</Label>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
 
         <div>
           <Label className="text-base font-semibold">Segments</Label>
           <div className="space-y-2 mt-2">
-            {segmentOptions.map((segment) => (
-              <div key={segment} className="flex items-center space-x-2">
-                <Checkbox
-                  id={segment}
-                  checked={campaignData.segments.includes(segment)}
-                  onCheckedChange={(checked) => {
-                    const newSegments = checked
-                      ? [...campaignData.segments, segment]
-                      : campaignData.segments.filter(s => s !== segment);
-                    updateCampaignData({ segments: newSegments });
-                  }}
-                />
+            {segmentOptions.map(segment => <div key={segment} className="flex items-center space-x-2">
+                <Checkbox id={segment} checked={campaignData.segments.includes(segment)} onCheckedChange={checked => {
+              const newSegments = checked ? [...campaignData.segments, segment] : campaignData.segments.filter(s => s !== segment);
+              updateCampaignData({
+                segments: newSegments
+              });
+            }} />
                 <Label htmlFor={segment} className="text-sm">{segment}</Label>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </div>
@@ -701,131 +638,93 @@ const Campaigns = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label htmlFor="volumeBand">Volumes souhaités</Label>
-          <Select value={campaignData.volumeBand} onValueChange={(value) => updateCampaignData({ volumeBand: value })}>
+          <Select value={campaignData.volumeBand} onValueChange={value => updateCampaignData({
+          volumeBand: value
+        })}>
             <SelectTrigger>
               <SelectValue placeholder="Sélectionnez" />
             </SelectTrigger>
             <SelectContent>
-              {volumeBandOptions.map((option) => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
+              {volumeBandOptions.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
 
         <div>
           <Label htmlFor="priceMin">Prix min. (€)</Label>
-          <Input
-            id="priceMin"
-            type="number"
-            value={campaignData.priceMin || ''}
-            onChange={(e) => updateCampaignData({ priceMin: e.target.value ? parseFloat(e.target.value) : null })}
-            placeholder="0"
-          />
+          <Input id="priceMin" type="number" value={campaignData.priceMin || ''} onChange={e => updateCampaignData({
+          priceMin: e.target.value ? parseFloat(e.target.value) : null
+        })} placeholder="0" />
         </div>
 
         <div>
           <Label htmlFor="priceMax">Prix max. (€)</Label>
-          <Input
-            id="priceMax"
-            type="number"
-            value={campaignData.priceMax || ''}
-            onChange={(e) => updateCampaignData({ priceMax: e.target.value ? parseFloat(e.target.value) : null })}
-            placeholder="100"
-          />
+          <Input id="priceMax" type="number" value={campaignData.priceMax || ''} onChange={e => updateCampaignData({
+          priceMax: e.target.value ? parseFloat(e.target.value) : null
+        })} placeholder="100" />
         </div>
       </div>
 
-      {campaignData.audienceEstimate > 0 && (
-        <div className="bg-blue-50 p-4 rounded-lg">
+      {campaignData.audienceEstimate > 0 && <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-sm text-blue-800">
             <strong>≈ {campaignData.audienceEstimate} contacts trouvés</strong>
-            {campaignData.audienceEstimate < 20 && (
-              <span className="text-red-600 block">
+            {campaignData.audienceEstimate < 20 && <span className="text-red-600 block">
                 Audience trop faible. Ajustez vos filtres.
-              </span>
-            )}
-            {campaignData.audienceEstimate > 500 && (
-              <span className="text-red-600 block">
+              </span>}
+            {campaignData.audienceEstimate > 500 && <span className="text-red-600 block">
                 Audience trop large. Ajustez vos filtres.
-              </span>
-            )}
+              </span>}
           </p>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6" id="step-2">
+        </div>}
+    </div>;
+  const renderStep2 = () => <div className="space-y-6" id="step-2">
       <div>
         <Label className="text-base font-semibold">Sélection des cuvées</Label>
         
-        {availableWines.length > 0 ? (
-          <div className="space-y-3 mt-4">
-            {availableWines.map((wine) => {
-              const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${wine.exw_price_eur.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€${wine.vintages?.length ? ` - ${Math.max(...wine.vintages)}` : ''}`;
-              
-              return (
-                <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/30">
-                  <Checkbox
-                    id={wine.id}
-                    checked={campaignData.selectedWines.includes(wine.id)}
-                    onCheckedChange={(checked) => {
-                      const newSelectedWines = checked
-                        ? [...campaignData.selectedWines, wine.id]
-                        : campaignData.selectedWines.filter(id => id !== wine.id);
-                      updateCampaignData({ selectedWines: newSelectedWines });
-                    }}
-                  />
+        {availableWines.length > 0 ? <div className="space-y-3 mt-4">
+            {availableWines.map(wine => {
+          const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${wine.exw_price_eur.toLocaleString('fr-FR', {
+            minimumFractionDigits: 2
+          })}€${wine.vintages?.length ? ` - ${Math.max(...wine.vintages)}` : ''}`;
+          return <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/30">
+                  <Checkbox id={wine.id} checked={campaignData.selectedWines.includes(wine.id)} onCheckedChange={checked => {
+              const newSelectedWines = checked ? [...campaignData.selectedWines, wine.id] : campaignData.selectedWines.filter(id => id !== wine.id);
+              updateCampaignData({
+                selectedWines: newSelectedWines
+              });
+            }} />
                   <Label htmlFor={wine.id} className="text-sm flex-1 cursor-pointer">
                     {displayText}
                   </Label>
                   <Badge variant="secondary" className="text-xs">
                     {wine.color}
                   </Badge>
-                </div>
-              );
-            })}
-          </div>
-        ) : availableCuvees.length > 0 ? (
-          <div className="space-y-2 mt-2">
+                </div>;
+        })}
+          </div> : availableCuvees.length > 0 ? <div className="space-y-2 mt-2">
             <p className="text-sm text-muted-foreground mb-2">
               Anciennes cuvées (ajoutez vos cuvées dans votre profil pour une meilleure gestion) :
             </p>
-            {availableCuvees.map((cuvee) => (
-              <div key={cuvee} className="flex items-center space-x-2">
-                <Checkbox
-                  id={cuvee}
-                  checked={campaignData.cuvees.includes(cuvee)}
-                  onCheckedChange={(checked) => {
-                    const newCuvees = checked
-                      ? [...campaignData.cuvees, cuvee]
-                      : campaignData.cuvees.filter(c => c !== cuvee);
-                    updateCampaignData({ cuvees: newCuvees });
-                  }}
-                />
+            {availableCuvees.map(cuvee => <div key={cuvee} className="flex items-center space-x-2">
+                <Checkbox id={cuvee} checked={campaignData.cuvees.includes(cuvee)} onCheckedChange={checked => {
+            const newCuvees = checked ? [...campaignData.cuvees, cuvee] : campaignData.cuvees.filter(c => c !== cuvee);
+            updateCampaignData({
+              cuvees: newCuvees
+            });
+          }} />
                 <Label htmlFor={cuvee} className="text-sm">{cuvee}</Label>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-yellow-50 p-4 rounded-lg mt-4">
+              </div>)}
+          </div> : <div className="bg-yellow-50 p-4 rounded-lg mt-4">
             <p className="text-sm text-yellow-800">
               Aucune cuvée disponible. Ajoutez vos cuvées dans votre{' '}
-              <Button 
-                variant="link" 
-                onClick={() => {
-                  const newTab = window.open('/profile#vins', '_blank');
-                  if (newTab) newTab.focus();
-                }} 
-                className="p-0 h-auto text-yellow-800 underline"
-              >
+              <Button variant="link" onClick={() => {
+            const newTab = window.open('/profile#vins', '_blank');
+            if (newTab) newTab.focus();
+          }} className="p-0 h-auto text-yellow-800 underline">
                 Profil
               </Button>
             </p>
-          </div>
-        )}
+          </div>}
       </div>
 
       <div>
@@ -834,121 +733,85 @@ const Campaigns = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <Label>Présentation du domaine (obligatoire)</Label>
-            <Select 
-              value={campaignData.presentationDocId || ''} 
-              onValueChange={(value) => updateCampaignData({ presentationDocId: value })}
-            >
+            <Select value={campaignData.presentationDocId || ''} onValueChange={value => updateCampaignData({
+            presentationDocId: value
+          })}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un document" />
               </SelectTrigger>
               <SelectContent>
-                {availableDocuments
-                  .filter(doc => doc.category === 'Presentation')
-                  .map((doc) => (
-                    <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>
-                  ))}
+                {availableDocuments.filter(doc => doc.category === 'Presentation').map(doc => <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <Label>Liste des prix export (obligatoire)</Label>
-            <Select 
-              value={campaignData.pricelistDocId || ''} 
-              onValueChange={(value) => updateCampaignData({ pricelistDocId: value })}
-            >
+            <Select value={campaignData.pricelistDocId || ''} onValueChange={value => updateCampaignData({
+            pricelistDocId: value
+          })}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un document" />
               </SelectTrigger>
               <SelectContent>
-                {availableDocuments
-                  .filter(doc => doc.category === 'PriceList')
-                  .map((doc) => (
-                    <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>
-                  ))}
+                {availableDocuments.filter(doc => doc.category === 'PriceList').map(doc => <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        {availableDocuments.length === 0 && (
-          <div className="bg-yellow-50 p-4 rounded-lg">
+        {availableDocuments.length === 0 && <div className="bg-yellow-50 p-4 rounded-lg">
             <p className="text-sm text-yellow-800">
               Aucun document disponible. Ajoutez d'abord vos documents dans votre{' '}
               <Button variant="link" onClick={() => navigate('/profile')} className="p-0 h-auto">
                 Profil
               </Button>
             </p>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="space-y-6" id="step-3">
+    </div>;
+  const renderStep3 = () => <div className="space-y-6" id="step-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="sendAsName">Expéditeur</Label>
-          <Input
-            id="sendAsName"
-            value={campaignData.sendAsName}
-            onChange={(e) => updateCampaignData({ sendAsName: e.target.value })}
-            placeholder="Nom du domaine"
-          />
+          <Input id="sendAsName" value={campaignData.sendAsName} onChange={e => updateCampaignData({
+          sendAsName: e.target.value
+        })} placeholder="Nom du domaine" />
         </div>
 
         <div>
           <Label htmlFor="replyTo">Email de réponse</Label>
-          <Input
-            id="replyTo"
-            type="email"
-            value={campaignData.replyTo}
-            onChange={(e) => updateCampaignData({ replyTo: e.target.value })}
-            placeholder="contact@domaine.com"
-          />
+          <Input id="replyTo" type="email" value={campaignData.replyTo} onChange={e => updateCampaignData({
+          replyTo: e.target.value
+        })} placeholder="contact@domaine.com" />
         </div>
       </div>
 
       <div>
         <div className="flex items-center justify-between">
           <Label className="text-base font-semibold">Objet de l'email</Label>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={generateSubjectVariants}
-            disabled={!campaignData.markets.length || !campaignData.sendAsName}
-          >
+          <Button variant="outline" size="sm" onClick={generateSubjectVariants} disabled={!campaignData.markets.length || !campaignData.sendAsName}>
             Générer des suggestions
           </Button>
         </div>
         
-        {campaignData.subjectVariants.length > 0 && (
-          <RadioGroup 
-            value={campaignData.subjectSelected} 
-            onValueChange={(value) => updateCampaignData({ subjectSelected: value })}
-            className="mt-4"
-          >
-            {campaignData.subjectVariants.map((subject, index) => (
-              <div key={index} className="flex items-center space-x-2">
+        {campaignData.subjectVariants.length > 0 && <RadioGroup value={campaignData.subjectSelected} onValueChange={value => updateCampaignData({
+        subjectSelected: value
+      })} className="mt-4">
+            {campaignData.subjectVariants.map((subject, index) => <div key={index} className="flex items-center space-x-2">
                 <RadioGroupItem value={subject} id={`subject-${index}`} />
                 <Label htmlFor={`subject-${index}`} className="text-sm flex-1">
                   {subject}
                 </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        )}
+              </div>)}
+          </RadioGroup>}
       </div>
 
       <div>
         <Label htmlFor="messageText">Message (template généré)</Label>
-        <Textarea
-          id="messageText"
-          rows={8}
-          value={campaignData.messageText}
-          onChange={(e) => updateCampaignData({ messageText: e.target.value })}
-          placeholder={`Bonjour {buyer_company},
+        <Textarea id="messageText" rows={8} value={campaignData.messageText} onChange={e => updateCampaignData({
+        messageText: e.target.value
+      })} placeholder={`Bonjour {buyer_company},
 
 Nous sommes ${campaignData.sendAsName}, domaine viticole spécialisé en ${getSelectedCuveeNames().join(', ')}.
 
@@ -961,14 +824,10 @@ Vous trouverez en pièces jointes :
 N'hésitez pas à nous contacter pour organiser une dégustation.
 
 Cordialement,
-${campaignData.sendAsName}`}
-        />
+${campaignData.sendAsName}`} />
       </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="space-y-6" id="step-4">
+    </div>;
+  const renderStep4 = () => <div className="space-y-6" id="step-4">
       <div className="bg-gray-50 p-6 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Récapitulatif de la campagne</h3>
         
@@ -1001,40 +860,34 @@ ${campaignData.sendAsName}`}
         </div>
       </div>
 
-      <PreflightBar 
-        errors={getPreflightErrors()} 
-        onFixClick={(anchor) => {
-          const stepMap: { [key: string]: number } = {
-            'step-1': 0,
-            'step-2': 1,
-            'step-3': 2
-          };
-          const targetStep = stepMap[anchor];
-          if (targetStep !== undefined) {
-            setCurrentStep(targetStep);
-          }
-        }} 
-      />
-    </div>
-  );
+      <PreflightBar errors={getPreflightErrors()} onFixClick={anchor => {
+      const stepMap: {
+        [key: string]: number;
+      } = {
+        'step-1': 0,
+        'step-2': 1,
+        'step-3': 2
+      };
+      const targetStep = stepMap[anchor];
+      if (targetStep !== undefined) {
+        setCurrentStep(targetStep);
+      }
+    }} />
+    </div>;
 
   // Campaign list view
   if (!showCreateForm) {
     if (listLoading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
+      return <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      );
+        </div>;
     }
-
-    return (
-      <div className="container mx-auto p-6 space-y-6">
+    return <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Campagnes</h1>
             <p className="text-muted-foreground mt-1">
-              Gérez vos campagnes de prospection internationale
+              Gérez vos campagnes de prospection 
             </p>
           </div>
           <Button onClick={() => navigate('/create-campaign')}>
@@ -1043,8 +896,7 @@ ${campaignData.sendAsName}`}
           </Button>
         </div>
 
-        {campaigns.length === 0 ? (
-          <Card>
+        {campaigns.length === 0 ? <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -1058,9 +910,7 @@ ${campaignData.sendAsName}`}
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        ) : (
-          <Card>
+          </Card> : <Card>
             <CardHeader>
               <CardTitle>Vos campagnes ({campaigns.length})</CardTitle>
             </CardHeader>
@@ -1078,8 +928,7 @@ ${campaignData.sendAsName}`}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {campaigns.map((campaign) => (
-                    <TableRow key={campaign.id}>
+                  {campaigns.map(campaign => <TableRow key={campaign.id}>
                       <TableCell className="font-medium">
                         {campaign.name}
                       </TableCell>
@@ -1088,16 +937,12 @@ ${campaignData.sendAsName}`}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {campaign.target_markets.slice(0, 2).map(market => (
-                            <Badge key={market} variant="outline" className="text-xs">
+                          {campaign.target_markets.slice(0, 2).map(market => <Badge key={market} variant="outline" className="text-xs">
                               {market.slice(0, 3)}
-                            </Badge>
-                          ))}
-                          {campaign.target_markets.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
+                            </Badge>)}
+                          {campaign.target_markets.length > 2 && <Badge variant="outline" className="text-xs">
                               +{campaign.target_markets.length - 2}
-                            </Badge>
-                          )}
+                            </Badge>}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -1105,73 +950,50 @@ ${campaignData.sendAsName}`}
                       </TableCell>
                       <TableCell>
                         <div className="text-sm space-y-1">
-                          {campaign.stats_opens && (
-                            <div>
-                              {Math.round(((campaign.stats_opens || 0) / (campaign.prospect_count || 1)) * 100)}% ouvertures
-                            </div>
-                          )}
-                          {campaign.stats_replies && (
-                            <div>
-                              {Math.round(((campaign.stats_replies || 0) / (campaign.prospect_count || 1)) * 100)}% réponses
-                            </div>
-                          )}
+                          {campaign.stats_opens && <div>
+                              {Math.round((campaign.stats_opens || 0) / (campaign.prospect_count || 1) * 100)}% ouvertures
+                            </div>}
+                          {campaign.stats_replies && <div>
+                              {Math.round((campaign.stats_replies || 0) / (campaign.prospect_count || 1) * 100)}% réponses
+                            </div>}
                         </div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(campaign.created_at), 'dd/MM/yyyy', { locale: fr })}
+                        {format(new Date(campaign.created_at), 'dd/MM/yyyy', {
+                    locale: fr
+                  })}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}
-                          >
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
                             <Eye className="h-4 w-4 mr-1" />
                             Voir prospects
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => archiveCampaign(campaign.id, campaign.name)}
-                          >
+                          <Button size="sm" variant="outline" onClick={() => archiveCampaign(campaign.id, campaign.name)}>
                             <Archive className="h-4 w-4 mr-1" />
                             Archiver
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteCampaign(campaign.id, campaign.name, campaign.status)}
-                            disabled={campaign.status === 'sending'}
-                            className={campaign.status === 'sending' ? 'opacity-50 cursor-not-allowed' : ''}
-                          >
+                          <Button size="sm" variant="outline" onClick={() => deleteCampaign(campaign.id, campaign.name, campaign.status)} disabled={campaign.status === 'sending'} className={campaign.status === 'sending' ? 'opacity-50 cursor-not-allowed' : ''}>
                             <Trash2 className="h-4 w-4 mr-1" />
                             Supprimer
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </CardContent>
-          </Card>
-        )}
-      </div>
-    );
+          </Card>}
+      </div>;
   }
 
   // Campaign creation form
-  return (
-    <div className="flex h-screen bg-background">
+  return <div className="flex h-screen bg-background">
       <div className="flex-1 flex flex-col max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              onClick={resetCreateForm}
-            >
+            <Button variant="ghost" onClick={resetCreateForm}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour aux campagnes
             </Button>
@@ -1179,11 +1001,9 @@ ${campaignData.sendAsName}`}
           </div>
 
           <div className="flex items-center space-x-4">
-            {lastSaved && (
-              <Badge variant="outline" className="text-green-600">
+            {lastSaved && <Badge variant="outline" className="text-green-600">
                 Enregistré {lastSaved.toLocaleTimeString()}
-              </Badge>
-            )}
+              </Badge>}
             {saving && <Badge variant="outline">Enregistrement...</Badge>}
             
             <Button variant="outline" onClick={saveDraft} disabled={saving}>
@@ -1191,10 +1011,7 @@ ${campaignData.sendAsName}`}
               Enregistrer le brouillon
             </Button>
             
-            <Button 
-              onClick={launchCampaign}
-              disabled={loading || getPreflightErrors().length > 0}
-            >
+            <Button onClick={launchCampaign} disabled={loading || getPreflightErrors().length > 0}>
               <Rocket className="h-4 w-4 mr-2" />
               {loading ? 'Lancement...' : 'Lancer la campagne'}
             </Button>
@@ -1202,12 +1019,7 @@ ${campaignData.sendAsName}`}
         </div>
 
         {/* Stepper */}
-        <Stepper
-          steps={steps}
-          currentStep={currentStep}
-          onStepClick={setCurrentStep}
-          className="mb-8"
-        />
+        <Stepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} className="mb-8" />
 
         {/* Main Content */}
         <div className="flex gap-8 flex-1">
@@ -1225,56 +1037,42 @@ ${campaignData.sendAsName}`}
 
           {/* Sidebar */}
           <div className="w-80">
-            <CampaignSidebar 
-              data={{
-                markets: campaignData.markets,
-                channels: campaignData.channels,
-                segments: campaignData.segments,
-                volumeBand: campaignData.volumeBand,
-                priceRange: { min: campaignData.priceMin || 0, max: campaignData.priceMax || 0 },
-                language: campaignData.language,
-                audienceEstimate: campaignData.audienceEstimate,
-                cuvees: getSelectedCuveeNames(),
-                hasPresentationDoc: !!campaignData.presentationDocId,
-                hasPricelistDoc: !!campaignData.pricelistDocId,
-                subject: campaignData.subjectSelected,
-                scheduleAt: campaignData.scheduleAt
-              }}
-            />
+            <CampaignSidebar data={{
+            markets: campaignData.markets,
+            channels: campaignData.channels,
+            segments: campaignData.segments,
+            volumeBand: campaignData.volumeBand,
+            priceRange: {
+              min: campaignData.priceMin || 0,
+              max: campaignData.priceMax || 0
+            },
+            language: campaignData.language,
+            audienceEstimate: campaignData.audienceEstimate,
+            cuvees: getSelectedCuveeNames(),
+            hasPresentationDoc: !!campaignData.presentationDocId,
+            hasPricelistDoc: !!campaignData.pricelistDocId,
+            subject: campaignData.subjectSelected,
+            scheduleAt: campaignData.scheduleAt
+          }} />
           </div>
         </div>
 
         {/* Navigation */}
         <div className="flex justify-between mt-6">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-            disabled={currentStep === 0}
-          >
+          <Button variant="outline" onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Précédent
           </Button>
           
-          {currentStep < steps.length - 1 ? (
-            <Button
-              onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
-            >
+          {currentStep < steps.length - 1 ? <Button onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
               Suivant
               <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          ) : (
-            <Button 
-              onClick={launchCampaign}
-              disabled={loading || getPreflightErrors().length > 0}
-            >
+            </Button> : <Button onClick={launchCampaign} disabled={loading || getPreflightErrors().length > 0}>
               <Rocket className="h-4 w-4 mr-2" />
               {loading ? 'Lancement...' : 'Lancer la campagne'}
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Campaigns;
