@@ -267,9 +267,7 @@ const LandingPage = () => {
                 <p className="text-xs text-muted-foreground">by ExportVins </p>
               </div>
             </div>
-            <p className="text-muted-foreground text-sm">
-              © 2024 ExportVins. Tous droits réservés.
-            </p>
+            <p className="text-muted-foreground text-sm">© 2026 Export Vins. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
