@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Download, Trash2, AlertTriangle } from 'lucide-react';
 import { debounce } from 'lodash';
-
 interface UserSettings {
   id: string;
   user_id: string;
@@ -25,10 +24,13 @@ interface UserSettings {
   notify_on_high_bounce: boolean;
   daily_digest_enabled: boolean;
 }
-
 const Settings = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -40,35 +42,28 @@ const Settings = () => {
   });
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [emailError, setEmailError] = useState('');
-
   useEffect(() => {
     if (user) {
       loadSettings();
     }
   }, [user]);
-
   const loadSettings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user?.id)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from('user_settings').select('*').eq('user_id', user?.id).maybeSingle();
       if (error) throw error;
-
       if (!data) {
         // Create default settings if none exist
-        const { data: newSettings, error: insertError } = await supabase
-          .from('user_settings')
-          .insert({
-            user_id: user?.id,
-            display_name: user?.email || '',
-            ui_language: 'fr'
-          })
-          .select()
-          .single();
-
+        const {
+          data: newSettings,
+          error: insertError
+        } = await supabase.from('user_settings').insert({
+          user_id: user?.id,
+          display_name: user?.email || '',
+          ui_language: 'fr'
+        }).select().single();
         if (insertError) throw insertError;
         setSettings(newSettings);
       } else {
@@ -85,19 +80,17 @@ const Settings = () => {
       setLoading(false);
     }
   };
-
   const updateSettings = async (updates: Partial<UserSettings>) => {
     if (!settings) return;
-
     try {
-      const { error } = await supabase
-        .from('user_settings')
-        .update(updates)
-        .eq('id', settings.id);
-
+      const {
+        error
+      } = await supabase.from('user_settings').update(updates).eq('id', settings.id);
       if (error) throw error;
-
-      setSettings(prev => prev ? { ...prev, ...updates } : null);
+      setSettings(prev => prev ? {
+        ...prev,
+        ...updates
+      } : null);
     } catch (error) {
       console.error('Error updating settings:', error);
       toast({
@@ -107,36 +100,39 @@ const Settings = () => {
       });
     }
   };
-
-  const debouncedUpdate = useCallback(
-    debounce((updates: Partial<UserSettings>) => {
-      updateSettings(updates);
-    }, 800),
-    [settings]
-  );
-
+  const debouncedUpdate = useCallback(debounce((updates: Partial<UserSettings>) => {
+    updateSettings(updates);
+  }, 800), [settings]);
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
   const handleReplyToChange = (value: string) => {
     if (!value) {
       setEmailError('');
-      setSettings(prev => prev ? { ...prev, reply_to_default: value } : null);
+      setSettings(prev => prev ? {
+        ...prev,
+        reply_to_default: value
+      } : null);
       return;
     }
-
     if (validateEmail(value)) {
       setEmailError('');
-      debouncedUpdate({ reply_to_default: value });
-      setSettings(prev => prev ? { ...prev, reply_to_default: value } : null);
+      debouncedUpdate({
+        reply_to_default: value
+      });
+      setSettings(prev => prev ? {
+        ...prev,
+        reply_to_default: value
+      } : null);
     } else {
       setEmailError('Format email invalide');
-      setSettings(prev => prev ? { ...prev, reply_to_default: value } : null);
+      setSettings(prev => prev ? {
+        ...prev,
+        reply_to_default: value
+      } : null);
     }
   };
-
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
@@ -146,7 +142,6 @@ const Settings = () => {
       });
       return;
     }
-
     if (passwordForm.newPassword.length < 8) {
       toast({
         title: "Erreur",
@@ -155,21 +150,23 @@ const Settings = () => {
       });
       return;
     }
-
     try {
-      const { error } = await supabase.auth.updateUser({
+      const {
+        error
+      } = await supabase.auth.updateUser({
         password: passwordForm.newPassword
       });
-
       if (error) throw error;
-
       toast({
         title: "Succès",
         description: "Mot de passe modifié avec succès."
       });
-
       setPasswordModalOpen(false);
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
     } catch (error) {
       console.error('Error updating password:', error);
       toast({
@@ -179,14 +176,13 @@ const Settings = () => {
       });
     }
   };
-
   const handleExportData = async () => {
     try {
       toast({
         title: "Export en cours",
         description: "Génération de vos données en cours..."
       });
-      
+
       // This would call an edge function to generate the export
       // For now, just show a success message
       toast({
@@ -202,7 +198,6 @@ const Settings = () => {
       });
     }
   };
-
   const handleDeleteAccount = async () => {
     if (deleteConfirmation !== 'SUPPRIMER') {
       toast({
@@ -212,14 +207,12 @@ const Settings = () => {
       });
       return;
     }
-
     try {
       // This would call an edge function to handle account deletion
       toast({
         title: "Suppression programmée",
         description: "Votre compte sera supprimé dans les prochaines 24h."
       });
-
       setDeleteModalOpen(false);
       setDeleteConfirmation('');
     } catch (error) {
@@ -231,29 +224,21 @@ const Settings = () => {
       });
     }
   };
-
   if (loading) {
-    return (
-      <div className="container mx-auto p-6">
+    return <div className="container mx-auto p-6">
         <div className="flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!settings) {
-    return (
-      <div className="container mx-auto p-6">
+    return <div className="container mx-auto p-6">
         <div className="text-center">
           <p>Impossible de charger les paramètres.</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="container mx-auto p-6 space-y-6">
+  return <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">Paramètres</h1>
 
       {/* Account Settings */}
@@ -265,25 +250,20 @@ const Settings = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="displayName">Nom affiché</Label>
-              <Input
-                id="displayName"
-                value={settings.display_name || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSettings(prev => prev ? { ...prev, display_name: value } : null);
-                  debouncedUpdate({ display_name: value });
-                }}
-                placeholder="Votre nom"
-              />
+              <Input id="displayName" value={settings.display_name || ''} onChange={e => {
+              const value = e.target.value;
+              setSettings(prev => prev ? {
+                ...prev,
+                display_name: value
+              } : null);
+              debouncedUpdate({
+                display_name: value
+              });
+            }} placeholder="Votre nom" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email de connexion</Label>
-              <Input
-                id="email"
-                value={user?.email || ''}
-                disabled
-                className="bg-muted"
-              />
+              <Input id="email" value={user?.email || ''} disabled className="bg-muted" />
             </div>
           </div>
 
@@ -300,30 +280,24 @@ const Settings = () => {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="currentPassword">Mot de passe actuel</Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        value={passwordForm.currentPassword}
-                        onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-                      />
+                      <Input id="currentPassword" type="password" value={passwordForm.currentPassword} onChange={e => setPasswordForm(prev => ({
+                    ...prev,
+                    currentPassword: e.target.value
+                  }))} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="newPassword">Nouveau mot de passe</Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        value={passwordForm.newPassword}
-                        onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                      />
+                      <Input id="newPassword" type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm(prev => ({
+                    ...prev,
+                    newPassword: e.target.value
+                  }))} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={passwordForm.confirmPassword}
-                        onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      />
+                      <Input id="confirmPassword" type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(prev => ({
+                    ...prev,
+                    confirmPassword: e.target.value
+                  }))} />
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setPasswordModalOpen(false)}>
@@ -351,61 +325,16 @@ const Settings = () => {
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="replyTo">Reply-to par défaut</Label>
-            <Input
-              id="replyTo"
-              type="email"
-              value={settings.reply_to_default || ''}
-              onChange={(e) => handleReplyToChange(e.target.value)}
-              placeholder="export@domaine.com"
-              className={emailError ? 'border-destructive' : ''}
-            />
-            {emailError && (
-              <p className="text-sm text-destructive">{emailError}</p>
-            )}
+            <Input id="replyTo" type="email" value={settings.reply_to_default || ''} onChange={e => handleReplyToChange(e.target.value)} placeholder="export@domaine.com" className={emailError ? 'border-destructive' : ''} />
+            {emailError && <p className="text-sm text-destructive">{emailError}</p>}
           </div>
         </CardContent>
       </Card>
 
       {/* Notifications */}
       <Card>
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifyApproved">Campagne validée</Label>
-            <Switch
-              id="notifyApproved"
-              checked={settings.notify_on_approved}
-              onCheckedChange={(checked) => {
-                setSettings(prev => prev ? { ...prev, notify_on_approved: checked } : null);
-                updateSettings({ notify_on_approved: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifySending">Envoi démarré</Label>
-            <Switch
-              id="notifySending"
-              checked={settings.notify_on_sending}
-              onCheckedChange={(checked) => {
-                setSettings(prev => prev ? { ...prev, notify_on_sending: checked } : null);
-                updateSettings({ notify_on_sending: checked });
-              }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifyResults">Résultats disponibles</Label>
-            <Switch
-              id="notifyResults"
-              checked={settings.notify_on_results}
-              onCheckedChange={(checked) => {
-                setSettings(prev => prev ? { ...prev, notify_on_results: checked } : null);
-                updateSettings({ notify_on_results: checked });
-              }}
-            />
-          </div>
-        </CardContent>
+        
+        
       </Card>
 
       {/* Data & Privacy */}
@@ -456,18 +385,13 @@ const Settings = () => {
                       <Label htmlFor="deleteConfirm">
                         Tapez <strong>SUPPRIMER</strong> pour confirmer
                       </Label>
-                      <Input
-                        id="deleteConfirm"
-                        value={deleteConfirmation}
-                        onChange={(e) => setDeleteConfirmation(e.target.value)}
-                        placeholder="SUPPRIMER"
-                      />
+                      <Input id="deleteConfirm" value={deleteConfirmation} onChange={e => setDeleteConfirmation(e.target.value)} placeholder="SUPPRIMER" />
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => {
-                        setDeleteModalOpen(false);
-                        setDeleteConfirmation('');
-                      }}>
+                      setDeleteModalOpen(false);
+                      setDeleteConfirmation('');
+                    }}>
                         Annuler
                       </Button>
                       <Button variant="destructive" onClick={handleDeleteAccount}>
@@ -481,8 +405,6 @@ const Settings = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Settings;
