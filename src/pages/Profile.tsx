@@ -1096,9 +1096,7 @@ const Profile = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Photos</CardTitle>
-                    <CardDescription>
-                      Images de votre domaine (.jpg/.jpeg/.png ≤ 10 Mo)
-                    </CardDescription>
+                    <CardDescription>Images de votre domaine et vos vins (.jpg/.jpeg/.png ≤ 10 Mo)</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <input ref={photosInputRef} type="file" accept=".jpg,.jpeg,.png" multiple className="hidden" onChange={e => {
