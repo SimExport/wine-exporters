@@ -102,7 +102,7 @@ const LandingPage = () => {
                 <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-6">
                   <Mail className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Une campagne par mois, nousgérons la prospection pour vous</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Une campagne par mois, nous gérons la prospection pour vous</h3>
                 <p className="text-muted-foreground">Ajoutez vos infos dans votre profil et lancez votre campagne mensuelle en quelques clics. Notre équipe crée pour vous des emails optimisés qui vont convaincre les acheteurs de sélectionner vos vins. </p>
               </CardContent>
             </Card>
