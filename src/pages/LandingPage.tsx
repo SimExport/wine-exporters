@@ -130,9 +130,7 @@ const LandingPage = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Comment ça marche ?
             </h2>
-            <p className="text-xl text-muted-foreground">
-              3 étapes simples pour développer vos exports
-            </p>
+            <p className="text-xl text-muted-foreground">3 étapes simples afin de trouver des acheteurs pour vos vins</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
