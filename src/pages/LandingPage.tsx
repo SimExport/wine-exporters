@@ -39,7 +39,8 @@ const LandingPage = () => {
               <Compass className="h-4 w-4" />
               Plateforme de prospection pour les domaines viticoles       
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-primary">Prospectez, trouvez des acheteurs pour vos vins
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-primary">La plateforme qui vous trouve acheteurs pour vos vins
+
             <br />
               
             </h1>
