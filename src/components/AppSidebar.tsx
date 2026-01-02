@@ -1,9 +1,11 @@
-import { User, Database, Target, Users, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban } from "lucide-react";
+import { User, Database, Target, Users, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 const navigationItems = [{
   title: "Dashboard",
   url: "/dashboard",
@@ -46,6 +48,11 @@ export function AppSidebar() {
   const {
     isAdmin
   } = useRole();
+  const {
+    hasPaidAccess,
+    campaignsRemaining,
+    loading: subscriptionLoading
+  } = useSubscription();
   const {
     toast
   } = useToast();
@@ -140,6 +147,41 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {/* Credits indicator */}
+        {hasPaidAccess && !subscriptionLoading && (
+          <div className="px-3 py-2">
+            <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent/50 px-3 py-2">
+              <Zap className="h-4 w-4 text-primary" />
+              <div className="flex flex-col">
+                <span className="text-xs font-medium text-sidebar-foreground">
+                  Crédits campagne
+                </span>
+                <span className="text-sm font-bold text-primary">
+                  {campaignsRemaining} restant{campaignsRemaining !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {!hasPaidAccess && !subscriptionLoading && (
+          <div className="px-3 py-2">
+            <NavLink to="/billing">
+              <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 hover:bg-primary/20 transition-colors cursor-pointer">
+                <Zap className="h-4 w-4 text-primary" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-sidebar-foreground">
+                    Passer à Premium
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    1 campagne/mois incluse
+                  </span>
+                </div>
+              </div>
+            </NavLink>
+          </div>
+        )}
+        
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-2 px-2 py-2">
