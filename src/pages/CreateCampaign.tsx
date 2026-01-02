@@ -144,7 +144,6 @@ const CreateCampaign = () => {
         user_id: user?.id,
         status: 'draft',
         target_markets: selectedMarkets,
-        markets: selectedMarkets,
         selected_wines: selectedWines,
         doc_presentation: presentationDoc || null,
         doc_pricelist: pricelistDoc || null,
@@ -201,7 +200,6 @@ const CreateCampaign = () => {
         user_id: user?.id,
         status: 'pending_validation',
         target_markets: selectedMarkets,
-        markets: selectedMarkets,
         selected_wines: selectedWines,
         doc_presentation: presentationDoc,
         doc_pricelist: pricelistDoc,
@@ -210,21 +208,11 @@ const CreateCampaign = () => {
         client_note: clientNote || null,
         validation_requested_at: new Date().toISOString()
       };
-      const {
-        data: campaign,
-        error: campaignError
-      } = await supabase.from('campaigns').insert(campaignData).select().single();
+      const { error: campaignError } = await supabase
+        .from('campaigns')
+        .insert(campaignData);
+      
       if (campaignError) throw campaignError;
-
-      // Create admin task
-      const {
-        error: taskError
-      } = await supabase.from('admin_tasks').insert({
-        type: 'campaign_validation',
-        campaign_id: campaign.id,
-        status: 'open'
-      });
-      if (taskError) throw taskError;
 
       // Decrement campaigns remaining (only for non-admins)
       if (!isAdmin) {
@@ -236,11 +224,11 @@ const CreateCampaign = () => {
         description: "En attente de validation (≤72h)"
       });
       navigate('/campaigns');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting campaign:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de soumettre la campagne",
+        description: error?.message || "Impossible de soumettre la campagne",
         variant: "destructive"
       });
     } finally {
