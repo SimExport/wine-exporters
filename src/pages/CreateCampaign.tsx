@@ -34,6 +34,10 @@ const CreateCampaign = () => {
   } = useAuth();
   const {
     isFreeUser,
+    canLaunchCampaign,
+    campaignsRemaining,
+    decrementCampaignsRemaining,
+    isAdmin,
     loading: subscriptionLoading
   } = useSubscription();
   const [step, setStep] = useState(1);
@@ -179,6 +183,16 @@ const CreateCampaign = () => {
       });
       return;
     }
+
+    // Check if user has campaigns remaining (admins bypass this check)
+    if (!isAdmin && campaignsRemaining <= 0) {
+      toast({
+        title: "Crédit de campagne épuisé",
+        description: "Vous avez déjà utilisé votre campagne pour ce mois-ci. Attendez le renouvellement ou contactez le support.",
+        variant: "destructive"
+      });
+      return;
+    }
     if (!validateStep1()) return;
     setLoading(true);
     try {
@@ -211,6 +225,12 @@ const CreateCampaign = () => {
         status: 'open'
       });
       if (taskError) throw taskError;
+
+      // Decrement campaigns remaining (only for non-admins)
+      if (!isAdmin) {
+        await decrementCampaignsRemaining();
+      }
+
       toast({
         title: "Campagne soumise",
         description: "En attente de validation (≤72h)"
