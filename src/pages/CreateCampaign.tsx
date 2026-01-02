@@ -208,15 +208,32 @@ const CreateCampaign = () => {
         client_note: clientNote || null,
         validation_requested_at: new Date().toISOString()
       };
-      const { error: campaignError } = await supabase
+      const { data: insertedCampaign, error: campaignError } = await supabase
         .from('campaigns')
-        .insert(campaignData);
+        .insert(campaignData)
+        .select('id')
+        .single();
       
       if (campaignError) throw campaignError;
 
       // Decrement campaigns remaining (only for non-admins)
       if (!isAdmin) {
         await decrementCampaignsRemaining();
+      }
+
+      // Send notification (silent - don't block on failure)
+      try {
+        await supabase.functions.invoke('notify-campaign-submission', {
+          body: {
+            campaignName,
+            userEmail: user?.email || 'Unknown',
+            markets: selectedMarkets,
+            campaignId: insertedCampaign?.id || '',
+          },
+        });
+        console.log('Notification sent successfully');
+      } catch (notifError) {
+        console.error('Failed to send notification:', notifError);
       }
 
       toast({
