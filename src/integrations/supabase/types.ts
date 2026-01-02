@@ -531,6 +531,7 @@ export type Database = {
           priority_markets: string | null
           social_media: Json | null
           strengths: string[] | null
+          stripe_customer_id: string | null
           subscription_plan: string | null
           surface_area: number | null
           target_buyer_description: string | null
@@ -562,6 +563,7 @@ export type Database = {
           priority_markets?: string | null
           social_media?: Json | null
           strengths?: string[] | null
+          stripe_customer_id?: string | null
           subscription_plan?: string | null
           surface_area?: number | null
           target_buyer_description?: string | null
@@ -593,6 +595,7 @@ export type Database = {
           priority_markets?: string | null
           social_media?: Json | null
           strengths?: string[] | null
+          stripe_customer_id?: string | null
           subscription_plan?: string | null
           surface_area?: number | null
           target_buyer_description?: string | null
