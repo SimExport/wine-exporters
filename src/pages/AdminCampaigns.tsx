@@ -27,9 +27,6 @@ interface Campaign {
   stats_clicks: number | null;
   stats_replies: number | null;
   prospect_count?: number;
-  profiles?: {
-    domain_name: string | null;
-  } | null;
 }
 
 interface Wine {
@@ -126,10 +123,7 @@ export default function AdminCampaigns() {
     try {
       const { data, error } = await supabase
         .from('campaigns')
-        .select(`
-          *,
-          profiles(domain_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -169,12 +163,12 @@ export default function AdminCampaigns() {
       );
     }
 
-    // Winery filter
-    if (filters.winery) {
-      filtered = filtered.filter(campaign =>
-        campaign.profiles?.domain_name?.toLowerCase().includes(filters.winery.toLowerCase())
-      );
-    }
+    // Winery filter (disabled - profiles not loaded)
+    // if (filters.winery) {
+    //   filtered = filtered.filter(campaign =>
+    //     campaign.name.toLowerCase().includes(filters.winery.toLowerCase())
+    //   );
+    // }
 
     // Market filter
     if (filters.market && filters.market !== 'all') {
@@ -187,8 +181,7 @@ export default function AdminCampaigns() {
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       filtered = filtered.filter(campaign =>
-        campaign.name.toLowerCase().includes(searchTerm) ||
-        campaign.profiles?.domain_name?.toLowerCase().includes(searchTerm)
+        campaign.name.toLowerCase().includes(searchTerm)
       );
     }
 
@@ -620,9 +613,7 @@ export default function AdminCampaigns() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div className="font-medium">{campaign.profiles?.domain_name || 'Client sans profil'}</div>
-                      </div>
+                      <span className="text-xs font-mono text-muted-foreground">{campaign.user_id.slice(0, 8)}...</span>
                     </TableCell>
                     <TableCell>
                       {getMarketsBadges(campaign.target_markets)}
