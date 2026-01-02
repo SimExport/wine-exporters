@@ -30,6 +30,9 @@ interface Campaign {
   profiles?: {
     domain_name: string | null;
   } | null;
+  user_settings?: {
+    display_name: string | null;
+  } | null;
 }
 
 interface Wine {
@@ -42,6 +45,7 @@ interface Wine {
 const CAMPAIGN_STATUS_LABELS = {
   draft: 'Brouillon',
   pending_validation: 'En attente',
+  active: 'Active',
   approved: 'Approuvée',
   sending: 'Envoi en cours',
   results: 'Terminée',
@@ -51,6 +55,7 @@ const CAMPAIGN_STATUS_LABELS = {
 const CAMPAIGN_STATUS_COLORS = {
   draft: 'secondary',
   pending_validation: 'yellow',
+  active: 'green',
   approved: 'green',
   sending: 'blue',
   results: 'purple',
@@ -80,10 +85,10 @@ export default function AdminCampaigns() {
 
   // Filters
   const [filters, setFilters] = useState({
-    status: ['pending_validation', 'approved', 'sending'],
+    status: ['pending_validation', 'active', 'approved', 'sending'],
     winery: '',
     period: '30',
-      market: 'all',
+    market: 'all',
     search: ''
   });
 
@@ -126,7 +131,8 @@ export default function AdminCampaigns() {
         .from('campaigns')
         .select(`
           *,
-          profiles!inner(domain_name)
+          profiles!inner(domain_name),
+          user_settings(display_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -206,7 +212,7 @@ export default function AdminCampaigns() {
 
   const resetFilters = () => {
     setFilters({
-      status: ['pending_validation', 'approved', 'sending'],
+      status: ['pending_validation', 'active', 'approved', 'sending'],
       winery: '',
       period: '30',
       market: 'all',
@@ -220,11 +226,10 @@ export default function AdminCampaigns() {
     }
 
     try {
-      // Update campaign status
       const { error: campaignError } = await supabase
         .from('campaigns')
         .update({ 
-          status: 'approved',
+          status: 'active',
           validated_at: new Date().toISOString(),
           admin_reviewer: (await supabase.auth.getUser()).data.user?.id
         })
@@ -232,25 +237,12 @@ export default function AdminCampaigns() {
 
       if (campaignError) throw campaignError;
 
-      // Update admin task
-      const { error: taskError } = await supabase
-        .from('admin_tasks')
-        .update({ 
-          status: 'done',
-          resolved_at: new Date().toISOString(),
-          assignee: (await supabase.auth.getUser()).data.user?.id
-        })
-        .eq('campaign_id', campaignId)
-        .eq('type', 'campaign_validation');
-
-      if (taskError) throw taskError;
-
       toast({
         title: "Campagne validée",
-        description: `La campagne "${campaignName}" a été validée avec succès`,
+        description: `La campagne "${campaignName}" est maintenant active`,
       });
 
-      fetchCampaigns(); // Refresh list
+      fetchCampaigns();
     } catch (error) {
       console.error('Error validating campaign:', error);
       toast({
@@ -266,37 +258,23 @@ export default function AdminCampaigns() {
     if (!comment) return;
 
     try {
-      // Update campaign status
       const { error: campaignError } = await supabase
         .from('campaigns')
         .update({ 
           status: 'failed',
-          admin_reviewer: (await supabase.auth.getUser()).data.user?.id
+          admin_reviewer: (await supabase.auth.getUser()).data.user?.id,
+          client_note: comment
         })
         .eq('id', campaignId);
 
       if (campaignError) throw campaignError;
-
-      // Update admin task
-      const { error: taskError } = await supabase
-        .from('admin_tasks')
-        .update({ 
-          status: 'rejected',
-          resolved_at: new Date().toISOString(),
-          assignee: (await supabase.auth.getUser()).data.user?.id,
-          admin_comment: comment
-        })
-        .eq('campaign_id', campaignId)
-        .eq('type', 'campaign_validation');
-
-      if (taskError) throw taskError;
 
       toast({
         title: "Campagne refusée",
         description: `La campagne "${campaignName}" a été refusée`,
       });
 
-      fetchCampaigns(); // Refresh list
+      fetchCampaigns();
     } catch (error) {
       console.error('Error rejecting campaign:', error);
       toast({
@@ -526,15 +504,15 @@ export default function AdminCampaigns() {
                   <SelectValue placeholder="Tous les statuts" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft,pending_validation,approved,sending,results,failed">
+                  <SelectItem value="draft,pending_validation,active,approved,sending,results,failed">
                     Tous les statuts
                   </SelectItem>
-                  <SelectItem value="pending_validation,approved,sending">
-                    Actives (défaut)
+                  <SelectItem value="pending_validation,active,approved,sending">
+                    En cours (défaut)
                   </SelectItem>
                   <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="pending_validation">En attente</SelectItem>
-                  <SelectItem value="approved">Approuvées</SelectItem>
+                  <SelectItem value="pending_validation">En attente de validation</SelectItem>
+                  <SelectItem value="active">Actives</SelectItem>
                   <SelectItem value="sending">En envoi</SelectItem>
                   <SelectItem value="results">Terminées</SelectItem>
                   <SelectItem value="failed">Échec</SelectItem>
@@ -620,18 +598,21 @@ export default function AdminCampaigns() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Date</TableHead>
                   <TableHead>Campagne</TableHead>
-                  <TableHead>Domaine</TableHead>
-                  <TableHead>Statut</TableHead>
+                  <TableHead>Client</TableHead>
                   <TableHead>Marchés</TableHead>
-                  <TableHead>Planifiée</TableHead>
-                  <TableHead>KPI</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Prospects</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCampaigns.map((campaign) => (
                   <TableRow key={campaign.id} className="hover:bg-muted/50">
+                    <TableCell className="text-sm text-muted-foreground">
+                      {format(new Date(campaign.created_at), 'dd/MM/yyyy', { locale: fr })}
+                    </TableCell>
                     <TableCell>
                       <Button 
                         variant="link" 
@@ -643,29 +624,21 @@ export default function AdminCampaigns() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      {campaign.profiles?.domain_name || '-'}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(campaign.status)}
+                      <div className="text-sm">
+                        <div className="font-medium">{campaign.profiles?.domain_name || '-'}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {campaign.user_settings?.display_name || campaign.user_id.slice(0, 8)}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {getMarketsBadges(campaign.target_markets)}
                     </TableCell>
                     <TableCell>
-                      {campaign.schedule_at 
-                        ? format(new Date(campaign.schedule_at), 'dd/MM/yyyy HH:mm', { locale: fr })
-                        : '-'
-                      }
+                      {getStatusBadge(campaign.status)}
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm space-y-1">
-                        <div>Prospects: {campaign.prospect_count || 0}</div>
-                        {(campaign.stats_opens || 0) > 0 && (
-                          <div className="text-muted-foreground">
-                            {Math.round(((campaign.stats_opens || 0) / (campaign.prospect_count || 1)) * 100)}% ouv.
-                          </div>
-                        )}
-                      </div>
+                      <span className="font-medium">{campaign.prospect_count || 0}</span>
                     </TableCell>
                      <TableCell>
                        <div className="flex gap-2">
