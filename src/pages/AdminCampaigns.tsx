@@ -30,9 +30,6 @@ interface Campaign {
   profiles?: {
     domain_name: string | null;
   } | null;
-  user_settings?: {
-    display_name: string | null;
-  } | null;
 }
 
 interface Wine {
@@ -131,8 +128,7 @@ export default function AdminCampaigns() {
         .from('campaigns')
         .select(`
           *,
-          profiles!inner(domain_name),
-          user_settings(display_name)
+          profiles(domain_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -625,10 +621,7 @@ export default function AdminCampaigns() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <div className="font-medium">{campaign.profiles?.domain_name || '-'}</div>
-                        <div className="text-muted-foreground text-xs">
-                          {campaign.user_settings?.display_name || campaign.user_id.slice(0, 8)}
-                        </div>
+                        <div className="font-medium">{campaign.profiles?.domain_name || 'Client sans profil'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
