@@ -148,24 +148,21 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border">
         {/* Credits indicator */}
-        {hasPaidAccess && !subscriptionLoading && (
-          <div className="px-3 py-2">
+        {hasPaidAccess && !subscriptionLoading && <div className="px-3 py-2">
             <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent/50 px-3 py-2">
-              <Zap className="h-4 w-4 text-primary" />
+              <Zap className="h-4 w-4 text-primary-foreground" />
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-sidebar-foreground">
                   Crédits campagne
                 </span>
-                <span className="text-sm font-bold text-primary">
+                <span className="text-sm font-bold text-primary-foreground">
                   {campaignsRemaining} restant{campaignsRemaining !== 1 ? 's' : ''}
                 </span>
               </div>
             </div>
-          </div>
-        )}
+          </div>}
         
-        {!hasPaidAccess && !subscriptionLoading && (
-          <div className="px-3 py-2">
+        {!hasPaidAccess && !subscriptionLoading && <div className="px-3 py-2">
             <NavLink to="/billing">
               <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 hover:bg-primary/20 transition-colors cursor-pointer">
                 <Zap className="h-4 w-4 text-primary" />
@@ -179,8 +176,7 @@ export function AppSidebar() {
                 </div>
               </div>
             </NavLink>
-          </div>
-        )}
+          </div>}
         
         <SidebarMenu>
           <SidebarMenuItem>
