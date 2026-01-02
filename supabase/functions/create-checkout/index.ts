@@ -51,6 +51,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
+      client_reference_id: user.id, // Also pass user_id as client_reference_id for webhook
       line_items: [
         {
           price: "price_1SjHFEK7E7uiZKC06cBOE57l", // WineExporters Premium - 149€/month
