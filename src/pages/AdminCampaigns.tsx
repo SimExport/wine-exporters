@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -27,6 +27,9 @@ interface Campaign {
   stats_clicks: number | null;
   stats_replies: number | null;
   prospect_count?: number;
+  user_settings?: {
+    display_name: string | null;
+  } | null;
 }
 
 interface Wine {
@@ -79,7 +82,7 @@ export default function AdminCampaigns() {
 
   // Filters
   const [filters, setFilters] = useState({
-    status: ['pending_validation', 'active', 'approved', 'sending'],
+    status: ['pending_validation'],
     winery: '',
     period: '30',
     market: 'all',
@@ -123,7 +126,7 @@ export default function AdminCampaigns() {
     try {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*')
+        .select('*, user_settings(display_name)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -201,11 +204,19 @@ export default function AdminCampaigns() {
 
   const resetFilters = () => {
     setFilters({
-      status: ['pending_validation', 'active', 'approved', 'sending'],
+      status: ['pending_validation'],
       winery: '',
       period: '30',
       market: 'all',
       search: ''
+    });
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copié",
+      description: "Nom copié dans le presse-papier",
     });
   };
 
@@ -226,12 +237,13 @@ export default function AdminCampaigns() {
 
       if (campaignError) throw campaignError;
 
+      // Remove from local state immediately (optimistic update)
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+
       toast({
         title: "Campagne validée",
         description: `La campagne "${campaignName}" est maintenant active`,
       });
-
-      fetchCampaigns();
     } catch (error) {
       console.error('Error validating campaign:', error);
       toast({
@@ -258,12 +270,13 @@ export default function AdminCampaigns() {
 
       if (campaignError) throw campaignError;
 
+      // Remove from local state immediately (optimistic update)
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+
       toast({
         title: "Campagne refusée",
         description: `La campagne "${campaignName}" a été refusée`,
       });
-
-      fetchCampaigns();
     } catch (error) {
       console.error('Error rejecting campaign:', error);
       toast({
@@ -613,7 +626,21 @@ export default function AdminCampaigns() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <span className="text-xs font-mono text-muted-foreground">{campaign.user_id.slice(0, 8)}...</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm">
+                          {campaign.user_settings?.display_name || campaign.user_id.slice(0, 8) + '...'}
+                        </span>
+                        {campaign.user_settings?.display_name && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => copyToClipboard(campaign.user_settings?.display_name || '')}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {getMarketsBadges(campaign.target_markets)}

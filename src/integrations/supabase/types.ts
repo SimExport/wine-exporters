@@ -289,6 +289,13 @@ export type Database = {
             referencedRelation: "documents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_campaigns_user_settings"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_settings"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       documents: {
