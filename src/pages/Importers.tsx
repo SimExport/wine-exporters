@@ -344,7 +344,7 @@ const Importers = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Sourcing Personnalisé & Vérifié</DialogTitle>
+                <DialogTitle>Recherche sur-mesure</DialogTitle>
                 <DialogDescription>
                   Dites-nous quel marché vous visez, et nous nous occupons du reste. Nous sélectionnons pour vous les acheteurs qui correspondent vraiment à votre typologie de vins et de prix.
                 </DialogDescription>
