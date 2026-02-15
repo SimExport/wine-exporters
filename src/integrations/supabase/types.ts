@@ -537,6 +537,7 @@ export type Database = {
           organic_year: number | null
           priority_markets: string | null
           social_media: Json | null
+          sourcing_requests_remaining: number
           strengths: string[] | null
           stripe_customer_id: string | null
           subscription_plan: string | null
@@ -569,6 +570,7 @@ export type Database = {
           organic_year?: number | null
           priority_markets?: string | null
           social_media?: Json | null
+          sourcing_requests_remaining?: number
           strengths?: string[] | null
           stripe_customer_id?: string | null
           subscription_plan?: string | null
@@ -601,6 +603,7 @@ export type Database = {
           organic_year?: number | null
           priority_markets?: string | null
           social_media?: Json | null
+          sourcing_requests_remaining?: number
           strengths?: string[] | null
           stripe_customer_id?: string | null
           subscription_plan?: string | null
@@ -690,6 +693,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sourcing_requests: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          id: string
+          status: string
+          target_market: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          target_market: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          target_market?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
