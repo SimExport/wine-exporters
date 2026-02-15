@@ -76,19 +76,19 @@ const Roadmap = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Fonctionnalités à venir</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="p-8 lg:p-10 space-y-10">
+      <div className="mb-12">
+        <h1 className="text-4xl font-bold text-foreground">Fonctionnalités à venir</h1>
+        <p className="text-muted-foreground mt-3 text-lg">
           Découvrez nos projets pour accélérer votre export. Votez pour vos outils préférés !
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((feature) => {
           const voted = votedFeatures.has(feature.id);
           return (
-            <Card key={feature.id} className="flex flex-col">
+            <Card key={feature.id} className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
               <CardHeader className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
