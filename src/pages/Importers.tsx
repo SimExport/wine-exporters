@@ -346,7 +346,7 @@ const Importers = () => {
               <DialogHeader>
                 <DialogTitle>Sourcing Personnalisé & Vérifié</DialogTitle>
                 <DialogDescription>
-                  Notre équipe analyse votre profil et sélectionne 3 à 5 importateurs parfaitement adaptés à votre domaine. Réponse sous 72h.
+                  Dites-nous quel marché vous visez, et nous nous occupons du reste. Nous sélectionnons pour vous les acheteurs qui correspondent vraiment à votre typologie de vins et de prix.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-2">
