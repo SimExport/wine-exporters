@@ -54,7 +54,7 @@ serve(async (req) => {
       client_reference_id: user.id, // Also pass user_id as client_reference_id for webhook
       line_items: [
         {
-          price: "price_1SjHFEK7E7uiZKC06cBOE57l", // WineExporters Premium - 149€/month
+          price: "price_1T17dgK7E7uiZKC0kOXpLP7Y", // WineExporters Premium - 199€/month
           quantity: 1,
         },
       ],
