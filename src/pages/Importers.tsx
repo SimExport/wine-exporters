@@ -421,39 +421,51 @@ const Importers = () => {
                   <TableRow>
                     <TableHead>Nom de la société</TableHead>
                     <TableHead>Pays</TableHead>
-                    <TableHead>Ville</TableHead>
+                    <TableHead>Adresse</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Téléphone</TableHead>
                     <TableHead>Site web</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {contacts.map(contact => <TableRow key={contact.id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">
-                        {contact.company_name}
-                      </TableCell>
-                      <TableCell>
-                        {contact.country}
-                      </TableCell>
-                      <TableCell>
-                        {contact.city || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
-                          <Mail className="h-3 w-3" />
-                          {contact.email}
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        {contact.phone || '-'}
-                      </TableCell>
-                      <TableCell>
-                        {contact.website_url ? <a href={contact.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                            <ExternalLink className="h-3 w-3" />
-                            Ouvrir
-                          </a> : <span className="text-muted-foreground">-</span>}
-                      </TableCell>
-                    </TableRow>)}
+                  {contacts.map(contact => {
+                    const addressParts = [contact.street, contact.city, contact.state].filter(Boolean);
+                    const fullAddress = addressParts.length > 0 ? addressParts.join(', ') : '-';
+                    const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
+
+                    return (
+                      <TableRow key={contact.id} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">
+                          {contact.company_name}
+                        </TableCell>
+                        <TableCell>
+                          {contact.country}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate" title={fullAddress}>
+                          {fullAddress}
+                        </TableCell>
+                        <TableCell>
+                          <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
+                            <Mail className="h-3 w-3" />
+                            {contact.email}
+                          </a>
+                        </TableCell>
+                        <TableCell>
+                          {formattedPhone}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {contact.website_url ? (
+                            <a href={contact.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                              <ExternalLink className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{contact.website_url.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
