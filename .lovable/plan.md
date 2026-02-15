@@ -1,60 +1,63 @@
 
+# Page Roadmap interactive avec systeme de vote
 
-## Fonctionnalite "Sourcing sur Mesure"
+## 1. Base de donnees
 
-### 1. Backend -- Schema SQL
+Creation d'une table `roadmap_votes` avec les colonnes suivantes :
+- `id` (UUID, cle primaire)
+- `user_id` (UUID, reference auth.users)
+- `feature_id` (text, identifiant de la fonctionnalite)
+- `created_at` (timestamp)
+- Contrainte UNIQUE sur (user_id, feature_id) pour empecher les doublons
 
-**Migration : Nouvelle table `sourcing_requests` + colonne sur `profiles`**
+Politiques RLS :
+- SELECT : l'utilisateur peut voir ses propres votes (`auth.uid() = user_id`)
+- INSERT : l'utilisateur authentifie peut voter (`auth.uid() = user_id`)
+- DELETE : l'utilisateur peut retirer son vote (`auth.uid() = user_id`)
 
-- Ajouter la colonne `sourcing_requests_remaining` (integer, default 1) a la table `profiles`.
-- Creer la table `sourcing_requests` :
-  - `id` UUID PK (gen_random_uuid())
-  - `created_at` timestamptz (default now())
-  - `user_id` UUID NOT NULL (references auth.users on delete cascade)
-  - `target_market` text NOT NULL
-  - `status` text NOT NULL DEFAULT 'pending'
-  - `admin_note` text nullable
-- Activer RLS sur `sourcing_requests`.
-- Politiques RLS :
-  - INSERT : `auth.uid() = user_id`
-  - SELECT : `auth.uid() = user_id OR has_role(auth.uid(), 'admin')`
+## 2. Page Roadmap.tsx
 
-**Mise a jour de `types.ts`** pour refleter la nouvelle table et la nouvelle colonne sur `profiles`.
+Nouvelle page `/roadmap` avec :
 
-### 2. Frontend -- Page `/importers` (Importers.tsx)
+**En-tete :**
+- Titre : "Fonctionnalites a venir"
+- Sous-titre : "Decouvrez nos projets pour accelerer votre export. Votez pour vos outils preferes !"
 
-- Ajouter un bouton "Demander une selection sur mesure" en haut de page (visible uniquement pour les utilisateurs avec `hasPaidAccess`).
-- Ce bouton ouvre un `Dialog` (composant Radix deja installe) contenant :
-  - Titre : "Sourcing Personnalise & Verifie"
-  - Description explicative du service (3-5 importateurs selectionnes par l'equipe)
-  - Un `Select` pour choisir le marche cible (reutilisation de la liste `COUNTRIES` existante)
-  - Affichage du credit restant (`sourcing_requests_remaining` recupere depuis `profiles`)
-  - Bouton "Envoyer la demande" : actif si credit > 0, desactive sinon avec message "Quota atteint"
-- Logique de soumission :
-  - INSERT dans `sourcing_requests` (user_id, target_market)
-  - UPDATE `profiles` pour decrementer `sourcing_requests_remaining` de 1
-  - Fermer la modale + toast "Demande recue ! Reponse sous 72h."
-  - Gestion silencieuse des erreurs (console.error, toast d'erreur)
+**Grille de cartes** (6 fonctionnalites) :
 
-### 3. Frontend -- Page `/billing` (Billing.tsx)
+| ID | Titre | Icone | Description |
+|----|-------|-------|-------------|
+| marketplace | Marketplace | Store | Connectez-vous directement aux importateurs via un catalogue de cuvees digital et interactif. |
+| tenders | Appels d'Offres | Megaphone | Un outil simple qui liste tous les appels d'offres disponibles et vous propose d'y repondre de maniere intuitive. |
+| calculator | Calculateur Prix Export | Calculator | Sachez exactement a combien vendre vos vins sur quels marches en integrant taxes et marges. |
+| tech-sheets | Generateur Fiches Techniques | FileText | Creez des fiches techniques modernes, adaptees et traduites automatiquement en plusieurs langues. |
+| market-guides | Fiches Marches | Globe | Guides detailles par pays pour savoir ou prospecter et comment penetrer le marche. |
 
-- Dans la carte "Utilisation du forfait" (deja existante), ajouter une ligne sous "Campagnes restantes" :
-  - "Recherches sur mesure : X / 1 par mois" avec une barre de progression
-  - Recuperer `sourcing_requests_remaining` depuis le hook `useSubscription`
+**Systeme de vote par carte :**
+- Bouton "Je suis interesse" avec icone ThumbsUp dans le CardFooter
+- Au clic : insertion dans `roadmap_votes`, le bouton passe a "Vote !" (desactive, couleur differente), toast de confirmation
+- Au chargement : verification des votes existants pour afficher l'etat correct
 
-### 4. Hook `useSubscription`
+## 3. Navigation - Sidebar
 
-- Ajouter `sourcing_requests_remaining` au state et a la requete `profiles` existante.
-- Exposer cette valeur dans le retour du hook.
+Ajout d'une entree dans `navigationItems` du fichier `AppSidebar.tsx` :
+- Label : "A venir"
+- Icone : Rocket
+- URL : `/roadmap`
+- Position : juste avant le groupe "Configuration" (apres CRM - Kanban)
 
-### Details techniques
+## 4. Routing
+
+Ajout de la route `/roadmap` dans `App.tsx` avec le `DashboardLayout`.
+
+## Details techniques
 
 **Fichiers modifies :**
-- `supabase/migrations/` -- nouvelle migration SQL (table + colonne + RLS)
-- `src/integrations/supabase/types.ts` -- ajout type `sourcing_requests`, mise a jour `profiles`
-- `src/hooks/useSubscription.tsx` -- ajout `sourcingRequestsRemaining`
-- `src/pages/Importers.tsx` -- bouton + modale sourcing
-- `src/pages/Billing.tsx` -- ligne quota sourcing dans la carte utilisation
+- `src/components/AppSidebar.tsx` : ajout de l'import Rocket et de l'entree sidebar
+- `src/App.tsx` : ajout de la route /roadmap
 
-**Composants UI reutilises :** Dialog, Select, Button, Progress, Badge, toast (tous deja installes).
+**Fichiers crees :**
+- `src/pages/Roadmap.tsx` : page complete avec grille de cartes, logique de vote via Supabase, verification des votes existants
 
+**Migration SQL :**
+- Creation de la table `roadmap_votes` avec RLS
