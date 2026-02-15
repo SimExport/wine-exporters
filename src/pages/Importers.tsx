@@ -25,119 +25,36 @@ interface BuyerContact {
   created_at: string;
   updated_at: string;
 }
-const COUNTRIES = [{
-  code: 'DE',
-  name: 'Allemagne',
-  englishName: 'Germany'
-}, {
-  code: 'UK',
-  name: 'Royaume-Uni',
-  englishName: 'United Kingdom'
-}, {
-  code: 'DK',
-  name: 'Danemark',
-  englishName: 'Denmark'
-}, {
-  code: 'SE',
-  name: 'Suède',
-  englishName: 'Sweden'
-}, {
-  code: 'NO',
-  name: 'Norvège',
-  englishName: 'Norway'
-}, {
-  code: 'FI',
-  name: 'Finlande',
-  englishName: 'Finland'
-}, {
-  code: 'NL',
-  name: 'Pays-Bas',
-  englishName: 'Netherlands'
-}, {
-  code: 'BE',
-  name: 'Belgique',
-  englishName: 'Belgium'
-}, {
-  code: 'CH',
-  name: 'Suisse',
-  englishName: 'Switzerland'
-}, {
-  code: 'AT',
-  name: 'Autriche',
-  englishName: 'Austria'
-}, {
-  code: 'IT',
-  name: 'Italie',
-  englishName: 'Italy'
-}, {
-  code: 'ES',
-  name: 'Espagne',
-  englishName: 'Spain'
-}, {
-  code: 'PT',
-  name: 'Portugal',
-  englishName: 'Portugal'
-}, {
-  code: 'US',
-  name: 'États-Unis',
-  englishName: 'United States'
-}, {
-  code: 'CA',
-  name: 'Canada',
-  englishName: 'Canada'
-}, {
-  code: 'JP',
-  name: 'Japon',
-  englishName: 'Japan'
-}, {
-  code: 'KR',
-  name: 'Corée du Sud',
-  englishName: 'South Korea'
-}, {
-  code: 'HK',
-  name: 'Hong Kong',
-  englishName: 'Hong Kong'
-}, {
-  code: 'SG',
-  name: 'Singapour',
-  englishName: 'Singapore'
-}, {
-  code: 'AU',
-  name: 'Australie',
-  englishName: 'Australia'
-}, {
-  code: 'BR',
-  name: 'Brésil',
-  englishName: 'Brazil'
-}, {
-  code: 'MX',
-  name: 'Mexique',
-  englishName: 'Mexico'
-}, {
-  code: 'CN',
-  name: 'Chine',
-  englishName: 'China'
-}, {
-  code: 'EE',
-  name: 'Estonie',
-  englishName: 'Estonia'
-}, {
-  code: 'IE',
-  name: 'Irlande',
-  englishName: 'Ireland'
-}, {
-  code: 'PL',
-  name: 'Pologne',
-  englishName: 'Poland'
-}, {
-  code: 'CZ',
-  name: 'République tchèque',
-  englishName: 'Czech Republic'
-}, {
-  code: 'ZA',
-  name: 'Afrique du Sud',
-  englishName: 'South Africa'
-}];
+const COUNTRIES = [
+  { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
+  { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
+  { code: 'AU', name: 'Australie', englishName: 'Australia' },
+  { code: 'AT', name: 'Autriche', englishName: 'Austria' },
+  { code: 'BE', name: 'Belgique', englishName: 'Belgium' },
+  { code: 'BR', name: 'Brésil', englishName: 'Brazil' },
+  { code: 'CA', name: 'Canada', englishName: 'Canada' },
+  { code: 'CN', name: 'Chine', englishName: 'China' },
+  { code: 'KR', name: 'Corée du Sud', englishName: 'South Korea' },
+  { code: 'DK', name: 'Danemark', englishName: 'Denmark' },
+  { code: 'ES', name: 'Espagne', englishName: 'Spain' },
+  { code: 'EE', name: 'Estonie', englishName: 'Estonia' },
+  { code: 'US', name: 'États-Unis', englishName: 'United States' },
+  { code: 'FI', name: 'Finlande', englishName: 'Finland' },
+  { code: 'HK', name: 'Hong Kong', englishName: 'Hong Kong' },
+  { code: 'IE', name: 'Irlande', englishName: 'Ireland' },
+  { code: 'IT', name: 'Italie', englishName: 'Italy' },
+  { code: 'JP', name: 'Japon', englishName: 'Japan' },
+  { code: 'MX', name: 'Mexique', englishName: 'Mexico' },
+  { code: 'NO', name: 'Norvège', englishName: 'Norway' },
+  { code: 'NL', name: 'Pays-Bas', englishName: 'Netherlands' },
+  { code: 'PL', name: 'Pologne', englishName: 'Poland' },
+  { code: 'PT', name: 'Portugal', englishName: 'Portugal' },
+  { code: 'CZ', name: 'République tchèque', englishName: 'Czech Republic' },
+  { code: 'UK', name: 'Royaume-Uni', englishName: 'United Kingdom' },
+  { code: 'SG', name: 'Singapour', englishName: 'Singapore' },
+  { code: 'SE', name: 'Suède', englishName: 'Sweden' },
+  { code: 'CH', name: 'Suisse', englishName: 'Switzerland' },
+];
 const Importers = () => {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
