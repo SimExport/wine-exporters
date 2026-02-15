@@ -1,4 +1,4 @@
-import { User, Database, Target, Users, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap } from "lucide-react";
+import { User, Database, Target, Users, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -30,6 +30,10 @@ const navigationItems = [{
   title: "CRM - Kanban",
   url: "/pipeline",
   icon: Kanban
+}, {
+  title: "À venir",
+  url: "/roadmap",
+  icon: Rocket
 }];
 const settingsItems = [{
   title: "Paramètres",

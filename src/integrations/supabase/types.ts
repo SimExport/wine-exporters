@@ -649,6 +649,27 @@ export type Database = {
           },
         ]
       }
+      roadmap_votes: {
+        Row: {
+          created_at: string
+          feature_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sample_items: {
         Row: {
           comment: string | null
