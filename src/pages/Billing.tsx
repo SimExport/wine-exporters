@@ -174,7 +174,7 @@ const Billing = () => {
           <CardContent className="space-y-4">
             <div>
               <p className="text-3xl font-bold text-foreground">
-                149€ <span className="text-base font-normal text-muted-foreground">HT / mois</span>
+                199€ <span className="text-base font-normal text-muted-foreground">HT / mois</span>
               </p>
             </div>
             <ul className="space-y-2 text-sm text-muted-foreground">
@@ -220,7 +220,7 @@ const Billing = () => {
               <div>
                 <p className="text-2xl font-bold text-foreground">ExportVins Premium</p>
                 <p className="text-3xl font-bold mt-1 text-primary">
-                  149€ <span className="text-base font-normal text-muted-foreground">HT / mois</span>
+                  199€ <span className="text-base font-normal text-muted-foreground">HT / mois</span>
                 </p>
               </div>
               

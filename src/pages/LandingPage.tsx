@@ -188,7 +188,7 @@ const LandingPage = () => {
                   <p className="text-muted-foreground">Tout inclus, sans surprise</p>
                 </div>
                 <div className="mb-8">
-                  <span className="text-5xl font-bold text-foreground">149€</span>
+                  <span className="text-5xl font-bold text-foreground">199€</span>
                   <span className="text-muted-foreground"> HT/mois</span>
                 </div>
                 <ul className="space-y-4 mb-8">
