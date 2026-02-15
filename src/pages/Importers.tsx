@@ -144,7 +144,7 @@ const Importers = () => {
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage] = useState(10);
   const [sourcingOpen, setSourcingOpen] = useState(false);
   const [sourcingMarket, setSourcingMarket] = useState('');
   const [sourcingLoading, setSourcingLoading] = useState(false);
@@ -441,7 +441,7 @@ const Importers = () => {
                         <TableCell>
                           {contact.country}
                         </TableCell>
-                        <TableCell className="max-w-[200px] truncate" title={fullAddress}>
+                        <TableCell className="min-w-[300px] whitespace-normal">
                           {fullAddress}
                         </TableCell>
                         <TableCell>
@@ -472,19 +472,8 @@ const Importers = () => {
 
             {/* Pagination */}
             <div className="flex items-center justify-between p-4 border-t">
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-muted-foreground">
-                  {startItem} à {endItem} sur {totalCount}
-                </div>
-                <Select value={itemsPerPage.toString()} onValueChange={value => setItemsPerPage(Number(value))}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="20">20 par page</SelectItem>
-                    <SelectItem value="50">50 par page</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="text-sm text-muted-foreground">
+                {startItem} à {endItem} sur {totalCount}
               </div>
               
               <div className="flex items-center gap-2">
