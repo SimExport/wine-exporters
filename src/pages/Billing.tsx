@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 const Billing = () => {
   const { user } = useAuth();
-  const { hasPaidAccess, campaignsRemaining, loading: subscriptionLoading } = useSubscription();
+  const { hasPaidAccess, campaignsRemaining, sourcingRequestsRemaining, loading: subscriptionLoading } = useSubscription();
   const [searchParams] = useSearchParams();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -276,9 +276,25 @@ const Billing = () => {
                 </p>
               </div>
 
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Recherches sur mesure</span>
+                  <span className="text-muted-foreground">{sourcingRequestsRemaining ?? 0}/1</span>
+                </div>
+                <Progress value={((sourcingRequestsRemaining ?? 0) / 1) * 100} className="h-2" />
+                <p className="text-sm text-muted-foreground">
+                  {sourcingRequestsRemaining === 0
+                    ? "Vous avez utilisé votre recherche sur mesure ce mois-ci"
+                    : `${sourcingRequestsRemaining} recherche sur mesure disponible`
+                  }
+                </p>
+              </div>
+
               <div className="bg-muted/50 rounded-lg p-3">
                 <p className="text-xs text-muted-foreground">
-                  Votre crédit campagne est renouvelé automatiquement chaque mois à la date anniversaire de votre abonnement.
+                  Vos crédits sont renouvelés automatiquement chaque mois à la date anniversaire de votre abonnement.
                 </p>
               </div>
             </CardContent>

@@ -10,12 +10,14 @@ export const useSubscription = () => {
   const { isAdmin, loading: roleLoading } = useRole();
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [campaignsRemaining, setCampaignsRemaining] = useState<number>(0);
+  const [sourcingRequestsRemaining, setSourcingRequestsRemaining] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   const fetchSubscription = useCallback(async () => {
     if (!user) {
       setSubscriptionPlan(null);
       setCampaignsRemaining(0);
+      setSourcingRequestsRemaining(0);
       setLoading(false);
       return;
     }
@@ -23,22 +25,24 @@ export const useSubscription = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('subscription_plan, campaigns_remaining')
+        .select('subscription_plan, campaigns_remaining, sourcing_requests_remaining')
         .eq('user_id', user.id)
         .maybeSingle();
-
       if (error) {
         console.error('Error fetching subscription:', error);
         setSubscriptionPlan('none');
         setCampaignsRemaining(0);
+        setSourcingRequestsRemaining(0);
       } else {
         setSubscriptionPlan(data?.subscription_plan || 'none');
         setCampaignsRemaining(data?.campaigns_remaining || 0);
+        setSourcingRequestsRemaining(data?.sourcing_requests_remaining ?? 0);
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscriptionPlan('none');
       setCampaignsRemaining(0);
+      setSourcingRequestsRemaining(0);
     } finally {
       setLoading(false);
     }
@@ -91,6 +95,7 @@ export const useSubscription = () => {
     isFreeUser,
     isAdmin,
     campaignsRemaining,
+    sourcingRequestsRemaining,
     canLaunchCampaign,
     decrementCampaignsRemaining,
     refetch: fetchSubscription,

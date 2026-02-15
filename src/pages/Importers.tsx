@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 interface BuyerContact {
@@ -142,13 +145,44 @@ const Importers = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
-  const {
-    toast
-  } = useToast();
+  const [sourcingOpen, setSourcingOpen] = useState(false);
+  const [sourcingMarket, setSourcingMarket] = useState('');
+  const [sourcingLoading, setSourcingLoading] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
   const {
     hasPaidAccess,
+    sourcingRequestsRemaining,
+    refetch: refetchSubscription,
     loading: subscriptionLoading
   } = useSubscription();
+
+  const handleSourcingSubmit = async () => {
+    if (!user || !sourcingMarket || sourcingRequestsRemaining <= 0) return;
+    setSourcingLoading(true);
+    try {
+      const { error: insertError } = await supabase
+        .from('sourcing_requests')
+        .insert({ user_id: user.id, target_market: sourcingMarket });
+      if (insertError) throw insertError;
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ sourcing_requests_remaining: sourcingRequestsRemaining - 1 })
+        .eq('user_id', user.id);
+      if (updateError) throw updateError;
+
+      await refetchSubscription();
+      setSourcingOpen(false);
+      setSourcingMarket('');
+      toast({ title: 'Demande reçue !', description: 'Notre équipe vous répondra sous 72h.' });
+    } catch (error) {
+      console.error('Sourcing request error:', error);
+      toast({ title: 'Erreur', description: 'Impossible d\'envoyer la demande', variant: 'destructive' });
+    } finally {
+      setSourcingLoading(false);
+    }
+  };
   const fetchContacts = async (countryCode: string, page = 1, limit = 20) => {
     if (!countryCode) {
       setContacts([]);
@@ -294,9 +328,62 @@ const Importers = () => {
   }
   return <div className="container mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Liste des importateurs et acheteurs</h1>
-        <p className="text-muted-foreground mt-2">Choisissez un marché pour afficher la liste des importateurs et acheteurs.</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Liste des importateurs et acheteurs</h1>
+          <p className="text-muted-foreground mt-2">Choisissez un marché pour afficher la liste des importateurs et acheteurs.</p>
+        </div>
+
+        {hasPaidAccess && (
+          <Dialog open={sourcingOpen} onOpenChange={setSourcingOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default" className="shrink-0">
+                <Target className="h-4 w-4 mr-2" />
+                Demander une sélection sur mesure
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Sourcing Personnalisé & Vérifié</DialogTitle>
+                <DialogDescription>
+                  Notre équipe analyse votre profil et sélectionne 3 à 5 importateurs parfaitement adaptés à votre domaine. Réponse sous 72h.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Marché cible</label>
+                  <Select value={sourcingMarket} onValueChange={setSourcingMarket}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisir un marché" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map(c => (
+                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Crédit restant</span>
+                  <Badge variant={sourcingRequestsRemaining > 0 ? 'default' : 'secondary'}>
+                    {sourcingRequestsRemaining} / 1
+                  </Badge>
+                </div>
+                {sourcingRequestsRemaining <= 0 && (
+                  <p className="text-sm text-destructive">Quota mensuel atteint. Votre crédit sera renouvelé le mois prochain.</p>
+                )}
+                <Button
+                  className="w-full"
+                  disabled={!sourcingMarket || sourcingRequestsRemaining <= 0 || sourcingLoading}
+                  onClick={handleSourcingSubmit}
+                >
+                  {sourcingLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
+                  Envoyer la demande
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       {/* Controls */}
