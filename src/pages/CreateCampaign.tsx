@@ -26,7 +26,15 @@ interface Document {
   category: string;
   file_name: string;
 }
-const AVAILABLE_MARKETS = ['France', 'Allemagne', 'Belgique', 'Pays-Bas', 'Royaume-Uni', 'Suisse', 'États-Unis', 'Canada', 'Japon', 'Chine', 'Hong Kong', 'Singapour', 'Australie', 'Nouvelle-Zélande', 'Brésil', 'Mexique', 'Corée du Sud', 'Danemark', 'Suède', 'Norvège'];
+const MARKETS_BY_CONTINENT: Record<string, string[]> = {
+  'Europe': ['Austria', 'Belgium', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'Germany', 'Ireland', 'Italy', 'Netherlands', 'Norway', 'Poland', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom'],
+  'Amérique du Nord': ['Canada', 'United States'],
+  'Amérique du Sud': ['Brazil', 'Mexico'],
+  'Asie': ['China', 'Hong Kong', 'Japan', 'South Korea', 'Taiwan', 'Thailand'],
+  'Océanie & Afrique': ['Australia', 'South Africa'],
+};
+const MAX_MARKETS = 10;
+const MIN_MARKETS = 3;
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const {
@@ -85,7 +93,14 @@ const CreateCampaign = () => {
     }
   };
   const handleMarketToggle = (market: string) => {
-    setSelectedMarkets(prev => prev.includes(market) ? prev.filter(m => m !== market) : [...prev, market]);
+    setSelectedMarkets(prev => {
+      if (prev.includes(market)) return prev.filter(m => m !== market);
+      if (prev.length >= MAX_MARKETS) {
+        toast({ title: "Maximum atteint", description: `Vous pouvez sélectionner ${MAX_MARKETS} marchés maximum.`, variant: "destructive" });
+        return prev;
+      }
+      return [...prev, market];
+    });
   };
   const handleWineToggle = (wineId: string) => {
     setSelectedWines(prev => prev.includes(wineId) ? prev.filter(id => id !== wineId) : [...prev, wineId]);
@@ -95,19 +110,15 @@ const CreateCampaign = () => {
   };
   const validateStep1 = () => {
     if (!campaignName.trim()) {
-      toast({
-        title: "Nom de campagne requis",
-        description: "Veuillez saisir un nom pour votre campagne",
-        variant: "destructive"
-      });
+      toast({ title: "Nom de campagne requis", description: "Veuillez saisir un nom pour votre campagne", variant: "destructive" });
+      return false;
+    }
+    if (selectedMarkets.length < MIN_MARKETS) {
+      toast({ title: "Marchés insuffisants", description: `Veuillez sélectionner au moins ${MIN_MARKETS} marchés à cibler.`, variant: "destructive" });
       return false;
     }
     if (selectedWines.length === 0) {
-      toast({
-        title: "Vins requis",
-        description: "Veuillez sélectionner au moins une cuvée",
-        variant: "destructive"
-      });
+      toast({ title: "Vins requis", description: "Veuillez sélectionner au moins une cuvée", variant: "destructive" });
       return false;
     }
     if (!presentationDoc) {
@@ -291,7 +302,7 @@ const CreateCampaign = () => {
                   <Globe className="h-5 w-5" />
                   Étape 1 — Marchés & Vins
                 </CardTitle>
-                <CardDescription>Définissez les marchés à éviter, sélectionnez les cuvées et les documents liés à la campagne</CardDescription>
+                <CardDescription>Sélectionnez les marchés à cibler, vos cuvées et les documents liés à la campagne</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Campaign Name */}
@@ -300,16 +311,23 @@ const CreateCampaign = () => {
                   <Input id="campaignName" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder="Ex: Lancement Millésime 2023" className="mt-1" />
                 </div>
 
-                {/* Markets to avoid */}
+                {/* Markets to target */}
                 <div>
-                  <Label>Marchés à éviter (sélection multiple)</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                    {AVAILABLE_MARKETS.map(market => <div key={market} className="flex items-center space-x-2">
-                        <Checkbox id={market} checked={selectedMarkets.includes(market)} onCheckedChange={() => handleMarketToggle(market)} />
-                        <Label htmlFor={market} className="text-sm">
-                          {market}
-                        </Label>
-                      </div>)}
+                  <Label>Marchés à cibler * <span className="text-muted-foreground font-normal">({selectedMarkets.length}/{MAX_MARKETS} — minimum {MIN_MARKETS})</span></Label>
+                  <div className="space-y-4 mt-3">
+                    {Object.entries(MARKETS_BY_CONTINENT).map(([continent, markets]) => (
+                      <div key={continent}>
+                        <p className="text-sm font-semibold text-muted-foreground mb-2">{continent}</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {markets.map(market => (
+                            <div key={market} className="flex items-center space-x-2">
+                              <Checkbox id={market} checked={selectedMarkets.includes(market)} onCheckedChange={() => handleMarketToggle(market)} disabled={!selectedMarkets.includes(market) && selectedMarkets.length >= MAX_MARKETS} />
+                              <Label htmlFor={market} className="text-sm">{market}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -317,7 +335,7 @@ const CreateCampaign = () => {
                 <Alert className="bg-muted/50 border-primary/20">
                   <Lightbulb className="h-4 w-4 text-primary" />
                   <AlertDescription className="text-sm text-muted-foreground">
-                    Merci d'indiquer les marchés à éviter, ainsi que les marchés sur lesquels vous êtes déjà présents ou que vous ne souhaitez pas prospecter. Notre équipe sélectionnera les marchés prioritaires et pertinents en fonction de ce que vous avez renseigné dans votre profil (la typologie de vos vins, la taille de votre domaine, etc.).
+                    Sélectionnez entre {MIN_MARKETS} et {MAX_MARKETS} marchés sur lesquels vous souhaitez prospecter. Notre équipe préparera votre campagne en ciblant les acheteurs pertinents sur ces marchés.
                   </AlertDescription>
                 </Alert>
 
@@ -447,7 +465,7 @@ const CreateCampaign = () => {
                   </div>
 
                   <div>
-                    <Label className="font-medium">Marchés à éviter ({selectedMarkets.length})</Label>
+                    <Label className="font-medium">Marchés ciblés ({selectedMarkets.length})</Label>
                     <p className="text-sm text-muted-foreground mt-1">
                       {selectedMarkets.join(', ')}
                     </p>
