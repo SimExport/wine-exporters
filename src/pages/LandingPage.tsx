@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import pillarNetworkImg from "@/assets/pillar-network.png";
+import pillarContactImg from "@/assets/pillar-contact.png";
+import pillarSuiviImg from "@/assets/pillar-suivi.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -84,7 +87,7 @@ const pillars = [
         text: "Sourcing sur-mesure : Vous visez un pays précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vous livrent une sélection vérifiée de contacts qui recherchent VOS profils de vins.",
       },
     ],
-    visual: Database,
+    visual: pillarNetworkImg,
   },
   {
     step: "ÉTAPE 2",
@@ -97,7 +100,7 @@ const pillars = [
         text: "Campagne Mensuelle gérée : Vous validez, nous envoyons. Nous optimisons la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams.",
       },
     ],
-    visual: Mail,
+    visual: pillarContactImg,
   },
   {
     step: "ÉTAPE 3",
@@ -108,7 +111,7 @@ const pillars = [
       { icon: Package, text: "Suivi des envois d'échantillons." },
       { icon: Clock, text: "Historique centralisé pour ne jamais oublier une relance." },
     ],
-    visual: Kanban,
+    visual: pillarSuiviImg,
   },
 ];
 
@@ -135,11 +138,10 @@ const faqs = [
   },
 ];
 
-/* ─── Pillar visual placeholder ─── */
-const PillarVisual = ({ Icon }: { Icon: React.ElementType }) => (
-  <div className="relative w-full aspect-[4/3] rounded-2xl bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center overflow-hidden">
-    <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M0 20h40M20 0v40' stroke='%23000' stroke-width='.5'/%3E%3C/svg%3E\")" }} />
-    <Icon className="h-20 w-20 text-primary/30" strokeWidth={1} />
+/* ─── Pillar visual ─── */
+const PillarVisual = ({ src }: { src: string }) => (
+  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-border">
+    <img src={src} alt="Aperçu de la fonctionnalité" className="w-full h-full object-cover" />
   </div>
 );
 
@@ -277,7 +279,7 @@ const LandingPage = () => {
                     </div>
                     {/* Visual */}
                     <div className="flex-1 w-full max-w-md lg:max-w-none">
-                      <PillarVisual Icon={p.visual} />
+                      <PillarVisual src={p.visual} />
                     </div>
                   </div>
                 </FadeIn>
