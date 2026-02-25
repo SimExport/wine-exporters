@@ -107,7 +107,7 @@ const pillars = [
   title: "Transformez vos prospects en clients.",
   text: "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
   bullets: [
-  { icon: Kanban, text: "Pipeline visuel (CRM Kanban) dédié à la vente de vin." },
+  { icon: Kanban, text: "Pipeline visuel (CRM Kanban) dédié à la vente de vins à l'export." },
   { icon: Package, text: "Suivi des envois d'échantillons." },
   { icon: Clock, text: "Historique centralisé pour ne jamais oublier une relance." }],
 
