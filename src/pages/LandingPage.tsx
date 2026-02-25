@@ -299,7 +299,9 @@ const LandingPage = () => {
           </FadeIn>
           <FadeIn delay={0.1}>
             <p className="text-lg leading-relaxed opacity-90">
-              ExportVins remplace vos fichiers Excel, vos outils d'emailing complexes et vos recherches Google. Surtout, ce n'est pas qu'un logiciel : derrière chaque sourcing sur-mesure et chaque validation de campagne, notre équipe d'experts vérifie la cohérence de votre démarche.
+              Notre plateforme remplace vos fichiers Excel, vos outils d'emailing complexes et vos recherches Google. 
+
+Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et chaque campagne de prospection, notre équipe d'experts s'active pour vendre vos vins.            
             </p>
           </FadeIn>
         </div>
@@ -331,12 +333,10 @@ const LandingPage = () => {
                   </Badge>
                 </div>
                 <ul className="space-y-4 mb-10">
-                  {inclusions.map((item) =>
-                  <li key={item} className="flex items-start gap-3">
+                  {inclusions.map((item) => <li key={item} className="flex items-start gap-3">
                       <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-primary" />
                       <span>{item}</span>
-                    </li>
-                  )}
+                    </li>)}
                 </ul>
                 <Button size="lg" className="w-full text-lg" asChild>
                   <Link to="/auth">Créer mon compte</Link>
