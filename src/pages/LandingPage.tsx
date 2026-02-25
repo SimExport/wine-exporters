@@ -79,9 +79,9 @@ const pillars = [
 {
   step: "ÉTAPE 1",
   title: "Ne cherchez plus les acheteurs. Trouvez-les.",
-  text: "Accédez à une base de données d'importateurs et de distributeurs.",
+  text: "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
   bullets: [
-  { icon: Filter, text: "Filtrage précis par marché." },
+  { icon: Filter, text: "Filtrage précis par marché et par type d'acheteur." },
   {
     icon: Users,
     text: "Recherche sur-mesure : Vous visez un marché précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vos vins afin de vous livrer une sélection d'importateurs pertinents."
@@ -185,14 +185,14 @@ const LandingPage = () => {
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6">
-              Exporter ses vins,{" "}
+              L'export de vos vins,{" "}
               <span className="text-primary underline decoration-primary/40 underline-offset-4">
-                enfin simplifié.
+enfin simplifié.
               </span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">Arrêtez de perdre du temps avec des annuaires obsolètes et des emails ignorés. Trouvez, contactez et signez avec les bons importateurs depuis une plateforme unique conçue exclusivement pour les domaines viticoles.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">Arrêtez de perdre du temps avec des annuaires obsolètes et des emails ignorés. Trouvez et signez les bons importateurs depuis une plateforme unique conçue pour les domaines viticoles.
 
 
             </p>
