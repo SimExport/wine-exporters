@@ -333,7 +333,7 @@ const LandingPage = () => {
                 <ul className="space-y-4 mb-10">
                   {inclusions.map((item) =>
                   <li key={item} className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-destructive-foreground" />
+                      <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-primary" />
                       <span>{item}</span>
                     </li>
                   )}
