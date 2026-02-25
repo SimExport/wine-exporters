@@ -117,7 +117,7 @@ const pillars = [
 
 const inclusions = [
 "Accès illimité aux bases de données",
-"1 recherche Sourcing Sur-Mesure / mois",
+"1 recherche sur-mesure / mois",
 "1 Campagne de prospection gérée / mois",
 "Accès complet au CRM Pipeline",
 "Support prioritaire et validation par nos experts"];
