@@ -84,7 +84,7 @@ const pillars = [
   { icon: Filter, text: "Filtrage précis par marché et par type d'acheteur." },
   {
     icon: Users,
-    text: "Sourcing sur-mesure : Vous visez un pays précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vous livrent une sélection vérifiée de contacts qui recherchent VOS profils de vins."
+    text: "Recherche sur-mesure : Vous visez un marché précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vos vins afin de vous livrer une sélection d'importateurs pertinents."
   }],
 
   visual: pillarNetworkImg
