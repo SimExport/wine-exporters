@@ -11,8 +11,8 @@ import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  AccordionTrigger } from
+"@/components/ui/accordion";
 import {
   Grape,
   Search,
@@ -28,19 +28,19 @@ import {
   Send,
   Eye,
   Package,
-  Clock,
-} from "lucide-react";
+  Clock } from
+"lucide-react";
 
 /* ─── Animation wrapper ─── */
 const FadeIn = ({
   children,
   className = "",
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) => {
+  delay = 0
+
+
+
+
+}: {children: React.ReactNode;className?: string;delay?: number;}) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
@@ -49,101 +49,101 @@ const FadeIn = ({
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.55, delay, ease: "easeOut" }}
-      className={className}
-    >
+      className={className}>
+
       {children}
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 /* ─── Data ─── */
 const painPoints = [
-  {
-    icon: Search,
-    title: "La recherche interminable",
-    text: "Trouver les bons contacts prend des heures, et les salons coûtent une fortune pour un ROI incertain.",
-  },
-  {
-    icon: MailQuestion,
-    title: "Le silence radio",
-    text: "Vos emails de prospection tombent dans les spams ou sont noyés dans la masse. Personne ne vous répond.",
-  },
-  {
-    icon: FileSpreadsheet,
-    title: "Le suivi chaotique",
-    text: "Le suivi des échantillons et des relances finit toujours par se perdre dans un fichier Excel interminable.",
-  },
-];
+{
+  icon: Search,
+  title: "La recherche interminable",
+  text: "Trouver les bons contacts prend des heures, et les salons coûtent une fortune pour un ROI incertain."
+},
+{
+  icon: MailQuestion,
+  title: "Le silence radio",
+  text: "Vos emails de prospection tombent dans les spams ou sont noyés dans la masse. Personne ne vous répond."
+},
+{
+  icon: FileSpreadsheet,
+  title: "Le suivi chaotique",
+  text: "Le suivi des échantillons et des relances finit toujours par se perdre dans un fichier Excel interminable."
+}];
+
 
 const pillars = [
+{
+  step: "ÉTAPE 1",
+  title: "Ne cherchez plus les acheteurs. Trouvez-les.",
+  text: "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
+  bullets: [
+  { icon: Filter, text: "Filtrage précis par marché et par type d'acheteur." },
   {
-    step: "ÉTAPE 1",
-    title: "Ne cherchez plus les acheteurs. Trouvez-les.",
-    text: "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
-    bullets: [
-      { icon: Filter, text: "Filtrage précis par marché et par type d'acheteur." },
-      {
-        icon: Users,
-        text: "Sourcing sur-mesure : Vous visez un pays précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vous livrent une sélection vérifiée de contacts qui recherchent VOS profils de vins.",
-      },
-    ],
-    visual: pillarNetworkImg,
-  },
+    icon: Users,
+    text: "Sourcing sur-mesure : Vous visez un pays précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vous livrent une sélection vérifiée de contacts qui recherchent VOS profils de vins."
+  }],
+
+  visual: pillarNetworkImg
+},
+{
+  step: "ÉTAPE 2",
+  title: "Des campagnes qui génèrent enfin des réponses.",
+  text: "Fini le démarchage à l'aveugle. Nous vous aidons à capter l'attention des décideurs grâce à une approche ciblée.",
+  bullets: [
+  { icon: Send, text: "Outil de création de campagnes intégré." },
   {
-    step: "ÉTAPE 2",
-    title: "Des campagnes qui génèrent enfin des réponses.",
-    text: "Fini le démarchage à l'aveugle. Nous vous aidons à capter l'attention des décideurs grâce à une approche ciblée.",
-    bullets: [
-      { icon: Send, text: "Outil de création de campagnes intégré." },
-      {
-        icon: Eye,
-        text: "Campagne Mensuelle gérée : Vous validez, nous envoyons. Nous optimisons la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams.",
-      },
-    ],
-    visual: pillarContactImg,
-  },
-  {
-    step: "ÉTAPE 3",
-    title: "Transformez vos prospects en clients.",
-    text: "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
-    bullets: [
-      { icon: Kanban, text: "Pipeline visuel (CRM Kanban) dédié à la vente de vin." },
-      { icon: Package, text: "Suivi des envois d'échantillons." },
-      { icon: Clock, text: "Historique centralisé pour ne jamais oublier une relance." },
-    ],
-    visual: pillarSuiviImg,
-  },
-];
+    icon: Eye,
+    text: "Campagne Mensuelle gérée : Vous validez, nous envoyons. Nous optimisons la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams."
+  }],
+
+  visual: pillarContactImg
+},
+{
+  step: "ÉTAPE 3",
+  title: "Transformez vos prospects en clients.",
+  text: "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
+  bullets: [
+  { icon: Kanban, text: "Pipeline visuel (CRM Kanban) dédié à la vente de vin." },
+  { icon: Package, text: "Suivi des envois d'échantillons." },
+  { icon: Clock, text: "Historique centralisé pour ne jamais oublier une relance." }],
+
+  visual: pillarSuiviImg
+}];
+
 
 const inclusions = [
-  "Accès illimité aux bases de données",
-  "1 recherche Sourcing Sur-Mesure / mois",
-  "1 Campagne de prospection gérée / mois",
-  "Accès complet au CRM Pipeline",
-  "Support prioritaire et validation par nos experts",
-];
+"Accès illimité aux bases de données",
+"1 recherche Sourcing Sur-Mesure / mois",
+"1 Campagne de prospection gérée / mois",
+"Accès complet au CRM Pipeline",
+"Support prioritaire et validation par nos experts"];
+
 
 const faqs = [
-  {
-    q: "Qu'est-ce que le sourcing sur-mesure ?",
-    a: "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine.",
-  },
-  {
-    q: "Puis-je lancer plus d'une campagne par mois ?",
-    a: "L'abonnement inclut l'envoi géré d'une campagne qualifiée pour garantir la qualité. Pour des besoins supérieurs, contactez-nous.",
-  },
-  {
-    q: "Y a-t-il un engagement ?",
-    a: "Non, l'abonnement à 199 € est mensuel et sans engagement.",
-  },
-];
+{
+  q: "Qu'est-ce que le sourcing sur-mesure ?",
+  a: "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine."
+},
+{
+  q: "Puis-je lancer plus d'une campagne par mois ?",
+  a: "L'abonnement inclut l'envoi géré d'une campagne qualifiée pour garantir la qualité. Pour des besoins supérieurs, contactez-nous."
+},
+{
+  q: "Y a-t-il un engagement ?",
+  a: "Non, l'abonnement à 199 € est mensuel et sans engagement."
+}];
+
 
 /* ─── Pillar visual ─── */
-const PillarVisual = ({ src }: { src: string }) => (
-  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-border">
-    <img src={src} alt="Aperçu de la fonctionnalité" className="w-full h-full object-cover" />
-  </div>
-);
+const PillarVisual = ({ src }: {src: string;}) =>
+<div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-border">
+    <img src={src} alt="Aperçu de la fonctionnalité" className="w-full h-full object-fill" />
+  </div>;
+
 
 /* ─── Page ─── */
 const LandingPage = () => {
@@ -174,13 +174,13 @@ const LandingPage = () => {
           className="absolute inset-0 opacity-[0.035]"
           style={{
             backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23000' stroke-width='.5'/%3E%3C/svg%3E\")",
-          }}
-        />
+            "url(\"data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23000' stroke-width='.5'/%3E%3C/svg%3E\")"
+          }} />
+
         <div className="relative max-w-3xl mx-auto px-6 text-center py-24">
           <FadeIn>
             <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5">
-              🍷 La nouvelle norme de l'export viticole
+              🍷 La plateforme tout-en-un pour les domaines viticoles      
             </Badge>
           </FadeIn>
           <FadeIn delay={0.1}>
@@ -192,8 +192,9 @@ const LandingPage = () => {
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Arrêtez de perdre du temps avec des annuaires obsolètes et des emails ignorés. Trouvez, contactez et signez avec les bons importateurs depuis une plateforme unique conçue exclusivement pour les domaines viticoles.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">Arrêtez de perdre du temps avec des annuaires obsolètes et des emails ignorés. Trouvez, contactez et signez avec les bons importateurs depuis une plateforme unique conçue exclusivement pour les domaines viticoles.
+
+
             </p>
           </FadeIn>
           <FadeIn delay={0.3}>
@@ -221,8 +222,7 @@ const LandingPage = () => {
             </h2>
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-8">
-            {painPoints.map((p, i) => (
-              <FadeIn key={p.title} delay={i * 0.1}>
+            {painPoints.map((p, i) => <FadeIn key={p.title} delay={i * 0.1}>
                 <Card className="h-full border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                   <CardContent className="p-8">
                     <div className="h-12 w-12 rounded-xl bg-destructive/10 flex items-center justify-center mb-5">
@@ -233,7 +233,7 @@ const LandingPage = () => {
                   </CardContent>
                 </Card>
               </FadeIn>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -254,9 +254,9 @@ const LandingPage = () => {
                 <FadeIn key={p.step}>
                   <div
                     className={`flex flex-col ${
-                      reversed ? "lg:flex-row-reverse" : "lg:flex-row"
-                    } items-center gap-12 lg:gap-16`}
-                  >
+                    reversed ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`
+                    }>
+
                     {/* Text */}
                     <div className="flex-1 space-y-5">
                       <Badge variant="outline" className="text-xs tracking-widest font-semibold">
@@ -269,12 +269,12 @@ const LandingPage = () => {
                         {p.text}
                       </p>
                       <ul className="space-y-4 pt-2">
-                        {p.bullets.map((b) => (
-                          <li key={b.text} className="flex items-start gap-3">
+                        {p.bullets.map((b) =>
+                        <li key={b.text} className="flex items-start gap-3">
                             <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
                             <span className="leading-relaxed">{b.text}</span>
                           </li>
-                        ))}
+                        )}
                       </ul>
                     </div>
                     {/* Visual */}
@@ -282,8 +282,8 @@ const LandingPage = () => {
                       <PillarVisual src={p.visual} />
                     </div>
                   </div>
-                </FadeIn>
-              );
+                </FadeIn>);
+
             })}
           </div>
         </div>
@@ -321,22 +321,22 @@ const LandingPage = () => {
             <Card className="border-2 border-primary shadow-xl shadow-primary/10">
               <CardContent className="p-10">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold mb-2">ExportVins Premium</h3>
+                  <h3 className="text-2xl font-bold mb-2">WineExporters</h3>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-5xl font-extrabold text-primary">199€</span>
                     <span className="text-muted-foreground text-lg">HT / mois</span>
                   </div>
-                  <Badge variant="secondary" className="mt-3">
-                    Sans engagement
+                  <Badge variant="secondary" className="mt-3">engagement 3 mois
+
                   </Badge>
                 </div>
                 <ul className="space-y-4 mb-10">
-                  {inclusions.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                  {inclusions.map((item) =>
+                  <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-destructive-foreground" />
                       <span>{item}</span>
                     </li>
-                  ))}
+                  )}
                 </ul>
                 <Button size="lg" className="w-full text-lg" asChild>
                   <Link to="/auth">Créer mon compte</Link>
@@ -357,12 +357,12 @@ const LandingPage = () => {
           </FadeIn>
           <FadeIn delay={0.1}>
             <Accordion type="single" collapsible className="space-y-3">
-              {faqs.map((faq, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`faq-${i}`}
-                  className="bg-card border border-border rounded-lg px-6"
-                >
+              {faqs.map((faq, i) =>
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="bg-card border border-border rounded-lg px-6">
+
                   <AccordionTrigger className="text-left font-semibold text-base">
                     {faq.q}
                   </AccordionTrigger>
@@ -370,7 +370,7 @@ const LandingPage = () => {
                     {faq.a}
                   </AccordionContent>
                 </AccordionItem>
-              ))}
+              )}
             </Accordion>
           </FadeIn>
         </div>
@@ -409,8 +409,8 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 };
 
 export default LandingPage;
