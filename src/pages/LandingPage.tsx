@@ -120,7 +120,7 @@ const inclusions = [
 "1 recherche sur-mesure / mois",
 "1 campagne de prospection / mois",
 "Accès complet au CRM",
-"Support prioritaire et validation par nos experts"];
+"Support prioritaire"];
 
 
 const faqs = [
