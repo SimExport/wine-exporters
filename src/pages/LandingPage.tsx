@@ -81,7 +81,7 @@ const pillars = [
   title: "Ne cherchez plus les acheteurs. Trouvez-les.",
   text: "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
   bullets: [
-  { icon: Filter, text: "Filtrage précis par marché et par type d'acheteur." },
+  { icon: Filter, text: "Filtrage précis par marché." },
   {
     icon: Users,
     text: "Recherche sur-mesure : Vous visez un marché précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vos vins afin de vous livrer une sélection d'importateurs pertinents."
