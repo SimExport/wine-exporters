@@ -79,7 +79,7 @@ const pillars = [
 {
   step: "ÉTAPE 1",
   title: "Ne cherchez plus les acheteurs. Trouvez-les.",
-  text: "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
+  text: "Accédez à une base de données d'importateurs et de distributeurs.",
   bullets: [
   { icon: Filter, text: "Filtrage précis par marché." },
   {
