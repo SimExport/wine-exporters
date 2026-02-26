@@ -10,22 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play } from 'lucide-react';
 import WineManagement from '@/components/profile/WineManagement';
-
-const FieldHint = ({ text }: { text: string }) => (
-  <TooltipProvider delayDuration={200}>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors cursor-help inline-block ml-1 align-middle" />
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
-        {text}
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
 interface ProfileData {
   domain_name: string;
   contact_name: string;
@@ -301,21 +287,21 @@ const Profile = () => {
     }
   };
   const handleWineTypeChange = (type: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      wine_types: checked ? [...prev.wine_types, type] : prev.wine_types.filter(t => t !== type)
+      wine_types: checked ? [...prev.wine_types, type] : prev.wine_types.filter((t) => t !== type)
     }));
   };
   const handleCertificationChange = (certification: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      certifications: checked ? [...prev.certifications, certification] : prev.certifications.filter(c => c !== certification)
+      certifications: checked ? [...prev.certifications, certification] : prev.certifications.filter((c) => c !== certification)
     }));
   };
   const handleStrengthChange = (index: number, value: string) => {
     const newStrengths = [...formData.strengths];
     newStrengths[index] = value.slice(0, 80); // Max 80 characters
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       strengths: newStrengths
     }));
@@ -324,42 +310,42 @@ const Profile = () => {
   // AOC management functions
   const addAoc = (aoc: string) => {
     if (aoc.trim() && !formData.aoc.includes(aoc.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         aoc: [...prev.aoc, aoc.trim()]
       }));
     }
   };
   const removeAoc = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       aoc: prev.aoc.filter((_, i) => i !== index)
     }));
   };
   const addGrapeVariety = (variety: string) => {
     if (variety.trim() && !formData.grape_varieties.includes(variety.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         grape_varieties: [...prev.grape_varieties, variety.trim()]
       }));
     }
   };
   const removeGrapeVariety = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       grape_varieties: prev.grape_varieties.filter((_, i) => i !== index)
     }));
   };
   const addCuvee = (cuvee: string) => {
     if (cuvee.trim() && !formData.cuvees.includes(cuvee.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         cuvees: [...prev.cuvees, cuvee.trim()]
       }));
     }
   };
   const removeCuvee = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       cuvees: prev.cuvees.filter((_, i) => i !== index)
     }));
@@ -388,7 +374,7 @@ const Profile = () => {
         error
       } = await supabase.from('documents').update(updates).eq('id', id);
       if (error) throw error;
-      setDocuments(prev => prev.map(doc => doc.id === id ? {
+      setDocuments((prev) => prev.map((doc) => doc.id === id ? {
         ...doc,
         ...updates
       } : doc));
@@ -409,7 +395,7 @@ const Profile = () => {
         error
       } = await supabase.from('media').update(updates).eq('id', id);
       if (error) throw error;
-      setMedia(prev => prev.map(m => m.id === id ? {
+      setMedia((prev) => prev.map((m) => m.id === id ? {
         ...m,
         ...updates
       } : m));
@@ -613,26 +599,6 @@ const Profile = () => {
       });
     }
   };
-  // Profile completion score
-  const completionFields = [
-    { label: 'Nom du domaine', done: !!formData.domain_name, tab: 'general' },
-    { label: 'Votre nom', done: !!formData.contact_name, tab: 'general' },
-    { label: 'Localisation', done: !!formData.location, tab: 'general' },
-    { label: 'AOC / Appellations', done: formData.aoc.length > 0, tab: 'general' },
-    { label: 'Volume annuel', done: !!formData.bottles_per_year, tab: 'general' },
-    { label: 'Types de vins', done: formData.wine_types.length > 0, tab: 'general' },
-    { label: 'Cépages cultivés', done: formData.grape_varieties.length > 0, tab: 'general' },
-    { label: 'Cuvées', done: formData.cuvees.length > 0, tab: 'general' },
-    { label: 'Marchés prioritaires', done: !!formData.priority_markets, tab: 'markets' },
-    { label: 'Marchés actuels', done: !!formData.current_markets, tab: 'markets' },
-    { label: 'Description acheteurs cibles', done: !!formData.target_buyer_description, tab: 'markets' },
-    { label: 'Description du domaine', done: formData.description.length >= 300, tab: 'description' },
-    { label: 'Site web', done: !!formData.website && isValidUrl(formData.website), tab: 'website' },
-  ];
-  const completedCount = completionFields.filter(f => f.done).length;
-  const completionPct = Math.round((completedCount / completionFields.length) * 100);
-  const missingFields = completionFields.filter(f => !f.done);
-
   if (initialLoading) {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -667,57 +633,6 @@ const Profile = () => {
       </div>
 
       <div className="max-w-[1100px] mx-auto px-6 py-6">
-
-        {/* Profile Completion Widget */}
-        {completionPct < 100 && (
-          <div className="mb-6 rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">Profil complété à {completionPct}%</span>
-                {completionPct >= 80 && <Badge variant="secondary" className="text-xs">Presque parfait 🎯</Badge>}
-                {completionPct < 50 && <Badge variant="destructive" className="text-xs">À compléter</Badge>}
-              </div>
-              <span className="text-xs text-muted-foreground">{completedCount}/{completionFields.length} champs</span>
-            </div>
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-3">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${completionPct}%`,
-                  background: completionPct >= 80
-                    ? 'hsl(var(--primary))'
-                    : completionPct >= 50
-                    ? 'hsl(var(--chart-4))'
-                    : 'hsl(var(--destructive))',
-                }}
-              />
-            </div>
-            {missingFields.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {missingFields.map(f => (
-                  <button
-                    key={f.label}
-                    type="button"
-                    onClick={() => setActiveTab(f.tab)}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-dashed border-muted-foreground/40 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                  >
-                    <span className="text-[10px]">+</span> {f.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {completionPct === 100 && (
-          <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 flex items-center gap-3">
-            <span className="text-lg">🎉</span>
-            <div>
-              <p className="text-sm font-semibold text-primary">Profil 100% complété !</p>
-              <p className="text-xs text-muted-foreground">Votre profil est complet. Nos experts pourront vous matcher avec les meilleurs importateurs.</p>
-            </div>
-          </div>
-        )}
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="general">Général</TabsTrigger>
@@ -743,14 +658,14 @@ const Profile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="contact_name">Votre nom</Label>
-                      <Input id="contact_name" value={formData.contact_name} onChange={e => setFormData(prev => ({
+                      <Input id="contact_name" value={formData.contact_name} onChange={(e) => setFormData((prev) => ({
                       ...prev,
                       contact_name: e.target.value
                     }))} placeholder="Jean Dupont" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="domain_name">Nom du domaine</Label>
-                      <Input id="domain_name" value={formData.domain_name} onChange={e => setFormData(prev => ({
+                      <Input id="domain_name" value={formData.domain_name} onChange={(e) => setFormData((prev) => ({
                       ...prev,
                       domain_name: e.target.value
                     }))} placeholder="Domaine de la Vallée" />
@@ -760,12 +675,12 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Label>AOC / Appellations</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {formData.aoc.map((appellation, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {formData.aoc.map((appellation, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-primary text-primary-foreground">
                           {appellation}
                           <X className="h-3 w-3 cursor-pointer" onClick={() => removeAoc(index)} />
                         </Badge>)}
                     </div>
-                    <Input placeholder="Ajouter une appellation et appuyez sur Entrée" onKeyPress={e => {
+                    <Input placeholder="Ajouter une appellation et appuyez sur Entrée" onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       addAoc(e.currentTarget.value);
@@ -776,21 +691,15 @@ const Profile = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="surface_area">
-                        Surface (hectares)
-                        <FieldHint text="La superficie de votre domaine nous aide à estimer votre capacité de production et à vous matcher avec des importateurs dont les volumes commandés sont adaptés à votre taille." />
-                      </Label>
-                      <Input id="surface_area" type="number" step="0.1" value={formData.surface_area || ''} onChange={e => setFormData(prev => ({
+                      <Label htmlFor="surface_area">Surface (hectares)</Label>
+                      <Input id="surface_area" type="number" step="0.1" value={formData.surface_area || ''} onChange={(e) => setFormData((prev) => ({
                       ...prev,
                       surface_area: e.target.value ? parseFloat(e.target.value) : null
                     }))} placeholder="25.5" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="bottles_per_year">
-                        Volume annuel (nb de bouteilles)
-                        <FieldHint text="Ce chiffre est déterminant pour cibler les bons importateurs. Un petit domaine (< 50 000 bt) n'a pas les mêmes besoins qu'une structure de 500 000 bt. Nous adaptons nos recommandations en fonction." />
-                      </Label>
-                      <Input id="bottles_per_year" type="number" min="0" value={formData.bottles_per_year || ''} onChange={e => setFormData(prev => ({
+                      <Label htmlFor="bottles_per_year">Volume annuel (nb de bouteilles)</Label>
+                      <Input id="bottles_per_year" type="number" min="0" value={formData.bottles_per_year || ''} onChange={(e) => setFormData((prev) => ({
                       ...prev,
                       bottles_per_year: e.target.value ? parseInt(e.target.value) : null
                     }))} placeholder="150000" />
@@ -800,8 +709,8 @@ const Profile = () => {
                   <div className="space-y-3">
                     <Label>Types de vins produits</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {wineTypeOptions.map(type => <div key={type} className="flex items-center space-x-2">
-                          <Checkbox id={type} checked={formData.wine_types.includes(type)} onCheckedChange={checked => handleWineTypeChange(type, checked as boolean)} />
+                      {wineTypeOptions.map((type) => <div key={type} className="flex items-center space-x-2">
+                          <Checkbox id={type} checked={formData.wine_types.includes(type)} onCheckedChange={(checked) => handleWineTypeChange(type, checked as boolean)} />
                           <Label htmlFor={type} className="text-sm font-normal">
                             {type}
                           </Label>
@@ -810,13 +719,10 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>
-                      Certifications
-                      <FieldHint text="Les certifications bio, biodynamique ou HVE sont des critères de filtrage très utilisés par les importateurs spécialisés. Les préciser augmente significativement vos chances d'être sélectionné sur des campagnes ciblées." />
-                    </Label>
+                    <Label>Certifications</Label>
                     <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
-                      {certificationOptions.map(certification => <div key={certification} className="flex items-center space-x-2">
-                          <Checkbox id={certification} checked={formData.certifications.includes(certification)} onCheckedChange={checked => handleCertificationChange(certification, checked as boolean)} />
+                      {certificationOptions.map((certification) => <div key={certification} className="flex items-center space-x-2">
+                          <Checkbox id={certification} checked={formData.certifications.includes(certification)} onCheckedChange={(checked) => handleCertificationChange(certification, checked as boolean)} />
                           <Label htmlFor={certification} className="text-sm font-normal">
                             {certification}
                           </Label>
@@ -829,10 +735,7 @@ const Profile = () => {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>
-                        Cépages cultivés
-                        <FieldHint text="Les cépages sont un critère clé pour les importateurs spécialisés. Certains recherchent spécifiquement des cépages rares ou autochtones pour se différencier." />
-                      </Label>
+                      <Label>Cépages cultivés</Label>
                       <div className="flex flex-wrap gap-2">
                         {formData.grape_varieties.map((variety, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
                             {variety}
@@ -840,7 +743,7 @@ const Profile = () => {
                           </Badge>)}
                       </div>
                       <div className="flex gap-2">
-                        <Input placeholder="Ajouter un cépage" onKeyPress={e => {
+                        <Input placeholder="Ajouter un cépage" onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addGrapeVariety(e.currentTarget.value);
@@ -859,7 +762,7 @@ const Profile = () => {
                           </Badge>)}
                       </div>
                       <div className="flex gap-2">
-                        <Input placeholder="Ajouter une cuvée" onKeyPress={e => {
+                        <Input placeholder="Ajouter une cuvée" onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addCuvee(e.currentTarget.value);
@@ -883,22 +786,16 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="priority_markets">
-                      Quels marchés souhaitez-vous prioriser ?
-                      <FieldHint text="Ces marchés seront utilisés en priorité pour construire vos audiences de campagne. Soyez précis (ex: 'États-Unis - côte Est', 'Japon - Tokyo') pour un meilleur ciblage." />
-                    </Label>
-                    <Textarea id="priority_markets" value={formData.priority_markets} onChange={e => setFormData(prev => ({
+                    <Label htmlFor="priority_markets">Quels marchés souhaitez-vous prioriser ?</Label>
+                    <Textarea id="priority_markets" value={formData.priority_markets} onChange={(e) => setFormData((prev) => ({
                     ...prev,
                     priority_markets: e.target.value
                   }))} placeholder="Ex: États-Unis, Japon, Royaume-Uni..." className="min-h-[100px]" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="current_markets">
-                      Sur quels marchés êtes-vous déjà présents ?
-                      <FieldHint text="Ces informations évitent les doublons avec vos distributeurs existants. Nous pourrons ainsi cibler des importateurs sur des marchés complémentaires à votre réseau actuel." />
-                    </Label>
-                    <Textarea id="current_markets" value={formData.current_markets} onChange={e => setFormData(prev => ({
+                    <Label htmlFor="current_markets">Sur quels marchés êtes-vous déjà présents ?</Label>
+                    <Textarea id="current_markets" value={formData.current_markets} onChange={(e) => setFormData((prev) => ({
                     ...prev,
                     current_markets: e.target.value
                   }))} placeholder="Ex: France, Belgique, Suisse..." className="min-h-[100px]" />
@@ -906,18 +803,15 @@ const Profile = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="avoid_markets">Quels marchés souhaitez-vous éviter ?</Label>
-                    <Textarea id="avoid_markets" value={formData.avoid_markets} onChange={e => setFormData(prev => ({
+                    <Textarea id="avoid_markets" value={formData.avoid_markets} onChange={(e) => setFormData((prev) => ({
                     ...prev,
                     avoid_markets: e.target.value
                   }))} placeholder="Ex: Marchés où vous avez déjà un distributeur exclusif..." className="min-h-[100px]" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="target_buyer_description">
-                      Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler
-                      <FieldHint text="Plus votre description est précise (type de circuit, positionnement prix, philosophie), plus nos experts pourront affiner la sélection des contacts et améliorer le taux de réponse de vos campagnes." />
-                    </Label>
-                    <Textarea id="target_buyer_description" value={formData.target_buyer_description} onChange={e => setFormData(prev => ({
+                    <Label htmlFor="target_buyer_description">Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler</Label>
+                    <Textarea id="target_buyer_description" value={formData.target_buyer_description} onChange={(e) => setFormData((prev) => ({
                     ...prev,
                     target_buyer_description: e.target.value
                   }))} placeholder="Ex: Importateurs spécialisés en vins bio, cavistes haut de gamme, restaurateurs étoilés..." className="min-h-[120px]" />
@@ -936,7 +830,7 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Textarea value={formData.description} onChange={e => setFormData(prev => ({
+                    <Textarea value={formData.description} onChange={(e) => setFormData((prev) => ({
                     ...prev,
                     description: e.target.value
                   }))} placeholder="Histoire, terroir, pratiques, volumes, marchés..." className="min-h-[200px]" />
@@ -964,7 +858,7 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Label htmlFor="website">URL du site web</Label>
                     <div className="flex gap-2">
-                      <Input id="website" type="url" value={formData.website} onChange={e => setFormData(prev => ({
+                      <Input id="website" type="url" value={formData.website} onChange={(e) => setFormData((prev) => ({
                       ...prev,
                       website: e.target.value
                     }))} placeholder="https://www.mondomaine.fr" className={!isValidUrl(formData.website) && formData.website ? 'border-destructive' : ''} />
@@ -995,7 +889,7 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={presentationInputRef} type="file" accept=".pdf,.doc,.docx" multiple className="hidden" onChange={e => {
+                    <input ref={presentationInputRef} type="file" accept=".pdf,.doc,.docx" multiple className="hidden" onChange={(e) => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleDocumentUpload(files, 'presentation');
@@ -1012,8 +906,8 @@ const Profile = () => {
                         Ajouter un document
                       </Button>
                     </div>
-                    {documents.filter(d => d.category === 'presentation').length > 0 && <div className="space-y-2">
-                        {documents.filter(d => d.category === 'presentation').map(doc => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    {documents.filter((d) => d.category === 'presentation').length > 0 && <div className="space-y-2">
+                        {documents.filter((d) => d.category === 'presentation').map((doc) => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex items-center gap-3">
                               <File className="h-5 w-5 text-muted-foreground" />
                               <div>
@@ -1039,7 +933,7 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={priceListInputRef} type="file" accept=".pdf,.xls,.xlsx,.csv" multiple className="hidden" onChange={e => {
+                    <input ref={priceListInputRef} type="file" accept=".pdf,.xls,.xlsx,.csv" multiple className="hidden" onChange={(e) => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleDocumentUpload(files, 'price_list');
@@ -1056,8 +950,8 @@ const Profile = () => {
                         Ajouter la liste des prix
                       </Button>
                     </div>
-                    {documents.filter(d => d.category === 'price_list').length > 0 && <div className="space-y-2">
-                        {documents.filter(d => d.category === 'price_list').map(doc => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    {documents.filter((d) => d.category === 'price_list').length > 0 && <div className="space-y-2">
+                        {documents.filter((d) => d.category === 'price_list').map((doc) => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex items-center gap-3">
                               <File className="h-5 w-5 text-muted-foreground" />
                               <div>
@@ -1083,7 +977,7 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={otherDocsInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" multiple className="hidden" onChange={e => {
+                    <input ref={otherDocsInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" multiple className="hidden" onChange={(e) => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleDocumentUpload(files, 'other');
@@ -1100,8 +994,8 @@ const Profile = () => {
                         Ajouter des documents
                       </Button>
                     </div>
-                    {documents.filter(d => d.category === 'other').length > 0 && <div className="space-y-2">
-                        {documents.filter(d => d.category === 'other').map(doc => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    {documents.filter((d) => d.category === 'other').length > 0 && <div className="space-y-2">
+                        {documents.filter((d) => d.category === 'other').map((doc) => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex items-center gap-3">
                               <File className="h-5 w-5 text-muted-foreground" />
                               <div>
@@ -1130,7 +1024,7 @@ const Profile = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <input ref={techSheetsInputRef} type="file" accept=".pdf" multiple className="hidden" onChange={e => {
+                  <input ref={techSheetsInputRef} type="file" accept=".pdf" multiple className="hidden" onChange={(e) => {
                   const files = e.target.files;
                   if (files && files.length > 0) {
                     handleMultipleDocumentUpload(files, 'tech_sheet');
@@ -1148,7 +1042,7 @@ const Profile = () => {
                     </Button>
                   </div>
 
-                  {documents.filter(d => d.category === 'tech_sheet').length > 0 && <div className="space-y-4">
+                  {documents.filter((d) => d.category === 'tech_sheet').length > 0 && <div className="space-y-4">
                       <h4 className="font-medium">Fiches techniques ajoutées</h4>
                       <div className="overflow-x-auto">
                         <table className="w-full border-collapse border border-border">
@@ -1162,24 +1056,24 @@ const Profile = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {documents.filter(d => d.category === 'tech_sheet').map(doc => <tr key={doc.id}>
+                            {documents.filter((d) => d.category === 'tech_sheet').map((doc) => <tr key={doc.id}>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.cuvee || ''} placeholder="Cuvée" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.cuvee || ''} placeholder="Cuvée" className="w-full" onChange={(e) => handleUpdateDocument(doc.id, {
                               cuvee: e.target.value
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.vintage || ''} placeholder="2023" type="number" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.vintage || ''} placeholder="2023" type="number" className="w-full" onChange={(e) => handleUpdateDocument(doc.id, {
                               vintage: e.target.value ? parseInt(e.target.value) : undefined
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.format || ''} placeholder="75cl" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.format || ''} placeholder="75cl" className="w-full" onChange={(e) => handleUpdateDocument(doc.id, {
                               format: e.target.value
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.language || ''} placeholder="FR" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.language || ''} placeholder="FR" className="w-full" onChange={(e) => handleUpdateDocument(doc.id, {
                               language: e.target.value
                             })} />
                                 </td>
@@ -1205,7 +1099,7 @@ const Profile = () => {
                     <CardDescription>Images de votre domaine et vos vins (.jpg/.jpeg/.png ≤ 10 Mo)</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={photosInputRef} type="file" accept=".jpg,.jpeg,.png" multiple className="hidden" onChange={e => {
+                    <input ref={photosInputRef} type="file" accept=".jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleMediaUpload(files, 'image');
@@ -1223,16 +1117,16 @@ const Profile = () => {
                       </Button>
                     </div>
 
-                    {media.filter(m => m.type === 'image').length > 0 && <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {media.filter(m => m.type === 'image').map(item => <div key={item.id} className="relative group">
+                    {media.filter((m) => m.type === 'image').length > 0 && <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {media.filter((m) => m.type === 'image').map((item) => <div key={item.id} className="relative group">
                             <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                               <img src={item.file_url} alt={item.title} className="w-full h-full object-cover" />
                             </div>
                             <div className="mt-2 space-y-1">
-                              <Input value={item.title} placeholder="Titre" className="text-xs" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.title} placeholder="Titre" className="text-xs" onChange={(e) => handleUpdateMedia(item.id, {
                           title: e.target.value
                         })} />
-                              <Input value={item.credit || ''} placeholder="Crédit" className="text-xs" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.credit || ''} placeholder="Crédit" className="text-xs" onChange={(e) => handleUpdateMedia(item.id, {
                           credit: e.target.value
                         })} />
                             </div>
@@ -1254,7 +1148,7 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={videosInputRef} type="file" accept=".mp4" multiple className="hidden" onChange={e => {
+                    <input ref={videosInputRef} type="file" accept=".mp4" multiple className="hidden" onChange={(e) => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleMediaUpload(files, 'video');
@@ -1272,18 +1166,18 @@ const Profile = () => {
                       </Button>
                     </div>
 
-                    {media.filter(m => m.type === 'video').length > 0 && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {media.filter(m => m.type === 'video').map(item => <div key={item.id} className="relative group">
+                    {media.filter((m) => m.type === 'video').length > 0 && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {media.filter((m) => m.type === 'video').map((item) => <div key={item.id} className="relative group">
                             <div className="aspect-video bg-muted rounded-lg overflow-hidden">
                               {item.thumbnail_url ? <img src={item.thumbnail_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">
                                   <Play className="h-12 w-12 text-muted-foreground" />
                                 </div>}
                             </div>
                             <div className="mt-2 space-y-1">
-                              <Input value={item.title} placeholder="Titre" className="text-sm" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.title} placeholder="Titre" className="text-sm" onChange={(e) => handleUpdateMedia(item.id, {
                           title: e.target.value
                         })} />
-                              <Input value={item.credit || ''} placeholder="Crédit" className="text-sm" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.credit || ''} placeholder="Crédit" className="text-sm" onChange={(e) => handleUpdateMedia(item.id, {
                           credit: e.target.value
                         })} />
                             </div>
