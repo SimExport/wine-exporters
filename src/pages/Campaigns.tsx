@@ -15,7 +15,7 @@ import { Stepper } from '@/components/ui/stepper';
 import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive, MousePointer, Reply } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
@@ -945,14 +945,24 @@ ${campaignData.sendAsName}`} />
                         {campaign.prospect_count || 0} prospects
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm space-y-1">
-                          {campaign.stats_opens && <div>
-                              {Math.round((campaign.stats_opens || 0) / (campaign.prospect_count || 1) * 100)}% ouvertures
-                            </div>}
-                          {campaign.stats_replies && <div>
-                              {Math.round((campaign.stats_replies || 0) / (campaign.prospect_count || 1) * 100)}% réponses
-                            </div>}
-                        </div>
+                        {campaign.status === 'draft' ? (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        ) : (
+                          <div className="text-xs space-y-1 text-muted-foreground">
+                            <div className="flex items-center gap-1.5">
+                              <Eye className="h-3 w-3 shrink-0" />
+                              <span>{campaign.stats_opens ?? 0} ouv.</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <MousePointer className="h-3 w-3 shrink-0" />
+                              <span>{campaign.stats_clicks ?? 0} clics</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Reply className="h-3 w-3 shrink-0" />
+                              <span>{campaign.stats_replies ?? 0} rép.</span>
+                            </div>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         {format(new Date(campaign.created_at), 'dd/MM/yyyy', {
