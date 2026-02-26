@@ -10,8 +10,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play } from 'lucide-react';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
+
+const FieldHint = ({ text }: { text: string }) => (
+  <TooltipProvider delayDuration={200}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors cursor-help inline-block ml-1 align-middle" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
 interface ProfileData {
   domain_name: string;
   contact_name: string;
@@ -691,14 +705,20 @@ const Profile = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="surface_area">Surface (hectares)</Label>
+                      <Label htmlFor="surface_area">
+                        Surface (hectares)
+                        <FieldHint text="La superficie de votre domaine nous aide à estimer votre capacité de production et à vous matcher avec des importateurs dont les volumes commandés sont adaptés à votre taille." />
+                      </Label>
                       <Input id="surface_area" type="number" step="0.1" value={formData.surface_area || ''} onChange={e => setFormData(prev => ({
                       ...prev,
                       surface_area: e.target.value ? parseFloat(e.target.value) : null
                     }))} placeholder="25.5" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="bottles_per_year">Volume annuel (nb de bouteilles)</Label>
+                      <Label htmlFor="bottles_per_year">
+                        Volume annuel (nb de bouteilles)
+                        <FieldHint text="Ce chiffre est déterminant pour cibler les bons importateurs. Un petit domaine (< 50 000 bt) n'a pas les mêmes besoins qu'une structure de 500 000 bt. Nous adaptons nos recommandations en fonction." />
+                      </Label>
                       <Input id="bottles_per_year" type="number" min="0" value={formData.bottles_per_year || ''} onChange={e => setFormData(prev => ({
                       ...prev,
                       bottles_per_year: e.target.value ? parseInt(e.target.value) : null
@@ -719,7 +739,10 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>Certifications</Label>
+                    <Label>
+                      Certifications
+                      <FieldHint text="Les certifications bio, biodynamique ou HVE sont des critères de filtrage très utilisés par les importateurs spécialisés. Les préciser augmente significativement vos chances d'être sélectionné sur des campagnes ciblées." />
+                    </Label>
                     <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                       {certificationOptions.map(certification => <div key={certification} className="flex items-center space-x-2">
                           <Checkbox id={certification} checked={formData.certifications.includes(certification)} onCheckedChange={checked => handleCertificationChange(certification, checked as boolean)} />
@@ -735,7 +758,10 @@ const Profile = () => {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Cépages cultivés</Label>
+                      <Label>
+                        Cépages cultivés
+                        <FieldHint text="Les cépages sont un critère clé pour les importateurs spécialisés. Certains recherchent spécifiquement des cépages rares ou autochtones pour se différencier." />
+                      </Label>
                       <div className="flex flex-wrap gap-2">
                         {formData.grape_varieties.map((variety, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
                             {variety}
@@ -786,7 +812,10 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="priority_markets">Quels marchés souhaitez-vous prioriser ?</Label>
+                    <Label htmlFor="priority_markets">
+                      Quels marchés souhaitez-vous prioriser ?
+                      <FieldHint text="Ces marchés seront utilisés en priorité pour construire vos audiences de campagne. Soyez précis (ex: 'États-Unis - côte Est', 'Japon - Tokyo') pour un meilleur ciblage." />
+                    </Label>
                     <Textarea id="priority_markets" value={formData.priority_markets} onChange={e => setFormData(prev => ({
                     ...prev,
                     priority_markets: e.target.value
@@ -794,7 +823,10 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="current_markets">Sur quels marchés êtes-vous déjà présents ?</Label>
+                    <Label htmlFor="current_markets">
+                      Sur quels marchés êtes-vous déjà présents ?
+                      <FieldHint text="Ces informations évitent les doublons avec vos distributeurs existants. Nous pourrons ainsi cibler des importateurs sur des marchés complémentaires à votre réseau actuel." />
+                    </Label>
                     <Textarea id="current_markets" value={formData.current_markets} onChange={e => setFormData(prev => ({
                     ...prev,
                     current_markets: e.target.value
@@ -810,7 +842,10 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="target_buyer_description">Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler</Label>
+                    <Label htmlFor="target_buyer_description">
+                      Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler
+                      <FieldHint text="Plus votre description est précise (type de circuit, positionnement prix, philosophie), plus nos experts pourront affiner la sélection des contacts et améliorer le taux de réponse de vos campagnes." />
+                    </Label>
                     <Textarea id="target_buyer_description" value={formData.target_buyer_description} onChange={e => setFormData(prev => ({
                     ...prev,
                     target_buyer_description: e.target.value
