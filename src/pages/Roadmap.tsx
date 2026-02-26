@@ -44,6 +44,21 @@ const Roadmap = () => {
   const { toast } = useToast();
   const [votedFeatures, setVotedFeatures] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<string | null>(null);
+  const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchAllVotes = async () => {
+      const { data } = await supabase.from("roadmap_votes").select("feature_id");
+      if (data) {
+        const counts: Record<string, number> = {};
+        data.forEach((v) => {
+          counts[v.feature_id] = (counts[v.feature_id] || 0) + 1;
+        });
+        setVoteCounts(counts);
+      }
+    };
+    fetchAllVotes();
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -70,6 +85,7 @@ const Roadmap = () => {
       toast({ title: "Erreur", description: "Impossible d'enregistrer votre vote.", variant: "destructive" });
     } else {
       setVotedFeatures((prev) => new Set([...prev, featureId]));
+      setVoteCounts((prev) => ({ ...prev, [featureId]: (prev[featureId] || 0) + 1 }));
       toast({ title: "Merci pour votre vote !", description: "Votre intérêt a été enregistré." });
     }
     setLoading(null);
@@ -97,6 +113,11 @@ const Roadmap = () => {
                   <CardTitle className="text-lg">{feature.title}</CardTitle>
                 </div>
                 <CardDescription>{feature.description}</CardDescription>
+                {(voteCounts[feature.id] || 0) > 0 && (
+                  <p className="mt-3 text-sm font-medium text-amber-600 dark:text-amber-400">
+                    🔥 {voteCounts[feature.id]} vigneron{voteCounts[feature.id] > 1 ? 's' : ''} intéressé{voteCounts[feature.id] > 1 ? 's' : ''}
+                  </p>
+                )}
               </CardHeader>
               <CardFooter>
                 <Button

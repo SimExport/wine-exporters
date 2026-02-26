@@ -6,11 +6,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2 } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
+const CopyButton = ({ value }: { value: string }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="ml-1 inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+      title="Copier"
+    >
+      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+    </button>
+  );
+};
+
 interface BuyerContact {
   id: string;
   company_name: string;
@@ -362,13 +380,19 @@ const Importers = () => {
                           {fullAddress}
                         </TableCell>
                         <TableCell>
-                          <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
-                            <Mail className="h-3 w-3" />
-                            {contact.email}
-                          </a>
+                          <div className="flex items-center gap-0.5">
+                            <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
+                              <Mail className="h-3 w-3" />
+                              {contact.email}
+                            </a>
+                            <CopyButton value={contact.email} />
+                          </div>
                         </TableCell>
                         <TableCell>
-                          {formattedPhone}
+                          <div className="flex items-center gap-0.5">
+                            <span>{formattedPhone}</span>
+                            {contact.phone && <CopyButton value={formattedPhone} />}
+                          </div>
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">
                           {contact.website_url ? (
