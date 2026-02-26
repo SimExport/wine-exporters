@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.notify-campaign-submission]
 verify_jwt = false
+
+[functions.send-daily-reminders]
+verify_jwt = false
