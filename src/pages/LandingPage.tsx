@@ -134,7 +134,7 @@ const faqs = [
 },
 {
   q: "Y a-t-il un engagement ?",
-  a: "Non, l'abonnement à 199 € est mensuel et sans engagement."
+  a: "Oui, 3 mois d'engagement. Ensuite l'abonnement à 199 € mensuel et sans engagement."
 }];
 
 
