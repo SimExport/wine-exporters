@@ -134,9 +134,9 @@ const Dashboard = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Grape className="h-8 w-8 mr-3 text-primary" />
-              <h1 className="text-xl font-semibold text-foreground">
-                Wine Exporters    
-              </h1>
+              
+
+
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
@@ -288,7 +288,7 @@ const Dashboard = () => {
                   </Link>
                 </Button>}
             </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {campaigns.map(campaign => <Card key={campaign.id} className="hover:shadow-md transition-shadow">
+              {campaigns.map((campaign) => <Card key={campaign.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{campaign.name}</CardTitle>
                     {getStatusBadge(campaign.status)}
