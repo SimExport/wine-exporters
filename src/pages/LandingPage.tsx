@@ -152,9 +152,14 @@ const LandingPage = () => {
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-            <Grape className="h-6 w-6 text-primary" />
-            ExportVins
+          <Link to="/" className="flex items-center gap-2">
+            <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
+              <Grape className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="font-bold text-base text-foreground">WineExporters</span>
+              <span className="text-xs text-muted-foreground">by ExportVins</span>
+            </div>
           </Link>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild>
