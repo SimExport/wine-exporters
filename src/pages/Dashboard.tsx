@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Megaphone, Users, MapPin, TrendingUp, Rocket, Zap, MessageSquare, UserCheck, Activity } from 'lucide-react';
+import { LeadsWorldMap } from '@/components/LeadsWorldMap';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -404,6 +405,13 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+
+        {/* World Map */}
+        {campaigns.length > 0 && (
+          <div className="mt-8">
+            <LeadsWorldMap campaignIds={campaigns.map(c => c.id)} />
+          </div>
+        )}
 
         {/* Activity Feed */}
         <div className="mt-8">
