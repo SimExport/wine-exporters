@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
+import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
 
 const FieldHint = ({ text }: { text: string }) => (
   <TooltipProvider delayDuration={200}>
@@ -45,9 +46,9 @@ interface ProfileData {
   description: string;
   strengths: string[];
   is_published: boolean;
-  priority_markets: string;
-  current_markets: string;
-  avoid_markets: string;
+  priority_markets: string[];
+  current_markets: string[];
+  avoid_markets: string[];
   target_buyer_description: string;
 }
 interface Document {
@@ -110,9 +111,9 @@ const Profile = () => {
     description: '',
     strengths: ['', '', ''],
     is_published: false,
-    priority_markets: '',
-    current_markets: '',
-    avoid_markets: '',
+    priority_markets: [],
+    current_markets: [],
+    avoid_markets: [],
     target_buyer_description: ''
   });
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -141,10 +142,13 @@ const Profile = () => {
   };
   const handleAutoSave = async () => {
     try {
-      // Convert aoc array to string for database storage
+      // Convert array fields to strings for database storage
       const dataToSave = {
         ...formData,
-        aoc: formData.aoc.join(', ')
+        aoc: formData.aoc.join(', '),
+        priority_markets: formData.priority_markets.join(', '),
+        current_markets: formData.current_markets.join(', '),
+        avoid_markets: formData.avoid_markets.join(', '),
       };
       const {
         error
@@ -225,9 +229,9 @@ const Profile = () => {
           description: data.description || '',
           strengths: data.strengths?.length === 3 ? data.strengths : ['', '', ''],
           is_published: data.is_published || false,
-          priority_markets: data.priority_markets || '',
-          current_markets: data.current_markets || '',
-          avoid_markets: data.avoid_markets || '',
+          priority_markets: parseMarketString(data.priority_markets || ''),
+          current_markets: parseMarketString(data.current_markets || ''),
+          avoid_markets: parseMarketString(data.avoid_markets || ''),
           target_buyer_description: data.target_buyer_description || ''
         });
       }
@@ -270,10 +274,13 @@ const Profile = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Convert aoc array to string for database storage
+      // Convert array fields to strings for database storage
       const dataToSave = {
         ...formData,
-        aoc: formData.aoc.join(', ')
+        aoc: formData.aoc.join(', '),
+        priority_markets: formData.priority_markets.join(', '),
+        current_markets: formData.current_markets.join(', '),
+        avoid_markets: formData.avoid_markets.join(', '),
       };
       const {
         error
@@ -623,8 +630,8 @@ const Profile = () => {
     { label: 'Types de vins', done: formData.wine_types.length > 0, tab: 'general' },
     { label: 'Cépages cultivés', done: formData.grape_varieties.length > 0, tab: 'general' },
     { label: 'Cuvées', done: formData.cuvees.length > 0, tab: 'general' },
-    { label: 'Marchés prioritaires', done: !!formData.priority_markets, tab: 'markets' },
-    { label: 'Marchés actuels', done: !!formData.current_markets, tab: 'markets' },
+    { label: 'Marchés prioritaires', done: formData.priority_markets.length > 0, tab: 'markets' },
+    { label: 'Marchés actuels', done: formData.current_markets.length > 0, tab: 'markets' },
     { label: 'Description acheteurs cibles', done: !!formData.target_buyer_description, tab: 'markets' },
     { label: 'Description du domaine', done: formData.description.length >= 300, tab: 'description' },
     { label: 'Site web', done: !!formData.website && isValidUrl(formData.website), tab: 'website' },
@@ -883,33 +890,36 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="priority_markets">
+                    <Label>
                       Quels marchés souhaitez-vous prioriser ?
-                      <FieldHint text="Ces marchés seront utilisés en priorité pour construire vos audiences de campagne. Soyez précis (ex: 'États-Unis - côte Est', 'Japon - Tokyo') pour un meilleur ciblage." />
+                      <FieldHint text="Ces marchés seront utilisés en priorité pour construire vos audiences de campagne. Sélectionnez les pays que vous visez en priorité pour un meilleur ciblage." />
                     </Label>
-                    <Textarea id="priority_markets" value={formData.priority_markets} onChange={e => setFormData(prev => ({
-                    ...prev,
-                    priority_markets: e.target.value
-                  }))} placeholder="Ex: États-Unis, Japon, Royaume-Uni..." className="min-h-[100px]" />
+                    <CountryMultiSelect
+                      value={formData.priority_markets}
+                      onChange={v => setFormData(prev => ({ ...prev, priority_markets: v }))}
+                      placeholder="Sélectionnez vos marchés prioritaires..."
+                    />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="current_markets">
+                    <Label>
                       Sur quels marchés êtes-vous déjà présents ?
                       <FieldHint text="Ces informations évitent les doublons avec vos distributeurs existants. Nous pourrons ainsi cibler des importateurs sur des marchés complémentaires à votre réseau actuel." />
                     </Label>
-                    <Textarea id="current_markets" value={formData.current_markets} onChange={e => setFormData(prev => ({
-                    ...prev,
-                    current_markets: e.target.value
-                  }))} placeholder="Ex: France, Belgique, Suisse..." className="min-h-[100px]" />
+                    <CountryMultiSelect
+                      value={formData.current_markets}
+                      onChange={v => setFormData(prev => ({ ...prev, current_markets: v }))}
+                      placeholder="Sélectionnez vos marchés actuels..."
+                    />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="avoid_markets">Quels marchés souhaitez-vous éviter ?</Label>
-                    <Textarea id="avoid_markets" value={formData.avoid_markets} onChange={e => setFormData(prev => ({
-                    ...prev,
-                    avoid_markets: e.target.value
-                  }))} placeholder="Ex: Marchés où vous avez déjà un distributeur exclusif..." className="min-h-[100px]" />
+                    <Label>Quels marchés souhaitez-vous éviter ?</Label>
+                    <CountryMultiSelect
+                      value={formData.avoid_markets}
+                      onChange={v => setFormData(prev => ({ ...prev, avoid_markets: v }))}
+                      placeholder="Sélectionnez les marchés à éviter..."
+                    />
                   </div>
 
                   <div className="space-y-2">
