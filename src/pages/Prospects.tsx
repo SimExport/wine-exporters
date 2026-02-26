@@ -14,9 +14,10 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Download, ExternalLink, Search, Filter, Kanban, SearchX, Users } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Plus, Download, Search, Kanban, SearchX, Users, AlertTriangle, Clock } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
-import { format, subDays, isAfter } from 'date-fns'
+import { format, subDays, isAfter, differenceInDays } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 interface Prospect {
@@ -31,8 +32,24 @@ interface Prospect {
   last_activity_at?: string
   created_at: string
   campaign_id: string
+  status?: string | null
   campaigns?: {
     name: string
+  }
+}
+
+const LEAD_TAGS = [
+  { key: 'hot',  label: 'Chaud', dot: '🔴', classes: 'bg-red-100 text-red-700 border-red-200' },
+  { key: 'warm', label: 'Tiède', dot: '🟡', classes: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { key: 'cold', label: 'Froid', dot: '🔵', classes: 'bg-blue-100 text-blue-700 border-blue-200' },
+]
+
+function getInactivityInfo(lastActivityAt?: string): { label: string; isAlert: boolean } {
+  if (!lastActivityAt) return { label: 'Aucune activité', isAlert: false }
+  const days = differenceInDays(new Date(), new Date(lastActivityAt))
+  return {
+    label: days === 0 ? "Aujourd'hui" : `Il y a ${days}j`,
+    isAlert: days >= 15,
   }
 }
 
@@ -320,6 +337,15 @@ export default function Prospects() {
         ? [...prev.requested_actions, action]
         : prev.requested_actions.filter(a => a !== action)
     }))
+  }
+
+  const handleTagUpdate = async (prospectId: string, tag: string | null) => {
+    try {
+      await supabase.from('leads').update({ status: tag }).eq('id', prospectId)
+      setProspects(prev => prev.map(p => p.id === prospectId ? { ...p, status: tag } : p))
+    } catch (error) {
+      console.error('Error updating tag:', error)
+    }
   }
 
   if (loading) {
@@ -638,6 +664,7 @@ export default function Prospects() {
                     <TableHead>Pays</TableHead>
                     <TableHead>Actions demandées</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead>Tag</TableHead>
                     <TableHead>Dernière MAJ</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
@@ -677,8 +704,43 @@ export default function Prospects() {
                           {PROSPECT_STATUS_LABELS[prospect.prospect_status as keyof typeof PROSPECT_STATUS_LABELS]}
                         </Badge>
                       </TableCell>
+                      {/* Temperature tag cell */}
                       <TableCell>
-                        {prospect.last_activity_at && format(new Date(prospect.last_activity_at), 'dd/MM/yyyy', { locale: fr })}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="focus:outline-none">
+                              {prospect.status && LEAD_TAGS.find(t => t.key === prospect.status) ? (
+                                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium cursor-pointer ${LEAD_TAGS.find(t => t.key === prospect.status)!.classes}`}>
+                                  {LEAD_TAGS.find(t => t.key === prospect.status)!.label}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground border border-dashed rounded-full px-2 py-0.5 hover:border-foreground/40">+ Tag</span>
+                              )}
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-32">
+                            {LEAD_TAGS.map(tag => (
+                              <DropdownMenuItem key={tag.key} onClick={() => handleTagUpdate(prospect.id, tag.key)}>
+                                <span className={`text-xs px-1.5 py-0.5 rounded-full border mr-2 ${tag.classes}`}>{tag.label}</span>
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuItem onClick={() => handleTagUpdate(prospect.id, null)}>
+                              <span className="text-xs text-muted-foreground">Aucun</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                      {/* Inactivity cell */}
+                      <TableCell>
+                        {(() => {
+                          const info = getInactivityInfo(prospect.last_activity_at)
+                          return (
+                            <span className={`flex items-center gap-1 text-xs ${info.isAlert ? 'text-orange-500 font-medium' : 'text-muted-foreground'}`}>
+                              {info.isAlert && <AlertTriangle className="w-3 h-3" />}
+                              {info.label}
+                            </span>
+                          )
+                        })()}
                       </TableCell>
                       <TableCell>
                         <Link to={`/prospects/${prospect.id}`}>

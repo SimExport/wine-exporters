@@ -9,11 +9,12 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, Building2, Mail, MapPin } from 'lucide-react'
-import { format } from 'date-fns'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag } from 'lucide-react'
+import { format, differenceInDays } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 interface Prospect {
@@ -28,8 +29,24 @@ interface Prospect {
   last_activity_at?: string
   created_at: string
   campaign_id: string
+  status?: string | null
   campaigns?: {
     name: string
+  }
+}
+
+const LEAD_TAGS = [
+  { key: 'hot',  label: 'Chaud', dot: '🔴', classes: 'bg-red-100 text-red-700 border-red-200' },
+  { key: 'warm', label: 'Tiède', dot: '🟡', classes: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { key: 'cold', label: 'Froid', dot: '🔵', classes: 'bg-blue-100 text-blue-700 border-blue-200' },
+]
+
+function getInactivityInfo(lastActivityAt?: string): { label: string; isAlert: boolean } {
+  if (!lastActivityAt) return { label: 'Aucune activité', isAlert: false }
+  const days = differenceInDays(new Date(), new Date(lastActivityAt))
+  return {
+    label: days === 0 ? "Aujourd'hui" : `Il y a ${days}j`,
+    isAlert: days >= 15,
   }
 }
 
@@ -277,6 +294,15 @@ export default function Pipeline() {
     return prospects.filter(p => p.prospect_status === status)
   }
 
+  const handleTagUpdate = async (prospectId: string, tag: string | null) => {
+    try {
+      await supabase.from('leads').update({ status: tag }).eq('id', prospectId)
+      setProspects(prev => prev.map(p => p.id === prospectId ? { ...p, status: tag } : p))
+    } catch (error) {
+      console.error('Error updating tag:', error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -516,12 +542,38 @@ export default function Pipeline() {
                           <div className="flex items-start gap-2">
                             <GripVertical className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <Link 
-                                to={`/prospects/${prospect.id}`}
-                                className="font-medium text-sm hover:underline block truncate"
-                              >
-                                {prospect.company_name || 'Sans nom'}
-                              </Link>
+                              <div className="flex items-start justify-between gap-1">
+                                <Link 
+                                  to={`/prospects/${prospect.id}`}
+                                  className="font-medium text-sm hover:underline block truncate"
+                                >
+                                  {prospect.company_name || 'Sans nom'}
+                                </Link>
+                                {/* Temperature tag */}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <button className="flex-shrink-0 focus:outline-none">
+                                      {prospect.status && LEAD_TAGS.find(t => t.key === prospect.status) ? (
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${LEAD_TAGS.find(t => t.key === prospect.status)!.classes}`}>
+                                          {LEAD_TAGS.find(t => t.key === prospect.status)!.label}
+                                        </span>
+                                      ) : (
+                                        <Tag className="w-3 h-3 text-muted-foreground opacity-50 hover:opacity-100" />
+                                      )}
+                                    </button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-32">
+                                    {LEAD_TAGS.map(tag => (
+                                      <DropdownMenuItem key={tag.key} onClick={() => handleTagUpdate(prospect.id, tag.key)}>
+                                        <span className={`text-xs px-1.5 py-0.5 rounded-full border mr-2 ${tag.classes}`}>{tag.label}</span>
+                                      </DropdownMenuItem>
+                                    ))}
+                                    <DropdownMenuItem onClick={() => handleTagUpdate(prospect.id, null)}>
+                                      <span className="text-xs text-muted-foreground">Aucun</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                               
                               {(prospect.first_name || prospect.last_name) && (
                                 <p className="text-xs text-muted-foreground truncate">
@@ -556,6 +608,17 @@ export default function Pipeline() {
                               <p className="text-[10px] text-muted-foreground mt-2">
                                 {prospect.campaigns?.name}
                               </p>
+
+                              {/* Inactivity indicator */}
+                              {(() => {
+                                const info = getInactivityInfo(prospect.last_activity_at)
+                                return (
+                                  <div className={`flex items-center gap-1 mt-1.5 text-[10px] ${info.isAlert ? 'text-orange-500' : 'text-muted-foreground'}`}>
+                                    {info.isAlert ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                                    {info.label}
+                                  </div>
+                                )
+                              })()}
                             </div>
                           </div>
                         </CardContent>
