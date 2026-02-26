@@ -13,7 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface Campaign {
   id: string;
@@ -593,9 +594,12 @@ export default function AdminCampaigns() {
         </CardHeader>
         <CardContent>
           {filteredCampaigns.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucune campagne selon vos filtres.
-            </div>
+            <EmptyState
+              icon={<SearchX className="h-10 w-10" />}
+              title="Aucune campagne ne correspond à vos filtres"
+              description="Essayez de modifier ou réinitialiser vos critères de recherche."
+              action={{ label: "Réinitialiser les filtres", onClick: resetFilters }}
+            />
           ) : (
             <Table>
               <TableHeader>

@@ -16,6 +16,7 @@ import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -897,18 +898,13 @@ ${campaignData.sendAsName}`} />
         </div>
 
         {campaigns.length === 0 ? <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aucune campagne</h3>
-                <p className="text-muted-foreground mb-4">
-                  Créez votre première campagne de prospection pour développer vos ventes à l'international.
-                </p>
-                <Button onClick={() => navigate('/create-campaign')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Créer ma première campagne
-                </Button>
-              </div>
+            <CardContent>
+              <EmptyState
+                icon={<Rocket className="h-10 w-10" />}
+                title="Vous n'avez pas encore de campagne"
+                description="Créez votre première campagne de prospection pour toucher des importateurs à l'international."
+                action={{ label: "Lancer ma première campagne", href: "/create-campaign" }}
+              />
             </CardContent>
           </Card> : <Card>
             <CardHeader>

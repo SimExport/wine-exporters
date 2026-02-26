@@ -14,7 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Download, ExternalLink, Search, Filter, Kanban } from 'lucide-react'
+import { Plus, Download, ExternalLink, Search, Filter, Kanban, SearchX, Users } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { format, subDays, isAfter } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -613,12 +614,19 @@ export default function Prospects() {
         <Card>
           <CardContent>
             {prospects.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {Object.values(filters).some(f => Array.isArray(f) ? f.length > 0 : f !== '' && f !== '30') 
-                  ? "Aucun résultat — modifiez vos filtres."
-                  : "Aucun prospect pour l'instant."
-                }
-              </div>
+              (filters.campaign !== 'all' || filters.country !== '' || filters.status !== 'all' || filters.requestedActions.length > 0 || filters.search !== '')
+                ? <EmptyState
+                    icon={<SearchX className="h-10 w-10" />}
+                    title="Aucun résultat"
+                    description="Aucun prospect ne correspond à vos filtres actuels."
+                    action={{ label: "Effacer les filtres", onClick: () => setFilters({ campaign: 'all', country: '', status: 'all', requestedActions: [], period: '30', search: '' }) }}
+                  />
+                : <EmptyState
+                    icon={<Users className="h-10 w-10" />}
+                    title="Vos premiers prospects apparaîtront ici"
+                    description="Lancez une campagne pour commencer à recevoir des réponses d'importateurs."
+                    action={{ label: "Voir mes campagnes", href: "/campaigns" }}
+                  />
             ) : (
               <Table>
                 <TableHeader>
