@@ -613,6 +613,26 @@ const Profile = () => {
       });
     }
   };
+  // Profile completion score
+  const completionFields = [
+    { label: 'Nom du domaine', done: !!formData.domain_name, tab: 'general' },
+    { label: 'Votre nom', done: !!formData.contact_name, tab: 'general' },
+    { label: 'Localisation', done: !!formData.location, tab: 'general' },
+    { label: 'AOC / Appellations', done: formData.aoc.length > 0, tab: 'general' },
+    { label: 'Volume annuel', done: !!formData.bottles_per_year, tab: 'general' },
+    { label: 'Types de vins', done: formData.wine_types.length > 0, tab: 'general' },
+    { label: 'Cépages cultivés', done: formData.grape_varieties.length > 0, tab: 'general' },
+    { label: 'Cuvées', done: formData.cuvees.length > 0, tab: 'general' },
+    { label: 'Marchés prioritaires', done: !!formData.priority_markets, tab: 'markets' },
+    { label: 'Marchés actuels', done: !!formData.current_markets, tab: 'markets' },
+    { label: 'Description acheteurs cibles', done: !!formData.target_buyer_description, tab: 'markets' },
+    { label: 'Description du domaine', done: formData.description.length >= 300, tab: 'description' },
+    { label: 'Site web', done: !!formData.website && isValidUrl(formData.website), tab: 'website' },
+  ];
+  const completedCount = completionFields.filter(f => f.done).length;
+  const completionPct = Math.round((completedCount / completionFields.length) * 100);
+  const missingFields = completionFields.filter(f => !f.done);
+
   if (initialLoading) {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -647,6 +667,57 @@ const Profile = () => {
       </div>
 
       <div className="max-w-[1100px] mx-auto px-6 py-6">
+
+        {/* Profile Completion Widget */}
+        {completionPct < 100 && (
+          <div className="mb-6 rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">Profil complété à {completionPct}%</span>
+                {completionPct >= 80 && <Badge variant="secondary" className="text-xs">Presque parfait 🎯</Badge>}
+                {completionPct < 50 && <Badge variant="destructive" className="text-xs">À compléter</Badge>}
+              </div>
+              <span className="text-xs text-muted-foreground">{completedCount}/{completionFields.length} champs</span>
+            </div>
+            <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-3">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${completionPct}%`,
+                  background: completionPct >= 80
+                    ? 'hsl(var(--primary))'
+                    : completionPct >= 50
+                    ? 'hsl(var(--chart-4))'
+                    : 'hsl(var(--destructive))',
+                }}
+              />
+            </div>
+            {missingFields.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {missingFields.map(f => (
+                  <button
+                    key={f.label}
+                    type="button"
+                    onClick={() => setActiveTab(f.tab)}
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-dashed border-muted-foreground/40 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <span className="text-[10px]">+</span> {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {completionPct === 100 && (
+          <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 flex items-center gap-3">
+            <span className="text-lg">🎉</span>
+            <div>
+              <p className="text-sm font-semibold text-primary">Profil 100% complété !</p>
+              <p className="text-xs text-muted-foreground">Votre profil est complet. Nos experts pourront vous matcher avec les meilleurs importateurs.</p>
+            </div>
+          </div>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="general">Général</TabsTrigger>
