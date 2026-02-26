@@ -32,7 +32,6 @@ export function useNotifications() {
 
   const addNotification = useCallback((notif: Omit<AppNotification, 'read'>) => {
     setNotifications(prev => {
-      // Deduplicate by id
       if (prev.find(n => n.id === notif.id)) return prev;
       const updated = [{ ...notif, read: false }, ...prev].slice(0, 50);
       saveStored(updated);
@@ -56,23 +55,37 @@ export function useNotifications() {
   useEffect(() => {
     if (!user) return;
 
-    // Listen for new leads (prospects)
+    // Listen for new leads — no server-side filter (RLS ensures we only get our data via the subsequent query)
     const leadsChannel = supabase
-      .channel('notif-leads')
+      .channel(`notif-leads-${user.id}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'leads' },
         async (payload) => {
-          const lead = payload.new as { id: string; company_name?: string; first_name?: string; last_name?: string; campaign_id: string; created_at: string };
-          // Only notify if lead belongs to user's campaign
+          const lead = payload.new as {
+            id: string;
+            company_name?: string;
+            first_name?: string;
+            last_name?: string;
+            campaign_id: string;
+            created_at: string;
+          };
+
+          // Verify the lead belongs to the current user via their campaign
           const { data: campaign } = await supabase
             .from('campaigns')
             .select('id, name, user_id')
             .eq('id', lead.campaign_id)
-            .single();
-          if (!campaign || campaign.user_id !== user.id) return;
+            .eq('user_id', user.id)
+            .maybeSingle();
 
-          const name = lead.company_name || [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Nouvel importateur';
+          if (!campaign) return;
+
+          const name =
+            lead.company_name ||
+            [lead.first_name, lead.last_name].filter(Boolean).join(' ') ||
+            'Nouvel importateur';
+
           addNotification({
             id: `lead-${lead.id}`,
             type: 'new_lead',
@@ -85,23 +98,34 @@ export function useNotifications() {
       )
       .subscribe();
 
-    // Listen for campaigns becoming active
+    // Listen for campaigns becoming active — filter by user_id server-side
     const campaignsChannel = supabase
-      .channel('notif-campaigns')
+      .channel(`notif-campaigns-${user.id}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'campaigns', filter: `user_id=eq.${user.id}` },
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'campaigns',
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
-          const prev = payload.old as { status: string };
-          const next = payload.new as { id: string; name: string; status: string; updated_at: string };
-          if (prev.status !== 'active' && next.status === 'active') {
+          const oldRow = payload.old as { status?: string };
+          const newRow = payload.new as {
+            id: string;
+            name: string;
+            status: string;
+            updated_at: string;
+          };
+          // Fire only on transition → active
+          if (oldRow.status !== 'active' && newRow.status === 'active') {
             addNotification({
-              id: `campaign-active-${next.id}`,
+              id: `campaign-active-${newRow.id}`,
               type: 'campaign_active',
               title: 'Campagne activée',
-              description: `La campagne « ${next.name} » est maintenant en cours d'envoi`,
-              created_at: next.updated_at,
-              link: `/campaigns/${next.id}`,
+              description: `La campagne « ${newRow.name} » est maintenant en cours d'envoi`,
+              created_at: newRow.updated_at,
+              link: `/campaigns/${newRow.id}`,
             });
           }
         }
@@ -116,5 +140,5 @@ export function useNotifications() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  return { notifications, unreadCount, markAllRead, clearAll };
+  return { notifications, unreadCount, markAllRead, clearAll, addNotification };
 }
