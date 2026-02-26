@@ -24,6 +24,7 @@ import Pipeline from "./pages/Pipeline";
 import AdminCampaigns from "./pages/AdminCampaigns";
 import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
+import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/pipeline" element={<DashboardLayout><Pipeline /></DashboardLayout>} />
             <Route path="/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
             <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
+            <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
               <DashboardLayout>
                 <AdminRoute>
