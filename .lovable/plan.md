@@ -1,54 +1,112 @@
 
-## Plan : Dynamisation du Tableau de Bord
+## Plan : Enrichissement CRM Kanban + CRM Liste
 
-### Analyse de l'état actuel
+### Analyse de l'existant
 
-Le Dashboard actuel (`src/pages/Dashboard.tsx`) :
-- 3 cartes d'info (Plan, Campagnes dispo, Domaine) — toutes visuellement identiques
-- 2 cartes d'action (Profil + Lancer campagne) — même poids visuel
-- Section campagnes en bas
+**Pipeline.tsx (Kanban)** — chaque carte contient :
+- Nom société + contact
+- Pays (icône MapPin)
+- Badges "actions demandées" (max 2 + overflow)
+- Nom de la campagne
+- ❌ Pas d'indicateur de temps / inactivité
+- ❌ Pas de tags colorés personnalisés
 
-Le problème : la carte "Souscrire un abonnement" (visible pour les utilisateurs gratuits) est terne, et il n'y a aucun bloc de statistiques d'activité pour montrer la valeur de la plateforme.
+**Prospects.tsx (Liste)** — chaque ligne contient :
+- Date ajout / Campagne / Société / Contact / Pays / Actions / Statut / Dernière MAJ
+- ❌ Pas d'indicateur d'inactivité visuel (juste une date)
+- ❌ Pas de tags colorés
+
+### Approche choisie : pas de migration DB
+
+Les tags sont stockés dans `owner_notes` (champ texte existant) ? Non — pour ne pas perturber les notes. La meilleure approche est d'utiliser le champ `status` (text, nullable) de la table `leads` qui est distinct de `prospect_status`. Ce champ `status` est déjà là et actuellement peu utilisé côté UI. Il peut stocker : `'hot'`, `'warm'`, `'cold'`, `null`.
+
+Ainsi : **aucune migration DB nécessaire**. On réutilise le champ `status` existant.
 
 ---
 
-### Changements prévus
+### Changements détaillés
 
-**1. Bloc statistiques globales (nouveau)**
+#### 1. Constantes partagées — tags de température
 
-Ajouter 3 blocs en haut, sous le titre, affichant des métriques agrégées issues de la table `campaigns` (colonnes `stats_opens`, `stats_replies`, `stats_bounces`) et `leads` :
-
-```text
-┌──────────────────┬──────────────────┬──────────────────┐
-│  📧 Emails       │  💬 Réponses     │  🌍 Marchés      │
-│  envoyés         │  reçues          │  prospectés      │
-│  1 240           │  87              │  12              │
-└──────────────────┴──────────────────┴──────────────────┘
+```ts
+const LEAD_TAGS = [
+  { key: 'hot',   label: 'Chaud',    color: 'bg-red-100 text-red-700 border-red-200' },
+  { key: 'warm',  label: 'Tiède',    color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { key: 'cold',  label: 'Froid',    color: 'bg-blue-100 text-blue-700 border-blue-200' },
+]
 ```
 
-Ces chiffres sont calculés depuis les données réelles de l'utilisateur (somme des `stats_opens` de toutes ses campagnes, etc.). S'ils sont à zéro, on affiche `0` — ça rappelle la promesse de l'outil.
+#### 2. Fonction utilitaire d'inactivité
 
-**2. Carte "Upgrade" mise en avant**
+```ts
+function getInactivityInfo(lastActivityAt?: string): { label: string; isAlert: boolean } {
+  if (!lastActivityAt) return { label: 'Aucune activité', isAlert: false }
+  const days = differenceInDays(new Date(), new Date(lastActivityAt))
+  return {
+    label: days === 0 ? "Aujourd'hui" : `Il y a ${days}j`,
+    isAlert: days >= 15
+  }
+}
+```
 
-Pour les utilisateurs sans abonnement (`subscription_plan === 'none'`), transformer la carte "Lancer une Campagne" en carte premium visuellement distinctive :
+#### 3. Mise à jour du tag depuis la carte Kanban
 
-- Fond `bg-primary/5` avec bordure `border-primary/30`
-- Icône `Crown` dorée
-- Titre fort : "Démarrez votre prospection"
-- Description : "Accédez à 15 000+ acheteurs qualifiés dans le monde"
-- Bouton plein (primary) "Passer Premium" + sous-texte "À partir de 199 €/mois · 3 mois d'engagement"
+Un petit menu déroulant sur la carte (3 points ou clic sur le tag) permettra de changer le tag `status`. La mise à jour se fait via `supabase.from('leads').update({ status: ... })`.
 
-Pour les utilisateurs avec abonnement, la carte reste normale avec l'action "Nouvelle campagne".
+---
 
-**3. Petites améliorations visuelles**
-- Ajouter icônes `Send`, `MessageSquare`, `MapPin` pour les blocs stats
-- Import des nouveaux icônes Lucide nécessaires (`Crown`, `Send`, `MessageSquare`, `TrendingUp`)
+### Modifications fichier par fichier
+
+**`src/pages/Pipeline.tsx`**
+
+Sur chaque carte Kanban, ajouter :
+
+1. **Tag de température** : petit badge coloré en haut à droite de la carte. Cliquable pour cycler entre `hot → warm → cold → null` avec un simple clic, ou afficher un menu. On opte pour un **DropdownMenu** simple.
+
+2. **Indicateur d'inactivité** : en bas de la carte, ligne discrète :
+   - `🕐 Dernière action : il y a 5j` (texte gris)
+   - Si ≥ 15 jours → texte orange + icône `AlertTriangle` pour attirer l'attention
+
+```text
+┌─────────────────────────────┐
+│ ⠿  Caves Martin        🔴   │  ← tag "Chaud" en haut droite
+│    Jean Dupont              │
+│    🗺 France                │
+│    [Échantillons] [+1]      │
+│    Campagne Été 2025        │
+│    🕐 il y a 5j             │  ← indicateur inactivité
+└─────────────────────────────┘
+```
+
+Si ≥ 15 jours :
+```text
+│    ⚠️ il y a 18j            │  ← texte orange/rouge
+```
+
+**`src/pages/Prospects.tsx`**
+
+1. **Colonne "Tag"** : nouvelle colonne entre "Statut" et "Dernière MAJ" avec le badge coloré modifiable via un `Select` inline ou un `DropdownMenu`.
+
+2. **Colonne "Dernière MAJ"** : transformer l'affichage de la date en badge relatif :
+   - < 15j → `"il y a Xj"` en gris discret
+   - ≥ 15j → badge orange `"⚠ il y a Xj"` pour alerter
 
 ---
 
 ### Fichiers à modifier
 
-1. **`src/pages/Dashboard.tsx`** — seul fichier modifié :
-   - Ajout du calcul des stats agrégées (somme depuis les campagnes existantes)
-   - Ajout du bloc statistiques entre le titre et les cartes d'info
-   - Remplacement de la carte "Lancer campagne" par la version premium mise en avant pour les utilisateurs gratuits
+1. **`src/pages/Pipeline.tsx`** :
+   - Ajouter imports : `differenceInDays`, `AlertTriangle`, `DropdownMenu`
+   - Ajouter fonction `getInactivityInfo`
+   - Ajouter constante `LEAD_TAGS`
+   - Ajouter handler `handleTagUpdate(prospectId, tag)`
+   - Modifier le rendu des cartes Kanban
+
+2. **`src/pages/Prospects.tsx`** :
+   - Ajouter imports : `differenceInDays`, `AlertTriangle`, `DropdownMenu`
+   - Ajouter `status` dans l'interface `Prospect`
+   - Ajouter constante `LEAD_TAGS` (partagée)
+   - Ajouter handler `handleTagUpdate`
+   - Modifier la ligne du tableau : nouvelle colonne tag + colonne inactivité enrichie
+
+Aucune modification de DB requise — on utilise le champ `status` (text) déjà présent dans `leads`.
