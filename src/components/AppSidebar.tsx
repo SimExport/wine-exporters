@@ -193,19 +193,6 @@ export function AppSidebar() {
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <Bell className="h-8 w-8 text-muted-foreground/40 mb-2" />
                  <p className="text-sm text-muted-foreground">Aucune notification</p>
-                    <button
-                      onClick={() => addNotification({
-                        id: `test-${Date.now()}`,
-                        type: 'new_lead',
-                        title: 'Nouvel importateur trouvé',
-                        description: 'Château Test a répondu à la campagne « Test »',
-                        created_at: new Date().toISOString(),
-                        link: '/prospects',
-                      })}
-                      className="mt-3 rounded-md border border-dashed border-muted-foreground/30 px-3 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors"
-                    >
-                      + Simuler une notification
-                    </button>
                   </div>
                 ) : (
                   notifications.map(notif => {
