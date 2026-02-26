@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Send, MessageSquare, MapPin, TrendingUp, Rocket } from 'lucide-react';
+import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Megaphone, Users, MapPin, TrendingUp, Rocket } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -121,13 +121,13 @@ const Dashboard = () => {
   const isFreeUser = !profile?.subscription_plan || profile.subscription_plan === 'none';
 
   // Aggregate stats from all campaigns
-  const totalEmailsSent = campaigns.reduce((sum, c) => sum + (c.stats_opens || 0), 0);
+  const launchedCampaigns = campaigns.filter(c => c.status !== 'draft' && c.status !== 'pending_validation').length;
   const totalReplies = campaigns.reduce((sum, c) => sum + (c.stats_replies || 0), 0);
   const uniqueMarkets = new Set(campaigns.flatMap(c => c.target_markets || [])).size;
 
   const globalStats = [
-    { label: 'Emails envoyés', value: totalEmailsSent.toLocaleString('fr-FR'), icon: Send },
-    { label: 'Réponses reçues', value: totalReplies.toLocaleString('fr-FR'), icon: MessageSquare },
+    { label: 'Campagnes envoyées', value: launchedCampaigns.toLocaleString('fr-FR'), icon: Megaphone },
+    { label: 'Importateurs trouvés', value: totalReplies.toLocaleString('fr-FR'), icon: Users },
     { label: 'Marchés prospectés', value: uniqueMarkets.toString(), icon: MapPin },
   ];
 
