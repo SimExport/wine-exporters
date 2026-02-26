@@ -125,7 +125,7 @@ const inclusions = [
 
 const faqs = [
 {
-  q: "Qu'est-ce que le sourcing sur-mesure ?",
+  q: "Qu'est ce que la recherche sur-mesure ?",
   a: "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine."
 },
 {
