@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Megaphone, Users, MapPin, TrendingUp, Rocket } from 'lucide-react';
+import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Megaphone, Users, MapPin, TrendingUp, Rocket, Zap, MessageSquare, UserCheck, Activity } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface Profile {
   id: string;
@@ -29,12 +31,23 @@ interface Campaign {
   stats_bounces: number | null;
 }
 
+interface ActivityItem {
+  id: string;
+  type: 'campaign_launched' | 'reply_received' | 'prospect_updated' | 'campaign_created';
+  label: string;
+  sublabel?: string;
+  date: string;
+  icon: React.ElementType;
+  iconColor: string;
+}
+
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,11 +64,48 @@ const Dashboard = () => {
         } else {
           setProfile(profileResult.data);
         }
-        if (campaignsResult.error) {
-          console.error('Error fetching campaigns:', campaignsResult.error);
-        } else {
-          setCampaigns(campaignsResult.data || []);
+        const fetchedCampaigns = campaignsResult.data || [];
+        if (!campaignsResult.error) {
+          setCampaigns(fetchedCampaigns);
         }
+
+        // Build activity feed
+        const activityItems: ActivityItem[] = [];
+
+        // Campaign events (launched, completed, etc.)
+        if (fetchedCampaigns.length > 0) {
+          const campaignIds = fetchedCampaigns.map(c => c.id);
+          const [eventsResult, leadsResult] = await Promise.all([
+            supabase.from('campaign_events').select('*').in('campaign_id', campaignIds).order('created_at', { ascending: false }).limit(20),
+            supabase.from('leads').select('id,first_name,last_name,company_name,updated_at,created_at,campaign_id,prospect_status').in('campaign_id', campaignIds).order('updated_at', { ascending: false }).limit(20),
+          ]);
+
+          // Map campaign events
+          (eventsResult.data || []).forEach(ev => {
+            const camp = fetchedCampaigns.find(c => c.id === ev.campaign_id);
+            const campName = camp?.name ?? 'Campagne';
+            if (ev.type === 'launched') {
+              activityItems.push({ id: `ev-${ev.id}`, type: 'campaign_launched', label: `Campagne lancée`, sublabel: campName, date: ev.created_at, icon: Zap, iconColor: 'text-primary' });
+            } else if (ev.type === 'reply') {
+              activityItems.push({ id: `ev-${ev.id}`, type: 'reply_received', label: `Réponse reçue`, sublabel: campName, date: ev.created_at, icon: MessageSquare, iconColor: 'text-green-600' });
+            }
+          });
+
+          // Campaign creations
+          fetchedCampaigns.slice(0, 5).forEach(c => {
+            activityItems.push({ id: `camp-${c.id}`, type: 'campaign_created', label: `Nouvelle campagne`, sublabel: c.name, date: c.created_at, icon: Megaphone, iconColor: 'text-blue-600' });
+          });
+
+          // Prospect updates
+          (leadsResult.data || []).forEach(lead => {
+            const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.company_name || 'Prospect';
+            activityItems.push({ id: `lead-${lead.id}`, type: 'prospect_updated', label: `Prospect mis à jour`, sublabel: name, date: lead.updated_at, icon: UserCheck, iconColor: 'text-orange-500' });
+          });
+        }
+
+        // Sort by date desc, keep top 8
+        activityItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setActivity(activityItems.slice(0, 8));
       } catch (error) {
         console.error('Unexpected error:', error);
       } finally {
@@ -353,6 +403,46 @@ const Dashboard = () => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Activity Feed */}
+        <div className="mt-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-2 pb-3">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base">Dernière activité</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activity.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Activity className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                  <p className="text-sm text-muted-foreground">Aucune activité récente</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Lancez votre première campagne pour voir l'activité ici</p>
+                </div>
+              ) : (
+                <ol className="relative border-l border-border ml-3 space-y-0">
+                  {activity.map((item, i) => (
+                    <li key={item.id} className={`ml-4 ${i < activity.length - 1 ? 'pb-5' : ''}`}>
+                      {/* Dot */}
+                      <span className="absolute -left-1.5 flex items-center justify-center w-3 h-3 rounded-full bg-background border-2 border-border mt-1" />
+                      <div className="flex items-start gap-2.5">
+                        <div className={`shrink-0 mt-0.5 ${item.iconColor}`}>
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground leading-tight">{item.label}</p>
+                          {item.sublabel && <p className="text-xs text-muted-foreground truncate">{item.sublabel}</p>}
+                        </div>
+                        <time className="text-xs text-muted-foreground/70 shrink-0 mt-0.5">
+                          {formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: fr })}
+                        </time>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
