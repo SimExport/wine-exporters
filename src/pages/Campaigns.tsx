@@ -120,6 +120,7 @@ const Campaigns = () => {
   // Campaign listing state
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [listLoading, setListLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [campaignData, setCampaignData] = useState<CampaignData>({
     name: '',
@@ -883,6 +884,18 @@ ${campaignData.sendAsName}`} />
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>;
     }
+    const STATUS_FILTERS = [
+      { key: 'all', label: 'Toutes', color: 'bg-muted text-muted-foreground' },
+      { key: 'draft', label: 'Brouillon', color: 'bg-secondary text-secondary-foreground' },
+      { key: 'pending_validation', label: 'En validation', color: 'bg-yellow-100 text-yellow-800' },
+      { key: 'active', label: 'Active', color: 'bg-green-100 text-green-800' },
+      { key: 'results', label: 'Terminée', color: 'bg-purple-100 text-purple-800' },
+    ];
+
+    const filteredCampaigns = statusFilter === 'all'
+      ? campaigns
+      : campaigns.filter(c => c.status === statusFilter);
+
     return <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -908,9 +921,36 @@ ${campaignData.sendAsName}`} />
             </CardContent>
           </Card> : <Card>
             <CardHeader>
-              <CardTitle>Vos campagnes ({campaigns.length})</CardTitle>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle>Vos campagnes ({campaigns.length})</CardTitle>
+                <div className="flex flex-wrap gap-2">
+                  {STATUS_FILTERS.map(f => {
+                    const count = f.key === 'all' ? campaigns.length : campaigns.filter(c => c.status === f.key).length;
+                    const isActive = statusFilter === f.key;
+                    return (
+                      <button
+                        key={f.key}
+                        onClick={() => setStatusFilter(f.key)}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all border ${
+                          isActive
+                            ? 'border-primary ring-1 ring-primary shadow-sm ' + f.color
+                            : 'border-border ' + f.color + ' opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        {f.label}
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${isActive ? 'bg-background/60' : 'bg-background/40'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
+              {filteredCampaigns.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">Aucune campagne pour ce statut.</p>
+              ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -924,7 +964,7 @@ ${campaignData.sendAsName}`} />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {campaigns.map(campaign => <TableRow key={campaign.id}>
+                  {filteredCampaigns.map(campaign => <TableRow key={campaign.id}>
                       <TableCell className="font-medium">
                         {campaign.name}
                       </TableCell>
@@ -988,6 +1028,7 @@ ${campaignData.sendAsName}`} />
                     </TableRow>)}
                 </TableBody>
               </Table>
+              )}
             </CardContent>
           </Card>}
       </div>;
