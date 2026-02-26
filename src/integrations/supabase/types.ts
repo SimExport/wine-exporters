@@ -377,6 +377,8 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           prospect_status: Database["public"]["Enums"]["prospect_status"] | null
+          remind_at: string | null
+          remind_note: string | null
           requested_actions:
             | Database["public"]["Enums"]["requested_action"][]
             | null
@@ -413,6 +415,8 @@ export type Database = {
           prospect_status?:
             | Database["public"]["Enums"]["prospect_status"]
             | null
+          remind_at?: string | null
+          remind_note?: string | null
           requested_actions?:
             | Database["public"]["Enums"]["requested_action"][]
             | null
@@ -449,6 +453,8 @@ export type Database = {
           prospect_status?:
             | Database["public"]["Enums"]["prospect_status"]
             | null
+          remind_at?: string | null
+          remind_note?: string | null
           requested_actions?:
             | Database["public"]["Enums"]["requested_action"][]
             | null

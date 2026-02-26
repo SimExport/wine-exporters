@@ -2,15 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export interface AppNotification {
+export type AppNotification = {
   id: string;
-  type: 'new_lead' | 'campaign_active';
+  type: 'new_lead' | 'campaign_active' | 'reminder_due';
   title: string;
   description: string;
   created_at: string;
   read: boolean;
   link: string;
-}
+};
 
 const STORAGE_KEY = 'app_notifications';
 
@@ -51,6 +51,38 @@ export function useNotifications() {
     setNotifications([]);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
+
+  // Check for due reminders on mount
+  useEffect(() => {
+    if (!user) return;
+
+    const checkDueReminders = async () => {
+      const { data: dueLeads } = await supabase
+        .from('leads')
+        .select(`id, first_name, last_name, company_name, remind_at, remind_note, campaigns!inner(name, user_id)`)
+        .lte('remind_at', new Date().toISOString())
+        .not('remind_at', 'is', null)
+        .eq('campaigns.user_id', user.id);
+
+      if (!dueLeads) return;
+      for (const lead of dueLeads) {
+        const name = lead.company_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Prospect';
+        const campaign = Array.isArray(lead.campaigns) ? lead.campaigns[0] : lead.campaigns as { name: string } | null;
+        addNotification({
+          id: `reminder-${lead.id}-${lead.remind_at}`,
+          type: 'reminder_due',
+          title: '🔔 Rappel de relance',
+          description: `Relancez ${name}${campaign?.name ? ` (${campaign.name})` : ''}${lead.remind_note ? ` — ${lead.remind_note}` : ''}`,
+          created_at: lead.remind_at!,
+          link: `/prospects/${lead.id}`,
+        });
+      }
+    };
+
+    checkDueReminders();
+    const interval = setInterval(checkDueReminders, 60 * 60 * 1000); // every hour
+    return () => clearInterval(interval);
+  }, [user, addNotification]);
 
   useEffect(() => {
     if (!user) return;

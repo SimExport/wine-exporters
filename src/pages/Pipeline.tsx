@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag } from 'lucide-react'
+import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -30,6 +31,8 @@ interface Prospect {
   created_at: string
   campaign_id: string
   status?: string | null
+  remind_at?: string | null
+  remind_note?: string | null
   campaigns?: {
     name: string
   }
@@ -609,16 +612,29 @@ export default function Pipeline() {
                                 {prospect.campaigns?.name}
                               </p>
 
-                              {/* Inactivity indicator */}
-                              {(() => {
-                                const info = getInactivityInfo(prospect.last_activity_at)
-                                return (
-                                  <div className={`flex items-center gap-1 mt-1.5 text-[10px] ${info.isAlert ? 'text-orange-500' : 'text-muted-foreground'}`}>
-                                    {info.isAlert ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                                    {info.label}
-                                  </div>
-                                )
-                              })()}
+                              {/* Inactivity + Reminder row */}
+                              <div className="flex items-center justify-between mt-1.5">
+                                {(() => {
+                                  const info = getInactivityInfo(prospect.last_activity_at)
+                                  return (
+                                    <div className={`flex items-center gap-1 text-[10px] ${info.isAlert ? 'text-orange-500' : 'text-muted-foreground'}`}>
+                                      {info.isAlert ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                                      {info.label}
+                                    </div>
+                                  )
+                                })()}
+                                <ReminderPopover
+                                  leadId={prospect.id}
+                                  remindAt={prospect.remind_at}
+                                  remindNote={prospect.remind_note}
+                                  onUpdate={(remindAt, remindNote) =>
+                                    setProspects(prev => prev.map(p =>
+                                      p.id === prospect.id ? { ...p, remind_at: remindAt, remind_note: remindNote } : p
+                                    ))
+                                  }
+                                  size="sm"
+                                />
+                              </div>
                             </div>
                           </div>
                         </CardContent>
