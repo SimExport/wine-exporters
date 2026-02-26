@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2 } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -38,6 +38,10 @@ const navigationItems = [{
   title: "À venir",
   url: "/roadmap",
   icon: Rocket
+}, {
+  title: "Aide",
+  url: "/help",
+  icon: HelpCircle
 }];
 const settingsItems = [{
   title: "Paramètres",
