@@ -190,9 +190,9 @@ const LandingPage = () => {
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6">
-              L'export de vos vins,{" "}
+              Trouvez vos futurs importateurs,{" "}
               <span className="text-primary underline decoration-primary/40 underline-offset-4">
-enfin simplifié.
+développez vos ventes export.
               </span>
             </h1>
           </FadeIn>
