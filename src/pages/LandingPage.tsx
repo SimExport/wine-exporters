@@ -197,7 +197,7 @@ développez vos ventes export.
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">Arrêtez de perdre du temps avec des annuaires obsolètes et des emails ignorés. Trouvez et signez les bons importateurs depuis une plateforme unique conçue pour les domaines viticoles.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">La première plateforme de prospection tout-en-un pour les vignerons. Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.
 
 
             </p>
