@@ -197,8 +197,8 @@ développez vos ventes export.
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">La première plateforme de prospection tout-en-un pour les vignerons. Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.
-
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">La première plateforme de prospection tout-en-un. 
+Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.
 
             </p>
           </FadeIn>
