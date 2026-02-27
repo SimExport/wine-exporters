@@ -184,8 +184,8 @@ const LandingPage = () => {
 
         <div className="relative max-w-3xl mx-auto px-6 text-center py-24">
           <FadeIn>
-            <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5">
-              🍷 La plateforme tout-en-un pour les domaines viticoles      
+            <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5">🍷 La première plateforme de prospection tout-en-un pour les domaines viticoles
+
             </Badge>
           </FadeIn>
           <FadeIn delay={0.1}>
@@ -197,8 +197,8 @@ développez vos ventes export.
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">La première plateforme de prospection tout-en-un. 
-Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.
+
 
             </p>
           </FadeIn>
