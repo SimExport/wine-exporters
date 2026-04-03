@@ -358,8 +358,11 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
                     </li>)}
                 </ul>
                 <Button size="lg" className="w-full text-lg" asChild>
-                  <Link to="/auth">Créer mon compte</Link>
+                  <Link to="/auth">Démarrer maintenant</Link>
                 </Button>
+                <p className="text-sm text-muted-foreground text-center mt-4">
+                  Accès fondateur disponible — contactez-nous pour bénéficier du tarif préférentiel.
+                </p>
               </CardContent>
             </Card>
           </FadeIn>
