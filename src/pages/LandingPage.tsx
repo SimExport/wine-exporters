@@ -338,22 +338,43 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
       <section className="py-24 bg-muted/50">
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-14">
-              Ils nous font confiance
+            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-3">
+              Ils nous ont fait confiance. Ils ont obtenu des commandes.
             </h2>
+            <p className="text-center text-muted-foreground text-lg mb-14">
+              Ces domaines ont réalisé une Mission Performance Export avec ExportVins.
+            </p>
           </FadeIn>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             {[
-              { name: "Château Chardonnay", result: "4 commandes au Danemark" },
-              { name: "Potel-Aviron", result: "2 marchés ouverts : Pays-Bas et Suisse" },
-              { name: "Famille Petitjean", result: "Commandes sur la Norvège, les USA et l'Autriche" },
+              { name: "Famille Petitjean", result: "Commandes sur la Norvège, les USA (Floride) et l'Autriche" },
+              { name: "Potel-Aviron", result: "Ouverture de 2 marchés : Pays-Bas et Suisse" },
+              { name: "Château Mouresse", result: "3 commandes : Danemark + Pays-Bas" },
+              { name: "Clos des Garands", result: "3 commandes au Danemark" },
+              { name: "Maison des Vins Margnat", result: "3 commandes sur la Grèce et le Royaume-Uni" },
+              { name: "Maison Kieffer", result: "2 commandes sur le Danemark" },
+              { name: "Vignobles Courty", result: "2 commandes aux Pays-Bas et 1 commande en Allemagne" },
+              { name: "Champagne Cordeuil", result: "2 commandes en Estonie" },
+              { name: "Domaine de Naisse", result: "A ouvert la Finlande" },
+              { name: "Domaine Cialhol Gauran", result: "A ouvert le Danemark" },
+              { name: "Château Jalousie Beaulieu", result: "A ouvert la Hongrie" },
+              { name: "Château Paquette", result: "A ouvert le Danemark" },
+              { name: "Vignoble Arbillons", result: "1 commande sur le Canada et 2 commandes à venir sur les USA" },
+              { name: "Domaine Sibille", result: "1 commande en Italie et 1 commande à venir aux USA" },
+              { name: "Château Moulin Caresse", result: "1 commande sur le Royaume-Uni" },
+              { name: "Château la Grave", result: "1 commande sur le Royaume-Uni" },
+              { name: "Domaine Vincent Spannagel", result: "1 commande en Hongrie" },
+              { name: "Domaine François Cartier", result: "1 commande en Pologne et 1 commande à venir en Suède" },
+              { name: "Banjo Vino", result: "1 commande en Suède, 2 commandes à venir au Danemark et en Norvège" },
+              { name: "Affentaler Winzer", result: "1 commande sur le Danemark, 1 commande à venir en Suède et en Norvège" },
+              { name: "Huber & Bléger", result: "2 commandes à venir sur les USA" },
+              { name: "Domaine Maurice Schueller", result: "Commandes à venir en Suède et en Pologne" },
             ].map((t, i) => (
-              <FadeIn key={t.name} delay={i * 0.1}>
+              <FadeIn key={t.name} delay={(i % 4) * 0.05}>
                 <Card className="h-full border-border bg-card">
-                  <CardContent className="p-8 flex flex-col gap-4">
-                    <h3 className="text-lg font-bold">{t.name}</h3>
-                    <p className="text-primary font-medium leading-relaxed">{t.result}</p>
-                    <Badge variant="secondary" className="w-fit text-xs">✓ Client vérifié</Badge>
+                  <CardContent className="p-6 flex flex-col gap-2">
+                    <h3 className="text-base font-bold">{t.name}</h3>
+                    <p className="text-primary font-medium text-sm leading-relaxed">{t.result}</p>
                   </CardContent>
                 </Card>
               </FadeIn>
