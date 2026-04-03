@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Sending Slack notification...");
       
       const slackMessage = {
-        text: `🔔 Nouvelle demande de campagne !\n\n👤 Client : ${userEmail}\n🍷 Campagne : ${campaignName}\n🌍 Marchés à éviter : ${marketsList}\n\n<${adminUrl}|Voir dans le dashboard>`,
+        text: `🔔 Nouvelle demande de campagne !\n\n👤 Client : ${userEmail}\n🍷 Campagne : ${campaignName}\n🌍 Marchés ciblés : ${marketsList}\n\n<${adminUrl}|Voir dans le dashboard>`,
       };
 
       const slackResponse = await fetch(slackWebhookUrl, {
