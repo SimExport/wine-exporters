@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p><strong>👤 Client :</strong> ${userEmail}</p>
           <p><strong>🍷 Campagne :</strong> ${campaignName}</p>
-          <p><strong>🌍 Marchés à éviter :</strong> ${marketsList}</p>
+          <p><strong>🌍 Marchés ciblés :</strong> ${marketsList}</p>
         </div>
         <p style="margin-top: 20px;">
           <a href="${adminUrl}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
