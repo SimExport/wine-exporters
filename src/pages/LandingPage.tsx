@@ -135,6 +135,14 @@ const faqs = [
 {
   q: "Y a-t-il un engagement ?",
   a: "Oui, 3 mois d'engagement. Ensuite l'abonnement à 199 € mensuel et sans engagement."
+},
+{
+  q: "Combien de temps pour recevoir une première commande ?",
+  a: "En moyenne 3 mois en Europe, 6 à 12 mois pour le grand export."
+},
+{
+  q: "Qui envoie les campagnes ?",
+  a: "Notre équipe s'occupe de l'envoi et de l'optimisation de la délivrabilité. Vous validez, nous envoyons."
 }];
 
 
