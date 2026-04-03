@@ -202,7 +202,21 @@ Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez v
 
             </p>
           </FadeIn>
-          <FadeIn delay={0.3}>
+          <FadeIn delay={0.25}>
+            <div className="flex items-center justify-center gap-8 sm:gap-12 border-t border-border pt-8 mb-10">
+              {[
+                { value: "+100", label: "domaines accompagnés" },
+                { value: "+260", label: "importateurs trouvés" },
+                { value: "+24", label: "marchés ouverts" },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-primary">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.35}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="text-lg px-8">
                 <Link to="/auth">
