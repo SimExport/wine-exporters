@@ -206,7 +206,7 @@ const Profile = () => {
             return data.aoc;
           }
           if (typeof data.aoc === 'string' && data.aoc.trim()) {
-            return [data.aoc.trim()];
+            return data.aoc.split(',').map((s: string) => s.trim()).filter(Boolean);
           }
           return [];
         };
