@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import pillarNetworkImg from "@/assets/pillar-network.png";
 import pillarContactImg from "@/assets/pillar-contact.png";
