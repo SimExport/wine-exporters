@@ -326,6 +326,34 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
         </div>
       </section>
 
+      {/* ── 4b. TÉMOIGNAGES ── */}
+      <section className="py-24 bg-muted/50">
+        <div className="max-w-6xl mx-auto px-6">
+          <FadeIn>
+            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-14">
+              Ils nous font confiance
+            </h2>
+          </FadeIn>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { name: "Château Chardonnay", result: "4 commandes au Danemark" },
+              { name: "Potel-Aviron", result: "2 marchés ouverts : Pays-Bas et Suisse" },
+              { name: "Famille Petitjean", result: "Commandes sur la Norvège, les USA et l'Autriche" },
+            ].map((t, i) => (
+              <FadeIn key={t.name} delay={i * 0.1}>
+                <Card className="h-full border-border bg-card">
+                  <CardContent className="p-8 flex flex-col gap-4">
+                    <h3 className="text-lg font-bold">{t.name}</h3>
+                    <p className="text-primary font-medium leading-relaxed">{t.result}</p>
+                    <Badge variant="secondary" className="w-fit text-xs">✓ Client vérifié</Badge>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── 5. TARIFS ── */}
       <section id="pricing" className="py-24 scroll-mt-20">
         <div className="max-w-2xl mx-auto px-6">
