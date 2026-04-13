@@ -320,23 +320,26 @@ const Importers = () => {
         )}
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-4 mb-6">
-        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-          <SelectTrigger className="w-64">
-            <SelectValue placeholder="Choisir un marché" />
-          </SelectTrigger>
-          <SelectContent>
-            {COUNTRIES.map(country => <SelectItem key={country.code} value={country.code}>
-                {country.name}
-              </SelectItem>)}
-          </SelectContent>
-        </Select>
-        
-        {selectedCountry && <div className="text-sm text-muted-foreground">
-            {totalCount} contacts
-          </div>}
-      </div>
+      {/* Country Selector - Map + Continent List */}
+      <CountrySelector
+        selectedCountry={selectedCountry}
+        onSelectCountry={setSelectedCountry}
+      />
+
+      {/* Selected country info */}
+      {selectedCountry && (
+        <div className="flex items-center gap-3 mt-4 mb-2">
+          <span className="text-sm font-medium text-foreground">
+            {COUNTRIES.find(c => c.code === selectedCountry)?.name}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            — {totalCount} contacts
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => setSelectedCountry('')} className="text-xs h-6 px-2">
+            Effacer le filtre
+          </Button>
+        </div>
+      )}
 
       {/* Main Content */}
       <Card>
