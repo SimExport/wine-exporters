@@ -57,12 +57,16 @@ export type Database = {
       }
       buyer_contacts: {
         Row: {
+          Address: string | null
           city: string | null
           company_name: string | null
           country: string
           created_at: string
           email: string
+          Facebook: string | null
           id: string
+          Instagram: string | null
+          LinkedIn: string | null
           phone: string | null
           postal_code: string | null
           state: string | null
@@ -71,12 +75,16 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          Address?: string | null
           city?: string | null
           company_name?: string | null
           country: string
           created_at?: string
           email: string
+          Facebook?: string | null
           id?: string
+          Instagram?: string | null
+          LinkedIn?: string | null
           phone?: string | null
           postal_code?: string | null
           state?: string | null
@@ -85,12 +93,16 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          Address?: string | null
           city?: string | null
           company_name?: string | null
           country?: string
           created_at?: string
           email?: string
+          Facebook?: string | null
           id?: string
+          Instagram?: string | null
+          LinkedIn?: string | null
           phone?: string | null
           postal_code?: string | null
           state?: string | null
