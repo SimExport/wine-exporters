@@ -7,6 +7,7 @@ import { MapPin, Loader2 } from 'lucide-react';
 interface ParseResult {
   total_candidates: number;
   updated: number;
+  skipped: number;
   errors?: string[];
 }
 
@@ -35,7 +36,7 @@ export function ParseAddressesButton() {
       setResult(res);
       toast({
         title: 'Parsing terminé',
-        description: `${res.updated} mis à jour sur ${res.total_candidates} candidats`,
+        description: `${res.updated} mis à jour / ${res.skipped} ignorés sur ${res.total_candidates + res.skipped} contacts`,
       });
     } catch (err: any) {
       toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
@@ -57,7 +58,7 @@ export function ParseAddressesButton() {
       </Button>
       {result && (
         <p className="text-xs text-muted-foreground">
-          {result.updated} mis à jour / {result.total_candidates - result.updated} ignorés
+          {result.updated} mis à jour / {result.skipped} ignorés sur {result.total_candidates + result.skipped} contacts
           {result.errors && ` · ${result.errors.length} erreur(s)`}
         </p>
       )}
