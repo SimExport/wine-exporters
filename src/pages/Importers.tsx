@@ -48,15 +48,24 @@ interface BuyerContact {
 const formatAddress = (contact: BuyerContact): string => {
   const { street, city, postal_code, country, Address } = contact;
   if (street && city && postal_code) {
-    return `${street}, ${postal_code} ${city}, ${country}`;
+    return `${street}, ${postal_code} ${city}, ${translateCountry(country)}`;
   }
   if (city && country) {
-    return `${city}, ${country}`;
+    return `${city}, ${translateCountry(country)}`;
   }
   if (Address) {
     return Address;
   }
   return '—';
+};
+
+const COUNTRY_EN_TO_FR: Record<string, string> = {};
+// Built lazily after COUNTRIES is defined below
+const translateCountry = (englishName: string): string => {
+  if (Object.keys(COUNTRY_EN_TO_FR).length === 0) {
+    COUNTRIES.forEach(c => { COUNTRY_EN_TO_FR[c.englishName] = c.name; });
+  }
+  return COUNTRY_EN_TO_FR[englishName] || englishName;
 };
 const COUNTRIES = [
   { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
@@ -388,7 +397,7 @@ const Importers = () => {
                           {contact.company_name}
                         </TableCell>
                         <TableCell>
-                          {contact.country}
+                          {translateCountry(contact.country)}
                         </TableCell>
                         <TableCell className="min-w-[300px] whitespace-normal">
                           {fullAddress}
