@@ -379,8 +379,7 @@ const Importers = () => {
                 </TableHeader>
                 <TableBody>
                   {contacts.map(contact => {
-                    const addressParts = [contact.street, contact.city, contact.state].filter(Boolean);
-                    const fullAddress = addressParts.length > 0 ? addressParts.join(', ') : '-';
+                    const fullAddress = formatAddress(contact);
                     const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
 
                     return (
