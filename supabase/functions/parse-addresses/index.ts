@@ -1,5 +1,9 @@
-import { corsHeaders } from '@supabase/supabase-js/cors'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 function parseAddress(raw: string): { street: string | null; city: string | null; postal_code: string | null; country: string | null } {
   const parts = raw.split(',').map(p => p.trim()).filter(Boolean)
