@@ -387,7 +387,9 @@ const Importers = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Téléphone</TableHead>
                     <TableHead>Site web</TableHead>
-                  </TableRow>
+                    <TableHead>Facebook</TableHead>
+                    <TableHead>Instagram</TableHead>
+                    <TableHead>LinkedIn</TableHead>
                 </TableHeader>
                 <TableBody>
                   {contacts.map(contact => {
