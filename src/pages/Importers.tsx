@@ -433,6 +433,27 @@ const Importers = () => {
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
+                        <TableCell>
+                          {contact.Facebook ? (
+                            <a href={contact.Facebook} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                              <Facebook className="h-4 w-4" />
+                            </a>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          {contact.Instagram ? (
+                            <a href={contact.Instagram} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                              <Instagram className="h-4 w-4" />
+                            </a>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          {contact.LinkedIn ? (
+                            <a href={contact.LinkedIn} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                              <Linkedin className="h-4 w-4" />
+                            </a>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
