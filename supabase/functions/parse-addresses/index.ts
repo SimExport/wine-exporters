@@ -10,7 +10,6 @@ function parseAddress(raw: string): { street: string | null; city: string | null
 
   if (parts.length === 0) return { street: null, city: null, postal_code: null, country: null }
 
-  // Heuristic: last part = country, second-to-last = city (possibly with postal code), rest = street
   const country = parts.length >= 2 ? parts[parts.length - 1] : null
   let city: string | null = null
   let postal_code: string | null = null
@@ -18,13 +17,11 @@ function parseAddress(raw: string): { street: string | null; city: string | null
 
   if (parts.length >= 2) {
     const cityPart = parts[parts.length - 2]
-    // Try to extract postal code (sequence of digits, possibly with spaces)
     const postalMatch = cityPart.match(/^(\d[\d\s\-]{2,8}\d?)\s+(.+)$/)
     if (postalMatch) {
       postal_code = postalMatch[1].trim()
       city = postalMatch[2].trim()
     } else {
-      // Try postal code after city name: "Paris 75000"
       const postalAfter = cityPart.match(/^(.+?)\s+(\d{4,6})$/)
       if (postalAfter) {
         city = postalAfter[1].trim()
@@ -38,7 +35,6 @@ function parseAddress(raw: string): { street: string | null; city: string | null
   if (parts.length >= 3) {
     street = parts.slice(0, parts.length - 2).join(', ')
   } else if (parts.length === 1) {
-    // Single part — treat as country
     return { street: null, city: null, postal_code: null, country: parts[0] }
   }
 
@@ -78,61 +74,88 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'Admin only' }), { status: 403, headers: corsHeaders })
   }
 
-  // Fetch contacts with Address but no structured fields
-  const { data: contacts, error: fetchError } = await supabase
-    .from('buyer_contacts')
-    .select('id, Address, street, city, postal_code, country')
-    .not('Address', 'is', null)
-    .or('street.is.null,street.eq.')
-    .or('city.is.null,city.eq.')
-    .limit(1000)
-
-  if (fetchError) {
-    return new Response(JSON.stringify({ error: fetchError.message }), { status: 500, headers: corsHeaders })
-  }
-
-  // Filter: only contacts where street AND city are empty but Address is filled
-  const toParse = (contacts || []).filter(c =>
-    c.Address && c.Address.trim() !== '' &&
-    (!c.street || c.street.trim() === '') &&
-    (!c.city || c.city.trim() === '')
-  )
-
+  // Paginate through ALL contacts with Address but missing structured fields
+  const BATCH_SIZE = 1000
+  let totalCandidates = 0
   let updated = 0
+  let skipped = 0
   const errors: string[] = []
+  let offset = 0
+  let hasMore = true
 
-  for (const contact of toParse) {
-    const parsed = parseAddress(contact.Address!)
-    // Only update if we extracted something useful
-    if (!parsed.city && !parsed.country && !parsed.street) continue
+  while (hasMore) {
+    const { data: contacts, error: fetchError } = await supabase
+      .from('buyer_contacts')
+      .select('id, Address, street, city, postal_code, country')
+      .not('Address', 'is', null)
+      .range(offset, offset + BATCH_SIZE - 1)
 
-    const updateData: Record<string, string | null> = {}
-    if (parsed.street) updateData.street = parsed.street
-    if (parsed.city) updateData.city = parsed.city
-    if (parsed.postal_code) updateData.postal_code = parsed.postal_code
-    // Don't overwrite country if already set
-    if (parsed.country && (!contact.country || contact.country.trim() === '')) {
-      updateData.country = parsed.country
+    if (fetchError) {
+      return new Response(JSON.stringify({ error: fetchError.message }), { status: 500, headers: corsHeaders })
     }
 
-    if (Object.keys(updateData).length === 0) continue
+    if (!contacts || contacts.length === 0) {
+      hasMore = false
+      break
+    }
 
-    const { error: updateError } = await supabase
-      .from('buyer_contacts')
-      .update(updateData)
-      .eq('id', contact.id)
+    for (const contact of contacts) {
+      // Only process contacts where street AND city are empty but Address is filled
+      if (!contact.Address || contact.Address.trim() === '') {
+        skipped++
+        continue
+      }
+      if ((contact.street && contact.street.trim() !== '') || (contact.city && contact.city.trim() !== '')) {
+        skipped++
+        continue
+      }
 
-    if (updateError) {
-      errors.push(`${contact.id}: ${updateError.message}`)
+      totalCandidates++
+
+      const parsed = parseAddress(contact.Address!)
+      if (!parsed.city && !parsed.country && !parsed.street) {
+        skipped++
+        continue
+      }
+
+      const updateData: Record<string, string | null> = {}
+      if (parsed.street) updateData.street = parsed.street
+      if (parsed.city) updateData.city = parsed.city
+      if (parsed.postal_code) updateData.postal_code = parsed.postal_code
+      if (parsed.country && (!contact.country || contact.country.trim() === '')) {
+        updateData.country = parsed.country
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        skipped++
+        continue
+      }
+
+      const { error: updateError } = await supabase
+        .from('buyer_contacts')
+        .update(updateData)
+        .eq('id', contact.id)
+
+      if (updateError) {
+        errors.push(`${contact.id}: ${updateError.message}`)
+      } else {
+        updated++
+      }
+    }
+
+    if (contacts.length < BATCH_SIZE) {
+      hasMore = false
     } else {
-      updated++
+      offset += BATCH_SIZE
     }
   }
 
   return new Response(JSON.stringify({
-    total_candidates: toParse.length,
+    total_scanned: offset + (hasMore ? 0 : 0),
+    total_candidates: totalCandidates,
     updated,
-    errors: errors.length > 0 ? errors : undefined,
+    skipped,
+    errors: errors.length > 0 ? errors.slice(0, 50) : undefined,
   }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     status: 200,
