@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CountrySelector, COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -70,36 +71,7 @@ const translateCountry = (englishName: string): string => {
   }
   return COUNTRY_EN_TO_FR[englishName] || englishName;
 };
-const COUNTRIES = [
-  { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
-  { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
-  { code: 'AU', name: 'Australie', englishName: 'Australia' },
-  { code: 'AT', name: 'Autriche', englishName: 'Austria' },
-  { code: 'BE', name: 'Belgique', englishName: 'Belgium' },
-  { code: 'BR', name: 'Brésil', englishName: 'Brazil' },
-  { code: 'CA', name: 'Canada', englishName: 'Canada' },
-  { code: 'CN', name: 'Chine', englishName: 'China' },
-  { code: 'KR', name: 'Corée du Sud', englishName: 'South Korea' },
-  { code: 'DK', name: 'Danemark', englishName: 'Denmark' },
-  { code: 'ES', name: 'Espagne', englishName: 'Spain' },
-  { code: 'EE', name: 'Estonie', englishName: 'Estonia' },
-  { code: 'US', name: 'États-Unis', englishName: 'United States' },
-  { code: 'FI', name: 'Finlande', englishName: 'Finland' },
-  { code: 'HK', name: 'Hong Kong', englishName: 'Hong Kong' },
-  { code: 'IE', name: 'Irlande', englishName: 'Ireland' },
-  { code: 'IT', name: 'Italie', englishName: 'Italy' },
-  { code: 'JP', name: 'Japon', englishName: 'Japan' },
-  { code: 'MX', name: 'Mexique', englishName: 'Mexico' },
-  { code: 'NO', name: 'Norvège', englishName: 'Norway' },
-  { code: 'NL', name: 'Pays-Bas', englishName: 'Netherlands' },
-  { code: 'PL', name: 'Pologne', englishName: 'Poland' },
-  { code: 'PT', name: 'Portugal', englishName: 'Portugal' },
-  { code: 'CZ', name: 'République tchèque', englishName: 'Czech Republic' },
-  { code: 'UK', name: 'Royaume-Uni', englishName: 'United Kingdom' },
-  { code: 'SG', name: 'Singapour', englishName: 'Singapore' },
-  { code: 'SE', name: 'Suède', englishName: 'Sweden' },
-  { code: 'CH', name: 'Suisse', englishName: 'Switzerland' },
-];
+const COUNTRIES = COUNTRY_LIST;
 const Importers = () => {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
@@ -348,23 +320,26 @@ const Importers = () => {
         )}
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-4 mb-6">
-        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-          <SelectTrigger className="w-64">
-            <SelectValue placeholder="Choisir un marché" />
-          </SelectTrigger>
-          <SelectContent>
-            {COUNTRIES.map(country => <SelectItem key={country.code} value={country.code}>
-                {country.name}
-              </SelectItem>)}
-          </SelectContent>
-        </Select>
-        
-        {selectedCountry && <div className="text-sm text-muted-foreground">
-            {totalCount} contacts
-          </div>}
-      </div>
+      {/* Country Selector - Map + Continent List */}
+      <CountrySelector
+        selectedCountry={selectedCountry}
+        onSelectCountry={setSelectedCountry}
+      />
+
+      {/* Selected country info */}
+      {selectedCountry && (
+        <div className="flex items-center gap-3 mt-4 mb-2">
+          <span className="text-sm font-medium text-foreground">
+            {COUNTRIES.find(c => c.code === selectedCountry)?.name}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            — {totalCount} contacts
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => setSelectedCountry('')} className="text-xs h-6 px-2">
+            Effacer le filtre
+          </Button>
+        </div>
+      )}
 
       {/* Main Content */}
       <Card>
