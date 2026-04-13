@@ -71,36 +71,7 @@ const translateCountry = (englishName: string): string => {
   }
   return COUNTRY_EN_TO_FR[englishName] || englishName;
 };
-const COUNTRIES = [
-  { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
-  { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
-  { code: 'AU', name: 'Australie', englishName: 'Australia' },
-  { code: 'AT', name: 'Autriche', englishName: 'Austria' },
-  { code: 'BE', name: 'Belgique', englishName: 'Belgium' },
-  { code: 'BR', name: 'Brésil', englishName: 'Brazil' },
-  { code: 'CA', name: 'Canada', englishName: 'Canada' },
-  { code: 'CN', name: 'Chine', englishName: 'China' },
-  { code: 'KR', name: 'Corée du Sud', englishName: 'South Korea' },
-  { code: 'DK', name: 'Danemark', englishName: 'Denmark' },
-  { code: 'ES', name: 'Espagne', englishName: 'Spain' },
-  { code: 'EE', name: 'Estonie', englishName: 'Estonia' },
-  { code: 'US', name: 'États-Unis', englishName: 'United States' },
-  { code: 'FI', name: 'Finlande', englishName: 'Finland' },
-  { code: 'HK', name: 'Hong Kong', englishName: 'Hong Kong' },
-  { code: 'IE', name: 'Irlande', englishName: 'Ireland' },
-  { code: 'IT', name: 'Italie', englishName: 'Italy' },
-  { code: 'JP', name: 'Japon', englishName: 'Japan' },
-  { code: 'MX', name: 'Mexique', englishName: 'Mexico' },
-  { code: 'NO', name: 'Norvège', englishName: 'Norway' },
-  { code: 'NL', name: 'Pays-Bas', englishName: 'Netherlands' },
-  { code: 'PL', name: 'Pologne', englishName: 'Poland' },
-  { code: 'PT', name: 'Portugal', englishName: 'Portugal' },
-  { code: 'CZ', name: 'République tchèque', englishName: 'Czech Republic' },
-  { code: 'UK', name: 'Royaume-Uni', englishName: 'United Kingdom' },
-  { code: 'SG', name: 'Singapour', englishName: 'Singapore' },
-  { code: 'SE', name: 'Suède', englishName: 'Sweden' },
-  { code: 'CH', name: 'Suisse', englishName: 'Switzerland' },
-];
+const COUNTRIES = COUNTRY_LIST;
 const Importers = () => {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
