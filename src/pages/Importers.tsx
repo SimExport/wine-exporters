@@ -142,7 +142,7 @@ const Importers = () => {
         count
       } = await supabase.from('buyer_contacts').select('*', {
         count: 'exact'
-      }).eq('country', country.englishName).order('company_name', {
+      }).in('country', country.dbAliases).order('company_name', {
         ascending: true
       }).range(from, to);
       if (error) {
@@ -190,7 +190,7 @@ const Importers = () => {
       const {
         data,
         error
-      } = await supabase.from('buyer_contacts').select('*').eq('country', country.englishName).order('company_name', {
+      } = await supabase.from('buyer_contacts').select('*').in('country', country.dbAliases).order('company_name', {
         ascending: true
       }).limit(10000);
       if (error) {
