@@ -40,9 +40,24 @@ interface BuyerContact {
   postal_code?: string;
   phone?: string;
   state?: string;
+  Address?: string;
   created_at: string;
   updated_at: string;
 }
+
+const formatAddress = (contact: BuyerContact): string => {
+  const { street, city, postal_code, country, Address } = contact;
+  if (street && city && postal_code) {
+    return `${street}, ${postal_code} ${city}, ${country}`;
+  }
+  if (city && country) {
+    return `${city}, ${country}`;
+  }
+  if (Address) {
+    return Address;
+  }
+  return '—';
+};
 const COUNTRIES = [
   { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
   { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
