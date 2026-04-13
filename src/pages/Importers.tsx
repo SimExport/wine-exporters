@@ -40,9 +40,24 @@ interface BuyerContact {
   postal_code?: string;
   phone?: string;
   state?: string;
+  Address?: string;
   created_at: string;
   updated_at: string;
 }
+
+const formatAddress = (contact: BuyerContact): string => {
+  const { street, city, postal_code, country, Address } = contact;
+  if (street && city && postal_code) {
+    return `${street}, ${postal_code} ${city}, ${country}`;
+  }
+  if (city && country) {
+    return `${city}, ${country}`;
+  }
+  if (Address) {
+    return Address;
+  }
+  return '—';
+};
 const COUNTRIES = [
   { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
   { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
@@ -364,8 +379,7 @@ const Importers = () => {
                 </TableHeader>
                 <TableBody>
                   {contacts.map(contact => {
-                    const addressParts = [contact.street, contact.city, contact.state].filter(Boolean);
-                    const fullAddress = addressParts.length > 0 ? addressParts.join(', ') : '-';
+                    const fullAddress = formatAddress(contact);
                     const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
 
                     return (
