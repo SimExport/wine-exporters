@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 
 interface Campaign {
   id: string;
