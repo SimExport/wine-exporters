@@ -390,6 +390,7 @@ const Importers = () => {
                     <TableHead>Facebook</TableHead>
                     <TableHead>Instagram</TableHead>
                     <TableHead>LinkedIn</TableHead>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contacts.map(contact => {
