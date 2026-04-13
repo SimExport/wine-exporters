@@ -142,7 +142,7 @@ const Importers = () => {
         count
       } = await supabase.from('buyer_contacts').select('*', {
         count: 'exact'
-      }).eq('country', country.englishName).order('company_name', {
+      }).in('country', country.dbAliases).order('company_name', {
         ascending: true
       }).range(from, to);
       if (error) {
