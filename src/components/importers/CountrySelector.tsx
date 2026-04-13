@@ -126,8 +126,23 @@ export function CountrySelector({ selectedCountry, onSelectCountry, onTotalCount
         }
       });
 
+      const distinctMarkets = Object.keys(appCounts).filter(k => appCounts[k] > 0);
       console.log('Mapped app country counts:', appCounts);
-      console.log('Total mapped:', Object.values(appCounts).reduce((s, c) => s + c, 0), '| Unmapped:', unmapped);
+      console.log(`Total mapped: ${Object.values(appCounts).reduce((s, c) => s + c, 0)} | Unmapped: ${unmapped} | Distinct markets: ${distinctMarkets.length}`);
+      console.log('Distinct market codes:', distinctMarkets.sort());
+      
+      // Log unmapped DB values for debugging
+      const unmappedValues: string[] = [];
+      Object.entries(rawCounts).forEach(([dbName]) => {
+        const appCode = DB_NAME_TO_CODE[dbName.trim().toLowerCase()];
+        if (!appCode) unmappedValues.push(dbName);
+      });
+      if (unmappedValues.length > 0) {
+        console.warn('⚠️ Unmapped DB country values (not counted in markets):', unmappedValues);
+      } else {
+        console.log('✅ All DB country values are mapped');
+      }
+      
       setCountryCounts(appCounts);
       setLoading(false);
     };
