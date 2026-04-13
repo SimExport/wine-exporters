@@ -56,7 +56,6 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  // Verify caller is admin
   const token = authHeader.replace('Bearer ', '')
   const { data: userData, error: authError } = await supabase.auth.getUser(token)
   if (authError || !userData?.user) {
@@ -74,7 +73,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'Admin only' }), { status: 403, headers: corsHeaders })
   }
 
-  // Paginate through ALL contacts with Address but missing structured fields
+  // Process in batches using batch updates for efficiency
   const BATCH_SIZE = 1000
   let totalCandidates = 0
   let updated = 0
@@ -99,8 +98,10 @@ Deno.serve(async (req) => {
       break
     }
 
+    // Collect updates for batch processing
+    const updates: { id: string; data: Record<string, string | null> }[] = []
+
     for (const contact of contacts) {
-      // Only process contacts where street AND city are empty but Address is filled
       if (!contact.Address || contact.Address.trim() === '') {
         skipped++
         continue
@@ -131,15 +132,24 @@ Deno.serve(async (req) => {
         continue
       }
 
-      const { error: updateError } = await supabase
-        .from('buyer_contacts')
-        .update(updateData)
-        .eq('id', contact.id)
+      updates.push({ id: contact.id, data: updateData })
+    }
 
-      if (updateError) {
-        errors.push(`${contact.id}: ${updateError.message}`)
-      } else {
-        updated++
+    // Execute updates in parallel chunks of 50
+    const CHUNK = 50
+    for (let i = 0; i < updates.length; i += CHUNK) {
+      const chunk = updates.slice(i, i + CHUNK)
+      const results = await Promise.all(
+        chunk.map(u =>
+          supabase.from('buyer_contacts').update(u.data).eq('id', u.id)
+        )
+      )
+      for (let j = 0; j < results.length; j++) {
+        if (results[j].error) {
+          errors.push(`${chunk[j].id}: ${results[j].error!.message}`)
+        } else {
+          updated++
+        }
       }
     }
 
@@ -151,7 +161,6 @@ Deno.serve(async (req) => {
   }
 
   return new Response(JSON.stringify({
-    total_scanned: offset + (hasMore ? 0 : 0),
     total_candidates: totalCandidates,
     updated,
     skipped,
