@@ -74,6 +74,7 @@ const translateCountry = (englishName: string): string => {
 const COUNTRIES = COUNTRY_LIST;
 const Importers = () => {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [totalDbContacts, setTotalDbContacts] = useState<number>(0);
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -265,7 +266,11 @@ const Importers = () => {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Liste des importateurs et acheteurs</h1>
-          <p className="text-muted-foreground mt-2">Choisissez un marché pour afficher la liste des importateurs et acheteurs.</p>
+          <p className="text-muted-foreground mt-2">
+            {totalDbContacts > 0
+              ? `${totalDbContacts.toLocaleString()} contacts disponibles — choisissez un marché pour afficher la liste.`
+              : 'Choisissez un marché pour afficher la liste des importateurs et acheteurs.'}
+          </p>
         </div>
 
         {hasPaidAccess && (
@@ -324,6 +329,7 @@ const Importers = () => {
       <CountrySelector
         selectedCountry={selectedCountry}
         onSelectCountry={setSelectedCountry}
+        onTotalCountChange={setTotalDbContacts}
       />
 
       {/* Selected country info */}

@@ -1364,6 +1364,17 @@ export const COUNTRIES: CountryDef[] = [
     ]
   },
   {
+    "code": "TR",
+    "isoA2": "TR",
+    "isoA3": "TUR",
+    "name": "Turquie",
+    "englishName": "Turkey",
+    "continent": "Europe",
+    "dbAliases": [
+      "Turkey"
+    ]
+  },
+  {
     "code": "UA",
     "isoA2": "UA",
     "isoA3": "UKR",
@@ -1711,6 +1722,7 @@ export const DB_NAME_TO_CODE: Record<string, string> = {
   "tanzania": "TZ",
   "thailand": "TH",
   "trinidad and tobago": "TT",
+  "turkey": "TR",
   "turks and caicos islands": "TC",
   "uae": "AE",
   "uganda": "UG",
@@ -1735,6 +1747,4 @@ export const ISO3_TO_CODE: Record<string, string> = Object.fromEntries(
   COUNTRIES.map((country) => [country.isoA3, country.code])
 );
 
-export const UNMAPPED_COUNTRY_VALUES = [
-  "Turkey"
-];
+export const UNMAPPED_COUNTRY_VALUES: string[] = [];
