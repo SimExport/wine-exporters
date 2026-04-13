@@ -48,10 +48,10 @@ interface BuyerContact {
 const formatAddress = (contact: BuyerContact): string => {
   const { street, city, postal_code, country, Address } = contact;
   if (street && city && postal_code) {
-    return `${street}, ${postal_code} ${city}, ${country}`;
+    return `${street}, ${postal_code} ${city}, ${translateCountry(country)}`;
   }
   if (city && country) {
-    return `${city}, ${country}`;
+    return `${city}, ${translateCountry(country)}`;
   }
   if (Address) {
     return Address;
@@ -397,7 +397,7 @@ const Importers = () => {
                           {contact.company_name}
                         </TableCell>
                         <TableCell>
-                          {contact.country}
+                          {translateCountry(contact.country)}
                         </TableCell>
                         <TableCell className="min-w-[300px] whitespace-normal">
                           {fullAddress}
