@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -41,6 +41,9 @@ interface BuyerContact {
   phone?: string;
   state?: string;
   Address?: string;
+  Facebook?: string;
+  Instagram?: string;
+  LinkedIn?: string;
   created_at: string;
   updated_at: string;
 }
@@ -384,6 +387,9 @@ const Importers = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Téléphone</TableHead>
                     <TableHead>Site web</TableHead>
+                    <TableHead>Facebook</TableHead>
+                    <TableHead>Instagram</TableHead>
+                    <TableHead>LinkedIn</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -426,6 +432,27 @@ const Importers = () => {
                           ) : (
                             <span className="text-muted-foreground">-</span>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          {contact.Facebook ? (
+                            <a href={contact.Facebook} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                              <Facebook className="h-4 w-4" />
+                            </a>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          {contact.Instagram ? (
+                            <a href={contact.Instagram} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                              <Instagram className="h-4 w-4" />
+                            </a>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          {contact.LinkedIn ? (
+                            <a href={contact.LinkedIn} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                              <Linkedin className="h-4 w-4" />
+                            </a>
+                          ) : <span className="text-muted-foreground">—</span>}
                         </TableCell>
                       </TableRow>
                     );
