@@ -58,6 +58,15 @@ const formatAddress = (contact: BuyerContact): string => {
   }
   return '—';
 };
+
+const COUNTRY_EN_TO_FR: Record<string, string> = {};
+// Built lazily after COUNTRIES is defined below
+const translateCountry = (englishName: string): string => {
+  if (Object.keys(COUNTRY_EN_TO_FR).length === 0) {
+    COUNTRIES.forEach(c => { COUNTRY_EN_TO_FR[c.englishName] = c.name; });
+  }
+  return COUNTRY_EN_TO_FR[englishName] || englishName;
+};
 const COUNTRIES = [
   { code: 'ZA', name: 'Afrique du Sud', englishName: 'South Africa' },
   { code: 'DE', name: 'Allemagne', englishName: 'Germany' },
