@@ -41,6 +41,9 @@ interface BuyerContact {
   phone?: string;
   state?: string;
   Address?: string;
+  Facebook?: string;
+  Instagram?: string;
+  LinkedIn?: string;
   created_at: string;
   updated_at: string;
 }
