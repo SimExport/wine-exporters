@@ -73,6 +73,7 @@ const translateCountry = (englishName: string): string => {
 };
 const COUNTRIES = COUNTRY_LIST;
 const Importers = () => {
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [totalDbContacts, setTotalDbContacts] = useState<number>(0);
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
   const [loading, setLoading] = useState(false);
