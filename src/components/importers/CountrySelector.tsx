@@ -170,6 +170,12 @@ export function CountrySelector({ selectedCountry, onSelectCountry, onTotalCount
 
   // Resolve a topojson geography to an app code
   const resolveGeoToAppCode = useCallback((geo: any): string | null => {
+    // world-atlas topojson uses numeric IDs
+    const numericId = geo.id || geo.properties?.id;
+    if (numericId) {
+      const code = NUMERIC_TO_CODE[String(numericId)];
+      if (code) return code;
+    }
     const isoA3 = geo.properties?.ISO_A3;
     if (isoA3 && isoA3 !== '-99' && ISO3_TO_CODE[isoA3]) {
       return ISO3_TO_CODE[isoA3];
