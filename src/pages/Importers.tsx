@@ -88,13 +88,24 @@ const Importers = () => {
   const { user } = useAuth();
   const {
     hasPaidAccess,
-    sourcingRequestsRemaining,
-    refetch: refetchSubscription,
     loading: subscriptionLoading
   } = useSubscription();
+  const {
+    searchCredits,
+    consumeSearchCredit,
+    noCreditsMessage,
+  } = useCredits();
 
   const handleSourcingSubmit = async () => {
-    if (!user || !sourcingMarket || sourcingRequestsRemaining <= 0) return;
+    if (!user || !sourcingMarket) return;
+    if (searchCredits <= 0) {
+      toast({
+        title: 'Crédit de recherche épuisé',
+        description: noCreditsMessage('search'),
+        variant: 'destructive',
+      });
+      return;
+    }
     setSourcingLoading(true);
     try {
       const { error: insertError } = await supabase
@@ -102,13 +113,14 @@ const Importers = () => {
         .insert({ user_id: user.id, target_market: sourcingMarket });
       if (insertError) throw insertError;
 
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ sourcing_requests_remaining: sourcingRequestsRemaining - 1 })
-        .eq('user_id', user.id);
-      if (updateError) throw updateError;
-
-      await refetchSubscription();
+      const { ok } = await consumeSearchCredit();
+      if (!ok) {
+        toast({
+          title: 'Crédit épuisé',
+          description: noCreditsMessage('search'),
+          variant: 'destructive',
+        });
+      }
       setSourcingOpen(false);
       setSourcingMarket('');
       toast({ title: 'Demande reçue !', description: 'Notre équipe vous répondra sous 72h.' });
