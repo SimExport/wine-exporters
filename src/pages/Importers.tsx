@@ -11,6 +11,7 @@ import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, C
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCredits } from '@/hooks/useCredits';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 const CopyButton = ({ value }: { value: string }) => {
   const [copied, setCopied] = useState(false);
