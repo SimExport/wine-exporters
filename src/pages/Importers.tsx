@@ -317,16 +317,16 @@ const Importers = () => {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Crédit restant</span>
-                  <Badge variant={sourcingRequestsRemaining > 0 ? 'default' : 'secondary'}>
-                    {sourcingRequestsRemaining} / 1
+                  <Badge variant={searchCredits > 0 ? 'default' : 'secondary'}>
+                    {searchCredits} / 1
                   </Badge>
                 </div>
-                {sourcingRequestsRemaining <= 0 && (
-                  <p className="text-sm text-destructive">Quota mensuel atteint. Votre crédit sera renouvelé le mois prochain.</p>
+                {searchCredits <= 0 && (
+                  <p className="text-sm text-destructive">{noCreditsMessage('search')}</p>
                 )}
                 <Button
                   className="w-full"
-                  disabled={!sourcingMarket || sourcingRequestsRemaining <= 0 || sourcingLoading}
+                  disabled={!sourcingMarket || searchCredits <= 0 || sourcingLoading}
                   onClick={handleSourcingSubmit}
                 >
                   {sourcingLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
