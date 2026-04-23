@@ -924,6 +924,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_campaign_credit: { Args: never; Returns: number }
+      consume_search_credit: { Args: never; Returns: number }
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { uid: string }; Returns: string }
       has_paid_access: { Args: { _user_id: string }; Returns: boolean }
