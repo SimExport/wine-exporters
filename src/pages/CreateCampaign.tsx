@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCredits } from '@/hooks/useCredits';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,12 +43,16 @@ const CreateCampaign = () => {
   } = useAuth();
   const {
     isFreeUser,
-    canLaunchCampaign,
-    campaignsRemaining,
-    decrementCampaignsRemaining,
     isAdmin,
     loading: subscriptionLoading
   } = useSubscription();
+  const {
+    campaignCredits,
+    consumeCampaignCredit,
+    noCreditsMessage,
+    loading: creditsLoading,
+  } = useCredits();
+  const canLaunchCampaign = isAdmin || campaignCredits > 0;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [wines, setWines] = useState<Wine[]>([]);
