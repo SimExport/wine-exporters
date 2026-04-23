@@ -11,6 +11,7 @@ import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, C
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCredits } from '@/hooks/useCredits';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 const CopyButton = ({ value }: { value: string }) => {
   const [copied, setCopied] = useState(false);
@@ -87,13 +88,24 @@ const Importers = () => {
   const { user } = useAuth();
   const {
     hasPaidAccess,
-    sourcingRequestsRemaining,
-    refetch: refetchSubscription,
     loading: subscriptionLoading
   } = useSubscription();
+  const {
+    searchCredits,
+    consumeSearchCredit,
+    noCreditsMessage,
+  } = useCredits();
 
   const handleSourcingSubmit = async () => {
-    if (!user || !sourcingMarket || sourcingRequestsRemaining <= 0) return;
+    if (!user || !sourcingMarket) return;
+    if (searchCredits <= 0) {
+      toast({
+        title: 'Crédit de recherche épuisé',
+        description: noCreditsMessage('search'),
+        variant: 'destructive',
+      });
+      return;
+    }
     setSourcingLoading(true);
     try {
       const { error: insertError } = await supabase
@@ -101,13 +113,14 @@ const Importers = () => {
         .insert({ user_id: user.id, target_market: sourcingMarket });
       if (insertError) throw insertError;
 
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ sourcing_requests_remaining: sourcingRequestsRemaining - 1 })
-        .eq('user_id', user.id);
-      if (updateError) throw updateError;
-
-      await refetchSubscription();
+      const { ok } = await consumeSearchCredit();
+      if (!ok) {
+        toast({
+          title: 'Crédit épuisé',
+          description: noCreditsMessage('search'),
+          variant: 'destructive',
+        });
+      }
       setSourcingOpen(false);
       setSourcingMarket('');
       toast({ title: 'Demande reçue !', description: 'Notre équipe vous répondra sous 72h.' });
@@ -304,16 +317,16 @@ const Importers = () => {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Crédit restant</span>
-                  <Badge variant={sourcingRequestsRemaining > 0 ? 'default' : 'secondary'}>
-                    {sourcingRequestsRemaining} / 1
+                  <Badge variant={searchCredits > 0 ? 'default' : 'secondary'}>
+                    {searchCredits} / 1
                   </Badge>
                 </div>
-                {sourcingRequestsRemaining <= 0 && (
-                  <p className="text-sm text-destructive">Quota mensuel atteint. Votre crédit sera renouvelé le mois prochain.</p>
+                {searchCredits <= 0 && (
+                  <p className="text-sm text-destructive">{noCreditsMessage('search')}</p>
                 )}
                 <Button
                   className="w-full"
-                  disabled={!sourcingMarket || sourcingRequestsRemaining <= 0 || sourcingLoading}
+                  disabled={!sourcingMarket || searchCredits <= 0 || sourcingLoading}
                   onClick={handleSourcingSubmit}
                 >
                   {sourcingLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}

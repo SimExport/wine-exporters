@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useCredits } from '@/hooks/useCredits';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,12 +43,16 @@ const CreateCampaign = () => {
   } = useAuth();
   const {
     isFreeUser,
-    canLaunchCampaign,
-    campaignsRemaining,
-    decrementCampaignsRemaining,
     isAdmin,
     loading: subscriptionLoading
   } = useSubscription();
+  const {
+    campaignCredits,
+    consumeCampaignCredit,
+    noCreditsMessage,
+    loading: creditsLoading,
+  } = useCredits();
+  const canLaunchCampaign = isAdmin || campaignCredits > 0;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [wines, setWines] = useState<Wine[]>([]);
@@ -195,10 +200,10 @@ const CreateCampaign = () => {
     }
 
     // Check if user has campaigns remaining (admins bypass this check)
-    if (!isAdmin && campaignsRemaining <= 0) {
+    if (!isAdmin && campaignCredits <= 0) {
       toast({
         title: "Crédit de campagne épuisé",
-        description: "Vous avez déjà utilisé votre campagne pour ce mois-ci. Attendez le renouvellement ou contactez le support.",
+        description: noCreditsMessage('campaign'),
         variant: "destructive"
       });
       return;
@@ -227,9 +232,16 @@ const CreateCampaign = () => {
       
       if (campaignError) throw campaignError;
 
-      // Decrement campaigns remaining (only for non-admins)
+      // Consume one campaign credit via RPC (admins bypass)
       if (!isAdmin) {
-        await decrementCampaignsRemaining();
+        const { ok } = await consumeCampaignCredit();
+        if (!ok) {
+          toast({
+            title: 'Crédit épuisé',
+            description: noCreditsMessage('campaign'),
+            variant: 'destructive',
+          });
+        }
       }
 
       // Send notification (silent - don't block on failure)
