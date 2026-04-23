@@ -200,10 +200,10 @@ const CreateCampaign = () => {
     }
 
     // Check if user has campaigns remaining (admins bypass this check)
-    if (!isAdmin && campaignsRemaining <= 0) {
+    if (!isAdmin && campaignCredits <= 0) {
       toast({
         title: "Crédit de campagne épuisé",
-        description: "Vous avez déjà utilisé votre campagne pour ce mois-ci. Attendez le renouvellement ou contactez le support.",
+        description: noCreditsMessage('campaign'),
         variant: "destructive"
       });
       return;
@@ -232,9 +232,16 @@ const CreateCampaign = () => {
       
       if (campaignError) throw campaignError;
 
-      // Decrement campaigns remaining (only for non-admins)
+      // Consume one campaign credit via RPC (admins bypass)
       if (!isAdmin) {
-        await decrementCampaignsRemaining();
+        const { ok } = await consumeCampaignCredit();
+        if (!ok) {
+          toast({
+            title: 'Crédit épuisé',
+            description: noCreditsMessage('campaign'),
+            variant: 'destructive',
+          });
+        }
       }
 
       // Send notification (silent - don't block on failure)
