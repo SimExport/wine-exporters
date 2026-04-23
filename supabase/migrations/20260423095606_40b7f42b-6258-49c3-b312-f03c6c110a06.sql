@@ -1,0 +1,1 @@
+ALTER TABLE public.user_credits ENABLE ROW LEVEL SECURITY;
