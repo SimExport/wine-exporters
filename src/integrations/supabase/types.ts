@@ -763,6 +763,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          campaign_credits: number
+          id: string
+          next_reset_date: string
+          search_credits: number
+          subscription_start_date: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign_credits?: number
+          id?: string
+          next_reset_date?: string
+          search_credits?: number
+          subscription_start_date?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign_credits?: number
+          id?: string
+          next_reset_date?: string
+          search_credits?: number
+          subscription_start_date?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -895,6 +925,7 @@ export type Database = {
     }
     Functions: {
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
+      get_user_role: { Args: { uid: string }; Returns: string }
       has_paid_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
