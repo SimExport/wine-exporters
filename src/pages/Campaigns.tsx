@@ -150,7 +150,12 @@ const Campaigns = () => {
     managedByBo: false,
     status: 'draft'
   });
-  const steps = ['Marchés & ciblage', 'Vins & documents', 'Message & envoi', 'Relecture & lancement'];
+  const steps = [
+    t('campaigns.wizard.steps.targeting'),
+    t('campaigns.wizard.steps.winesDocs'),
+    t('campaigns.wizard.steps.messageSend'),
+    t('campaigns.wizard.steps.reviewLaunch'),
+  ];
   const markets = {
     'Europe': ['France', 'Allemagne', 'Italie', 'Espagne', 'Royaume-Uni', 'Pays-Bas', 'Belgique', 'Suisse', 'Autriche', 'Suède'],
     'Amérique du Nord': ['États-Unis', 'Canada', 'Mexique'],
@@ -577,18 +582,18 @@ const Campaigns = () => {
   };
   const renderStep1 = () => <div className="space-y-6" id="step-1">
       <div>
-        <Label htmlFor="campaignName">Nom de la campagne</Label>
+        <Label htmlFor="campaignName">{t('campaigns.wizard.step1.campaignName')}</Label>
         <Input id="campaignName" value={campaignData.name} onChange={e => updateCampaignData({
         name: e.target.value
-      })} placeholder="Ex: Campagne Printemps 2024" className="mt-1" />
+      })} placeholder={t('campaigns.wizard.step1.campaignNamePlaceholder')} className="mt-1" />
       </div>
 
       <div>
         <Label className="text-base font-semibold">
-          Marchés prioritaires ({campaignData.markets.length} sélectionnés)
+          {t('campaigns.wizard.step1.marketsLabel', { count: campaignData.markets.length })}
         </Label>
         {Object.entries(markets).map(([region, countryList]) => <div key={region} className="mb-6">
-            <h3 className="font-semibold text-lg mb-3">{region}</h3>
+            <h3 className="font-semibold text-lg mb-3">{t(`campaigns.wizard.step1.regions.${region}`, { defaultValue: region })}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {countryList.map(country => <div key={country} className="flex items-center space-x-2">
                   <Checkbox id={country} checked={campaignData.markets.includes(country)} onCheckedChange={() => handleMarketToggle(country)} />
@@ -602,7 +607,7 @@ const Campaigns = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <Label className="text-base font-semibold">Canaux</Label>
+          <Label className="text-base font-semibold">{t('campaigns.wizard.step1.channels')}</Label>
           <div className="space-y-2 mt-2">
             {channelOptions.map(channel => <div key={channel} className="flex items-center space-x-2">
                 <Checkbox id={channel} checked={campaignData.channels.includes(channel)} onCheckedChange={checked => {
@@ -617,7 +622,7 @@ const Campaigns = () => {
         </div>
 
         <div>
-          <Label className="text-base font-semibold">Segments</Label>
+          <Label className="text-base font-semibold">{t('campaigns.wizard.step1.segments')}</Label>
           <div className="space-y-2 mt-2">
             {segmentOptions.map(segment => <div key={segment} className="flex items-center space-x-2">
                 <Checkbox id={segment} checked={campaignData.segments.includes(segment)} onCheckedChange={checked => {
@@ -634,12 +639,12 @@ const Campaigns = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="volumeBand">Volumes souhaités</Label>
+          <Label htmlFor="volumeBand">{t('campaigns.wizard.step1.volumeBand')}</Label>
           <Select value={campaignData.volumeBand} onValueChange={value => updateCampaignData({
           volumeBand: value
         })}>
             <SelectTrigger>
-              <SelectValue placeholder="Sélectionnez" />
+              <SelectValue placeholder={t('campaigns.wizard.step1.select')} />
             </SelectTrigger>
             <SelectContent>
               {volumeBandOptions.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}
@@ -648,14 +653,14 @@ const Campaigns = () => {
         </div>
 
         <div>
-          <Label htmlFor="priceMin">Prix min. (€)</Label>
+          <Label htmlFor="priceMin">{t('campaigns.wizard.step1.priceMin')}</Label>
           <Input id="priceMin" type="number" value={campaignData.priceMin || ''} onChange={e => updateCampaignData({
           priceMin: e.target.value ? parseFloat(e.target.value) : null
         })} placeholder="0" />
         </div>
 
         <div>
-          <Label htmlFor="priceMax">Prix max. (€)</Label>
+          <Label htmlFor="priceMax">{t('campaigns.wizard.step1.priceMax')}</Label>
           <Input id="priceMax" type="number" value={campaignData.priceMax || ''} onChange={e => updateCampaignData({
           priceMax: e.target.value ? parseFloat(e.target.value) : null
         })} placeholder="100" />
@@ -664,23 +669,23 @@ const Campaigns = () => {
 
       {campaignData.audienceEstimate > 0 && <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>≈ {campaignData.audienceEstimate} contacts trouvés</strong>
+            <strong>{t('campaigns.wizard.step1.audienceFound', { count: campaignData.audienceEstimate })}</strong>
             {campaignData.audienceEstimate < 20 && <span className="text-red-600 block">
-                Audience trop faible. Ajustez vos filtres.
+                {t('campaigns.wizard.step1.audienceTooLow')}
               </span>}
             {campaignData.audienceEstimate > 500 && <span className="text-red-600 block">
-                Audience trop large. Ajustez vos filtres.
+                {t('campaigns.wizard.step1.audienceTooHigh')}
               </span>}
           </p>
         </div>}
     </div>;
   const renderStep2 = () => <div className="space-y-6" id="step-2">
       <div>
-        <Label className="text-base font-semibold">Sélection des cuvées</Label>
+        <Label className="text-base font-semibold">{t('campaigns.wizard.step2.winesLabel')}</Label>
         
         {availableWines.length > 0 ? <div className="space-y-3 mt-4">
             {availableWines.map(wine => {
-          const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${wine.exw_price_eur.toLocaleString('fr-FR', {
+          const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${wine.exw_price_eur.toLocaleString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
             minimumFractionDigits: 2
           })}€${wine.vintages?.length ? ` - ${Math.max(...wine.vintages)}` : ''}`;
           return <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/30">
@@ -700,7 +705,7 @@ const Campaigns = () => {
         })}
           </div> : availableCuvees.length > 0 ? <div className="space-y-2 mt-2">
             <p className="text-sm text-muted-foreground mb-2">
-              Anciennes cuvées (ajoutez vos cuvées dans votre profil pour une meilleure gestion) :
+              {t('campaigns.wizard.step2.oldCuveesNote')}
             </p>
             {availableCuvees.map(cuvee => <div key={cuvee} className="flex items-center space-x-2">
                 <Checkbox id={cuvee} checked={campaignData.cuvees.includes(cuvee)} onCheckedChange={checked => {
@@ -713,28 +718,28 @@ const Campaigns = () => {
               </div>)}
           </div> : <div className="bg-yellow-50 p-4 rounded-lg mt-4">
             <p className="text-sm text-yellow-800">
-              Aucune cuvée disponible. Ajoutez vos cuvées dans votre{' '}
+              {t('campaigns.wizard.step2.noWinesAvailable')}{' '}
               <Button variant="link" onClick={() => {
             const newTab = window.open('/profile#vins', '_blank');
             if (newTab) newTab.focus();
           }} className="p-0 h-auto text-yellow-800 underline">
-                Profil
+                {t('campaigns.wizard.step2.profileLink')}
               </Button>
             </p>
           </div>}
       </div>
 
       <div>
-        <Label className="text-base font-semibold">Documents à joindre</Label>
+        <Label className="text-base font-semibold">{t('campaigns.wizard.step2.documentsLabel')}</Label>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
-            <Label>Présentation du domaine (obligatoire)</Label>
+            <Label>{t('campaigns.wizard.step2.presentationLabel')}</Label>
             <Select value={campaignData.presentationDocId || ''} onValueChange={value => updateCampaignData({
             presentationDocId: value
           })}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un document" />
+                <SelectValue placeholder={t('campaigns.wizard.step2.selectDocument')} />
               </SelectTrigger>
               <SelectContent>
                 {availableDocuments.filter(doc => doc.category === 'Presentation').map(doc => <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>)}
@@ -743,12 +748,12 @@ const Campaigns = () => {
           </div>
 
           <div>
-            <Label>Liste des prix export (obligatoire)</Label>
+            <Label>{t('campaigns.wizard.step2.pricelistLabel')}</Label>
             <Select value={campaignData.pricelistDocId || ''} onValueChange={value => updateCampaignData({
             pricelistDocId: value
           })}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un document" />
+                <SelectValue placeholder={t('campaigns.wizard.step2.selectDocument')} />
               </SelectTrigger>
               <SelectContent>
                 {availableDocuments.filter(doc => doc.category === 'PriceList').map(doc => <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>)}
@@ -759,9 +764,9 @@ const Campaigns = () => {
 
         {availableDocuments.length === 0 && <div className="bg-yellow-50 p-4 rounded-lg">
             <p className="text-sm text-yellow-800">
-              Aucun document disponible. Ajoutez d'abord vos documents dans votre{' '}
+              {t('campaigns.wizard.step2.noDocumentsAvailable')}{' '}
               <Button variant="link" onClick={() => navigate('/profile')} className="p-0 h-auto">
-                Profil
+                {t('campaigns.wizard.step2.profileLink')}
               </Button>
             </p>
           </div>}
@@ -770,25 +775,25 @@ const Campaigns = () => {
   const renderStep3 = () => <div className="space-y-6" id="step-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="sendAsName">Expéditeur</Label>
+          <Label htmlFor="sendAsName">{t('campaigns.wizard.step3.sender')}</Label>
           <Input id="sendAsName" value={campaignData.sendAsName} onChange={e => updateCampaignData({
           sendAsName: e.target.value
-        })} placeholder="Nom du domaine" />
+        })} placeholder={t('campaigns.wizard.step3.senderPlaceholder')} />
         </div>
 
         <div>
-          <Label htmlFor="replyTo">Email de réponse</Label>
+          <Label htmlFor="replyTo">{t('campaigns.wizard.step3.replyTo')}</Label>
           <Input id="replyTo" type="email" value={campaignData.replyTo} onChange={e => updateCampaignData({
           replyTo: e.target.value
-        })} placeholder="contact@domaine.com" />
+        })} placeholder={t('campaigns.wizard.step3.replyToPlaceholder')} />
         </div>
       </div>
 
       <div>
         <div className="flex items-center justify-between">
-          <Label className="text-base font-semibold">Objet de l'email</Label>
+          <Label className="text-base font-semibold">{t('campaigns.wizard.step3.subject')}</Label>
           <Button variant="outline" size="sm" onClick={generateSubjectVariants} disabled={!campaignData.markets.length || !campaignData.sendAsName}>
-            Générer des suggestions
+            {t('campaigns.wizard.step3.generateSuggestions')}
           </Button>
         </div>
         
@@ -805,7 +810,7 @@ const Campaigns = () => {
       </div>
 
       <div>
-        <Label htmlFor="messageText">Message (template généré)</Label>
+        <Label htmlFor="messageText">{t('campaigns.wizard.step3.messageLabel')}</Label>
         <Textarea id="messageText" rows={8} value={campaignData.messageText} onChange={e => updateCampaignData({
         messageText: e.target.value
       })} placeholder={`Bonjour {buyer_company},
@@ -826,32 +831,32 @@ ${campaignData.sendAsName}`} />
     </div>;
   const renderStep4 = () => <div className="space-y-6" id="step-4">
       <div className="bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">Récapitulatif de la campagne</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('campaigns.wizard.step4.summary')}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h4 className="font-medium mb-2">Ciblage</h4>
+            <h4 className="font-medium mb-2">{t('campaigns.wizard.step4.targeting')}</h4>
             <p className="text-sm text-muted-foreground">
-              <strong>Marchés:</strong> {campaignData.markets.join(', ') || 'Aucun'}
+              <strong>{t('campaigns.wizard.step4.marketsField')}</strong> {campaignData.markets.join(', ') || t('campaigns.wizard.step4.none')}
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>Audience:</strong> ≈ {campaignData.audienceEstimate} contacts
+              <strong>{t('campaigns.wizard.step4.audienceField')}</strong> {t('campaigns.wizard.step4.audienceContacts', { count: campaignData.audienceEstimate })}
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>Canaux:</strong> {campaignData.channels.join(', ') || 'Aucun'}
+              <strong>{t('campaigns.wizard.step4.channelsField')}</strong> {campaignData.channels.join(', ') || t('campaigns.wizard.step4.none')}
             </p>
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">Contenu</h4>
+            <h4 className="font-medium mb-2">{t('campaigns.wizard.step4.content')}</h4>
             <p className="text-sm text-muted-foreground">
-              <strong>Cuvées:</strong> {getSelectedCuveeNames().join(', ') || 'Aucune'}
+              <strong>{t('campaigns.wizard.step4.cuveesField')}</strong> {getSelectedCuveeNames().join(', ') || t('campaigns.wizard.step4.noneFem')}
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>Objet:</strong> {campaignData.subjectSelected || 'Non défini'}
+              <strong>{t('campaigns.wizard.step4.subjectField')}</strong> {campaignData.subjectSelected || t('campaigns.wizard.step4.notSet')}
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>Expéditeur:</strong> {campaignData.sendAsName || 'Non défini'}
+              <strong>{t('campaigns.wizard.step4.senderField')}</strong> {campaignData.sendAsName || t('campaigns.wizard.step4.notSet')}
             </p>
           </div>
         </div>
