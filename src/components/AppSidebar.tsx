@@ -9,50 +9,29 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-const navigationItems = [{
-  title: "Dashboard",
-  url: "/dashboard",
-  icon: Target
-}, {
-  title: "Profil",
-  url: "/profile",
-  icon: User
-}, {
-  title: "Importateurs",
-  url: "/importers",
-  icon: Database
-}, {
-  title: "Campagnes",
-  url: "/campaigns",
-  icon: Target
-}, {
-  title: "CRM - Liste",
-  url: "/prospects",
-  icon: List
-}, {
-  title: "CRM - Kanban",
-  url: "/pipeline",
-  icon: Kanban
-}, {
-  title: "À venir",
-  url: "/roadmap",
-  icon: Rocket
-}, {
-  title: "Aide",
-  url: "/help",
-  icon: HelpCircle
-}];
-const settingsItems = [{
-  title: "Paramètres",
-  url: "/settings",
-  icon: Settings
-}, {
-  title: "Facturation",
-  url: "/billing",
-  icon: CreditCard
-}];
+import { fr, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+
+const navigationItems = [
+  { key: "dashboard", url: "/dashboard", icon: Target },
+  { key: "profile", url: "/profile", icon: User },
+  { key: "importers", url: "/importers", icon: Database },
+  { key: "campaigns", url: "/campaigns", icon: Target },
+  { key: "crmList", url: "/prospects", icon: List },
+  { key: "crmKanban", url: "/pipeline", icon: Kanban },
+  { key: "roadmap", url: "/roadmap", icon: Rocket },
+  { key: "help", url: "/help", icon: HelpCircle },
+] as const;
+
+const settingsItems = [
+  { key: "settings", url: "/settings", icon: Settings },
+  { key: "billing", url: "/billing", icon: CreditCard },
+] as const;
+
 export function AppSidebar() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
   const {
     user,
     signOut
@@ -82,13 +61,13 @@ export function AppSidebar() {
     try {
       await signOut();
       toast({
-        title: "Déconnexion réussie",
-        description: "À bientôt sur WineExporters !"
+        title: t('sidebar.signOutSuccess'),
+        description: t('sidebar.signOutDescription')
       });
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Erreur lors de la déconnexion",
+        title: t('common.error'),
+        description: t('sidebar.signOutError'),
         variant: "destructive"
       });
     }
@@ -112,14 +91,14 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('nav.navigation')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map(item => <SidebarMenuItem key={item.title}>
+              {navigationItems.map(item => <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(`nav.${item.key}`)}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
@@ -128,14 +107,14 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {isAdmin && <SidebarGroup>
-            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupLabel>{t('nav.administration')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/admin/campaigns" end className={getNavCls}>
                       <Shield className="h-4 w-4" />
-                      <span>Campagnes Admin</span>
+                      <span>{t('nav.adminCampaigns')}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -144,14 +123,14 @@ export function AppSidebar() {
           </SidebarGroup>}
 
         <SidebarGroup>
-          <SidebarGroupLabel>Configuration</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('nav.configuration')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {settingsItems.map(item => <SidebarMenuItem key={item.title}>
+              {settingsItems.map(item => <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(`nav.${item.key}`)}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
@@ -161,13 +140,18 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {/* Language switcher */}
+        <div className="px-3 pt-2 group-data-[collapsible=icon]:hidden">
+          <LanguageSwitcher variant="sidebar" />
+        </div>
+
         {/* Notifications bell */}
         <div className="px-3 py-2">
           <Popover>
             <PopoverTrigger asChild>
               <button className="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-sidebar-accent/50 transition-colors text-sidebar-foreground">
                 <Bell className="h-4 w-4 shrink-0" />
-                <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">Notifications</span>
+                <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">{t('sidebar.notifications')}</span>
                 {unreadCount > 0 && (
                   <span className="absolute left-7 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
                     {unreadCount > 9 ? '9+' : unreadCount}
@@ -177,12 +161,12 @@ export function AppSidebar() {
             </PopoverTrigger>
             <PopoverContent side="right" align="end" className="w-80 p-0" sideOffset={8}>
               <div className="flex items-center justify-between border-b px-4 py-3">
-                <span className="text-sm font-semibold">Notifications</span>
+                <span className="text-sm font-semibold">{t('sidebar.notifications')}</span>
                 <div className="flex gap-1">
                   {unreadCount > 0 && (
                     <button onClick={markAllRead} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors">
                       <CheckCheck className="h-3 w-3" />
-                      Tout lire
+                      {t('sidebar.markAllRead')}
                     </button>
                   )}
                   {notifications.length > 0 && (
@@ -196,7 +180,7 @@ export function AppSidebar() {
                 {notifications.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <Bell className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                 <p className="text-sm text-muted-foreground">Aucune notification</p>
+                    <p className="text-sm text-muted-foreground">{t('sidebar.noNotifications')}</p>
                   </div>
                 ) : (
                   notifications.map(notif => {
@@ -214,7 +198,7 @@ export function AppSidebar() {
                           <p className="text-xs font-semibold text-foreground leading-tight">{notif.title}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground leading-snug line-clamp-2">{notif.description}</p>
                           <p className="mt-1 text-[10px] text-muted-foreground/70">
-                            {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: fr })}
+                            {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: dateLocale })}
                           </p>
                         </div>
                         {!notif.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
@@ -233,10 +217,10 @@ export function AppSidebar() {
               <Zap className="h-4 w-4 text-primary-foreground" />
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-sidebar-foreground">
-                  Crédits campagne
+                  {t('sidebar.campaignCredits')}
                 </span>
                 <span className="text-sm font-bold text-primary-foreground">
-                  {campaignsRemaining} restant{campaignsRemaining !== 1 ? 's' : ''}
+                  {campaignsRemaining} {campaignsRemaining !== 1 ? t('sidebar.remainingPlural') : t('sidebar.remaining')}
                 </span>
               </div>
             </div>
@@ -248,10 +232,10 @@ export function AppSidebar() {
                 <Zap className="h-4 w-4 text-primary" />
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-sidebar-foreground">
-                    Passer à Premium
+                    {t('sidebar.upgradeToPremium')}
                   </span>
                   <span className="text-[10px] text-muted-foreground">
-                    1 campagne/mois incluse
+                    {t('sidebar.upgradeIncluded')}
                   </span>
                 </div>
               </div>
