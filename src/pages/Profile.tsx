@@ -588,12 +588,12 @@ const Profile = () => {
       if (dbError) throw dbError;
       await refetchDocuments();
       toast({
-        title: "Document supprimé",
-        description: "Le document a été supprimé avec succès"
+        title: t('profile.documents.deletedTitle'),
+        description: t('profile.documents.deletedDescription')
       });
     } catch (error: any) {
       toast({
-        title: "Erreur de suppression",
+        title: t('profile.documents.deleteErrorTitle'),
         description: error.message,
         variant: "destructive"
       });
@@ -612,12 +612,12 @@ const Profile = () => {
       if (dbError) throw dbError;
       await refetchMedia();
       toast({
-        title: "Média supprimé",
-        description: "Le fichier a été supprimé avec succès"
+        title: t('profile.media.deletedTitle'),
+        description: t('profile.media.deletedDescription')
       });
     } catch (error: any) {
       toast({
-        title: "Erreur de suppression",
+        title: t('profile.documents.deleteErrorTitle'),
         description: error.message,
         variant: "destructive"
       });
@@ -625,19 +625,19 @@ const Profile = () => {
   };
   // Profile completion score
   const completionFields = [
-    { label: 'Nom du domaine', done: !!formData.domain_name, tab: 'general' },
-    { label: 'Votre nom', done: !!formData.contact_name, tab: 'general' },
-    { label: 'Localisation', done: !!formData.location, tab: 'general' },
-    { label: 'AOC / Appellations', done: formData.aoc.length > 0, tab: 'general' },
-    { label: 'Volume annuel', done: !!formData.bottles_per_year, tab: 'general' },
-    { label: 'Types de vins', done: formData.wine_types.length > 0, tab: 'general' },
-    { label: 'Cépages cultivés', done: formData.grape_varieties.length > 0, tab: 'general' },
-    { label: 'Cuvées', done: formData.cuvees.length > 0, tab: 'general' },
-    { label: 'Marchés prioritaires', done: formData.priority_markets.length > 0, tab: 'markets' },
-    { label: 'Marchés actuels', done: formData.current_markets.length > 0, tab: 'markets' },
-    { label: 'Description acheteurs cibles', done: !!formData.target_buyer_description, tab: 'markets' },
-    { label: 'Description du domaine', done: formData.description.length >= 300, tab: 'description' },
-    { label: 'Site web', done: !!formData.website && isValidUrl(formData.website), tab: 'website' },
+    { key: 'domain_name', done: !!formData.domain_name, tab: 'general' },
+    { key: 'contact_name', done: !!formData.contact_name, tab: 'general' },
+    { key: 'location', done: !!formData.location, tab: 'general' },
+    { key: 'aoc', done: formData.aoc.length > 0, tab: 'general' },
+    { key: 'bottles_per_year', done: !!formData.bottles_per_year, tab: 'general' },
+    { key: 'wine_types', done: formData.wine_types.length > 0, tab: 'general' },
+    { key: 'grape_varieties', done: formData.grape_varieties.length > 0, tab: 'general' },
+    { key: 'cuvees', done: formData.cuvees.length > 0, tab: 'general' },
+    { key: 'priority_markets', done: formData.priority_markets.length > 0, tab: 'markets' },
+    { key: 'current_markets', done: formData.current_markets.length > 0, tab: 'markets' },
+    { key: 'target_buyer_description', done: !!formData.target_buyer_description, tab: 'markets' },
+    { key: 'description', done: formData.description.length >= 300, tab: 'description' },
+    { key: 'website', done: !!formData.website && isValidUrl(formData.website), tab: 'website' },
   ];
   const completedCount = completionFields.filter(f => f.done).length;
   const completionPct = Math.round((completedCount / completionFields.length) * 100);
