@@ -416,5 +416,87 @@
       "wrongTypeDesc": "Veuillez sélectionner un fichier au bon format",
       "updateError": "Impossible de mettre à jour le média."
     }
+  },
+  "countryMultiSelect": {
+    "placeholder": "Sélectionnez des pays...",
+    "searchPlaceholder": "Rechercher un pays...",
+    "noResults": "Aucun résultat",
+    "continents": {
+      "Europe": "Europe",
+      "Amérique du Nord": "Amérique du Nord",
+      "Amérique du Sud": "Amérique du Sud",
+      "Asie": "Asie",
+      "Moyen-Orient & Afrique": "Moyen-Orient & Afrique",
+      "Océanie": "Océanie"
+    }
+  },
+  "wines": {
+    "cardTitle": "Vins / Cuvées",
+    "cardSubtitle": "Ajoutez vos cuvées pour les sélectionner directement lors de la création de campagnes.",
+    "addCuvee": "Ajouter une cuvée",
+    "editCuvee": "Modifier la cuvée",
+    "loadError": "Impossible de charger les cuvées.",
+    "fillRequired": "Veuillez remplir tous les champs obligatoires.",
+    "priceRangeError": "Le prix doit être entre 0,10€ et 999,99€.",
+    "saveSuccess": "Modifications enregistrées",
+    "addedSuccess": "Cuvée ajoutée",
+    "saveError": "Impossible d'enregistrer la cuvée.",
+    "statusUpdated": "Statut mis à jour",
+    "statusError": "Impossible de mettre à jour le statut.",
+    "copySuffix": "(copie)",
+    "fields": {
+      "name": "Nom de la cuvée",
+      "namePlaceholder": "Cuvée Prestige",
+      "appellation": "Appellation",
+      "appellationPlaceholder": "AOC Bordeaux",
+      "color": "Couleur",
+      "colorPlaceholder": "Choisir une couleur",
+      "price": "EXW (€ / 75cl)",
+      "pricePlaceholder": "12.50",
+      "grapes": "Cépages",
+      "grapesPlaceholder": "Tapez un cépage et appuyez sur Entrée",
+      "vintages": "Millésimes",
+      "vintagesPlaceholder": "Tapez un millésime et appuyez sur Entrée",
+      "certifications": "Certifications du vin",
+      "organic": "Bio",
+      "biodynamic": "Biodynamie",
+      "natural": "Nature",
+      "awards": "Notes / Récompenses",
+      "awardsPlaceholder": "Médaille d'or au concours...",
+      "awardsCount": "{{count}}/300 caractères",
+      "description": "Description",
+      "descriptionPlaceholder": "Description détaillée de la cuvée..."
+    },
+    "wineColors": {
+      "Rouge": "Rouge",
+      "Blanc": "Blanc",
+      "Rosé": "Rosé",
+      "Pétillant": "Pétillant"
+    },
+    "search": {
+      "placeholder": "Rechercher par nom ou appellation...",
+      "filterColor": "Filtrer par couleur",
+      "allColors": "Toutes les couleurs"
+    },
+    "table": {
+      "name": "Nom",
+      "appellation": "Appellation",
+      "grapes": "Cépages",
+      "color": "Couleur",
+      "exw": "EXW (€)",
+      "organic": "Bio",
+      "vintages": "Millésimes",
+      "actions": "Actions",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "empty": "Aucune cuvée. Ajoutez votre première cuvée.",
+    "noMatch": "Aucune cuvée ne correspond aux critères de recherche.",
+    "perPage": "par page",
+    "countSingular": "{{count}} cuvée",
+    "countPlural": "{{count}} cuvées",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {{current}} sur {{total}}"
   }
 }
