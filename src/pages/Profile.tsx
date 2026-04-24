@@ -884,54 +884,52 @@ const Profile = () => {
             <TabsContent value="markets" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Préférences de prospection</CardTitle>
-                  <CardDescription>
-                    Définissez vos marchés cibles et vos préférences pour la prospection
-                  </CardDescription>
+                  <CardTitle>{t('profile.markets.cardTitle')}</CardTitle>
+                  <CardDescription>{t('profile.markets.cardDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label>
-                      Quels marchés souhaitez-vous prioriser ?
-                      <FieldHint text="Ces marchés seront utilisés en priorité pour construire vos audiences de campagne. Sélectionnez les pays que vous visez en priorité pour un meilleur ciblage." />
+                      {t('profile.markets.priority')}
+                      <FieldHint text={t('profile.markets.priorityHint')} />
                     </Label>
                     <CountryMultiSelect
                       value={formData.priority_markets}
                       onChange={v => setFormData(prev => ({ ...prev, priority_markets: v }))}
-                      placeholder="Sélectionnez vos marchés prioritaires..."
+                      placeholder={t('profile.markets.priorityPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label>
-                      Sur quels marchés êtes-vous déjà présents ?
-                      <FieldHint text="Ces informations évitent les doublons avec vos distributeurs existants. Nous pourrons ainsi cibler des importateurs sur des marchés complémentaires à votre réseau actuel." />
+                      {t('profile.markets.current')}
+                      <FieldHint text={t('profile.markets.currentHint')} />
                     </Label>
                     <CountryMultiSelect
                       value={formData.current_markets}
                       onChange={v => setFormData(prev => ({ ...prev, current_markets: v }))}
-                      placeholder="Sélectionnez vos marchés actuels..."
+                      placeholder={t('profile.markets.currentPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Quels marchés souhaitez-vous éviter ?</Label>
+                    <Label>{t('profile.markets.avoid')}</Label>
                     <CountryMultiSelect
                       value={formData.avoid_markets}
                       onChange={v => setFormData(prev => ({ ...prev, avoid_markets: v }))}
-                      placeholder="Sélectionnez les marchés à éviter..."
+                      placeholder={t('profile.markets.avoidPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="target_buyer_description">
-                      Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler
-                      <FieldHint text="Plus votre description est précise (type de circuit, positionnement prix, philosophie), plus nos experts pourront affiner la sélection des contacts et améliorer le taux de réponse de vos campagnes." />
+                      {t('profile.markets.buyerDescription')}
+                      <FieldHint text={t('profile.markets.buyerDescriptionHint')} />
                     </Label>
                     <Textarea id="target_buyer_description" value={formData.target_buyer_description} onChange={e => setFormData(prev => ({
                     ...prev,
                     target_buyer_description: e.target.value
-                  }))} placeholder="Ex: Importateurs spécialisés en vins bio, cavistes haut de gamme, restaurateurs étoilés..." className="min-h-[120px]" />
+                  }))} placeholder={t('profile.markets.buyerDescriptionPlaceholder')} className="min-h-[120px]" />
                   </div>
                 </CardContent>
               </Card>
@@ -940,21 +938,19 @@ const Profile = () => {
             <TabsContent value="description" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Description du domaine</CardTitle>
-                  <CardDescription>
-                    Présentez votre domaine, son histoire, son terroir, ses pratiques (minimum 300 caractères)
-                  </CardDescription>
+                  <CardTitle>{t('profile.description.cardTitle')}</CardTitle>
+                  <CardDescription>{t('profile.description.cardDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Textarea value={formData.description} onChange={e => setFormData(prev => ({
                     ...prev,
                     description: e.target.value
-                  }))} placeholder="Histoire, terroir, pratiques, volumes, marchés..." className="min-h-[200px]" />
+                  }))} placeholder={t('profile.description.placeholder')} className="min-h-[200px]" />
                     <div className="text-sm text-muted-foreground">
-                      {formData.description.length}/300 caractères minimum
+                      {t('profile.description.charsCount', { count: formData.description.length })}
                       {formData.description.length < 300 && <span className="text-destructive ml-2">
-                          (encore {300 - formData.description.length} caractères requis)
+                          {t('profile.description.remaining', { count: 300 - formData.description.length })}
                         </span>}
                     </div>
                   </div>
@@ -966,26 +962,24 @@ const Profile = () => {
             <TabsContent value="website" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Site web</CardTitle>
-                  <CardDescription>
-                    URL de votre site web (obligatoire, doit commencer par https://)
-                  </CardDescription>
+                  <CardTitle>{t('profile.website.cardTitle')}</CardTitle>
+                  <CardDescription>{t('profile.website.cardDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="website">URL du site web</Label>
+                    <Label htmlFor="website">{t('profile.website.label')}</Label>
                     <div className="flex gap-2">
                       <Input id="website" type="url" value={formData.website} onChange={e => setFormData(prev => ({
                       ...prev,
                       website: e.target.value
-                    }))} placeholder="https://www.mondomaine.fr" className={!isValidUrl(formData.website) && formData.website ? 'border-destructive' : ''} />
+                    }))} placeholder={t('profile.website.placeholder')} className={!isValidUrl(formData.website) && formData.website ? 'border-destructive' : ''} />
                       <Button type="button" variant="outline" disabled={!isValidUrl(formData.website)} onClick={() => window.open(formData.website, '_blank')}>
                         <ExternalLink className="h-4 w-4 mr-2" />
-                        Tester
+                        {t('profile.website.test')}
                       </Button>
                     </div>
                     {!isValidUrl(formData.website) && formData.website && <div className="text-destructive text-sm">
-                        L'URL doit être valide et commencer par https://
+                        {t('profile.website.invalid')}
                       </div>}
                   </div>
                 </CardContent>
