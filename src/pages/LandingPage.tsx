@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import pillarNetworkImg from "@/assets/pillar-network.png";
 import pillarContactImg from "@/assets/pillar-contact.png";
 import pillarSuiviImg from "@/assets/pillar-suivi.png";
@@ -222,6 +223,7 @@ const LandingPage = () => {
             </div>
           </Link>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Button variant="ghost" asChild>
               <Link to="/auth">Se connecter</Link>
             </Button>
