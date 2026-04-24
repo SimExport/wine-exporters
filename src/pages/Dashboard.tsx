@@ -9,7 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Megaphone, Users, MapPin, TrendingUp, Rocket, Zap, MessageSquare, UserCheck, Activity } from 'lucide-react';
 import { LeadsWorldMap } from '@/components/LeadsWorldMap';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface Profile {
   id: string;
@@ -43,6 +44,9 @@ interface ActivityItem {
 }
 
 const Dashboard = () => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
+  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -61,7 +65,7 @@ const Dashboard = () => {
         ]);
         if (profileResult.error) {
           console.error('Error fetching profile:', profileResult.error);
-          toast({ title: "Erreur", description: "Impossible de charger votre profil", variant: "destructive" });
+          toast({ title: t('common.error'), description: t('dashboard.loadProfileError'), variant: "destructive" });
         } else {
           setProfile(profileResult.data);
         }
@@ -84,23 +88,23 @@ const Dashboard = () => {
           // Map campaign events
           (eventsResult.data || []).forEach(ev => {
             const camp = fetchedCampaigns.find(c => c.id === ev.campaign_id);
-            const campName = camp?.name ?? 'Campagne';
+            const campName = camp?.name ?? t('dashboard.campaign');
             if (ev.type === 'launched') {
-              activityItems.push({ id: `ev-${ev.id}`, type: 'campaign_launched', label: `Campagne lancée`, sublabel: campName, date: ev.created_at, icon: Zap, iconColor: 'text-primary' });
+              activityItems.push({ id: `ev-${ev.id}`, type: 'campaign_launched', label: t('dashboard.campaignLaunched'), sublabel: campName, date: ev.created_at, icon: Zap, iconColor: 'text-primary' });
             } else if (ev.type === 'reply') {
-              activityItems.push({ id: `ev-${ev.id}`, type: 'reply_received', label: `Réponse reçue`, sublabel: campName, date: ev.created_at, icon: MessageSquare, iconColor: 'text-green-600' });
+              activityItems.push({ id: `ev-${ev.id}`, type: 'reply_received', label: t('dashboard.replyReceived'), sublabel: campName, date: ev.created_at, icon: MessageSquare, iconColor: 'text-green-600' });
             }
           });
 
           // Campaign creations
           fetchedCampaigns.slice(0, 5).forEach(c => {
-            activityItems.push({ id: `camp-${c.id}`, type: 'campaign_created', label: `Nouvelle campagne`, sublabel: c.name, date: c.created_at, icon: Megaphone, iconColor: 'text-blue-600' });
+            activityItems.push({ id: `camp-${c.id}`, type: 'campaign_created', label: t('dashboard.newCampaign'), sublabel: c.name, date: c.created_at, icon: Megaphone, iconColor: 'text-blue-600' });
           });
 
           // Prospect updates
           (leadsResult.data || []).forEach(lead => {
-            const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.company_name || 'Prospect';
-            activityItems.push({ id: `lead-${lead.id}`, type: 'prospect_updated', label: `Prospect mis à jour`, sublabel: name, date: lead.updated_at, icon: UserCheck, iconColor: 'text-orange-500' });
+            const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.company_name || t('dashboard.prospect');
+            activityItems.push({ id: `lead-${lead.id}`, type: 'prospect_updated', label: t('dashboard.prospectUpdated'), sublabel: name, date: lead.updated_at, icon: UserCheck, iconColor: 'text-orange-500' });
           });
         }
 
@@ -119,20 +123,20 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast({ title: "Déconnexion réussie", description: "À bientôt sur ExportVins !" });
+      toast({ title: t('sidebar.signOutSuccess'), description: t('auth.welcome') });
     } catch (error) {
-      toast({ title: "Erreur", description: "Erreur lors de la déconnexion", variant: "destructive" });
+      toast({ title: t('common.error'), description: t('sidebar.signOutError'), variant: "destructive" });
     }
   };
 
   const getSubscriptionBadge = (plan: string) => {
     switch (plan) {
       case 'monthly':
-        return <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">Abonnement Mensuel</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">{t('dashboardPage.plan.monthly')}</Badge>;
       case 'pay_per_campaign':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">Paiement à la Carte</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">{t('dashboardPage.plan.payPerCampaign')}</Badge>;
       default:
-        return <Badge variant="outline" className="bg-muted/50">Aucun Abonnement</Badge>;
+        return <Badge variant="outline" className="bg-muted/50">{t('dashboardPage.plan.none')}</Badge>;
     }
   };
 
@@ -141,17 +145,17 @@ const Dashboard = () => {
       case 'pending_validation':
         return <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4 text-orange-500" />
-          <Badge className="bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-50">En attente de validation</Badge>
+          <Badge className="bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-50">{t('dashboardPage.campaignStatus.pendingValidation')}</Badge>
         </div>;
       case 'active':
         return <div className="flex items-center space-x-2">
           <CheckCircle className="h-4 w-4 text-green-500" />
-          <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">Active</Badge>
+          <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">{t('dashboardPage.campaignStatus.active')}</Badge>
         </div>;
       case 'completed':
         return <div className="flex items-center space-x-2">
           <CheckCircle className="h-4 w-4 text-gray-500" />
-          <Badge variant="outline" className="text-muted-foreground">Terminée</Badge>
+          <Badge variant="outline" className="text-muted-foreground">{t('dashboardPage.campaignStatus.completed')}</Badge>
         </div>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -162,7 +166,7 @@ const Dashboard = () => {
     return <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <Grape className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-        <p className="text-muted-foreground">Chargement de votre tableau de bord...</p>
+        <p className="text-muted-foreground">{t('dashboardPage.loading')}</p>
       </div>
     </div>;
   }
@@ -177,9 +181,9 @@ const Dashboard = () => {
   const uniqueMarkets = new Set(campaigns.flatMap(c => c.target_markets || [])).size;
 
   const globalStats = [
-    { label: 'Campagnes envoyées', value: launchedCampaigns.toLocaleString('fr-FR'), icon: Megaphone },
-    { label: 'Importateurs trouvés', value: totalReplies.toLocaleString('fr-FR'), icon: Users },
-    { label: 'Marchés prospectés', value: uniqueMarkets.toString(), icon: MapPin },
+    { label: t('dashboardPage.stats.campaignsSent'), value: launchedCampaigns.toLocaleString(localeCode), icon: Megaphone },
+    { label: t('dashboardPage.stats.importersFound'), value: totalReplies.toLocaleString(localeCode), icon: Users },
+    { label: t('dashboardPage.stats.marketsProspected'), value: uniqueMarkets.toString(), icon: MapPin },
   ];
 
   return (
@@ -195,7 +199,7 @@ const Dashboard = () => {
               <span className="text-sm text-muted-foreground">{user?.email}</span>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
+                {t('dashboardPage.signOut')}
               </Button>
             </div>
           </div>
@@ -205,9 +209,9 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-1">Tableau de Bord</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-1">{t('dashboardPage.title')}</h2>
           <p className="text-muted-foreground">
-            Bienvenue{profile?.contact_name ? `, ${profile.contact_name}` : ' Vigneron'} 👋
+            {t('dashboardPage.welcome')}{profile?.contact_name ? `, ${profile.contact_name}` : ` ${t('dashboardPage.welcomeFallback')}`} 👋
           </p>
         </div>
 
@@ -231,7 +235,7 @@ const Dashboard = () => {
           {/* Plan */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Plan Actuel</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboardPage.plan.title')}</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -239,10 +243,10 @@ const Dashboard = () => {
                 {getSubscriptionBadge(profile?.subscription_plan || 'none')}
                 <p className="text-xs text-muted-foreground">
                   {profile?.subscription_plan === 'monthly'
-                    ? 'Accès complet à la base de données'
+                    ? t('dashboardPage.plan.monthlyDesc')
                     : profile?.subscription_plan === 'pay_per_campaign'
-                    ? 'Accès limité aux pays sélectionnés'
-                    : 'Aucun accès premium'}
+                    ? t('dashboardPage.plan.payPerCampaignDesc')
+                    : t('dashboardPage.plan.noneDesc')}
                 </p>
               </div>
             </CardContent>
@@ -251,19 +255,19 @@ const Dashboard = () => {
           {/* Campagnes restantes */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Campagnes Disponibles</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboardPage.remaining.title')}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{profile?.campaigns_remaining || 0}</div>
-              <p className="text-xs text-muted-foreground">Campagnes de prospection restantes</p>
+              <p className="text-xs text-muted-foreground">{t('dashboardPage.remaining.subtitle')}</p>
             </CardContent>
           </Card>
 
           {/* Domaine */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Votre Domaine</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboardPage.domain.title')}</CardTitle>
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -271,7 +275,7 @@ const Dashboard = () => {
                 {isProfileIncomplete
                   ? <div className="flex items-center space-x-2">
                       <AlertCircle className="h-4 w-4 text-orange-500" />
-                      <span className="text-sm font-medium text-orange-600">Profil incomplet</span>
+                      <span className="text-sm font-medium text-orange-600">{t('dashboardPage.domain.incomplete')}</span>
                     </div>
                   : <p className="text-sm font-medium">{profile.domain_name}</p>}
                 {profile?.location && <p className="text-xs text-muted-foreground">{profile.location}</p>}
@@ -286,17 +290,17 @@ const Dashboard = () => {
           {/* Profile config */}
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/profile')}>
             <CardHeader>
-              <CardTitle>Configuration du Profil</CardTitle>
-              <CardDescription>Renseignez les informations concernant votre domaine</CardDescription>
+              <CardTitle>{t('dashboardPage.config.title')}</CardTitle>
+              <CardDescription>{t('dashboardPage.config.description')}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full" asChild>
                 <Link to="/profile">
                   <Settings className="h-4 w-4 mr-2" />
-                  Configurer mon profil
+                  {t('dashboardPage.config.cta')}
                 </Link>
               </Button>
-              <p className="text-xs text-muted-foreground mt-2">Renseignez vos informations en cliquant sur configurer mon profil</p>
+              <p className="text-xs text-muted-foreground mt-2">{t('dashboardPage.config.hint')}</p>
             </CardContent>
           </Card>
 
@@ -310,18 +314,18 @@ const Dashboard = () => {
                   <Crown className="h-5 w-5 text-yellow-500" />
                   <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100 text-xs">Premium</Badge>
                 </div>
-                <CardTitle>Démarrez votre prospection</CardTitle>
-                <CardDescription>Accédez à 15 000+ acheteurs qualifiés dans le monde</CardDescription>
+                <CardTitle>{t('dashboardPage.upgradeCard.title')}</CardTitle>
+                <CardDescription>{t('dashboardPage.upgradeCard.description')}</CardDescription>
               </CardHeader>
               <CardContent className="relative">
                 <Button className="w-full" asChild>
                   <Link to="/billing">
                     <Rocket className="h-4 w-4 mr-2" />
-                    Passer Premium
+                    {t('dashboardPage.upgradeCard.cta')}
                   </Link>
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2 text-center">
-                  À partir de 199 €/mois · 3 mois d'engagement
+                  {t('dashboardPage.upgradeCard.fineprint')}
                 </p>
               </CardContent>
             </Card>
@@ -331,8 +335,8 @@ const Dashboard = () => {
               onClick={() => !hasNoCampaignsRemaining && navigate('/create-campaign')}
             >
               <CardHeader>
-                <CardTitle>Lancer une Campagne</CardTitle>
-                <CardDescription>Démarrez une campagne de prospection</CardDescription>
+                <CardTitle>{t('dashboardPage.campaignCard.title')}</CardTitle>
+                <CardDescription>{t('dashboardPage.campaignCard.description')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {hasNoCampaignsRemaining ? (
@@ -340,20 +344,20 @@ const Dashboard = () => {
                     <Button className="w-full" variant="outline" asChild>
                       <Link to="/billing">
                         <CreditCard className="h-4 w-4 mr-2" />
-                        Souscrire un abonnement
+                        {t('dashboardPage.campaignCard.subscribe')}
                       </Link>
                     </Button>
-                    <p className="text-xs text-orange-600 mt-2">Souscrivez à un plan pour lancer des campagnes</p>
+                    <p className="text-xs text-orange-600 mt-2">{t('dashboardPage.campaignCard.subscribeHint')}</p>
                   </>
                 ) : (
                   <>
                     <Button className="w-full" asChild>
                       <Link to="/create-campaign">
                         <Globe className="h-4 w-4 mr-2" />
-                        Nouvelle campagne
+                        {t('dashboardPage.campaignCard.newCampaign')}
                       </Link>
                     </Button>
-                    <p className="text-xs text-muted-foreground mt-2">Sélectionnez vos marchés cibles</p>
+                    <p className="text-xs text-muted-foreground mt-2">{t('dashboardPage.campaignCard.newCampaignHint')}</p>
                   </>
                 )}
               </CardContent>
@@ -363,20 +367,20 @@ const Dashboard = () => {
 
         {/* Campaigns list */}
         <div className="mt-8">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Vos Campagnes</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">{t('dashboardPage.campaignsList.title')}</h3>
 
           {campaigns.length === 0 ? (
             <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
               <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-foreground mb-2">Aucune campagne pour le moment</h4>
+              <h4 className="text-lg font-medium text-foreground mb-2">{t('dashboardPage.campaignsList.emptyTitle')}</h4>
               <p className="text-sm text-muted-foreground mb-4">
-                Créez votre première campagne de prospection pour toucher des importateurs à l'international.
+                {t('dashboardPage.campaignsList.emptyDescription')}
               </p>
               {!hasNoCampaignsRemaining && (
                 <Button asChild>
                   <Link to="/create-campaign">
                     <Plus className="h-4 w-4 mr-2" />
-                    Créer ma première campagne
+                    {t('dashboardPage.campaignsList.createFirst')}
                   </Link>
                 </Button>
               )}
@@ -392,11 +396,11 @@ const Dashboard = () => {
                   <CardContent>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        Marchés: {campaign.target_markets.slice(0, 3).join(', ')}
+                        {t('dashboardPage.campaignsList.marketsLabel')}: {campaign.target_markets.slice(0, 3).join(', ')}
                         {campaign.target_markets.length > 3 && ` +${campaign.target_markets.length - 3}`}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Créée le {new Date(campaign.created_at).toLocaleDateString('fr-FR')}
+                        {t('dashboardPage.campaignsList.createdOn')} {new Date(campaign.created_at).toLocaleDateString(localeCode)}
                       </p>
                     </div>
                   </CardContent>
@@ -418,14 +422,14 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 pb-3">
               <Activity className="h-4 w-4 text-muted-foreground" />
-              <CardTitle className="text-base">Dernière activité</CardTitle>
+              <CardTitle className="text-base">{t('dashboardPage.activity.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {activity.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Activity className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                  <p className="text-sm text-muted-foreground">Aucune activité récente</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">Lancez votre première campagne pour voir l'activité ici</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboardPage.activity.empty')}</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">{t('dashboardPage.activity.emptyHint')}</p>
                 </div>
               ) : (
                 <ol className="relative border-l border-border ml-3 space-y-0">
@@ -442,7 +446,7 @@ const Dashboard = () => {
                           {item.sublabel && <p className="text-xs text-muted-foreground truncate">{item.sublabel}</p>}
                         </div>
                         <time className="text-xs text-muted-foreground/70 shrink-0 mt-0.5">
-                          {formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: fr })}
+                          {formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: dateLocale })}
                         </time>
                       </div>
                     </li>

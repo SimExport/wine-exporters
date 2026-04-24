@@ -13,7 +13,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
+import { useTranslation } from 'react-i18next';
 const CopyButton = ({ value }: { value: string }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
@@ -24,7 +26,7 @@ const CopyButton = ({ value }: { value: string }) => {
     <button
       onClick={handleCopy}
       className="ml-1 inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
-      title="Copier"
+      title={t('importers.table.copy')}
     >
       {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
     </button>
@@ -74,6 +76,8 @@ const translateCountry = (englishName: string): string => {
 };
 const COUNTRIES = COUNTRY_LIST;
 const Importers = () => {
+  const { t, i18n } = useTranslation();
+  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [totalDbContacts, setTotalDbContacts] = useState<number>(0);
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
@@ -100,7 +104,7 @@ const Importers = () => {
     if (!user || !sourcingMarket) return;
     if (searchCredits <= 0) {
       toast({
-        title: 'Crédit de recherche épuisé',
+        title: t('importers.sourcing.creditExhausted'),
         description: noCreditsMessage('search'),
         variant: 'destructive',
       });
@@ -116,17 +120,17 @@ const Importers = () => {
       const { ok } = await consumeSearchCredit();
       if (!ok) {
         toast({
-          title: 'Crédit épuisé',
+          title: t('importers.sourcing.creditExhaustedShort'),
           description: noCreditsMessage('search'),
           variant: 'destructive',
         });
       }
       setSourcingOpen(false);
       setSourcingMarket('');
-      toast({ title: 'Demande reçue !', description: 'Notre équipe vous répondra sous 72h.' });
+      toast({ title: t('importers.sourcing.successTitle'), description: t('importers.sourcing.successDescription') });
     } catch (error) {
       console.error('Sourcing request error:', error);
-      toast({ title: 'Erreur', description: 'Impossible d\'envoyer la demande', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('importers.sourcing.errorSubmit'), variant: 'destructive' });
     } finally {
       setSourcingLoading(false);
     }
@@ -162,8 +166,8 @@ const Importers = () => {
       if (error) {
         console.error('Error fetching contacts:', error);
         toast({
-          title: 'Erreur',
-          description: 'Impossible de charger les contacts',
+          title: t('common.error'),
+          description: t('importers.loadError'),
           variant: 'destructive'
         });
         return;
@@ -173,8 +177,8 @@ const Importers = () => {
     } catch (error) {
       console.error('Error:', error);
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue',
+        title: t('common.error'),
+        description: t('importers.genericError'),
         variant: 'destructive'
       });
     } finally {
@@ -191,8 +195,8 @@ const Importers = () => {
   const exportToCSV = async () => {
     if (!selectedCountry) {
       toast({
-        title: 'Erreur',
-        description: 'Veuillez sélectionner un pays',
+        title: t('common.error'),
+        description: t('importers.selectMarketError'),
         variant: 'destructive'
       });
       return;
@@ -210,8 +214,8 @@ const Importers = () => {
       if (error) {
         console.error('Error fetching data for export:', error);
         toast({
-          title: 'Erreur',
-          description: 'Impossible d\'exporter les données',
+          title: t('common.error'),
+          description: t('importers.exportError'),
           variant: 'destructive'
         });
         return;
@@ -237,14 +241,14 @@ const Importers = () => {
       link.click();
       document.body.removeChild(link);
       toast({
-        title: 'Succès',
-        description: 'Export CSV téléchargé avec succès'
+        title: t('common.success'),
+        description: t('importers.exportSuccess')
       });
     } catch (error) {
       console.error('Error during export:', error);
       toast({
-        title: 'Erreur',
-        description: 'Erreur lors de l\'export',
+        title: t('common.error'),
+        description: t('importers.exportFailure'),
         variant: 'destructive'
       });
     }
@@ -266,23 +270,23 @@ const Importers = () => {
   if (!hasPaidAccess) {
     return <div className="container mx-auto max-w-7xl px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Base de données des importateurs et acheteurs</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('importers.premiumTitle')}</h1>
           <p className="text-muted-foreground mt-2">
-            Consultez les contacts importateurs disponibles et découvrez leurs informations essentielles.
+            {t('importers.premiumDescription')}
           </p>
         </div>
-        <PremiumOnlyState title="Accès réservé aux membres abonnés" description="Passez Premium pour accéder à 15 000+ acheteurs qualifiés dans le monde entier." />
+        <PremiumOnlyState title={t('importers.premiumGate.title')} description={t('importers.premiumGate.description')} />
       </div>;
   }
   return <div className="container mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Liste des importateurs et acheteurs</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('importers.title')}</h1>
           <p className="text-muted-foreground mt-2">
             {totalDbContacts > 0
-              ? `${totalDbContacts.toLocaleString()} contacts disponibles — choisissez un marché pour afficher la liste.`
-              : 'Choisissez un marché pour afficher la liste des importateurs et acheteurs.'}
+              ? t('importers.subtitleWithCount', { count: totalDbContacts.toLocaleString(localeCode) })
+              : t('importers.subtitleEmpty')}
           </p>
         </div>
 
@@ -291,22 +295,22 @@ const Importers = () => {
             <DialogTrigger asChild>
               <Button variant="default" className="shrink-0">
                 <Target className="h-4 w-4 mr-2" />
-                Demander une sélection sur mesure
+                {t('importers.sourcing.cta')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Recherche sur-mesure</DialogTitle>
+                <DialogTitle>{t('importers.sourcing.title')}</DialogTitle>
                 <DialogDescription>
-                  Dites-nous quel marché vous visez, et nous nous occupons du reste. Nous sélectionnons pour vous les acheteurs qui correspondent vraiment à votre typologie de vins et de prix.
+                  {t('importers.sourcing.description')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Marché cible</label>
+                  <label className="text-sm font-medium mb-1.5 block">{t('importers.sourcing.marketLabel')}</label>
                   <Select value={sourcingMarket} onValueChange={setSourcingMarket}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choisir un marché" />
+                      <SelectValue placeholder={t('importers.sourcing.marketPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {COUNTRIES.map(c => (
@@ -316,7 +320,7 @@ const Importers = () => {
                   </Select>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Crédit restant</span>
+                  <span className="text-muted-foreground">{t('importers.sourcing.creditRemaining')}</span>
                   <Badge variant={searchCredits > 0 ? 'default' : 'secondary'}>
                     {searchCredits} / 1
                   </Badge>
@@ -330,7 +334,7 @@ const Importers = () => {
                   onClick={handleSourcingSubmit}
                 >
                   {sourcingLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
-                  Envoyer la demande
+                  {t('importers.sourcing.submit')}
                 </Button>
               </div>
             </DialogContent>
@@ -352,10 +356,10 @@ const Importers = () => {
             {COUNTRIES.find(c => c.code === selectedCountry)?.name}
           </span>
           <span className="text-sm text-muted-foreground">
-            — {totalCount} contacts
+            {t('importers.selected.contactsCount', { count: totalCount })}
           </span>
           <Button variant="ghost" size="sm" onClick={() => setSelectedCountry('')} className="text-xs h-6 px-2">
-            Effacer le filtre
+            {t('importers.selected.clearFilter')}
           </Button>
         </div>
       )}
@@ -363,27 +367,27 @@ const Importers = () => {
       {/* Main Content */}
       <Card>
         {!selectedCountry ? <div className="p-12 text-center text-muted-foreground">
-            Sélectionnez un marché pour afficher les contacts.
+            {t('importers.table.selectMarketHint')}
           </div> : loading ? <div className="p-12 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-2">Chargement...</p>
+            <p className="text-muted-foreground mt-2">{t('importers.loadingProtected')}</p>
           </div> : contacts.length === 0 ? <div className="p-12 text-center text-muted-foreground">
-            Aucun contact trouvé pour ce pays.
+            {t('importers.table.noResultsForCountry')}
           </div> : <>
             {/* Table */}
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom de la société</TableHead>
-                    <TableHead>Pays</TableHead>
-                    <TableHead>Adresse</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Téléphone</TableHead>
-                    <TableHead>Site web</TableHead>
-                    <TableHead>Facebook</TableHead>
-                    <TableHead>Instagram</TableHead>
-                    <TableHead>LinkedIn</TableHead>
+                    <TableHead>{t('importers.table.company')}</TableHead>
+                    <TableHead>{t('importers.table.country')}</TableHead>
+                    <TableHead>{t('importers.table.address')}</TableHead>
+                    <TableHead>{t('importers.table.email')}</TableHead>
+                    <TableHead>{t('importers.table.phone')}</TableHead>
+                    <TableHead>{t('importers.table.website')}</TableHead>
+                    <TableHead>{t('importers.table.facebook')}</TableHead>
+                    <TableHead>{t('importers.table.instagram')}</TableHead>
+                    <TableHead>{t('importers.table.linkedin')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -458,19 +462,19 @@ const Importers = () => {
             {/* Pagination */}
             <div className="flex items-center justify-between p-4 border-t">
               <div className="text-sm text-muted-foreground">
-                {startItem} à {endItem} sur {totalCount}
+                {t('importers.pagination.rangeOf', { start: startItem, end: endItem, total: totalCount })}
               </div>
               
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
                   <ChevronLeft className="h-4 w-4 mr-1" />
-                  Précédent
+                  {t('importers.pagination.previous')}
                 </Button>
                 <span className="text-sm text-muted-foreground px-2">
-                  Page {currentPage} sur {totalPages}
+                  {t('importers.pagination.pageOf', { current: currentPage, total: totalPages })}
                 </span>
                 <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
-                  Suivant
+                  {t('importers.pagination.next')}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
