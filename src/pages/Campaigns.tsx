@@ -885,11 +885,11 @@ ${campaignData.sendAsName}`} />
         </div>;
     }
     const STATUS_FILTERS = [
-      { key: 'all', label: 'Toutes', color: 'bg-muted text-muted-foreground' },
-      { key: 'draft', label: 'Brouillon', color: 'bg-secondary text-secondary-foreground' },
-      { key: 'pending_validation', label: 'En validation', color: 'bg-yellow-100 text-yellow-800' },
-      { key: 'active', label: 'Active', color: 'bg-green-100 text-green-800' },
-      { key: 'results', label: 'Terminée', color: 'bg-purple-100 text-purple-800' },
+      { key: 'all', label: t('campaigns.list.filters.all'), color: 'bg-muted text-muted-foreground' },
+      { key: 'draft', label: t('campaigns.list.filters.draft'), color: 'bg-secondary text-secondary-foreground' },
+      { key: 'pending_validation', label: t('campaigns.list.filters.pending_validation'), color: 'bg-yellow-100 text-yellow-800' },
+      { key: 'active', label: t('campaigns.list.filters.active'), color: 'bg-green-100 text-green-800' },
+      { key: 'results', label: t('campaigns.list.filters.results'), color: 'bg-purple-100 text-purple-800' },
     ];
 
     const filteredCampaigns = statusFilter === 'all'
@@ -899,14 +899,14 @@ ${campaignData.sendAsName}`} />
     return <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Campagnes</h1>
+            <h1 className="text-3xl font-bold">{t('campaigns.list.title')}</h1>
             <p className="text-muted-foreground mt-1">
-              Gérez vos campagnes de prospection 
+              {t('campaigns.list.subtitle')}
             </p>
           </div>
           <Button onClick={() => navigate('/create-campaign')}>
             <Plus className="h-4 w-4 mr-2" />
-            Nouvelle campagne
+            {t('campaigns.list.newCampaign')}
           </Button>
         </div>
 
@@ -914,15 +914,15 @@ ${campaignData.sendAsName}`} />
             <CardContent>
               <EmptyState
                 icon={<Rocket className="h-10 w-10" />}
-                title="Vous n'avez pas encore de campagne"
-                description="Créez votre première campagne de prospection pour toucher des importateurs à l'international."
-                action={{ label: "Lancer ma première campagne", href: "/create-campaign" }}
+                title={t('campaigns.list.emptyTitle')}
+                description={t('campaigns.list.emptyDescription')}
+                action={{ label: t('campaigns.list.emptyAction'), href: "/create-campaign" }}
               />
             </CardContent>
           </Card> : <Card>
             <CardHeader>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <CardTitle>Vos campagnes ({campaigns.length})</CardTitle>
+                <CardTitle>{t('campaigns.list.yoursCount', { count: campaigns.length })}</CardTitle>
                 <div className="flex flex-wrap gap-2">
                   {STATUS_FILTERS.map(f => {
                     const count = f.key === 'all' ? campaigns.length : campaigns.filter(c => c.status === f.key).length;
@@ -949,18 +949,18 @@ ${campaignData.sendAsName}`} />
             </CardHeader>
             <CardContent>
               {filteredCampaigns.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8 text-sm">Aucune campagne pour ce statut.</p>
+                <p className="text-center text-muted-foreground py-8 text-sm">{t('campaigns.list.noneForStatus')}</p>
               ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Marchés</TableHead>
-                    <TableHead>Prospects</TableHead>
-                    <TableHead>KPIs</TableHead>
-                    <TableHead>Créée le</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('campaigns.list.table.name')}</TableHead>
+                    <TableHead>{t('campaigns.list.table.status')}</TableHead>
+                    <TableHead>{t('campaigns.list.table.markets')}</TableHead>
+                    <TableHead>{t('campaigns.list.table.prospects')}</TableHead>
+                    <TableHead>{t('campaigns.list.table.kpis')}</TableHead>
+                    <TableHead>{t('campaigns.list.table.createdAt')}</TableHead>
+                    <TableHead>{t('campaigns.list.table.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -982,7 +982,7 @@ ${campaignData.sendAsName}`} />
                         </div>
                       </TableCell>
                       <TableCell>
-                        {campaign.prospect_count || 0} prospects
+                        {t('campaigns.list.table.prospectsCount', { count: campaign.prospect_count || 0 })}
                       </TableCell>
                       <TableCell>
                         {campaign.status === 'draft' ? (
@@ -991,37 +991,37 @@ ${campaignData.sendAsName}`} />
                           <div className="text-xs space-y-1 text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                               <Eye className="h-3 w-3 shrink-0" />
-                              <span>{campaign.stats_opens ?? 0} ouv.</span>
+                              <span>{t('campaigns.list.table.opens', { count: campaign.stats_opens ?? 0 })}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <MousePointer className="h-3 w-3 shrink-0" />
-                              <span>{campaign.stats_clicks ?? 0} clics</span>
+                              <span>{t('campaigns.list.table.clicks', { count: campaign.stats_clicks ?? 0 })}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <Reply className="h-3 w-3 shrink-0" />
-                              <span>{campaign.stats_replies ?? 0} rép.</span>
+                              <span>{t('campaigns.list.table.replies', { count: campaign.stats_replies ?? 0 })}</span>
                             </div>
                           </div>
                         )}
                       </TableCell>
                       <TableCell>
                         {format(new Date(campaign.created_at), 'dd/MM/yyyy', {
-                    locale: fr
+                    locale: dateLocale
                   })}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
                             <Eye className="h-4 w-4 mr-1" />
-                            Voir prospects
+                            {t('campaigns.list.table.viewProspects')}
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => archiveCampaign(campaign.id, campaign.name)}>
                             <Archive className="h-4 w-4 mr-1" />
-                            Archiver
+                            {t('campaigns.list.table.archive')}
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => deleteCampaign(campaign.id, campaign.name, campaign.status)} disabled={campaign.status === 'sending'} className={campaign.status === 'sending' ? 'opacity-50 cursor-not-allowed' : ''}>
                             <Trash2 className="h-4 w-4 mr-1" />
-                            Supprimer
+                            {t('campaigns.list.table.delete')}
                           </Button>
                         </div>
                       </TableCell>
@@ -1042,25 +1042,25 @@ ${campaignData.sendAsName}`} />
           <div className="flex items-center space-x-4">
             <Button variant="ghost" onClick={resetCreateForm}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour aux campagnes
+              {t('campaigns.wizard.back')}
             </Button>
-            <h1 className="text-2xl font-bold">Créer une campagne</h1>
+            <h1 className="text-2xl font-bold">{t('campaigns.wizard.title')}</h1>
           </div>
 
           <div className="flex items-center space-x-4">
             {lastSaved && <Badge variant="outline" className="text-green-600">
-                Enregistré {lastSaved.toLocaleTimeString()}
+                {t('campaigns.wizard.savedAt', { time: lastSaved.toLocaleTimeString() })}
               </Badge>}
-            {saving && <Badge variant="outline">Enregistrement...</Badge>}
+            {saving && <Badge variant="outline">{t('campaigns.wizard.saving')}</Badge>}
             
             <Button variant="outline" onClick={saveDraft} disabled={saving}>
               <Save className="h-4 w-4 mr-2" />
-              Enregistrer le brouillon
+              {t('campaigns.wizard.saveDraft')}
             </Button>
             
             <Button onClick={launchCampaign} disabled={loading || getPreflightErrors().length > 0}>
               <Rocket className="h-4 w-4 mr-2" />
-              {loading ? 'Lancement...' : 'Lancer la campagne'}
+              {loading ? t('campaigns.wizard.launching') : t('campaigns.wizard.launch')}
             </Button>
           </div>
         </div>
@@ -1108,15 +1108,15 @@ ${campaignData.sendAsName}`} />
         <div className="flex justify-between mt-6">
           <Button variant="outline" onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Précédent
+            {t('campaigns.wizard.previous')}
           </Button>
           
           {currentStep < steps.length - 1 ? <Button onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
-              Suivant
+              {t('campaigns.wizard.next')}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button> : <Button onClick={launchCampaign} disabled={loading || getPreflightErrors().length > 0}>
               <Rocket className="h-4 w-4 mr-2" />
-              {loading ? 'Lancement...' : 'Lancer la campagne'}
+              {loading ? t('campaigns.wizard.launching') : t('campaigns.wizard.launch')}
             </Button>}
         </div>
       </div>
