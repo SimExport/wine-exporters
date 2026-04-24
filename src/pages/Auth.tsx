@@ -8,7 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Grape } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 const Auth = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,33 +20,36 @@ const Auth = () => {
   const navigate = useNavigate();
   const handleSubmit = async (isSignUp: boolean) => {
     if (!email || !password) {
-      toast({ title: "Erreur", description: "Veuillez remplir tous les champs", variant: "destructive" });
+      toast({ title: t('common.error'), description: t('auth.fillAllFields'), variant: "destructive" });
       return;
     }
     setLoading(true);
     try {
       const { error } = isSignUp ? await signUp(email, password) : await signIn(email, password);
       if (error) {
-        let errorMessage = "Une erreur s'est produite";
-        if (error.message.includes('Invalid login credentials')) errorMessage = "Email ou mot de passe incorrect";
-        else if (error.message.includes('User already registered')) errorMessage = "Cet email est déjà utilisé";
-        else if (error.message.includes('Password should be at least')) errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
-        toast({ title: "Erreur d'authentification", description: errorMessage, variant: "destructive" });
+        let errorMessage = t('auth.genericError');
+        if (error.message.includes('Invalid login credentials')) errorMessage = t('auth.invalidCredentials');
+        else if (error.message.includes('User already registered')) errorMessage = t('auth.userExists');
+        else if (error.message.includes('Password should be at least')) errorMessage = t('auth.passwordTooShort');
+        toast({ title: t('auth.errorTitle'), description: errorMessage, variant: "destructive" });
       } else {
         if (isSignUp) {
-          toast({ title: "Compte créé avec succès", description: "Vérifiez votre email pour confirmer votre compte" });
+          toast({ title: t('auth.accountCreated'), description: t('auth.accountCreatedDescription') });
         } else {
-          toast({ title: "Connexion réussie", description: "Bienvenue sur ExportVins !" });
+          toast({ title: t('auth.signedIn'), description: t('auth.welcome') });
           navigate('/');
         }
       }
     } catch (error) {
-      toast({ title: "Erreur", description: "Une erreur inattendue s'est produite" });
+      toast({ title: t('common.error'), description: t('auth.unexpectedError') });
     } finally {
       setLoading(false);
     }
   };
   return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -57,39 +63,39 @@ const Auth = () => {
               </div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">Connexion</CardTitle>
-          <CardDescription className="text-muted-foreground">Plateforme de prospection tout-en-un pour les domaines viticoles.</CardDescription>
+          <CardTitle className="text-2xl font-bold text-foreground">{t('auth.title')}</CardTitle>
+          <CardDescription className="text-muted-foreground">{t('auth.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Connexion</TabsTrigger>
-              <TabsTrigger value="signup">Inscription</TabsTrigger>
+              <TabsTrigger value="signin">{t('auth.signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
             </TabsList>
             <TabsContent value="signin" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signin-email">Email</Label>
-                <Input id="signin-email" type="email" placeholder="votre@email.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
+                <Label htmlFor="signin-email">{t('auth.email')}</Label>
+                <Input id="signin-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signin-password">Mot de passe</Label>
+                <Label htmlFor="signin-password">{t('auth.password')}</Label>
                 <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
               </div>
               <Button onClick={() => handleSubmit(false)} className="w-full" disabled={loading}>
-                {loading ? 'Connexion...' : 'Se connecter'}
+                {loading ? t('auth.signingIn') : t('auth.signInButton')}
               </Button>
             </TabsContent>
             <TabsContent value="signup" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <Input id="signup-email" type="email" placeholder="votre@email.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
+                <Label htmlFor="signup-email">{t('auth.email')}</Label>
+                <Input id="signup-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-password">Mot de passe</Label>
+                <Label htmlFor="signup-password">{t('auth.password')}</Label>
                 <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
               </div>
               <Button onClick={() => handleSubmit(true)} className="w-full" disabled={loading}>
-                {loading ? 'Création...' : 'Créer un compte'}
+                {loading ? t('auth.signingUp') : t('auth.signUpButton')}
               </Button>
             </TabsContent>
           </Tabs>
