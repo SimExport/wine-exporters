@@ -109,5 +109,312 @@
     "loading": "Loading error",
     "notFound": "Not found",
     "unauthorized": "Unauthorized"
+  },
+  "notFound": {
+    "title": "404",
+    "subtitle": "Oops! Page not found",
+    "backHome": "Back to home"
+  },
+  "dashboardPage": {
+    "loading": "Loading your dashboard...",
+    "signOut": "Sign out",
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "welcomeFallback": "Winemaker",
+    "stats": {
+      "campaignsSent": "Campaigns sent",
+      "importersFound": "Importers found",
+      "marketsProspected": "Markets prospected"
+    },
+    "plan": {
+      "title": "Current Plan",
+      "monthly": "Monthly Subscription",
+      "payPerCampaign": "Pay Per Campaign",
+      "none": "No Subscription",
+      "monthlyDesc": "Full access to the database",
+      "payPerCampaignDesc": "Limited access to selected countries",
+      "noneDesc": "No premium access"
+    },
+    "campaignStatus": {
+      "pendingValidation": "Pending validation",
+      "active": "Active",
+      "completed": "Completed"
+    },
+    "remaining": {
+      "title": "Available Campaigns",
+      "subtitle": "Prospecting campaigns remaining"
+    },
+    "domain": {
+      "title": "Your Estate",
+      "incomplete": "Incomplete profile"
+    },
+    "config": {
+      "title": "Profile Setup",
+      "description": "Fill in the information about your estate",
+      "cta": "Configure my profile",
+      "hint": "Fill in your information by clicking on configure my profile"
+    },
+    "upgradeCard": {
+      "title": "Start prospecting",
+      "description": "Access 15,000+ qualified buyers worldwide",
+      "cta": "Go Premium",
+      "fineprint": "From €199/month · 3-month commitment"
+    },
+    "campaignCard": {
+      "title": "Launch a Campaign",
+      "description": "Start a prospecting campaign",
+      "subscribe": "Subscribe to a plan",
+      "subscribeHint": "Subscribe to a plan to launch campaigns",
+      "newCampaign": "New campaign",
+      "newCampaignHint": "Select your target markets"
+    },
+    "campaignsList": {
+      "title": "Your Campaigns",
+      "emptyTitle": "No campaigns yet",
+      "emptyDescription": "Create your first prospecting campaign to reach importers internationally.",
+      "createFirst": "Create my first campaign",
+      "marketsLabel": "Markets",
+      "createdOn": "Created on"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "empty": "No recent activity",
+      "emptyHint": "Launch your first campaign to see activity here"
+    }
+  },
+  "importers": {
+    "loadingProtected": "Loading...",
+    "premiumTitle": "Importers and buyers database",
+    "premiumDescription": "Browse available importer contacts and discover their key information.",
+    "premiumGate": {
+      "title": "Members-only access",
+      "description": "Go Premium to access 15,000+ qualified buyers worldwide."
+    },
+    "title": "List of importers and buyers",
+    "subtitleWithCount": "{{count}} contacts available — choose a market to display the list.",
+    "subtitleEmpty": "Choose a market to display the list of importers and buyers.",
+    "sourcing": {
+      "cta": "Request a custom selection",
+      "title": "Custom search",
+      "description": "Tell us which market you're targeting and we'll handle the rest. We hand-pick buyers that truly match your wine and price profile.",
+      "marketLabel": "Target market",
+      "marketPlaceholder": "Choose a market",
+      "creditRemaining": "Credit remaining",
+      "submit": "Send request",
+      "creditExhausted": "Search credit exhausted",
+      "creditExhaustedShort": "Credit exhausted",
+      "successTitle": "Request received!",
+      "successDescription": "Our team will reply within 72h.",
+      "errorSubmit": "Unable to send request"
+    },
+    "loadError": "Unable to load contacts",
+    "genericError": "An error occurred",
+    "selectMarketError": "Please select a country",
+    "exportError": "Unable to export the data",
+    "exportSuccess": "CSV export downloaded successfully",
+    "exportFailure": "Error during export",
+    "selected": {
+      "contactsCount": "— {{count}} contacts",
+      "clearFilter": "Clear filter"
+    },
+    "table": {
+      "company": "Company name",
+      "country": "Country",
+      "address": "Address",
+      "email": "Email",
+      "phone": "Phone",
+      "website": "Website",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "copy": "Copy",
+      "noResultsForCountry": "No contact found for this country.",
+      "selectMarketHint": "Select a market to display contacts."
+    },
+    "pagination": {
+      "rangeOf": "{{start}} to {{end}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {{current}} of {{total}}"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage information about your estate and your wines.",
+    "savedAt": "Saved at {{time}}",
+    "saving": "Saving...",
+    "save": "Save",
+    "loadError": "Unable to load profile information.",
+    "saveSuccess": "Your estate information has been saved.",
+    "saveError": "Unable to save the information.",
+    "completion": {
+      "completed": "Profile {{pct}}% complete",
+      "almostThere": "Almost perfect 🎯",
+      "needsWork": "Needs work",
+      "fieldsCount": "{{done}}/{{total}} fields",
+      "fullDoneTitle": "Profile 100% complete!",
+      "fullDoneSubtitle": "Your profile is complete. Our experts will be able to match you with the best importers.",
+      "fields": {
+        "domain_name": "Estate name",
+        "contact_name": "Your name",
+        "location": "Location",
+        "aoc": "AOC / Appellations",
+        "bottles_per_year": "Annual volume",
+        "wine_types": "Wine types",
+        "grape_varieties": "Grape varieties",
+        "cuvees": "Cuvées",
+        "priority_markets": "Priority markets",
+        "current_markets": "Current markets",
+        "target_buyer_description": "Target buyer description",
+        "description": "Estate description",
+        "website": "Website"
+      }
+    },
+    "tabs": {
+      "general": "General",
+      "markets": "Markets",
+      "description": "Description",
+      "website": "Website",
+      "wines": "Wines",
+      "documents": "Documents",
+      "techSheets": "Tech sheets",
+      "media": "Media"
+    },
+    "general": {
+      "cardTitle": "General information",
+      "cardDescription": "The main information about your estate",
+      "contactName": "Your name",
+      "contactNamePlaceholder": "Jean Dupont",
+      "domainName": "Estate name",
+      "domainNamePlaceholder": "Domaine de la Vallée",
+      "aoc": "AOC / Appellations",
+      "aocPlaceholder": "Add an appellation and press Enter",
+      "surface": "Surface (hectares)",
+      "surfaceHint": "Your estate's size helps us estimate your production capacity and match you with importers whose order volumes fit your scale.",
+      "bottles": "Annual volume (number of bottles)",
+      "bottlesHint": "This figure is decisive in targeting the right importers. A small estate (< 50,000 bt) doesn't have the same needs as a 500,000 bt operation. We tailor our recommendations accordingly.",
+      "wineTypes": "Wine types produced",
+      "wineTypeOptions": {
+        "Rouge": "Red",
+        "Blanc": "White",
+        "Rosé": "Rosé",
+        "Pétillant": "Sparkling",
+        "Orange": "Orange",
+        "Nature": "Natural"
+      },
+      "certifications": "Certifications",
+      "certificationsHint": "Organic, biodynamic and HVE certifications are widely-used filters by specialty importers. Listing them significantly boosts your chances of being selected for targeted campaigns.",
+      "certificationsHelp": "Select all applicable certifications.",
+      "certificationOptions": {
+        "Biologique": "Organic",
+        "Conversion bio": "Organic conversion",
+        "Biodynamique": "Biodynamic",
+        "HVE3": "HVE3"
+      },
+      "grapes": "Grape varieties",
+      "grapesHint": "Grape varieties are a key criterion for specialty importers. Some specifically look for rare or native varieties to differentiate themselves.",
+      "grapesPlaceholder": "Add a grape variety",
+      "cuvees": "Cuvées",
+      "cuveesPlaceholder": "Add a cuvée"
+    },
+    "markets": {
+      "cardTitle": "Prospecting preferences",
+      "cardDescription": "Define your target markets and prospecting preferences",
+      "priority": "Which markets would you like to prioritize?",
+      "priorityHint": "These markets will be used as a priority to build your campaign audiences. Pick the countries you target most for better targeting.",
+      "priorityPlaceholder": "Select your priority markets...",
+      "current": "Which markets are you already present in?",
+      "currentHint": "This info avoids duplicates with your existing distributors. We can target importers on markets complementary to your current network.",
+      "currentPlaceholder": "Select your current markets...",
+      "avoid": "Which markets would you like to avoid?",
+      "avoidPlaceholder": "Select markets to avoid...",
+      "buyerDescription": "Describe the type of buyers/importers you want to target",
+      "buyerDescriptionHint": "The more precise your description (channel type, price positioning, philosophy), the better our experts can refine contact selection and improve campaign reply rates.",
+      "buyerDescriptionPlaceholder": "e.g. Specialty organic wine importers, premium wine shops, Michelin-starred restaurants..."
+    },
+    "description": {
+      "cardTitle": "Estate description",
+      "cardDescription": "Introduce your estate, its history, terroir and practices (minimum 300 characters)",
+      "placeholder": "History, terroir, practices, volumes, markets...",
+      "charsCount": "{{count}}/300 characters minimum",
+      "remaining": "({{count}} more characters required)"
+    },
+    "website": {
+      "cardTitle": "Website",
+      "cardDescription": "Your website URL (required, must start with https://)",
+      "label": "Website URL",
+      "placeholder": "https://www.myestate.com",
+      "test": "Test",
+      "invalid": "URL must be valid and start with https://"
+    },
+    "documents": {
+      "presentationTitle": "Estate presentation",
+      "presentationDesc": "Brochure or presentation document (.pdf/.doc/.docx ≤ 15 MB)",
+      "presentationDrop": "Add your brochure (.pdf)",
+      "addDocument": "Add a document",
+      "pricelistTitle": "Price list",
+      "pricelistDesc": "Your wine prices (.pdf/.xls/.xlsx/.csv ≤ 15 MB)",
+      "pricelistDrop": "Add your price list",
+      "addPricelist": "Add the price list",
+      "otherTitle": "Other documents",
+      "otherDesc": "Additional documents (.pdf/.doc/.docx/.xls/.xlsx/.csv ≤ 15 MB)",
+      "otherDrop": "Drag and drop your documents or click to browse",
+      "addOther": "Add documents",
+      "delete": "Delete",
+      "addedTitle": "Document added",
+      "addedDescription": "The document was uploaded successfully",
+      "deletedTitle": "Document deleted",
+      "deletedDescription": "The document was deleted successfully",
+      "fileTooLargeTitle": "File too large",
+      "fileTooLargeDesc": "Maximum size is 15 MB",
+      "wrongTypeTitle": "File type not accepted",
+      "wrongTypeDesc": "Please select a file with the right format",
+      "uploadErrorTitle": "Upload error",
+      "deleteErrorTitle": "Delete error",
+      "updateErrorTitle": "Error",
+      "updateErrorDesc": "Unable to update the document."
+    },
+    "techSheets": {
+      "cardTitle": "Tech sheets",
+      "cardDescription": "Technical sheets for your wines (.pdf)",
+      "drop": "Drag and drop your tech sheets (PDF) or click to browse",
+      "add": "Add tech sheets",
+      "addedTitle": "Tech sheets added",
+      "tableHeaders": {
+        "cuvee": "Cuvée",
+        "vintage": "Vintage",
+        "format": "Format",
+        "language": "Language",
+        "actions": "Actions"
+      },
+      "placeholders": {
+        "cuvee": "Cuvée",
+        "vintage": "2023",
+        "format": "75cl",
+        "language": "EN"
+      }
+    },
+    "media": {
+      "photosTitle": "Photos",
+      "photosDesc": "Images of your estate and your wines (.jpg/.jpeg/.png ≤ 10 MB)",
+      "photosDrop": "Drag and drop your photos or click to browse",
+      "addPhotos": "Add photos",
+      "videosTitle": "Videos",
+      "videosDesc": "Presentation videos (.mp4 ≤ 200 MB)",
+      "videosDrop": "Drag and drop your videos or click to browse",
+      "addVideos": "Add videos",
+      "addedTitle": "Media added",
+      "addedDescription": "The file was uploaded successfully",
+      "deletedTitle": "Media deleted",
+      "deletedDescription": "The file was deleted successfully",
+      "titlePlaceholder": "Title",
+      "creditPlaceholder": "Credit",
+      "fileTooLarge": "File too large",
+      "fileTooLargeDescPhoto": "Maximum size is 10 MB",
+      "fileTooLargeDescVideo": "Maximum size is 200 MB",
+      "wrongType": "File type not accepted",
+      "wrongTypeDesc": "Please select a file with the right format",
+      "updateError": "Unable to update the media."
+    }
   }
 }

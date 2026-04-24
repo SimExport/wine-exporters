@@ -109,5 +109,312 @@
     "loading": "Erreur de chargement",
     "notFound": "Introuvable",
     "unauthorized": "Non autorisé"
+  },
+  "notFound": {
+    "title": "404",
+    "subtitle": "Oups ! Page introuvable",
+    "backHome": "Retour à l'accueil"
+  },
+  "dashboardPage": {
+    "loading": "Chargement de votre tableau de bord...",
+    "signOut": "Déconnexion",
+    "title": "Tableau de Bord",
+    "welcome": "Bienvenue",
+    "welcomeFallback": "Vigneron",
+    "stats": {
+      "campaignsSent": "Campagnes envoyées",
+      "importersFound": "Importateurs trouvés",
+      "marketsProspected": "Marchés prospectés"
+    },
+    "plan": {
+      "title": "Plan Actuel",
+      "monthly": "Abonnement Mensuel",
+      "payPerCampaign": "Paiement à la Carte",
+      "none": "Aucun Abonnement",
+      "monthlyDesc": "Accès complet à la base de données",
+      "payPerCampaignDesc": "Accès limité aux pays sélectionnés",
+      "noneDesc": "Aucun accès premium"
+    },
+    "campaignStatus": {
+      "pendingValidation": "En attente de validation",
+      "active": "Active",
+      "completed": "Terminée"
+    },
+    "remaining": {
+      "title": "Campagnes Disponibles",
+      "subtitle": "Campagnes de prospection restantes"
+    },
+    "domain": {
+      "title": "Votre Domaine",
+      "incomplete": "Profil incomplet"
+    },
+    "config": {
+      "title": "Configuration du Profil",
+      "description": "Renseignez les informations concernant votre domaine",
+      "cta": "Configurer mon profil",
+      "hint": "Renseignez vos informations en cliquant sur configurer mon profil"
+    },
+    "upgradeCard": {
+      "title": "Démarrez votre prospection",
+      "description": "Accédez à 15 000+ acheteurs qualifiés dans le monde",
+      "cta": "Passer Premium",
+      "fineprint": "À partir de 199 €/mois · 3 mois d'engagement"
+    },
+    "campaignCard": {
+      "title": "Lancer une Campagne",
+      "description": "Démarrez une campagne de prospection",
+      "subscribe": "Souscrire un abonnement",
+      "subscribeHint": "Souscrivez à un plan pour lancer des campagnes",
+      "newCampaign": "Nouvelle campagne",
+      "newCampaignHint": "Sélectionnez vos marchés cibles"
+    },
+    "campaignsList": {
+      "title": "Vos Campagnes",
+      "emptyTitle": "Aucune campagne pour le moment",
+      "emptyDescription": "Créez votre première campagne de prospection pour toucher des importateurs à l'international.",
+      "createFirst": "Créer ma première campagne",
+      "marketsLabel": "Marchés",
+      "createdOn": "Créée le"
+    },
+    "activity": {
+      "title": "Dernière activité",
+      "empty": "Aucune activité récente",
+      "emptyHint": "Lancez votre première campagne pour voir l'activité ici"
+    }
+  },
+  "importers": {
+    "loadingProtected": "Chargement...",
+    "premiumTitle": "Base de données des importateurs et acheteurs",
+    "premiumDescription": "Consultez les contacts importateurs disponibles et découvrez leurs informations essentielles.",
+    "premiumGate": {
+      "title": "Accès réservé aux membres abonnés",
+      "description": "Passez Premium pour accéder à 15 000+ acheteurs qualifiés dans le monde entier."
+    },
+    "title": "Liste des importateurs et acheteurs",
+    "subtitleWithCount": "{{count}} contacts disponibles — choisissez un marché pour afficher la liste.",
+    "subtitleEmpty": "Choisissez un marché pour afficher la liste des importateurs et acheteurs.",
+    "sourcing": {
+      "cta": "Demander une sélection sur mesure",
+      "title": "Recherche sur-mesure",
+      "description": "Dites-nous quel marché vous visez, et nous nous occupons du reste. Nous sélectionnons pour vous les acheteurs qui correspondent vraiment à votre typologie de vins et de prix.",
+      "marketLabel": "Marché cible",
+      "marketPlaceholder": "Choisir un marché",
+      "creditRemaining": "Crédit restant",
+      "submit": "Envoyer la demande",
+      "creditExhausted": "Crédit de recherche épuisé",
+      "creditExhaustedShort": "Crédit épuisé",
+      "successTitle": "Demande reçue !",
+      "successDescription": "Notre équipe vous répondra sous 72h.",
+      "errorSubmit": "Impossible d'envoyer la demande"
+    },
+    "loadError": "Impossible de charger les contacts",
+    "genericError": "Une erreur est survenue",
+    "selectMarketError": "Veuillez sélectionner un pays",
+    "exportError": "Impossible d'exporter les données",
+    "exportSuccess": "Export CSV téléchargé avec succès",
+    "exportFailure": "Erreur lors de l'export",
+    "selected": {
+      "contactsCount": "— {{count}} contacts",
+      "clearFilter": "Effacer le filtre"
+    },
+    "table": {
+      "company": "Nom de la société",
+      "country": "Pays",
+      "address": "Adresse",
+      "email": "Email",
+      "phone": "Téléphone",
+      "website": "Site web",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "copy": "Copier",
+      "noResultsForCountry": "Aucun contact trouvé pour ce pays.",
+      "selectMarketHint": "Sélectionnez un marché pour afficher les contacts."
+    },
+    "pagination": {
+      "rangeOf": "{{start}} à {{end}} sur {{total}}",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "pageOf": "Page {{current}} sur {{total}}"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Gérez les informations concernant votre domaine et vos vins.",
+    "savedAt": "Enregistré à {{time}}",
+    "saving": "Sauvegarde...",
+    "save": "Enregistrer",
+    "loadError": "Impossible de charger les informations du profil.",
+    "saveSuccess": "Les informations de votre domaine ont été sauvegardées.",
+    "saveError": "Impossible de sauvegarder les informations.",
+    "completion": {
+      "completed": "Profil complété à {{pct}}%",
+      "almostThere": "Presque parfait 🎯",
+      "needsWork": "À compléter",
+      "fieldsCount": "{{done}}/{{total}} champs",
+      "fullDoneTitle": "Profil 100% complété !",
+      "fullDoneSubtitle": "Votre profil est complet. Nos experts pourront vous matcher avec les meilleurs importateurs.",
+      "fields": {
+        "domain_name": "Nom du domaine",
+        "contact_name": "Votre nom",
+        "location": "Localisation",
+        "aoc": "AOC / Appellations",
+        "bottles_per_year": "Volume annuel",
+        "wine_types": "Types de vins",
+        "grape_varieties": "Cépages cultivés",
+        "cuvees": "Cuvées",
+        "priority_markets": "Marchés prioritaires",
+        "current_markets": "Marchés actuels",
+        "target_buyer_description": "Description acheteurs cibles",
+        "description": "Description du domaine",
+        "website": "Site web"
+      }
+    },
+    "tabs": {
+      "general": "Général",
+      "markets": "Marchés",
+      "description": "Description",
+      "website": "Site web",
+      "wines": "Vins",
+      "documents": "Documents",
+      "techSheets": "Fiches tech",
+      "media": "Médias"
+    },
+    "general": {
+      "cardTitle": "Informations générales",
+      "cardDescription": "Les informations principales de votre domaine",
+      "contactName": "Votre nom",
+      "contactNamePlaceholder": "Jean Dupont",
+      "domainName": "Nom du domaine",
+      "domainNamePlaceholder": "Domaine de la Vallée",
+      "aoc": "AOC / Appellations",
+      "aocPlaceholder": "Ajouter une appellation et appuyez sur Entrée",
+      "surface": "Surface (hectares)",
+      "surfaceHint": "La superficie de votre domaine nous aide à estimer votre capacité de production et à vous matcher avec des importateurs dont les volumes commandés sont adaptés à votre taille.",
+      "bottles": "Volume annuel (nb de bouteilles)",
+      "bottlesHint": "Ce chiffre est déterminant pour cibler les bons importateurs. Un petit domaine (< 50 000 bt) n'a pas les mêmes besoins qu'une structure de 500 000 bt. Nous adaptons nos recommandations en fonction.",
+      "wineTypes": "Types de vins produits",
+      "wineTypeOptions": {
+        "Rouge": "Rouge",
+        "Blanc": "Blanc",
+        "Rosé": "Rosé",
+        "Pétillant": "Pétillant",
+        "Orange": "Orange",
+        "Nature": "Nature"
+      },
+      "certifications": "Certifications",
+      "certificationsHint": "Les certifications bio, biodynamique ou HVE sont des critères de filtrage très utilisés par les importateurs spécialisés. Les préciser augmente significativement vos chances d'être sélectionné sur des campagnes ciblées.",
+      "certificationsHelp": "Sélectionnez toutes les certifications applicables.",
+      "certificationOptions": {
+        "Biologique": "Biologique",
+        "Conversion bio": "Conversion bio",
+        "Biodynamique": "Biodynamique",
+        "HVE3": "HVE3"
+      },
+      "grapes": "Cépages cultivés",
+      "grapesHint": "Les cépages sont un critère clé pour les importateurs spécialisés. Certains recherchent spécifiquement des cépages rares ou autochtones pour se différencier.",
+      "grapesPlaceholder": "Ajouter un cépage",
+      "cuvees": "Cuvées",
+      "cuveesPlaceholder": "Ajouter une cuvée"
+    },
+    "markets": {
+      "cardTitle": "Préférences de prospection",
+      "cardDescription": "Définissez vos marchés cibles et vos préférences pour la prospection",
+      "priority": "Quels marchés souhaitez-vous prioriser ?",
+      "priorityHint": "Ces marchés seront utilisés en priorité pour construire vos audiences de campagne. Sélectionnez les pays que vous visez en priorité pour un meilleur ciblage.",
+      "priorityPlaceholder": "Sélectionnez vos marchés prioritaires...",
+      "current": "Sur quels marchés êtes-vous déjà présents ?",
+      "currentHint": "Ces informations évitent les doublons avec vos distributeurs existants. Nous pourrons ainsi cibler des importateurs sur des marchés complémentaires à votre réseau actuel.",
+      "currentPlaceholder": "Sélectionnez vos marchés actuels...",
+      "avoid": "Quels marchés souhaitez-vous éviter ?",
+      "avoidPlaceholder": "Sélectionnez les marchés à éviter...",
+      "buyerDescription": "Décrivez le type d'acheteurs/importateurs que vous souhaitez cibler",
+      "buyerDescriptionHint": "Plus votre description est précise (type de circuit, positionnement prix, philosophie), plus nos experts pourront affiner la sélection des contacts et améliorer le taux de réponse de vos campagnes.",
+      "buyerDescriptionPlaceholder": "Ex: Importateurs spécialisés en vins bio, cavistes haut de gamme, restaurateurs étoilés..."
+    },
+    "description": {
+      "cardTitle": "Description du domaine",
+      "cardDescription": "Présentez votre domaine, son histoire, son terroir, ses pratiques (minimum 300 caractères)",
+      "placeholder": "Histoire, terroir, pratiques, volumes, marchés...",
+      "charsCount": "{{count}}/300 caractères minimum",
+      "remaining": "(encore {{count}} caractères requis)"
+    },
+    "website": {
+      "cardTitle": "Site web",
+      "cardDescription": "URL de votre site web (obligatoire, doit commencer par https://)",
+      "label": "URL du site web",
+      "placeholder": "https://www.mondomaine.fr",
+      "test": "Tester",
+      "invalid": "L'URL doit être valide et commencer par https://"
+    },
+    "documents": {
+      "presentationTitle": "Présentation du domaine",
+      "presentationDesc": "Brochure ou document de présentation (.pdf/.doc/.docx ≤ 15 Mo)",
+      "presentationDrop": "Ajoutez votre brochure (.pdf)",
+      "addDocument": "Ajouter un document",
+      "pricelistTitle": "Liste des prix",
+      "pricelistDesc": "Tarifs de vos vins (.pdf/.xls/.xlsx/.csv ≤ 15 Mo)",
+      "pricelistDrop": "Ajoutez votre liste de prix",
+      "addPricelist": "Ajouter la liste des prix",
+      "otherTitle": "Autres documents",
+      "otherDesc": "Documents complémentaires (.pdf/.doc/.docx/.xls/.xlsx/.csv ≤ 15 Mo)",
+      "otherDrop": "Glissez-déposez vos documents ou cliquez pour parcourir",
+      "addOther": "Ajouter des documents",
+      "delete": "Supprimer",
+      "addedTitle": "Document ajouté",
+      "addedDescription": "Le document a été uploadé avec succès",
+      "deletedTitle": "Document supprimé",
+      "deletedDescription": "Le document a été supprimé avec succès",
+      "fileTooLargeTitle": "Fichier trop volumineux",
+      "fileTooLargeDesc": "La taille maximale est de 15 Mo",
+      "wrongTypeTitle": "Type de fichier non accepté",
+      "wrongTypeDesc": "Veuillez sélectionner un fichier au bon format",
+      "uploadErrorTitle": "Erreur d'upload",
+      "deleteErrorTitle": "Erreur de suppression",
+      "updateErrorTitle": "Erreur",
+      "updateErrorDesc": "Impossible de mettre à jour le document."
+    },
+    "techSheets": {
+      "cardTitle": "Fiches techniques",
+      "cardDescription": "Fiches techniques de vos vins (.pdf)",
+      "drop": "Glissez-déposez vos fiches techniques (PDF) ou cliquez pour parcourir",
+      "add": "Ajouter des fiches techniques",
+      "addedTitle": "Fiches techniques ajoutées",
+      "tableHeaders": {
+        "cuvee": "Cuvée",
+        "vintage": "Millésime",
+        "format": "Format",
+        "language": "Langue",
+        "actions": "Actions"
+      },
+      "placeholders": {
+        "cuvee": "Cuvée",
+        "vintage": "2023",
+        "format": "75cl",
+        "language": "FR"
+      }
+    },
+    "media": {
+      "photosTitle": "Photos",
+      "photosDesc": "Images de votre domaine et vos vins (.jpg/.jpeg/.png ≤ 10 Mo)",
+      "photosDrop": "Glissez-déposez vos photos ou cliquez pour parcourir",
+      "addPhotos": "Ajouter des photos",
+      "videosTitle": "Vidéos",
+      "videosDesc": "Vidéos de présentation (.mp4 ≤ 200 Mo)",
+      "videosDrop": "Glissez-déposez vos vidéos ou cliquez pour parcourir",
+      "addVideos": "Ajouter des vidéos",
+      "addedTitle": "Média ajouté",
+      "addedDescription": "Le fichier a été uploadé avec succès",
+      "deletedTitle": "Média supprimé",
+      "deletedDescription": "Le fichier a été supprimé avec succès",
+      "titlePlaceholder": "Titre",
+      "creditPlaceholder": "Crédit",
+      "fileTooLarge": "Fichier trop volumineux",
+      "fileTooLargeDescPhoto": "La taille maximale est de 10 Mo",
+      "fileTooLargeDescVideo": "La taille maximale est de 200 Mo",
+      "wrongType": "Type de fichier non accepté",
+      "wrongTypeDesc": "Veuillez sélectionner un fichier au bon format",
+      "updateError": "Impossible de mettre à jour le média."
+    }
   }
 }
