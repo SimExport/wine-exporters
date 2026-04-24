@@ -744,38 +744,36 @@ const Profile = () => {
             <TabsContent value="general" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Informations générales</CardTitle>
-                  <CardDescription>
-                    Les informations principales de votre domaine
-                  </CardDescription>
+                  <CardTitle>{t('profile.general.cardTitle')}</CardTitle>
+                  <CardDescription>{t('profile.general.cardDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="contact_name">Votre nom</Label>
+                      <Label htmlFor="contact_name">{t('profile.general.contactName')}</Label>
                       <Input id="contact_name" value={formData.contact_name} onChange={e => setFormData(prev => ({
                       ...prev,
                       contact_name: e.target.value
-                    }))} placeholder="Jean Dupont" />
+                    }))} placeholder={t('profile.general.contactNamePlaceholder')} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="domain_name">Nom du domaine</Label>
+                      <Label htmlFor="domain_name">{t('profile.general.domainName')}</Label>
                       <Input id="domain_name" value={formData.domain_name} onChange={e => setFormData(prev => ({
                       ...prev,
                       domain_name: e.target.value
-                    }))} placeholder="Domaine de la Vallée" />
+                    }))} placeholder={t('profile.general.domainNamePlaceholder')} />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>AOC / Appellations</Label>
+                    <Label>{t('profile.general.aoc')}</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {formData.aoc.map((appellation, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
                           {appellation}
                           <X className="h-3 w-3 cursor-pointer" onClick={() => removeAoc(index)} />
                         </Badge>)}
                     </div>
-                    <Input placeholder="Ajouter une appellation et appuyez sur Entrée" onKeyPress={e => {
+                    <Input placeholder={t('profile.general.aocPlaceholder')} onKeyPress={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       addAoc(e.currentTarget.value);
@@ -787,8 +785,8 @@ const Profile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="surface_area">
-                        Surface (hectares)
-                        <FieldHint text="La superficie de votre domaine nous aide à estimer votre capacité de production et à vous matcher avec des importateurs dont les volumes commandés sont adaptés à votre taille." />
+                        {t('profile.general.surface')}
+                        <FieldHint text={t('profile.general.surfaceHint')} />
                       </Label>
                       <Input id="surface_area" type="number" step="0.1" value={formData.surface_area || ''} onChange={e => setFormData(prev => ({
                       ...prev,
@@ -797,8 +795,8 @@ const Profile = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="bottles_per_year">
-                        Volume annuel (nb de bouteilles)
-                        <FieldHint text="Ce chiffre est déterminant pour cibler les bons importateurs. Un petit domaine (< 50 000 bt) n'a pas les mêmes besoins qu'une structure de 500 000 bt. Nous adaptons nos recommandations en fonction." />
+                        {t('profile.general.bottles')}
+                        <FieldHint text={t('profile.general.bottlesHint')} />
                       </Label>
                       <Input id="bottles_per_year" type="number" min="0" value={formData.bottles_per_year || ''} onChange={e => setFormData(prev => ({
                       ...prev,
@@ -808,12 +806,12 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>Types de vins produits</Label>
+                    <Label>{t('profile.general.wineTypes')}</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {wineTypeOptions.map(type => <div key={type} className="flex items-center space-x-2">
                           <Checkbox id={type} checked={formData.wine_types.includes(type)} onCheckedChange={checked => handleWineTypeChange(type, checked as boolean)} />
                           <Label htmlFor={type} className="text-sm font-normal">
-                            {type}
+                            {t(`profile.general.wineTypeOptions.${type}`, type)}
                           </Label>
                         </div>)}
                     </div>
@@ -821,27 +819,27 @@ const Profile = () => {
 
                   <div className="space-y-3">
                     <Label>
-                      Certifications
-                      <FieldHint text="Les certifications bio, biodynamique ou HVE sont des critères de filtrage très utilisés par les importateurs spécialisés. Les préciser augmente significativement vos chances d'être sélectionné sur des campagnes ciblées." />
+                      {t('profile.general.certifications')}
+                      <FieldHint text={t('profile.general.certificationsHint')} />
                     </Label>
                     <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                       {certificationOptions.map(certification => <div key={certification} className="flex items-center space-x-2">
                           <Checkbox id={certification} checked={formData.certifications.includes(certification)} onCheckedChange={checked => handleCertificationChange(certification, checked as boolean)} />
                           <Label htmlFor={certification} className="text-sm font-normal">
-                            {certification}
+                            {t(`profile.general.certificationOptions.${certification}`, certification)}
                           </Label>
                         </div>)}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Sélectionnez toutes les certifications applicables.
+                      {t('profile.general.certificationsHelp')}
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>
-                        Cépages cultivés
-                        <FieldHint text="Les cépages sont un critère clé pour les importateurs spécialisés. Certains recherchent spécifiquement des cépages rares ou autochtones pour se différencier." />
+                        {t('profile.general.grapes')}
+                        <FieldHint text={t('profile.general.grapesHint')} />
                       </Label>
                       <div className="flex flex-wrap gap-2">
                         {formData.grape_varieties.map((variety, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
@@ -850,7 +848,7 @@ const Profile = () => {
                           </Badge>)}
                       </div>
                       <div className="flex gap-2">
-                        <Input placeholder="Ajouter un cépage" onKeyPress={e => {
+                        <Input placeholder={t('profile.general.grapesPlaceholder')} onKeyPress={e => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addGrapeVariety(e.currentTarget.value);
@@ -861,7 +859,7 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Cuvées</Label>
+                      <Label>{t('profile.general.cuvees')}</Label>
                       <div className="flex flex-wrap gap-2">
                         {formData.cuvees.map((cuvee, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
                             {cuvee}
@@ -869,7 +867,7 @@ const Profile = () => {
                           </Badge>)}
                       </div>
                       <div className="flex gap-2">
-                        <Input placeholder="Ajouter une cuvée" onKeyPress={e => {
+                        <Input placeholder={t('profile.general.cuveesPlaceholder')} onKeyPress={e => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addCuvee(e.currentTarget.value);
