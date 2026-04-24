@@ -994,10 +994,8 @@ const Profile = () => {
               <div className="grid gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Présentation du domaine</CardTitle>
-                    <CardDescription>
-                      Brochure ou document de présentation (.pdf/.doc/.docx ≤ 15 Mo)
-                    </CardDescription>
+                    <CardTitle>{t('profile.documents.presentationTitle')}</CardTitle>
+                    <CardDescription>{t('profile.documents.presentationDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <input ref={presentationInputRef} type="file" accept=".pdf,.doc,.docx" multiple className="hidden" onChange={e => {
@@ -1010,11 +1008,11 @@ const Profile = () => {
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Ajoutez votre brochure (.pdf)
+                        {t('profile.documents.presentationDrop')}
                       </p>
                       <Button type="button" variant="outline" className="mt-2" onClick={() => presentationInputRef.current?.click()} disabled={uploading}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter un document
+                        {t('profile.documents.addDocument')}
                       </Button>
                     </div>
                     {documents.filter(d => d.category === 'presentation').length > 0 && <div className="space-y-2">
@@ -1029,7 +1027,7 @@ const Profile = () => {
                               </div>
                             </div>
                             <Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteDocument(doc.id, doc.file_url)}>
-                              Supprimer
+                              {t('profile.documents.delete')}
                             </Button>
                           </div>)}
                       </div>}
@@ -1038,10 +1036,8 @@ const Profile = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Liste des prix</CardTitle>
-                    <CardDescription>
-                      Tarifs de vos vins (.pdf/.xls/.xlsx/.csv ≤ 15 Mo)
-                    </CardDescription>
+                    <CardTitle>{t('profile.documents.pricelistTitle')}</CardTitle>
+                    <CardDescription>{t('profile.documents.pricelistDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <input ref={priceListInputRef} type="file" accept=".pdf,.xls,.xlsx,.csv" multiple className="hidden" onChange={e => {
@@ -1054,11 +1050,11 @@ const Profile = () => {
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Ajoutez votre liste de prix
+                        {t('profile.documents.pricelistDrop')}
                       </p>
                       <Button type="button" variant="outline" className="mt-2" onClick={() => priceListInputRef.current?.click()} disabled={uploading}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter la liste des prix
+                        {t('profile.documents.addPricelist')}
                       </Button>
                     </div>
                     {documents.filter(d => d.category === 'price_list').length > 0 && <div className="space-y-2">
@@ -1073,7 +1069,7 @@ const Profile = () => {
                               </div>
                             </div>
                             <Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteDocument(doc.id, doc.file_url)}>
-                              Supprimer
+                              {t('profile.documents.delete')}
                             </Button>
                           </div>)}
                       </div>}
@@ -1082,10 +1078,8 @@ const Profile = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Autres documents</CardTitle>
-                    <CardDescription>
-                      Documents complémentaires (.pdf/.doc/.docx/.xls/.xlsx/.csv ≤ 15 Mo)
-                    </CardDescription>
+                    <CardTitle>{t('profile.documents.otherTitle')}</CardTitle>
+                    <CardDescription>{t('profile.documents.otherDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <input ref={otherDocsInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" multiple className="hidden" onChange={e => {
@@ -1098,11 +1092,11 @@ const Profile = () => {
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Glissez-déposez vos documents ou cliquez pour parcourir
+                        {t('profile.documents.otherDrop')}
                       </p>
                       <Button type="button" variant="outline" className="mt-2" onClick={() => otherDocsInputRef.current?.click()} disabled={uploading}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter des documents
+                        {t('profile.documents.addOther')}
                       </Button>
                     </div>
                     {documents.filter(d => d.category === 'other').length > 0 && <div className="space-y-2">
@@ -1117,7 +1111,7 @@ const Profile = () => {
                               </div>
                             </div>
                             <Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteDocument(doc.id, doc.file_url)}>
-                              Supprimer
+                              {t('profile.documents.delete')}
                             </Button>
                           </div>)}
                       </div>}
@@ -1129,10 +1123,8 @@ const Profile = () => {
             <TabsContent value="tech-sheets" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Fiches techniques</CardTitle>
-                  <CardDescription>
-                    Fiches techniques de vos vins (.pdf)
-                  </CardDescription>
+                  <CardTitle>{t('profile.techSheets.cardTitle')}</CardTitle>
+                  <CardDescription>{t('profile.techSheets.cardDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <input ref={techSheetsInputRef} type="file" accept=".pdf" multiple className="hidden" onChange={e => {
@@ -1145,52 +1137,52 @@ const Profile = () => {
                   <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
-                      Glissez-déposez vos fiches techniques (PDF) ou cliquez pour parcourir
+                      {t('profile.techSheets.drop')}
                     </p>
                     <Button type="button" variant="outline" className="mt-2" onClick={() => techSheetsInputRef.current?.click()} disabled={uploading}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Ajouter des fiches techniques
+                      {t('profile.techSheets.add')}
                     </Button>
                   </div>
 
                   {documents.filter(d => d.category === 'tech_sheet').length > 0 && <div className="space-y-4">
-                      <h4 className="font-medium">Fiches techniques ajoutées</h4>
+                      <h4 className="font-medium">{t('profile.techSheets.addedTitle')}</h4>
                       <div className="overflow-x-auto">
                         <table className="w-full border-collapse border border-border">
                           <thead>
                             <tr className="bg-muted">
-                              <th className="border border-border p-2 text-left">Cuvée</th>
-                              <th className="border border-border p-2 text-left">Millésime</th>
-                              <th className="border border-border p-2 text-left">Format</th>
-                              <th className="border border-border p-2 text-left">Langue</th>
-                              <th className="border border-border p-2 text-left">Actions</th>
+                              <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.cuvee')}</th>
+                              <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.vintage')}</th>
+                              <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.format')}</th>
+                              <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.language')}</th>
+                              <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.actions')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {documents.filter(d => d.category === 'tech_sheet').map(doc => <tr key={doc.id}>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.cuvee || ''} placeholder="Cuvée" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.cuvee || ''} placeholder={t('profile.techSheets.placeholders.cuvee')} className="w-full" onChange={e => handleUpdateDocument(doc.id, {
                               cuvee: e.target.value
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.vintage || ''} placeholder="2023" type="number" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.vintage || ''} placeholder={t('profile.techSheets.placeholders.vintage')} type="number" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
                               vintage: e.target.value ? parseInt(e.target.value) : undefined
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.format || ''} placeholder="75cl" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.format || ''} placeholder={t('profile.techSheets.placeholders.format')} className="w-full" onChange={e => handleUpdateDocument(doc.id, {
                               format: e.target.value
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
-                                  <Input value={doc.language || ''} placeholder="FR" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
+                                  <Input value={doc.language || ''} placeholder={t('profile.techSheets.placeholders.language')} className="w-full" onChange={e => handleUpdateDocument(doc.id, {
                               language: e.target.value
                             })} />
                                 </td>
                                 <td className="border border-border p-2">
                                   <Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteDocument(doc.id, doc.file_url)}>
-                                    Supprimer
+                                    {t('profile.documents.delete')}
                                   </Button>
                                 </td>
                               </tr>)}
@@ -1206,8 +1198,8 @@ const Profile = () => {
               <div className="grid gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Photos</CardTitle>
-                    <CardDescription>Images de votre domaine et vos vins (.jpg/.jpeg/.png ≤ 10 Mo)</CardDescription>
+                    <CardTitle>{t('profile.media.photosTitle')}</CardTitle>
+                    <CardDescription>{t('profile.media.photosDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <input ref={photosInputRef} type="file" accept=".jpg,.jpeg,.png" multiple className="hidden" onChange={e => {
@@ -1220,11 +1212,11 @@ const Profile = () => {
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Glissez-déposez vos photos ou cliquez pour parcourir
+                        {t('profile.media.photosDrop')}
                       </p>
                       <Button type="button" variant="outline" className="mt-2" onClick={() => photosInputRef.current?.click()} disabled={uploading}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter des photos
+                        {t('profile.media.addPhotos')}
                       </Button>
                     </div>
 
@@ -1234,10 +1226,10 @@ const Profile = () => {
                               <img src={item.file_url} alt={item.title} className="w-full h-full object-cover" />
                             </div>
                             <div className="mt-2 space-y-1">
-                              <Input value={item.title} placeholder="Titre" className="text-xs" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.title} placeholder={t('profile.media.titlePlaceholder')} className="text-xs" onChange={e => handleUpdateMedia(item.id, {
                           title: e.target.value
                         })} />
-                              <Input value={item.credit || ''} placeholder="Crédit" className="text-xs" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.credit || ''} placeholder={t('profile.media.creditPlaceholder')} className="text-xs" onChange={e => handleUpdateMedia(item.id, {
                           credit: e.target.value
                         })} />
                             </div>
@@ -1253,10 +1245,8 @@ const Profile = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Vidéos</CardTitle>
-                    <CardDescription>
-                      Vidéos de présentation (.mp4 ≤ 200 Mo)
-                    </CardDescription>
+                    <CardTitle>{t('profile.media.videosTitle')}</CardTitle>
+                    <CardDescription>{t('profile.media.videosDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <input ref={videosInputRef} type="file" accept=".mp4" multiple className="hidden" onChange={e => {
@@ -1269,11 +1259,11 @@ const Profile = () => {
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
                       <Play className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Glissez-déposez vos vidéos ou cliquez pour parcourir
+                        {t('profile.media.videosDrop')}
                       </p>
                       <Button type="button" variant="outline" className="mt-2" onClick={() => videosInputRef.current?.click()} disabled={uploading}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter des vidéos
+                        {t('profile.media.addVideos')}
                       </Button>
                     </div>
 
@@ -1285,10 +1275,10 @@ const Profile = () => {
                                 </div>}
                             </div>
                             <div className="mt-2 space-y-1">
-                              <Input value={item.title} placeholder="Titre" className="text-sm" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.title} placeholder={t('profile.media.titlePlaceholder')} className="text-sm" onChange={e => handleUpdateMedia(item.id, {
                           title: e.target.value
                         })} />
-                              <Input value={item.credit || ''} placeholder="Crédit" className="text-sm" onChange={e => handleUpdateMedia(item.id, {
+                              <Input value={item.credit || ''} placeholder={t('profile.media.creditPlaceholder')} className="text-sm" onChange={e => handleUpdateMedia(item.id, {
                           credit: e.target.value
                         })} />
                             </div>
