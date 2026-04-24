@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 export interface UserCredits {
   campaign_credits: number;
@@ -8,23 +9,25 @@ export interface UserCredits {
   next_reset_date: string | null;
 }
 
-const formatResetDate = (date: string | null): string => {
-  if (!date) return 'la prochaine période';
-  try {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  } catch {
-    return date;
-  }
-};
-
 export const useCredits = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [credits, setCredits] = useState<UserCredits | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const formatResetDate = (date: string | null): string => {
+    if (!date) return t('credits.nextPeriod');
+    try {
+      const locale = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
+      return new Date(date).toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return date;
+    }
+  };
 
   const fetchCredits = useCallback(async () => {
     if (!user) {
@@ -87,9 +90,9 @@ export const useCredits = () => {
   const resetDateLabel = formatResetDate(credits?.next_reset_date ?? null);
 
   const noCreditsMessage = (kind: 'campaign' | 'search') =>
-    `Vous avez utilisé votre crédit ${
-      kind === 'campaign' ? 'de campagne' : 'de recherche'
-    } mensuel. Il sera réinitialisé le ${resetDateLabel}.`;
+    kind === 'campaign'
+      ? t('credits.noCreditsCampaign', { date: resetDateLabel })
+      : t('credits.noCreditsSearch', { date: resetDateLabel });
 
   return {
     credits,
