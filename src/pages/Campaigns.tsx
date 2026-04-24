@@ -20,7 +20,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 interface Document {
   id: string;
   title: string;
@@ -87,14 +88,6 @@ interface CampaignData {
   managedByBo: boolean;
   status: string;
 }
-const CAMPAIGN_STATUS_LABELS = {
-  draft: 'Brouillon',
-  pending_validation: 'En attente de validation',
-  approved: 'Approuvée',
-  sending: 'Envoi en cours',
-  results: 'Terminée',
-  failed: 'Échec'
-};
 const CAMPAIGN_STATUS_COLORS = {
   draft: 'secondary',
   pending_validation: 'yellow',
@@ -108,6 +101,8 @@ const Campaigns = () => {
     user
   } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -209,8 +204,8 @@ const Campaigns = () => {
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les campagnes",
+        title: t('common.error'),
+        description: t('campaigns.toasts.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -221,13 +216,13 @@ const Campaigns = () => {
     // Cannot delete campaigns that are currently sending
     if (status === 'sending') {
       toast({
-        title: "Impossible de supprimer",
-        description: "Vous ne pouvez pas supprimer une campagne en cours d'envoi",
+        title: t('campaigns.toasts.cannotDeleteTitle'),
+        description: t('campaigns.toasts.cannotDeleteDescription'),
         variant: "destructive"
       });
       return;
     }
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer la campagne "${campaignName}" ? Cette action est irréversible.`)) {
+    if (!confirm(t('campaigns.toasts.deleteConfirm', { name: campaignName }))) {
       return;
     }
     try {
@@ -236,21 +231,21 @@ const Campaigns = () => {
       } = await supabase.from('campaigns').delete().eq('id', campaignId).eq('user_id', user?.id);
       if (error) throw error;
       toast({
-        title: "Campagne supprimée",
-        description: `La campagne "${campaignName}" a été supprimée avec succès`
+        title: t('campaigns.toasts.deletedTitle'),
+        description: t('campaigns.toasts.deletedDescription', { name: campaignName })
       });
       fetchCampaigns(); // Refresh list
     } catch (error) {
       console.error('Error deleting campaign:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer la campagne",
+        title: t('common.error'),
+        description: t('campaigns.toasts.deleteError'),
         variant: "destructive"
       });
     }
   };
   const archiveCampaign = async (campaignId: string, campaignName: string) => {
-    if (!confirm(`Êtes-vous sûr de vouloir archiver la campagne "${campaignName}" ?`)) {
+    if (!confirm(t('campaigns.toasts.archiveConfirm', { name: campaignName }))) {
       return;
     }
     try {
@@ -261,15 +256,15 @@ const Campaigns = () => {
       }).eq('id', campaignId).eq('user_id', user?.id);
       if (error) throw error;
       toast({
-        title: "Campagne archivée",
-        description: `La campagne "${campaignName}" a été archivée`
+        title: t('campaigns.toasts.archivedTitle'),
+        description: t('campaigns.toasts.archivedDescription', { name: campaignName })
       });
       fetchCampaigns(); // Refresh list
     } catch (error) {
       console.error('Error archiving campaign:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'archiver la campagne",
+        title: t('common.error'),
+        description: t('campaigns.toasts.archiveError'),
         variant: "destructive"
       });
     }
