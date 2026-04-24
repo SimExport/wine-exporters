@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Country {
   code: string;
@@ -114,6 +115,7 @@ export function parseMarketString(str: string): string[] {
 }
 
 export default function CountryMultiSelect({ value, onChange, placeholder = 'Sélectionnez des pays...' }: CountryMultiSelectProps) {
+  const { t } = useTranslation('common');
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
@@ -158,7 +160,7 @@ export default function CountryMultiSelect({ value, onChange, placeholder = 'Sé
         onClick={() => setOpen(o => !o)}
       >
         {value.length === 0 ? (
-          <span className="text-muted-foreground flex-1">{placeholder}</span>
+          <span className="text-muted-foreground flex-1">{placeholder || t('countryMultiSelect.placeholder')}</span>
         ) : (
           value.map(name => (
             <Badge key={name} variant="secondary" className="flex items-center gap-1 text-xs pr-1">
@@ -186,7 +188,7 @@ export default function CountryMultiSelect({ value, onChange, placeholder = 'Sé
             <input
               autoFocus
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              placeholder="Rechercher un pays..."
+              placeholder={t('countryMultiSelect.searchPlaceholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               onClick={e => e.stopPropagation()}
@@ -198,7 +200,7 @@ export default function CountryMultiSelect({ value, onChange, placeholder = 'Sé
             {filtered ? (
               // Search results
               filtered.length === 0 ? (
-                <p className="text-sm text-muted-foreground px-3 py-4 text-center">Aucun résultat</p>
+                <p className="text-sm text-muted-foreground px-3 py-4 text-center">{t('countryMultiSelect.noResults')}</p>
               ) : (
                 <div>
                   {filtered.map(country => (
@@ -211,7 +213,7 @@ export default function CountryMultiSelect({ value, onChange, placeholder = 'Sé
               CONTINENTS.map(continent => (
                 <div key={continent.name}>
                   <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
-                    {continent.name}
+                    {t(`countryMultiSelect.continents.${continent.name}`, continent.name)}
                   </div>
                   {continent.countries.map(country => (
                     <CountryOption key={country.code} country={country} selected={value.includes(country.name)} onToggle={toggle} />

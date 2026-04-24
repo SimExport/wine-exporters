@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Copy, Eye, EyeOff, Search, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Wine {
   id: string;
@@ -35,6 +36,8 @@ const WINE_COLORS = ['Rouge', 'Blanc', 'Rosé', 'Pétillant'];
 const WineManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation('common');
+  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,8 +79,8 @@ const WineManagement = () => {
     } catch (error) {
       console.error('Error loading wines:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les cuvées.",
+        title: t('common.error'),
+        description: t('wines.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -88,8 +91,8 @@ const WineManagement = () => {
   const handleSaveWine = async () => {
     if (!formData.name || !formData.color || !formData.exw_price_eur) {
       toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
+        title: t('common.error'),
+        description: t('wines.fillRequired'),
         variant: "destructive"
       });
       return;
@@ -98,8 +101,8 @@ const WineManagement = () => {
     const price = parseFloat(formData.exw_price_eur);
     if (price < 0.10 || price > 999.99) {
       toast({
-        title: "Erreur",
-        description: "Le prix doit être entre 0,10€ et 999,99€.",
+        title: t('common.error'),
+        description: t('wines.priceRangeError'),
         variant: "destructive"
       });
       return;
@@ -128,13 +131,13 @@ const WineManagement = () => {
           .update(payload)
           .eq('id', editingWine.id);
         if (error) throw error;
-        toast({ title: "Succès", description: "Modifications enregistrées" });
+        toast({ title: t('common.success'), description: t('wines.saveSuccess') });
       } else {
         const { error } = await supabase
           .from('wines')
           .insert(payload);
         if (error) throw error;
-        toast({ title: "Succès", description: "Cuvée ajoutée" });
+        toast({ title: t('common.success'), description: t('wines.addedSuccess') });
       }
 
       setModalOpen(false);
@@ -143,8 +146,8 @@ const WineManagement = () => {
     } catch (error) {
       console.error('Error saving wine:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer la cuvée.",
+        title: t('common.error'),
+        description: t('wines.saveError'),
         variant: "destructive"
       });
     }
@@ -152,7 +155,7 @@ const WineManagement = () => {
 
   const handleDuplicate = (wine: Wine) => {
     setFormData({
-      name: `${wine.name} (copie)`,
+      name: `${wine.name} ${t('wines.copySuffix')}`,
       appellation: wine.appellation || '',
       grapes: wine.grapes || [],
       color: wine.color,
@@ -176,13 +179,13 @@ const WineManagement = () => {
         .eq('id', wine.id);
 
       if (error) throw error;
-      toast({ title: "Succès", description: "Statut mis à jour" });
+      toast({ title: t('common.success'), description: t('wines.statusUpdated') });
       loadWines();
     } catch (error) {
       console.error('Error updating wine status:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut.",
+        title: t('common.error'),
+        description: t('wines.statusError'),
         variant: "destructive"
       });
     }
@@ -272,63 +275,63 @@ const WineManagement = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Vins / Cuvées</CardTitle>
+            <CardTitle>{t('wines.cardTitle')}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Ajoutez vos cuvées pour les sélectionner directement lors de la création de campagnes.
+              {t('wines.cardSubtitle')}
             </p>
           </div>
           <Dialog open={modalOpen} onOpenChange={setModalOpen}>
             <DialogTrigger asChild>
               <Button onClick={resetForm}>
                 <Plus className="h-4 w-4 mr-2" />
-                Ajouter une cuvée
+                {t('wines.addCuvee')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
-                  {editingWine ? 'Modifier la cuvée' : 'Ajouter une cuvée'}
+                  {editingWine ? t('wines.editCuvee') : t('wines.addCuvee')}
                 </DialogTitle>
               </DialogHeader>
               
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nom de la cuvée *</Label>
+                    <Label htmlFor="name">{t('wines.fields.name')} *</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Cuvée Prestige"
+                      placeholder={t('wines.fields.namePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="appellation">Appellation</Label>
+                    <Label htmlFor="appellation">{t('wines.fields.appellation')}</Label>
                     <Input
                       id="appellation"
                       value={formData.appellation}
                       onChange={(e) => setFormData(prev => ({ ...prev, appellation: e.target.value }))}
-                      placeholder="AOC Bordeaux"
+                      placeholder={t('wines.fields.appellationPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="color">Couleur *</Label>
+                    <Label htmlFor="color">{t('wines.fields.color')} *</Label>
                     <Select value={formData.color} onValueChange={(value) => setFormData(prev => ({ ...prev, color: value }))}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Choisir une couleur" />
+                        <SelectValue placeholder={t('wines.fields.colorPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {WINE_COLORS.map(color => (
-                          <SelectItem key={color} value={color}>{color}</SelectItem>
+                          <SelectItem key={color} value={color}>{t(`wines.wineColors.${color}`, color)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">EXW (€ / 75cl) *</Label>
+                    <Label htmlFor="price">{t('wines.fields.price')} *</Label>
                     <Input
                       id="price"
                       type="number"
@@ -337,16 +340,16 @@ const WineManagement = () => {
                       max="999.99"
                       value={formData.exw_price_eur}
                       onChange={(e) => setFormData(prev => ({ ...prev, exw_price_eur: e.target.value }))}
-                      placeholder="12.50"
+                      placeholder={t('wines.fields.pricePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="grapes">Cépages</Label>
+                  <Label htmlFor="grapes">{t('wines.fields.grapes')}</Label>
                   <Input
                     id="grapes"
-                    placeholder="Tapez un cépage et appuyez sur Entrée"
+                    placeholder={t('wines.fields.grapesPlaceholder')}
                     onKeyDown={handleAddGrape}
                   />
                   <div className="flex flex-wrap gap-1">
@@ -369,11 +372,11 @@ const WineManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="vintages">Millésimes</Label>
+                  <Label htmlFor="vintages">{t('wines.fields.vintages')}</Label>
                   <Input
                     id="vintages"
                     type="number"
-                    placeholder="Tapez un millésime et appuyez sur Entrée"
+                    placeholder={t('wines.fields.vintagesPlaceholder')}
                     onKeyDown={handleAddVintage}
                   />
                   <div className="flex flex-wrap gap-1">
@@ -396,7 +399,7 @@ const WineManagement = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label>Certifications du vin</Label>
+                  <Label>{t('wines.fields.certifications')}</Label>
                   <div className="grid grid-cols-1 gap-3">
                     <div className="flex items-center space-x-2">
                       <Switch
@@ -404,7 +407,7 @@ const WineManagement = () => {
                         checked={formData.organic}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, organic: checked }))}
                       />
-                      <Label htmlFor="organic">Bio</Label>
+                      <Label htmlFor="organic">{t('wines.fields.organic')}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
@@ -412,7 +415,7 @@ const WineManagement = () => {
                         checked={formData.is_biodynamic}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_biodynamic: checked }))}
                       />
-                      <Label htmlFor="biodynamic">Biodynamie</Label>
+                      <Label htmlFor="biodynamic">{t('wines.fields.biodynamic')}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
@@ -420,40 +423,40 @@ const WineManagement = () => {
                         checked={formData.is_natural}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_natural: checked }))}
                       />
-                      <Label htmlFor="natural">Nature</Label>
+                      <Label htmlFor="natural">{t('wines.fields.natural')}</Label>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="awards">Notes / Récompenses</Label>
+                  <Label htmlFor="awards">{t('wines.fields.awards')}</Label>
                   <Textarea
                     id="awards"
                     value={formData.awards}
                     onChange={(e) => setFormData(prev => ({ ...prev, awards: e.target.value.slice(0, 300) }))}
-                    placeholder="Médaille d'or au concours..."
+                    placeholder={t('wines.fields.awardsPlaceholder')}
                     maxLength={300}
                   />
-                  <p className="text-xs text-muted-foreground">{formData.awards.length}/300 caractères</p>
+                  <p className="text-xs text-muted-foreground">{t('wines.fields.awardsCount', { count: formData.awards.length })}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t('wines.fields.description')}</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Description détaillée de la cuvée..."
+                    placeholder={t('wines.fields.descriptionPlaceholder')}
                     rows={3}
                   />
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setModalOpen(false)}>
-                    Annuler
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={handleSaveWine}>
-                    Enregistrer
+                    {t('common.save')}
                   </Button>
                 </div>
               </div>
@@ -469,7 +472,7 @@ const WineManagement = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par nom ou appellation..."
+                  placeholder={t('wines.search.placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -478,12 +481,12 @@ const WineManagement = () => {
             </div>
             <Select value={colorFilter} onValueChange={setColorFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrer par couleur" />
+                <SelectValue placeholder={t('wines.search.filterColor')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les couleurs</SelectItem>
+                <SelectItem value="all">{t('wines.search.allColors')}</SelectItem>
                 {WINE_COLORS.map(color => (
-                  <SelectItem key={color} value={color}>{color}</SelectItem>
+                  <SelectItem key={color} value={color}>{t(`wines.wineColors.${color}`, color)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -492,9 +495,9 @@ const WineManagement = () => {
           {paginatedWines.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {filteredWines.length === 0 && wines.length === 0 ? (
-                <p>Aucune cuvée. Ajoutez votre première cuvée.</p>
+                <p>{t('wines.empty')}</p>
               ) : (
-                <p>Aucune cuvée ne correspond aux critères de recherche.</p>
+                <p>{t('wines.noMatch')}</p>
               )}
             </div>
           ) : (
@@ -502,14 +505,14 @@ const WineManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Appellation</TableHead>
-                    <TableHead>Cépages</TableHead>
-                    <TableHead>Couleur</TableHead>
-                    <TableHead>EXW (€)</TableHead>
-                    <TableHead>Bio</TableHead>
-                    <TableHead>Millésimes</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('wines.table.name')}</TableHead>
+                    <TableHead>{t('wines.table.appellation')}</TableHead>
+                    <TableHead>{t('wines.table.grapes')}</TableHead>
+                    <TableHead>{t('wines.table.color')}</TableHead>
+                    <TableHead>{t('wines.table.exw')}</TableHead>
+                    <TableHead>{t('wines.table.organic')}</TableHead>
+                    <TableHead>{t('wines.table.vintages')}</TableHead>
+                    <TableHead className="text-right">{t('wines.table.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -521,12 +524,12 @@ const WineManagement = () => {
                         {wine.grapes?.length ? wine.grapes.join(', ') : '-'}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{wine.color}</Badge>
+                        <Badge variant="secondary">{t(`wines.wineColors.${wine.color}`, wine.color)}</Badge>
                       </TableCell>
-                      <TableCell>{wine.exw_price_eur.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€</TableCell>
+                      <TableCell>{wine.exw_price_eur.toLocaleString(localeCode, { minimumFractionDigits: 2 })}€</TableCell>
                       <TableCell>
                         <Badge variant={wine.organic ? "default" : "outline"}>
-                          {wine.organic ? 'Oui' : 'Non'}
+                          {wine.organic ? t('wines.table.yes') : t('wines.table.no')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -553,7 +556,9 @@ const WineManagement = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
-                    {filteredWines.length} cuvée{filteredWines.length !== 1 ? 's' : ''}
+                    {filteredWines.length === 1
+                      ? t('wines.countSingular', { count: filteredWines.length })
+                      : t('wines.countPlural', { count: filteredWines.length })}
                   </span>
                   <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(parseInt(value))}>
                     <SelectTrigger className="w-20">
@@ -564,7 +569,7 @@ const WineManagement = () => {
                       <SelectItem value="50">50</SelectItem>
                     </SelectContent>
                   </Select>
-                  <span className="text-sm text-muted-foreground">par page</span>
+                  <span className="text-sm text-muted-foreground">{t('wines.perPage')}</span>
                 </div>
                 
                 {totalPages > 1 && (
@@ -575,10 +580,10 @@ const WineManagement = () => {
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
                     >
-                      Précédent
+                      {t('wines.previous')}
                     </Button>
                     <span className="text-sm text-muted-foreground">
-                      Page {currentPage} sur {totalPages}
+                      {t('wines.pageOf', { current: currentPage, total: totalPages })}
                     </span>
                     <Button
                       variant="outline"
@@ -586,7 +591,7 @@ const WineManagement = () => {
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
                     >
-                      Suivant
+                      {t('wines.next')}
                     </Button>
                   </div>
                 )}

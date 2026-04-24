@@ -416,5 +416,87 @@
       "wrongTypeDesc": "Please select a file with the right format",
       "updateError": "Unable to update the media."
     }
+  },
+  "countryMultiSelect": {
+    "placeholder": "Select countries...",
+    "searchPlaceholder": "Search for a country...",
+    "noResults": "No results",
+    "continents": {
+      "Europe": "Europe",
+      "Amérique du Nord": "North America",
+      "Amérique du Sud": "South America",
+      "Asie": "Asia",
+      "Moyen-Orient & Afrique": "Middle East & Africa",
+      "Océanie": "Oceania"
+    }
+  },
+  "wines": {
+    "cardTitle": "Wines / Cuvées",
+    "cardSubtitle": "Add your cuvées to select them directly when creating campaigns.",
+    "addCuvee": "Add a cuvée",
+    "editCuvee": "Edit cuvée",
+    "loadError": "Unable to load cuvées.",
+    "fillRequired": "Please fill all required fields.",
+    "priceRangeError": "Price must be between €0.10 and €999.99.",
+    "saveSuccess": "Changes saved",
+    "addedSuccess": "Cuvée added",
+    "saveError": "Unable to save the cuvée.",
+    "statusUpdated": "Status updated",
+    "statusError": "Unable to update the status.",
+    "copySuffix": "(copy)",
+    "fields": {
+      "name": "Cuvée name",
+      "namePlaceholder": "Prestige Cuvée",
+      "appellation": "Appellation",
+      "appellationPlaceholder": "AOC Bordeaux",
+      "color": "Color",
+      "colorPlaceholder": "Choose a color",
+      "price": "EXW (€ / 75cl)",
+      "pricePlaceholder": "12.50",
+      "grapes": "Grape varieties",
+      "grapesPlaceholder": "Type a grape variety and press Enter",
+      "vintages": "Vintages",
+      "vintagesPlaceholder": "Type a vintage and press Enter",
+      "certifications": "Wine certifications",
+      "organic": "Organic",
+      "biodynamic": "Biodynamic",
+      "natural": "Natural",
+      "awards": "Notes / Awards",
+      "awardsPlaceholder": "Gold medal at competition...",
+      "awardsCount": "{{count}}/300 characters",
+      "description": "Description",
+      "descriptionPlaceholder": "Detailed description of the cuvée..."
+    },
+    "wineColors": {
+      "Rouge": "Red",
+      "Blanc": "White",
+      "Rosé": "Rosé",
+      "Pétillant": "Sparkling"
+    },
+    "search": {
+      "placeholder": "Search by name or appellation...",
+      "filterColor": "Filter by color",
+      "allColors": "All colors"
+    },
+    "table": {
+      "name": "Name",
+      "appellation": "Appellation",
+      "grapes": "Grapes",
+      "color": "Color",
+      "exw": "EXW (€)",
+      "organic": "Organic",
+      "vintages": "Vintages",
+      "actions": "Actions",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "empty": "No cuvées yet. Add your first cuvée.",
+    "noMatch": "No cuvées match the search criteria.",
+    "perPage": "per page",
+    "countSingular": "{{count}} cuvée",
+    "countPlural": "{{count}} cuvées",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{current}} of {{total}}"
   }
 }
