@@ -1,6 +1,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, CheckCircle } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 interface PreflightError {
   id: string
@@ -14,12 +15,13 @@ interface PreflightBarProps {
 }
 
 export function PreflightBar({ errors, onFixClick }: PreflightBarProps) {
+  const { t } = useTranslation()
   if (errors.length === 0) {
     return (
       <Alert className="border-green-200 bg-green-50">
         <CheckCircle className="h-4 w-4 text-green-600" />
         <AlertDescription className="text-green-800">
-          Tout est prêt. Vous pouvez lancer votre campagne.
+          {t('campaigns.preflightBar.ready')}
         </AlertDescription>
       </Alert>
     )
@@ -31,7 +33,7 @@ export function PreflightBar({ errors, onFixClick }: PreflightBarProps) {
       <AlertDescription className="text-orange-800">
         <div className="flex items-center justify-between">
           <div>
-            <strong>{errors.length} erreur(s) bloquante(s):</strong>
+            <strong>{t('campaigns.preflightBar.errorsCount', { count: errors.length })}</strong>
             <ul className="mt-1 space-y-1">
               {errors.map((error) => (
                 <li key={error.id} className="flex items-center justify-between">
@@ -42,7 +44,7 @@ export function PreflightBar({ errors, onFixClick }: PreflightBarProps) {
                     onClick={() => onFixClick(error.anchor)}
                     className="ml-2 h-6 text-xs"
                   >
-                    Corriger
+                    {t('campaigns.preflightBar.fix')}
                   </Button>
                 </li>
               ))}

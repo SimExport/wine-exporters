@@ -1,6 +1,7 @@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Clock, CheckCircle, AlertCircle, Rocket } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface CampaignStatusBannerProps {
   status: string;
@@ -13,6 +14,7 @@ export const CampaignStatusBanner = ({
   validatedAt, 
   prospectCount = 0 
 }: CampaignStatusBannerProps) => {
+  const { t } = useTranslation();
   
   const getValidationDate = () => {
     if (!validatedAt) return null;
@@ -36,12 +38,8 @@ export const CampaignStatusBanner = ({
       <Alert className="mb-6 border-yellow-200 bg-yellow-50">
         <Clock className="h-4 w-4 text-yellow-600" />
         <AlertDescription className="text-yellow-800">
-          <div className="font-medium mb-2">En attente de validation</div>
-          <p className="text-sm">
-            Notre équipe prépare votre campagne sous 72h. Vous recevrez une notification 
-            à la validation. Sous 7 jours, les importateurs intéressés apparaîtront dans 
-            votre espace Prospects.
-          </p>
+          <div className="font-medium mb-2">{t('campaigns.banner.pendingTitle')}</div>
+          <p className="text-sm">{t('campaigns.banner.pendingMessage')}</p>
         </AlertDescription>
       </Alert>
     );
@@ -52,11 +50,11 @@ export const CampaignStatusBanner = ({
       <Alert className="mb-6 border-blue-200 bg-blue-50">
         <CheckCircle className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          <div className="font-medium mb-2">Campagne validée</div>
+          <div className="font-medium mb-2">{t('campaigns.banner.approvedTitle')}</div>
           <p className="text-sm">
-            Les prospects seront ajoutés par notre équipe sous 7 jours après la validation.
+            {t('campaigns.banner.approvedMessage')}
             <Badge variant="outline" className="ml-2">
-              Jour {getDaysSinceValidation()}/7
+              {t('campaigns.banner.approvedDay', { day: getDaysSinceValidation() })}
             </Badge>
           </p>
         </AlertDescription>
@@ -69,10 +67,8 @@ export const CampaignStatusBanner = ({
       <Alert className="mb-6 border-green-200 bg-green-50">
         <Rocket className="h-4 w-4 text-green-600" />
         <AlertDescription className="text-green-800">
-          <div className="font-medium mb-2">Campagne en cours d'envoi</div>
-          <p className="text-sm">
-            Votre campagne est actuellement en cours d'envoi vers {prospectCount} prospects.
-          </p>
+          <div className="font-medium mb-2">{t('campaigns.banner.sendingTitle')}</div>
+          <p className="text-sm">{t('campaigns.banner.sendingMessage', { count: prospectCount })}</p>
         </AlertDescription>
       </Alert>
     );
@@ -83,11 +79,8 @@ export const CampaignStatusBanner = ({
       <Alert className="mb-6 border-red-200 bg-red-50">
         <AlertCircle className="h-4 w-4 text-red-600" />
         <AlertDescription className="text-red-800">
-          <div className="font-medium mb-2">Campagne refusée</div>
-          <p className="text-sm">
-            Votre campagne a été refusée. Consultez les commentaires de l'équipe 
-            ou contactez le support pour plus d'informations.
-          </p>
+          <div className="font-medium mb-2">{t('campaigns.banner.failedTitle')}</div>
+          <p className="text-sm">{t('campaigns.banner.failedMessage')}</p>
         </AlertDescription>
       </Alert>
     );

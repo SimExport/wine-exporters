@@ -498,5 +498,203 @@
     "previous": "Previous",
     "next": "Next",
     "pageOf": "Page {{current}} of {{total}}"
+  },
+  "campaigns": {
+    "list": {
+      "title": "Campaigns",
+      "subtitle": "Manage your prospecting campaigns",
+      "newCampaign": "New campaign",
+      "yoursCount": "Your campaigns ({{count}})",
+      "emptyTitle": "You don't have any campaigns yet",
+      "emptyDescription": "Create your first prospecting campaign to reach importers internationally.",
+      "emptyAction": "Launch my first campaign",
+      "noneForStatus": "No campaigns for this status.",
+      "filters": {
+        "all": "All",
+        "draft": "Draft",
+        "pending_validation": "In validation",
+        "active": "Active",
+        "results": "Completed"
+      },
+      "table": {
+        "name": "Name",
+        "status": "Status",
+        "markets": "Markets",
+        "prospects": "Prospects",
+        "kpis": "KPIs",
+        "createdAt": "Created on",
+        "actions": "Actions",
+        "prospectsCount": "{{count}} prospects",
+        "opens": "{{count}} opens",
+        "clicks": "{{count}} clicks",
+        "replies": "{{count}} replies",
+        "viewProspects": "View prospects",
+        "archive": "Archive",
+        "delete": "Delete"
+      }
+    },
+    "status": {
+      "draft": "Draft",
+      "pending_validation": "Pending validation",
+      "approved": "Approved",
+      "sending": "Sending",
+      "results": "Completed",
+      "failed": "Failed",
+      "validatedShort": "Validated",
+      "sendingShort": "Sending",
+      "failedShort": "Rejected"
+    },
+    "toasts": {
+      "loadError": "Could not load campaigns",
+      "loadOneError": "Could not load the campaign",
+      "cannotDeleteTitle": "Cannot delete",
+      "cannotDeleteDescription": "You cannot delete a campaign that is currently sending",
+      "deleteConfirm": "Are you sure you want to delete the campaign \"{{name}}\"? This action is irreversible.",
+      "archiveConfirm": "Are you sure you want to archive the campaign \"{{name}}\"?",
+      "deletedTitle": "Campaign deleted",
+      "deletedDescription": "Campaign \"{{name}}\" was successfully deleted",
+      "deleteError": "Could not delete the campaign",
+      "archivedTitle": "Campaign archived",
+      "archivedDescription": "Campaign \"{{name}}\" has been archived",
+      "archiveError": "Could not archive the campaign",
+      "launchedTitle": "Campaign launched!",
+      "launchedDescription": "Your campaign is being processed.",
+      "launchErrorTitle": "Error",
+      "launchErrorDescription": "An error occurred while launching.",
+      "fixErrorsTitle": "Errors to fix",
+      "fixErrorsDescription": "Please fix the errors before launching the campaign."
+    },
+    "wizard": {
+      "back": "Back to campaigns",
+      "title": "Create a campaign",
+      "savedAt": "Saved {{time}}",
+      "saving": "Saving...",
+      "saveDraft": "Save draft",
+      "launch": "Launch campaign",
+      "launching": "Launching...",
+      "previous": "Previous",
+      "next": "Next",
+      "steps": {
+        "targeting": "Markets & targeting",
+        "winesDocs": "Wines & documents",
+        "messageSend": "Message & sending",
+        "reviewLaunch": "Review & launch"
+      },
+      "step1": {
+        "campaignName": "Campaign name",
+        "campaignNamePlaceholder": "E.g. Spring Campaign 2024",
+        "marketsLabel": "Priority markets ({{count}} selected)",
+        "channels": "Channels",
+        "segments": "Segments",
+        "volumeBand": "Desired volumes",
+        "select": "Select",
+        "priceMin": "Min. price (€)",
+        "priceMax": "Max. price (€)",
+        "audienceFound": "≈ {{count}} contacts found",
+        "audienceTooLow": "Audience too small. Adjust your filters.",
+        "audienceTooHigh": "Audience too large. Adjust your filters.",
+        "regions": {
+          "Europe": "Europe",
+          "Amérique du Nord": "North America",
+          "Asie": "Asia"
+        }
+      },
+      "step2": {
+        "winesLabel": "Wine selection",
+        "oldCuveesNote": "Legacy cuvées (add your wines in your profile for better management):",
+        "noWinesAvailable": "No wines available. Add your wines in your",
+        "profileLink": "Profile",
+        "documentsLabel": "Documents to attach",
+        "presentationLabel": "Domain presentation (required)",
+        "pricelistLabel": "Export price list (required)",
+        "selectDocument": "Select a document",
+        "noDocumentsAvailable": "No documents available. Add your documents first in your"
+      },
+      "step3": {
+        "sender": "Sender",
+        "senderPlaceholder": "Domain name",
+        "replyTo": "Reply-to email",
+        "replyToPlaceholder": "contact@domain.com",
+        "subject": "Email subject",
+        "generateSuggestions": "Generate suggestions",
+        "messageLabel": "Message (generated template)"
+      },
+      "step4": {
+        "summary": "Campaign summary",
+        "targeting": "Targeting",
+        "content": "Content",
+        "marketsField": "Markets:",
+        "audienceField": "Audience:",
+        "channelsField": "Channels:",
+        "cuveesField": "Wines:",
+        "subjectField": "Subject:",
+        "senderField": "Sender:",
+        "audienceContacts": "≈ {{count}} contacts",
+        "none": "None",
+        "noneFem": "None",
+        "notSet": "Not set"
+      },
+      "preflight": {
+        "markets": "At least 1 market required",
+        "audience": "Audience between 20 and 500 contacts",
+        "cuvees": "At least 1 wine required",
+        "presentation": "Presentation document required",
+        "pricelist": "Price list required",
+        "sender": "Sender required",
+        "subject": "Subject required"
+      }
+    },
+    "detail": {
+      "back": "Back to campaigns",
+      "createdOn": "Created on {{date}}",
+      "notFound": "Campaign not found",
+      "marketsCard": "Markets & Targeting",
+      "marketsTitle": "Priority markets",
+      "winesCard": "Selected wines",
+      "noWinesSelected": "No wine selected",
+      "wineNotFound": "Wine not found",
+      "documentsCard": "Documents",
+      "presentationLabel": "Domain presentation",
+      "pricelistLabel": "Price list",
+      "techsLabel": "Tech sheets",
+      "techsLinkLabel": "Tech sheets link",
+      "documentNotFound": "Document not found",
+      "statsCard": "Statistics",
+      "prospectsLabel": "Prospects",
+      "viewProspects": "View prospects",
+      "noteCard": "Note to the team"
+    },
+    "banner": {
+      "pendingTitle": "Pending validation",
+      "pendingMessage": "Our team is preparing your campaign within 72h. You'll be notified upon validation. Within 7 days, interested importers will appear in your Prospects area.",
+      "approvedTitle": "Campaign validated",
+      "approvedMessage": "Prospects will be added by our team within 7 days after validation.",
+      "approvedDay": "Day {{day}}/7",
+      "sendingTitle": "Campaign sending",
+      "sendingMessage": "Your campaign is currently being sent to {{count}} prospects.",
+      "failedTitle": "Campaign rejected",
+      "failedMessage": "Your campaign was rejected. Check the team's comments or contact support for more information."
+    },
+    "sidebar": {
+      "marketsCard": "Markets & Targeting",
+      "marketsLabel": "Priority markets",
+      "channelsLabel": "Channels",
+      "audienceLabel": "Estimated audience",
+      "audienceContacts": "≈ {{count}} contacts",
+      "winesDocsCard": "Wines & Documents",
+      "winesLabel": "Selected wines",
+      "noWines": "No wine selected",
+      "presentation": "Presentation: {{value}}",
+      "pricelist": "Price list: {{value}}",
+      "messageCard": "Message & Schedule",
+      "subject": "Subject",
+      "language": "Language",
+      "scheduledFor": "Scheduled for"
+    },
+    "preflightBar": {
+      "ready": "Everything is ready. You can launch your campaign.",
+      "errorsCount": "{{count}} blocking error(s):",
+      "fix": "Fix"
+    }
   }
 }

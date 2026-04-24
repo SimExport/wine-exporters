@@ -498,5 +498,203 @@
     "previous": "Précédent",
     "next": "Suivant",
     "pageOf": "Page {{current}} sur {{total}}"
+  },
+  "campaigns": {
+    "list": {
+      "title": "Campagnes",
+      "subtitle": "Gérez vos campagnes de prospection",
+      "newCampaign": "Nouvelle campagne",
+      "yoursCount": "Vos campagnes ({{count}})",
+      "emptyTitle": "Vous n'avez pas encore de campagne",
+      "emptyDescription": "Créez votre première campagne de prospection pour toucher des importateurs à l'international.",
+      "emptyAction": "Lancer ma première campagne",
+      "noneForStatus": "Aucune campagne pour ce statut.",
+      "filters": {
+        "all": "Toutes",
+        "draft": "Brouillon",
+        "pending_validation": "En validation",
+        "active": "Active",
+        "results": "Terminée"
+      },
+      "table": {
+        "name": "Nom",
+        "status": "Statut",
+        "markets": "Marchés",
+        "prospects": "Prospects",
+        "kpis": "KPIs",
+        "createdAt": "Créée le",
+        "actions": "Actions",
+        "prospectsCount": "{{count}} prospects",
+        "opens": "{{count}} ouv.",
+        "clicks": "{{count}} clics",
+        "replies": "{{count}} rép.",
+        "viewProspects": "Voir prospects",
+        "archive": "Archiver",
+        "delete": "Supprimer"
+      }
+    },
+    "status": {
+      "draft": "Brouillon",
+      "pending_validation": "En attente de validation",
+      "approved": "Approuvée",
+      "sending": "Envoi en cours",
+      "results": "Terminée",
+      "failed": "Échec",
+      "validatedShort": "Validée",
+      "sendingShort": "En cours d'envoi",
+      "failedShort": "Refusée"
+    },
+    "toasts": {
+      "loadError": "Impossible de charger les campagnes",
+      "loadOneError": "Impossible de charger la campagne",
+      "cannotDeleteTitle": "Impossible de supprimer",
+      "cannotDeleteDescription": "Vous ne pouvez pas supprimer une campagne en cours d'envoi",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la campagne \"{{name}}\" ? Cette action est irréversible.",
+      "archiveConfirm": "Êtes-vous sûr de vouloir archiver la campagne \"{{name}}\" ?",
+      "deletedTitle": "Campagne supprimée",
+      "deletedDescription": "La campagne \"{{name}}\" a été supprimée avec succès",
+      "deleteError": "Impossible de supprimer la campagne",
+      "archivedTitle": "Campagne archivée",
+      "archivedDescription": "La campagne \"{{name}}\" a été archivée",
+      "archiveError": "Impossible d'archiver la campagne",
+      "launchedTitle": "Campagne lancée !",
+      "launchedDescription": "Votre campagne est en cours de traitement.",
+      "launchErrorTitle": "Erreur",
+      "launchErrorDescription": "Une erreur est survenue lors du lancement.",
+      "fixErrorsTitle": "Erreurs à corriger",
+      "fixErrorsDescription": "Veuillez corriger les erreurs avant de lancer la campagne."
+    },
+    "wizard": {
+      "back": "Retour aux campagnes",
+      "title": "Créer une campagne",
+      "savedAt": "Enregistré {{time}}",
+      "saving": "Enregistrement...",
+      "saveDraft": "Enregistrer le brouillon",
+      "launch": "Lancer la campagne",
+      "launching": "Lancement...",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "steps": {
+        "targeting": "Marchés & ciblage",
+        "winesDocs": "Vins & documents",
+        "messageSend": "Message & envoi",
+        "reviewLaunch": "Relecture & lancement"
+      },
+      "step1": {
+        "campaignName": "Nom de la campagne",
+        "campaignNamePlaceholder": "Ex: Campagne Printemps 2024",
+        "marketsLabel": "Marchés prioritaires ({{count}} sélectionnés)",
+        "channels": "Canaux",
+        "segments": "Segments",
+        "volumeBand": "Volumes souhaités",
+        "select": "Sélectionnez",
+        "priceMin": "Prix min. (€)",
+        "priceMax": "Prix max. (€)",
+        "audienceFound": "≈ {{count}} contacts trouvés",
+        "audienceTooLow": "Audience trop faible. Ajustez vos filtres.",
+        "audienceTooHigh": "Audience trop large. Ajustez vos filtres.",
+        "regions": {
+          "Europe": "Europe",
+          "Amérique du Nord": "Amérique du Nord",
+          "Asie": "Asie"
+        }
+      },
+      "step2": {
+        "winesLabel": "Sélection des cuvées",
+        "oldCuveesNote": "Anciennes cuvées (ajoutez vos cuvées dans votre profil pour une meilleure gestion) :",
+        "noWinesAvailable": "Aucune cuvée disponible. Ajoutez vos cuvées dans votre",
+        "profileLink": "Profil",
+        "documentsLabel": "Documents à joindre",
+        "presentationLabel": "Présentation du domaine (obligatoire)",
+        "pricelistLabel": "Liste des prix export (obligatoire)",
+        "selectDocument": "Sélectionnez un document",
+        "noDocumentsAvailable": "Aucun document disponible. Ajoutez d'abord vos documents dans votre"
+      },
+      "step3": {
+        "sender": "Expéditeur",
+        "senderPlaceholder": "Nom du domaine",
+        "replyTo": "Email de réponse",
+        "replyToPlaceholder": "contact@domaine.com",
+        "subject": "Objet de l'email",
+        "generateSuggestions": "Générer des suggestions",
+        "messageLabel": "Message (template généré)"
+      },
+      "step4": {
+        "summary": "Récapitulatif de la campagne",
+        "targeting": "Ciblage",
+        "content": "Contenu",
+        "marketsField": "Marchés:",
+        "audienceField": "Audience:",
+        "channelsField": "Canaux:",
+        "cuveesField": "Cuvées:",
+        "subjectField": "Objet:",
+        "senderField": "Expéditeur:",
+        "audienceContacts": "≈ {{count}} contacts",
+        "none": "Aucun",
+        "noneFem": "Aucune",
+        "notSet": "Non défini"
+      },
+      "preflight": {
+        "markets": "Au moins 1 marché requis",
+        "audience": "Audience entre 20 et 500 contacts",
+        "cuvees": "Au moins 1 cuvée requise",
+        "presentation": "Document de présentation requis",
+        "pricelist": "Liste des prix requise",
+        "sender": "Expéditeur requis",
+        "subject": "Objet requis"
+      }
+    },
+    "detail": {
+      "back": "Retour aux campagnes",
+      "createdOn": "Créée le {{date}}",
+      "notFound": "Campagne introuvable",
+      "marketsCard": "Marchés & Ciblage",
+      "marketsTitle": "Marchés prioritaires",
+      "winesCard": "Vins sélectionnés",
+      "noWinesSelected": "Aucun vin sélectionné",
+      "wineNotFound": "Vin introuvable",
+      "documentsCard": "Documents",
+      "presentationLabel": "Présentation du domaine",
+      "pricelistLabel": "Liste des prix",
+      "techsLabel": "Fiches techniques",
+      "techsLinkLabel": "Lien fiches techniques",
+      "documentNotFound": "Document introuvable",
+      "statsCard": "Statistiques",
+      "prospectsLabel": "Prospects",
+      "viewProspects": "Voir les prospects",
+      "noteCard": "Note à l'équipe"
+    },
+    "banner": {
+      "pendingTitle": "En attente de validation",
+      "pendingMessage": "Notre équipe prépare votre campagne sous 72h. Vous recevrez une notification à la validation. Sous 7 jours, les importateurs intéressés apparaîtront dans votre espace Prospects.",
+      "approvedTitle": "Campagne validée",
+      "approvedMessage": "Les prospects seront ajoutés par notre équipe sous 7 jours après la validation.",
+      "approvedDay": "Jour {{day}}/7",
+      "sendingTitle": "Campagne en cours d'envoi",
+      "sendingMessage": "Votre campagne est actuellement en cours d'envoi vers {{count}} prospects.",
+      "failedTitle": "Campagne refusée",
+      "failedMessage": "Votre campagne a été refusée. Consultez les commentaires de l'équipe ou contactez le support pour plus d'informations."
+    },
+    "sidebar": {
+      "marketsCard": "Marchés & Ciblage",
+      "marketsLabel": "Marchés prioritaires",
+      "channelsLabel": "Canaux",
+      "audienceLabel": "Audience estimée",
+      "audienceContacts": "≈ {{count}} contacts",
+      "winesDocsCard": "Cuvées & Documents",
+      "winesLabel": "Cuvées sélectionnées",
+      "noWines": "Aucune cuvée sélectionnée",
+      "presentation": "Présentation: {{value}}",
+      "pricelist": "Liste des prix: {{value}}",
+      "messageCard": "Message & Planning",
+      "subject": "Objet",
+      "language": "Langue",
+      "scheduledFor": "Planifié pour"
+    },
+    "preflightBar": {
+      "ready": "Tout est prêt. Vous pouvez lancer votre campagne.",
+      "errorsCount": "{{count}} erreur(s) bloquante(s):",
+      "fix": "Corriger"
+    }
   }
 }
