@@ -405,8 +405,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Error updating document:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le document.",
+        title: t('profile.documents.updateErrorTitle'),
+        description: t('profile.documents.updateErrorDesc'),
         variant: "destructive"
       });
     }
@@ -426,8 +426,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Error updating media:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le média.",
+        title: t('common.error'),
+        description: t('profile.media.updateError'),
         variant: "destructive"
       });
     }
@@ -442,8 +442,8 @@ const Profile = () => {
     const maxSize = 15 * 1024 * 1024;
     if (file.size > maxSize) {
       toast({
-        title: "Fichier trop volumineux",
-        description: "La taille maximale est de 15 Mo",
+        title: t('profile.documents.fileTooLargeTitle'),
+        description: t('profile.documents.fileTooLargeDesc'),
         variant: "destructive"
       });
       return;
@@ -460,8 +460,8 @@ const Profile = () => {
     };
     if (!allowedTypes[category].includes(file.type)) {
       toast({
-        title: "Type de fichier non accepté",
-        description: "Veuillez sélectionner un fichier au bon format",
+        title: t('profile.documents.wrongTypeTitle'),
+        description: t('profile.documents.wrongTypeDesc'),
         variant: "destructive"
       });
       return;
@@ -492,13 +492,13 @@ const Profile = () => {
       if (dbError) throw dbError;
       await refetchDocuments();
       toast({
-        title: "Document ajouté",
-        description: "Le document a été uploadé avec succès"
+        title: t('profile.documents.addedTitle'),
+        description: t('profile.documents.addedDescription')
       });
     } catch (error: any) {
       console.error('Upload error:', error);
       toast({
-        title: "Erreur d'upload",
+        title: t('profile.documents.uploadErrorTitle'),
         description: error.message,
         variant: "destructive"
       });
@@ -511,8 +511,8 @@ const Profile = () => {
     const maxSize = type === 'image' ? 10 * 1024 * 1024 : 200 * 1024 * 1024;
     if (file.size > maxSize) {
       toast({
-        title: "Fichier trop volumineux",
-        description: `La taille maximale est de ${type === 'image' ? '10' : '200'} Mo`,
+        title: t('profile.media.fileTooLarge'),
+        description: type === 'image' ? t('profile.media.fileTooLargeDescPhoto') : t('profile.media.fileTooLargeDescVideo'),
         variant: "destructive"
       });
       return;
@@ -520,8 +520,8 @@ const Profile = () => {
     const allowedTypes = type === 'image' ? ['image/jpeg', 'image/jpg', 'image/png'] : ['video/mp4'];
     if (!allowedTypes.includes(file.type)) {
       toast({
-        title: "Type de fichier non accepté",
-        description: "Veuillez sélectionner un fichier au bon format",
+        title: t('profile.media.wrongType'),
+        description: t('profile.media.wrongTypeDesc'),
         variant: "destructive"
       });
       return;
@@ -549,13 +549,13 @@ const Profile = () => {
       if (dbError) throw dbError;
       await refetchMedia();
       toast({
-        title: "Média ajouté",
-        description: "Le fichier a été uploadé avec succès"
+        title: t('profile.media.addedTitle'),
+        description: t('profile.media.addedDescription')
       });
     } catch (error: any) {
       console.error('Upload error:', error);
       toast({
-        title: "Erreur d'upload",
+        title: t('profile.documents.uploadErrorTitle'),
         description: error.message,
         variant: "destructive"
       });
