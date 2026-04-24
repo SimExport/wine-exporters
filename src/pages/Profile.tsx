@@ -14,6 +14,7 @@ import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon,
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
+import { useTranslation } from 'react-i18next';
 
 const FieldHint = ({ text }: { text: string }) => (
   <TooltipProvider delayDuration={200}>
@@ -79,6 +80,8 @@ const Profile = () => {
   const {
     toast
   } = useToast();
+  const { t, i18n } = useTranslation('common');
+  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
