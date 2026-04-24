@@ -653,11 +653,11 @@ const Profile = () => {
         <div className="max-w-[1100px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Profil</h1>
-              <p className="text-muted-foreground mt-1">Gérez les informations concernant votre domaine et vos vins.</p>
+              <h1 className="text-2xl font-bold text-foreground">{t('profile.title')}</h1>
+              <p className="text-muted-foreground mt-1">{t('profile.subtitle')}</p>
               {lastSaved && <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs">
-                    Enregistré à {lastSaved.toLocaleTimeString()}
+                    {t('profile.savedAt', { time: lastSaved.toLocaleTimeString(localeCode) })}
                   </Badge>
                 </div>}
             </div>
@@ -665,10 +665,10 @@ const Profile = () => {
               <Button onClick={handleSubmit} disabled={loading} variant="default">
                 {loading ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sauvegarde...
+                    {t('profile.saving')}
                   </> : <>
                     <Save className="mr-2 h-4 w-4" />
-                    Enregistrer
+                    {t('profile.save')}
                   </>}
               </Button>
             </div>
@@ -683,11 +683,11 @@ const Profile = () => {
           <div className="mb-6 rounded-xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">Profil complété à {completionPct}%</span>
-                {completionPct >= 80 && <Badge variant="secondary" className="text-xs">Presque parfait 🎯</Badge>}
-                {completionPct < 50 && <Badge variant="destructive" className="text-xs">À compléter</Badge>}
+                <span className="text-sm font-semibold text-foreground">{t('profile.completion.completed', { pct: completionPct })}</span>
+                {completionPct >= 80 && <Badge variant="secondary" className="text-xs">{t('profile.completion.almostThere')}</Badge>}
+                {completionPct < 50 && <Badge variant="destructive" className="text-xs">{t('profile.completion.needsWork')}</Badge>}
               </div>
-              <span className="text-xs text-muted-foreground">{completedCount}/{completionFields.length} champs</span>
+              <span className="text-xs text-muted-foreground">{t('profile.completion.fieldsCount', { done: completedCount, total: completionFields.length })}</span>
             </div>
             <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-3">
               <div
@@ -706,12 +706,12 @@ const Profile = () => {
               <div className="flex flex-wrap gap-1.5">
                 {missingFields.map(f => (
                   <button
-                    key={f.label}
+                    key={f.key}
                     type="button"
                     onClick={() => setActiveTab(f.tab)}
                     className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-dashed border-muted-foreground/40 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   >
-                    <span className="text-[10px]">+</span> {f.label}
+                    <span className="text-[10px]">+</span> {t(`profile.completion.fields.${f.key}`)}
                   </button>
                 ))}
               </div>
@@ -722,22 +722,22 @@ const Profile = () => {
           <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 flex items-center gap-3">
             <span className="text-lg">🎉</span>
             <div>
-              <p className="text-sm font-semibold text-primary">Profil 100% complété !</p>
-              <p className="text-xs text-muted-foreground">Votre profil est complet. Nos experts pourront vous matcher avec les meilleurs importateurs.</p>
+              <p className="text-sm font-semibold text-primary">{t('profile.completion.fullDoneTitle')}</p>
+              <p className="text-xs text-muted-foreground">{t('profile.completion.fullDoneSubtitle')}</p>
             </div>
           </div>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-8 mb-6">
-            <TabsTrigger value="general">Général</TabsTrigger>
-            <TabsTrigger value="markets">Marchés</TabsTrigger>
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="website">Site web</TabsTrigger>
-            <TabsTrigger value="wines">Vins</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="tech-sheets">Fiches tech</TabsTrigger>
-            <TabsTrigger value="media">Médias</TabsTrigger>
+            <TabsTrigger value="general">{t('profile.tabs.general')}</TabsTrigger>
+            <TabsTrigger value="markets">{t('profile.tabs.markets')}</TabsTrigger>
+            <TabsTrigger value="description">{t('profile.tabs.description')}</TabsTrigger>
+            <TabsTrigger value="website">{t('profile.tabs.website')}</TabsTrigger>
+            <TabsTrigger value="wines">{t('profile.tabs.wines')}</TabsTrigger>
+            <TabsTrigger value="documents">{t('profile.tabs.documents')}</TabsTrigger>
+            <TabsTrigger value="tech-sheets">{t('profile.tabs.techSheets')}</TabsTrigger>
+            <TabsTrigger value="media">{t('profile.tabs.media')}</TabsTrigger>
           </TabsList>
 
           <form onSubmit={handleSubmit} className="space-y-6">
