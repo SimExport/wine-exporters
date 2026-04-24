@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { ArrowLeft, Globe, Wine, FileText, Calendar, Target } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Campaign {
   id: string;
@@ -47,6 +48,8 @@ const CampaignDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [wines, setWines] = useState<Wine[]>([]);
@@ -81,8 +84,8 @@ const CampaignDetail = () => {
     } catch (error) {
       console.error('Error fetching campaign:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger la campagne",
+        title: t('common.error'),
+        description: t('campaigns.toasts.loadOneError'),
         variant: "destructive"
       });
       navigate('/campaigns');
@@ -121,12 +124,12 @@ const CampaignDetail = () => {
 
   const getDocumentTitle = (docId: string) => {
     const doc = documents.find(d => d.id === docId);
-    return doc ? doc.title : 'Document introuvable';
+    return doc ? doc.title : t('campaigns.detail.documentNotFound');
   };
 
   const getWineName = (wineId: string) => {
     const wine = wines.find(w => w.id === wineId);
-    return wine ? `${wine.name} (${wine.color})` : 'Vin introuvable';
+    return wine ? `${wine.name} (${wine.color})` : t('campaigns.detail.wineNotFound');
   };
 
   const getStatusBadge = (status: string) => {
@@ -140,12 +143,12 @@ const CampaignDetail = () => {
     };
 
     const labels: Record<string, string> = {
-      draft: 'Brouillon',
-      pending_validation: 'En attente de validation',
-      approved: 'Validée',
-      sending: 'En cours d\'envoi',
-      results: 'Terminée',
-      failed: 'Refusée'
+      draft: t('campaigns.status.draft'),
+      pending_validation: t('campaigns.status.pending_validation'),
+      approved: t('campaigns.status.validatedShort'),
+      sending: t('campaigns.status.sendingShort'),
+      results: t('campaigns.status.results'),
+      failed: t('campaigns.status.failedShort')
     };
 
     return (
@@ -167,9 +170,9 @@ const CampaignDetail = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Campagne introuvable</h2>
+          <h2 className="text-xl font-semibold mb-2">{t('campaigns.detail.notFound')}</h2>
           <Button onClick={() => navigate('/campaigns')}>
-            Retour aux campagnes
+            {t('campaigns.detail.back')}
           </Button>
         </div>
       </div>
@@ -187,7 +190,7 @@ const CampaignDetail = () => {
             onClick={() => navigate('/campaigns')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour aux campagnes
+            {t('campaigns.detail.back')}
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-3">
@@ -195,7 +198,7 @@ const CampaignDetail = () => {
               {getStatusBadge(campaign.status)}
             </div>
             <p className="text-muted-foreground">
-              Créée le {format(new Date(campaign.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+              {t('campaigns.detail.createdOn', { date: format(new Date(campaign.created_at), 'dd/MM/yyyy à HH:mm', { locale: dateLocale }) })}
             </p>
           </div>
         </div>
@@ -213,12 +216,12 @@ const CampaignDetail = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5" />
-                Marchés & Ciblage
+                {t('campaigns.detail.marketsCard')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-medium mb-2">Marchés prioritaires</h4>
+                <h4 className="font-medium mb-2">{t('campaigns.detail.marketsTitle')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {(campaign.target_markets || campaign.markets || []).map((market) => (
                     <Badge key={market} variant="outline">
@@ -235,7 +238,7 @@ const CampaignDetail = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Wine className="h-5 w-5" />
-                Vins sélectionnés
+                {t('campaigns.detail.winesCard')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -244,7 +247,7 @@ const CampaignDetail = () => {
                   <div key={wineId} className="text-sm">
                     • {getWineName(wineId)}
                   </div>
-                )) || <p className="text-muted-foreground">Aucun vin sélectionné</p>}
+                )) || <p className="text-muted-foreground">{t('campaigns.detail.noWinesSelected')}</p>}
               </div>
             </CardContent>
           </Card>
@@ -254,13 +257,13 @@ const CampaignDetail = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Documents
+                {t('campaigns.detail.documentsCard')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {campaign.doc_presentation && (
                 <div>
-                  <h5 className="font-medium text-sm">Présentation du domaine</h5>
+                  <h5 className="font-medium text-sm">{t('campaigns.detail.presentationLabel')}</h5>
                   <p className="text-sm text-muted-foreground">
                     {getDocumentTitle(campaign.doc_presentation)}
                   </p>
@@ -269,7 +272,7 @@ const CampaignDetail = () => {
               
               {campaign.doc_pricelist && (
                 <div>
-                  <h5 className="font-medium text-sm">Liste des prix</h5>
+                  <h5 className="font-medium text-sm">{t('campaigns.detail.pricelistLabel')}</h5>
                   <p className="text-sm text-muted-foreground">
                     {getDocumentTitle(campaign.doc_pricelist)}
                   </p>
@@ -278,7 +281,7 @@ const CampaignDetail = () => {
 
               {campaign.doc_techs && campaign.doc_techs.length > 0 && (
                 <div>
-                  <h5 className="font-medium text-sm">Fiches techniques</h5>
+                  <h5 className="font-medium text-sm">{t('campaigns.detail.techsLabel')}</h5>
                   {campaign.doc_techs.map((docId) => (
                     <p key={docId} className="text-sm text-muted-foreground">
                       • {getDocumentTitle(docId)}
@@ -289,7 +292,7 @@ const CampaignDetail = () => {
 
               {campaign.techs_link && (
                 <div>
-                  <h5 className="font-medium text-sm">Lien fiches techniques</h5>
+                  <h5 className="font-medium text-sm">{t('campaigns.detail.techsLinkLabel')}</h5>
                   <a 
                     href={campaign.techs_link}
                     target="_blank"
@@ -308,12 +311,12 @@ const CampaignDetail = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Statistiques
+                {t('campaigns.detail.statsCard')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h5 className="font-medium text-sm">Prospects</h5>
+                <h5 className="font-medium text-sm">{t('campaigns.detail.prospectsLabel')}</h5>
                 <p className="text-2xl font-bold">{campaign.prospect_count || 0}</p>
               </div>
               
@@ -323,7 +326,7 @@ const CampaignDetail = () => {
                   className="w-full"
                   onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}
                 >
-                  Voir les prospects
+                  {t('campaigns.detail.viewProspects')}
                 </Button>
               </div>
             </CardContent>
@@ -333,7 +336,7 @@ const CampaignDetail = () => {
           {campaign.client_note && (
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Note à l'équipe</CardTitle>
+                <CardTitle>{t('campaigns.detail.noteCard')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm whitespace-pre-wrap">{campaign.client_note}</p>
