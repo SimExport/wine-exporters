@@ -308,7 +308,7 @@ const Campaigns = () => {
         setAvailableCuvees(data.cuvees || []);
         updateCampaignData({
           sendAsName: data.domain_name || '',
-          name: `Campagne - ${new Date().toLocaleDateString('fr-FR', {
+          name: `${i18n.language.startsWith('en') ? 'Campaign' : 'Campagne'} - ${new Date().toLocaleDateString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
             month: 'long',
             year: 'numeric'
           })}`
@@ -423,49 +423,49 @@ const Campaigns = () => {
     if (campaignData.markets.length === 0) {
       errors.push({
         id: 'markets',
-        message: 'Au moins 1 marché requis',
+        message: t('campaigns.wizard.preflight.markets'),
         anchor: 'step-1'
       });
     }
     if (campaignData.audienceEstimate < 20 || campaignData.audienceEstimate > 500) {
       errors.push({
         id: 'audience',
-        message: 'Audience entre 20 et 500 contacts',
+        message: t('campaigns.wizard.preflight.audience'),
         anchor: 'step-1'
       });
     }
     if (campaignData.selectedWines.length === 0 && campaignData.cuvees.length === 0) {
       errors.push({
         id: 'cuvees',
-        message: 'Au moins 1 cuvée requise',
+        message: t('campaigns.wizard.preflight.cuvees'),
         anchor: 'step-2'
       });
     }
     if (!campaignData.presentationDocId) {
       errors.push({
         id: 'presentation',
-        message: 'Document de présentation requis',
+        message: t('campaigns.wizard.preflight.presentation'),
         anchor: 'step-2'
       });
     }
     if (!campaignData.pricelistDocId) {
       errors.push({
         id: 'pricelist',
-        message: 'Liste des prix requise',
+        message: t('campaigns.wizard.preflight.pricelist'),
         anchor: 'step-2'
       });
     }
     if (!campaignData.sendAsName) {
       errors.push({
         id: 'sender',
-        message: 'Expéditeur requis',
+        message: t('campaigns.wizard.preflight.sender'),
         anchor: 'step-3'
       });
     }
     if (!campaignData.subjectSelected) {
       errors.push({
         id: 'subject',
-        message: 'Objet requis',
+        message: t('campaigns.wizard.preflight.subject'),
         anchor: 'step-3'
       });
     }
@@ -487,8 +487,8 @@ const Campaigns = () => {
     const errors = getPreflightErrors();
     if (errors.length > 0) {
       toast({
-        title: "Erreurs à corriger",
-        description: "Veuillez corriger les erreurs avant de lancer la campagne.",
+        title: t('campaigns.toasts.fixErrorsTitle'),
+        description: t('campaigns.toasts.fixErrorsDescription'),
         variant: "destructive"
       });
       return;
@@ -500,8 +500,8 @@ const Campaigns = () => {
         status: 'pending_validation'
       }).eq('id', campaignData.id);
       toast({
-        title: "Campagne lancée !",
-        description: "Votre campagne est en cours de traitement."
+        title: t('campaigns.toasts.launchedTitle'),
+        description: t('campaigns.toasts.launchedDescription')
       });
 
       // Reset form and go back to list
@@ -509,8 +509,8 @@ const Campaigns = () => {
     } catch (error) {
       console.error('Error launching campaign:', error);
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors du lancement.",
+        title: t('campaigns.toasts.launchErrorTitle'),
+        description: t('campaigns.toasts.launchErrorDescription'),
         variant: "destructive"
       });
     } finally {
@@ -558,7 +558,7 @@ const Campaigns = () => {
   const getStatusBadge = (status: string) => {
     const color = CAMPAIGN_STATUS_COLORS[status as keyof typeof CAMPAIGN_STATUS_COLORS] || 'secondary';
     return <Badge variant={color as any}>
-        {CAMPAIGN_STATUS_LABELS[status as keyof typeof CAMPAIGN_STATUS_LABELS] || status}
+        {t(`campaigns.status.${status}`, { defaultValue: status })}
       </Badge>;
   };
   const renderStepContent = () => {
