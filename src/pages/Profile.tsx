@@ -241,8 +241,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Error loading profile:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les informations du profil.",
+        title: t('common.error'),
+        description: t('profile.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -296,14 +296,14 @@ const Profile = () => {
       if (error) throw error;
       setLastSaved(new Date());
       toast({
-        title: "Succès",
-        description: "Les informations de votre domaine ont été sauvegardées."
+        title: t('common.success'),
+        description: t('profile.saveSuccess')
       });
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les informations.",
+        title: t('common.error'),
+        description: t('profile.saveError'),
         variant: "destructive"
       });
     } finally {
