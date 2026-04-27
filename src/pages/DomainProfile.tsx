@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface DomainProfileData {
 }
 
 const DomainProfile = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,12 @@ const DomainProfile = () => {
     cuvees: []
   });
 
-  const wineColorOptions = ['Rouge', 'Blanc', 'Rosé', 'Pétillant'];
+  const wineColorOptions: { value: string; labelKey: string }[] = [
+    { value: 'Rouge', labelKey: 'domainProfile.production.colors.red' },
+    { value: 'Blanc', labelKey: 'domainProfile.production.colors.white' },
+    { value: 'Rosé', labelKey: 'domainProfile.production.colors.rose' },
+    { value: 'Pétillant', labelKey: 'domainProfile.production.colors.sparkling' },
+  ];
 
   useEffect(() => {
     if (user) {
@@ -78,8 +85,8 @@ const DomainProfile = () => {
     } catch (error) {
       console.error('Error loading profile:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les informations du profil.",
+        title: t('common.error'),
+        description: t('domainProfile.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -102,14 +109,14 @@ const DomainProfile = () => {
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Les informations de votre domaine ont été sauvegardées."
+        title: t('common.success'),
+        description: t('domainProfile.saveSuccess')
       });
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les informations.",
+        title: t('common.error'),
+        description: t('domainProfile.saveError'),
         variant: "destructive"
       });
     } finally {
