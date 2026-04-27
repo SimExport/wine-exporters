@@ -44,8 +44,6 @@ interface ActivityItem {
 
 const Dashboard = () => {
   const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
-  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
