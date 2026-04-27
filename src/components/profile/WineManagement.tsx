@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Copy, Eye, EyeOff, Search, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { formatCurrency } from '@/lib/format';
 
 interface Wine {
   id: string;
@@ -36,8 +37,7 @@ const WINE_COLORS = ['Rouge', 'Blanc', 'Rosé', 'Pétillant'];
 const WineManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t, i18n } = useTranslation('common');
-  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
+  const { t } = useTranslation('common');
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -526,7 +526,7 @@ const WineManagement = () => {
                       <TableCell>
                         <Badge variant="secondary">{t(`wines.wineColors.${wine.color}`, wine.color)}</Badge>
                       </TableCell>
-                      <TableCell>{wine.exw_price_eur.toLocaleString(localeCode, { minimumFractionDigits: 2 })}€</TableCell>
+                      <TableCell>{formatCurrency(wine.exw_price_eur)}</TableCell>
                       <TableCell>
                         <Badge variant={wine.organic ? "default" : "outline"}>
                           {wine.organic ? t('wines.table.yes') : t('wines.table.no')}

@@ -1484,11 +1484,26 @@
     "faq": {
       "title": "Questions fréquentes",
       "items": [
-        { "q": "Qu'est ce que la recherche sur-mesure ?", "a": "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine." },
-        { "q": "Puis-je lancer plus d'une campagne par mois ?", "a": "L'abonnement inclut l'envoi géré d'une campagne qualifiée pour garantir la qualité. Pour des besoins supérieurs, contactez-nous." },
-        { "q": "Y a-t-il un engagement ?", "a": "Oui, 3 mois d'engagement. Ensuite l'abonnement à 199 € mensuel et sans engagement." },
-        { "q": "Combien de temps pour recevoir une première commande ?", "a": "En moyenne 3 mois en Europe, 6 à 12 mois pour le grand export." },
-        { "q": "Qui envoie les campagnes ?", "a": "Notre équipe s'occupe de l'envoi et de l'optimisation de la délivrabilité. Vous validez, nous envoyons." }
+        {
+          "q": "Qu'est ce que la recherche sur-mesure ?",
+          "a": "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine."
+        },
+        {
+          "q": "Puis-je lancer plus d'une campagne par mois ?",
+          "a": "L'abonnement inclut l'envoi géré d'une campagne qualifiée pour garantir la qualité. Pour des besoins supérieurs, contactez-nous."
+        },
+        {
+          "q": "Y a-t-il un engagement ?",
+          "a": "Oui, 3 mois d'engagement. Ensuite l'abonnement à 199 € mensuel et sans engagement."
+        },
+        {
+          "q": "Combien de temps pour recevoir une première commande ?",
+          "a": "En moyenne 3 mois en Europe, 6 à 12 mois pour le grand export."
+        },
+        {
+          "q": "Qui envoie les campagnes ?",
+          "a": "Notre équipe s'occupe de l'envoi et de l'optimisation de la délivrabilité. Vous validez, nous envoyons."
+        }
       ]
     },
     "finalCta": {
@@ -1608,5 +1623,15 @@
       "cancel": "Annuler",
       "save": "Enregistrer"
     }
+  },
+  "parseAddresses": {
+    "button": "Normaliser les adresses",
+    "doneTitle": "Parsing terminé",
+    "doneDescription": "{{updated}} mis à jour / {{skipped}} ignorés sur {{total}} contacts",
+    "summary": "{{updated}} mis à jour / {{skipped}} ignorés sur {{total}} contacts",
+    "errorsCount_one": "{{count}} erreur",
+    "errorsCount_other": "{{count}} erreurs",
+    "errorTitle": "Erreur",
+    "errorNotAuth": "Non authentifié"
   }
 }

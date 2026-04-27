@@ -1397,7 +1397,10 @@
     }
   },
   "landing": {
-    "nav": { "signIn": "Sign in", "start": "Get started" },
+    "nav": {
+      "signIn": "Sign in",
+      "start": "Get started"
+    },
     "hero": {
       "badge": "🍷 The all-in-one platform for wineries",
       "titleLead": "Find your future importers,",
@@ -1414,9 +1417,18 @@
     "pain": {
       "title": "Exporting shouldn't be a battle.",
       "items": {
-        "search": { "title": "The endless search", "text": "Finding the right contacts takes hours, and trade fairs cost a fortune for an uncertain ROI." },
-        "silence": { "title": "Radio silence", "text": "Your prospecting emails land in spam or get lost in the noise. No one replies." },
-        "tracking": { "title": "Chaotic follow-up", "text": "Sample tracking and follow-ups always end up lost in an endless Excel file." }
+        "search": {
+          "title": "The endless search",
+          "text": "Finding the right contacts takes hours, and trade fairs cost a fortune for an uncertain ROI."
+        },
+        "silence": {
+          "title": "Radio silence",
+          "text": "Your prospecting emails land in spam or get lost in the noise. No one replies."
+        },
+        "tracking": {
+          "title": "Chaotic follow-up",
+          "text": "Sample tracking and follow-ups always end up lost in an endless Excel file."
+        }
       }
     },
     "method": {
@@ -1472,14 +1484,32 @@
     "faq": {
       "title": "Frequently asked questions",
       "items": [
-        { "q": "What is bespoke search?", "a": "It's an included concierge service. You pick a market, and we find 3 to 5 importers that perfectly match your winery." },
-        { "q": "Can I run more than one campaign per month?", "a": "The subscription includes one managed qualified campaign to ensure quality. For higher needs, contact us." },
-        { "q": "Is there a commitment?", "a": "Yes, a 3-month commitment. After that, the subscription is €199/month with no commitment." },
-        { "q": "How long until the first order?", "a": "On average 3 months in Europe, 6 to 12 months for distant export markets." },
-        { "q": "Who sends the campaigns?", "a": "Our team handles sending and deliverability optimization. You validate, we send." }
+        {
+          "q": "What is bespoke search?",
+          "a": "It's an included concierge service. You pick a market, and we find 3 to 5 importers that perfectly match your winery."
+        },
+        {
+          "q": "Can I run more than one campaign per month?",
+          "a": "The subscription includes one managed qualified campaign to ensure quality. For higher needs, contact us."
+        },
+        {
+          "q": "Is there a commitment?",
+          "a": "Yes, a 3-month commitment. After that, the subscription is €199/month with no commitment."
+        },
+        {
+          "q": "How long until the first order?",
+          "a": "On average 3 months in Europe, 6 to 12 months for distant export markets."
+        },
+        {
+          "q": "Who sends the campaigns?",
+          "a": "Our team handles sending and deliverability optimization. You validate, we send."
+        }
       ]
     },
-    "finalCta": { "title": "Ready to conquer new markets?", "button": "Get started now" },
+    "finalCta": {
+      "title": "Ready to conquer new markets?",
+      "button": "Get started now"
+    },
     "footer": {
       "copyright": "ExportVins © 2026 — The prospecting tool for winegrowers.",
       "contact": "Contact",
@@ -1593,5 +1623,15 @@
       "cancel": "Cancel",
       "save": "Save"
     }
+  },
+  "parseAddresses": {
+    "button": "Normalize addresses",
+    "doneTitle": "Parsing complete",
+    "doneDescription": "{{updated}} updated / {{skipped}} skipped out of {{total}} contacts",
+    "summary": "{{updated}} updated / {{skipped}} skipped out of {{total}} contacts",
+    "errorsCount_one": "{{count}} error",
+    "errorsCount_other": "{{count}} errors",
+    "errorTitle": "Error",
+    "errorNotAuth": "Not authenticated"
   }
 }

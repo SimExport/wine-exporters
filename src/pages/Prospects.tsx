@@ -18,8 +18,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Plus, Download, Search, Kanban, SearchX, Users, AlertTriangle, Clock } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
-import { format, subDays, isAfter, differenceInDays } from 'date-fns'
-import { fr, enUS } from 'date-fns/locale'
+import { subDays, isAfter, differenceInDays } from 'date-fns'
+import { formatDate, formatDateFile } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
 
 interface Prospect {
@@ -59,8 +59,7 @@ const PROSPECT_STATUS_KEYS = ['new','samples_requested','samples_sent','received
 const REQUESTED_ACTION_KEYS = ['price_list','samples','video_call','tech_sheets','other'] as const
 
 export default function Prospects() {
-  const { t, i18n } = useTranslation()
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -301,7 +300,7 @@ export default function Prospects() {
   const handleExportCSV = () => {
     const headers = t('prospects.csv.headers', { returnObjects: true }) as string[]
     const rows = prospects.map(p => [
-      format(new Date(p.created_at), 'dd/MM/yyyy', { locale: dateLocale }),
+      formatDate(p.created_at),
       p.campaigns?.name || '',
       p.company_name || '',
       `${p.first_name || ''} ${p.last_name || ''}`.trim(),
@@ -315,7 +314,7 @@ export default function Prospects() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = t('prospects.csv.filename', { date: format(new Date(), 'yyyy-MM-dd') })
+    a.download = t('prospects.csv.filename', { date: formatDateFile() })
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -664,7 +663,7 @@ export default function Prospects() {
                   {prospects.map((prospect) => (
                     <TableRow key={prospect.id} className="hover:bg-muted/50">
                       <TableCell>
-                        {format(new Date(prospect.created_at), 'dd/MM/yyyy', { locale: dateLocale })}
+                        {formatDate(prospect.created_at)}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="cursor-pointer">

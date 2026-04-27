@@ -7,10 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { ArrowLeft, Globe, Wine, FileText, Calendar, Target } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr, enUS } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime } from '@/lib/format';
 
 interface Campaign {
   id: string;
@@ -48,8 +47,7 @@ const CampaignDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
+  const { t } = useTranslation();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [wines, setWines] = useState<Wine[]>([]);
@@ -198,7 +196,7 @@ const CampaignDetail = () => {
               {getStatusBadge(campaign.status)}
             </div>
             <p className="text-muted-foreground">
-              {t('campaigns.detail.createdOn', { date: format(new Date(campaign.created_at), 'dd/MM/yyyy à HH:mm', { locale: dateLocale }) })}
+              {t('campaigns.detail.createdOn', { date: formatDateTime(campaign.created_at) })}
             </p>
           </div>
         </div>

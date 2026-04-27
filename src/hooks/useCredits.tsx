@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { formatDateLong } from '@/lib/format';
 
 export interface UserCredits {
   campaign_credits: number;
@@ -10,7 +11,7 @@ export interface UserCredits {
 }
 
 export const useCredits = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [credits, setCredits] = useState<UserCredits | null>(null);
   const [loading, setLoading] = useState(true);
@@ -18,12 +19,7 @@ export const useCredits = () => {
   const formatResetDate = (date: string | null): string => {
     if (!date) return t('credits.nextPeriod');
     try {
-      const locale = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
-      return new Date(date).toLocaleDateString(locale, {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
+      return formatDateLong(date) || date;
     } catch {
       return date;
     }
