@@ -8,9 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCircle, Plus, Crown, Megaphone, Users, MapPin, TrendingUp, Rocket, Zap, MessageSquare, UserCheck, Activity } from 'lucide-react';
 import { LeadsWorldMap } from '@/components/LeadsWorldMap';
-import { formatDistanceToNow } from 'date-fns';
-import { fr, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
+import { formatDate, formatNumber, formatRelative } from '@/lib/format';
 
 interface Profile {
   id: string;
@@ -181,9 +180,9 @@ const Dashboard = () => {
   const uniqueMarkets = new Set(campaigns.flatMap(c => c.target_markets || [])).size;
 
   const globalStats = [
-    { label: t('dashboardPage.stats.campaignsSent'), value: launchedCampaigns.toLocaleString(localeCode), icon: Megaphone },
-    { label: t('dashboardPage.stats.importersFound'), value: totalReplies.toLocaleString(localeCode), icon: Users },
-    { label: t('dashboardPage.stats.marketsProspected'), value: uniqueMarkets.toString(), icon: MapPin },
+    { label: t('dashboardPage.stats.campaignsSent'), value: formatNumber(launchedCampaigns), icon: Megaphone },
+    { label: t('dashboardPage.stats.importersFound'), value: formatNumber(totalReplies), icon: Users },
+    { label: t('dashboardPage.stats.marketsProspected'), value: formatNumber(uniqueMarkets), icon: MapPin },
   ];
 
   return (
@@ -400,7 +399,7 @@ const Dashboard = () => {
                         {campaign.target_markets.length > 3 && ` +${campaign.target_markets.length - 3}`}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {t('dashboardPage.campaignsList.createdOn')} {new Date(campaign.created_at).toLocaleDateString(localeCode)}
+                        {t('dashboardPage.campaignsList.createdOn')} {formatDate(campaign.created_at)}
                       </p>
                     </div>
                   </CardContent>
@@ -446,7 +445,7 @@ const Dashboard = () => {
                           {item.sublabel && <p className="text-xs text-muted-foreground truncate">{item.sublabel}</p>}
                         </div>
                         <time className="text-xs text-muted-foreground/70 shrink-0 mt-0.5">
-                          {formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: dateLocale })}
+                          {formatRelative(item.date)}
                         </time>
                       </div>
                     </li>
