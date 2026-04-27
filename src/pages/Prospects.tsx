@@ -19,7 +19,8 @@ import { Plus, Download, Search, Kanban, SearchX, Users, AlertTriangle, Clock } 
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
 import { format, subDays, isAfter, differenceInDays } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { fr, enUS } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
 
 interface Prospect {
   id: string
@@ -41,20 +42,11 @@ interface Prospect {
   }
 }
 
-const LEAD_TAGS = [
-  { key: 'hot',  label: 'Chaud', dot: '🔴', classes: 'bg-red-100 text-red-700 border-red-200' },
-  { key: 'warm', label: 'Tiède', dot: '🟡', classes: 'bg-amber-100 text-amber-700 border-amber-200' },
-  { key: 'cold', label: 'Froid', dot: '🔵', classes: 'bg-blue-100 text-blue-700 border-blue-200' },
-]
-
-function getInactivityInfo(lastActivityAt?: string): { label: string; isAlert: boolean } {
-  if (!lastActivityAt) return { label: 'Aucune activité', isAlert: false }
-  const days = differenceInDays(new Date(), new Date(lastActivityAt))
-  return {
-    label: days === 0 ? "Aujourd'hui" : `Il y a ${days}j`,
-    isAlert: days >= 15,
-  }
-}
+const LEAD_TAG_KEYS = [
+  { key: 'hot',  classes: 'bg-red-100 text-red-700 border-red-200' },
+  { key: 'warm', classes: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { key: 'cold', classes: 'bg-blue-100 text-blue-700 border-blue-200' },
+] as const
 
 interface Campaign {
   id: string
@@ -63,28 +55,24 @@ interface Campaign {
   launched_at?: string
 }
 
-const PROSPECT_STATUS_LABELS = {
-  new: 'Nouveau',
-  samples_requested: 'Échantillons demandés',
-  samples_sent: 'Échantillons envoyés',
-  received: 'Reçu',
-  tasted: 'Dégusté',
-  negotiation: 'Négociation',
-  won: 'Gagné',
-  lost: 'Perdu'
-}
-
-const REQUESTED_ACTION_LABELS = {
-  price_list: 'Liste de prix',
-  samples: 'Échantillons',
-  video_call: 'Visioconférence',
-  tech_sheets: 'Fiches techniques',
-  other: 'Autre'
-}
+const PROSPECT_STATUS_KEYS = ['new','samples_requested','samples_sent','received','tasted','negotiation','won','lost'] as const
+const REQUESTED_ACTION_KEYS = ['price_list','samples','video_call','tech_sheets','other'] as const
 
 export default function Prospects() {
+  const { t, i18n } = useTranslation()
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr
   const { user } = useAuth()
   const { toast } = useToast()
+
+  const getInactivityInfo = (lastActivityAt?: string): { label: string; isAlert: boolean } => {
+    if (!lastActivityAt) return { label: t('crm.inactivity.none'), isAlert: false }
+    const days = differenceInDays(new Date(), new Date(lastActivityAt))
+    return {
+      label: days === 0 ? t('crm.inactivity.today') : t('crm.inactivity.daysAgo', { count: days }),
+      isAlert: days >= 15,
+    }
+  }
+
   const [searchParams, setSearchParams] = useSearchParams()
   const [prospects, setProspects] = useState<Prospect[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
@@ -222,8 +210,8 @@ export default function Prospects() {
     } catch (error) {
       console.error('Error loading data:', error)
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les données",
+        title: t('crm.toasts.loadError.title'),
+        description: t('crm.toasts.loadError.description'),
         variant: "destructive",
       })
     } finally {
@@ -243,8 +231,8 @@ export default function Prospects() {
 
       if (existing) {
         toast({
-          title: "Prospect existant",
-          description: "Un prospect avec cet email existe déjà pour cette campagne",
+          title: t('crm.toasts.duplicate.title'),
+          description: t('crm.toasts.duplicate.description'),
           variant: "destructive",
         })
         return
@@ -271,15 +259,15 @@ export default function Prospects() {
           created_by: user?.id,
           requested_actions: newProspect.requested_actions as any,
           message_snippet: newProspect.requested_samples.length > 0 
-            ? `Échantillons demandés: ${newProspect.requested_samples.join(', ')}`
+            ? t('crm.createDialog.samplesRequestedSnippet', { list: newProspect.requested_samples.join(', ') })
             : null
         })
 
       if (error) throw error
 
       toast({
-        title: "Prospect créé",
-        description: "Le prospect a été ajouté avec succès",
+        title: t('crm.toasts.created.title'),
+        description: t('crm.toasts.created.description'),
       })
 
       setShowCreateModal(false)
@@ -303,24 +291,23 @@ export default function Prospects() {
     } catch (error) {
       console.error('Error creating prospect:', error)
       toast({
-        title: "Erreur",
-        description: "Impossible de créer le prospect",
+        title: t('crm.toasts.createError.title'),
+        description: t('crm.toasts.createError.description'),
         variant: "destructive",
       })
     }
   }
 
   const handleExportCSV = () => {
-    // Simple CSV export of visible data
-    const headers = ['Date', 'Campagne', 'Société', 'Contact', 'Pays', 'Actions demandées', 'Statut']
+    const headers = t('prospects.csv.headers', { returnObjects: true }) as string[]
     const rows = prospects.map(p => [
-      format(new Date(p.created_at), 'dd/MM/yyyy', { locale: fr }),
+      format(new Date(p.created_at), 'dd/MM/yyyy', { locale: dateLocale }),
       p.campaigns?.name || '',
       p.company_name || '',
       `${p.first_name || ''} ${p.last_name || ''}`.trim(),
       p.country || '',
-      p.requested_actions?.map(a => REQUESTED_ACTION_LABELS[a as keyof typeof REQUESTED_ACTION_LABELS]).join(', ') || '',
-      PROSPECT_STATUS_LABELS[p.prospect_status as keyof typeof PROSPECT_STATUS_LABELS]
+      p.requested_actions?.map(a => t(`crm.actions.${a}`)).join(', ') || '',
+      t(`crm.statuses.${p.prospect_status}`)
     ])
 
     const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
@@ -328,7 +315,7 @@ export default function Prospects() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `prospects-${format(new Date(), 'yyyy-MM-dd')}.csv`
+    a.download = t('prospects.csv.filename', { date: format(new Date(), 'yyyy-MM-dd') })
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -364,15 +351,15 @@ export default function Prospects() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Prospects</h1>
-          <p className="text-muted-foreground">Acheteurs intéressés suite à vos campagnes</p>
+          <h1 className="text-3xl font-bold">{t('prospects.title')}</h1>
+          <p className="text-muted-foreground">{t('prospects.subtitle')}</p>
         </div>
 
         {/* SLA Banner */}
         {showSLABanner && (
           <Alert>
             <AlertDescription>
-              Les prospects sont ajoutés par un admin sous 7 jours après l'envoi.
+              {t('prospects.slaBanner')}
             </AlertDescription>
           </Alert>
         )}
@@ -382,13 +369,13 @@ export default function Prospects() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="campaign-filter">Campagne</Label>
+                <Label htmlFor="campaign-filter">{t('prospects.filters.campaign')}</Label>
                 <Select value={filters.campaign} onValueChange={(value) => setFilters(prev => ({ ...prev, campaign: value === 'all' ? '' : value }))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Toutes les campagnes" />
+                    <SelectValue placeholder={t('prospects.filters.allCampaigns')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toutes les campagnes</SelectItem>
+                    <SelectItem value="all">{t('prospects.filters.allCampaigns')}</SelectItem>
                     {campaigns.map(campaign => (
                       <SelectItem key={campaign.id} value={campaign.id}>
                         {campaign.name}
@@ -399,40 +386,40 @@ export default function Prospects() {
               </div>
 
               <div>
-                <Label htmlFor="status-filter">Statut</Label>
+                <Label htmlFor="status-filter">{t('prospects.filters.status')}</Label>
                 <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? '' : value }))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Tous les statuts" />
+                    <SelectValue placeholder={t('prospects.filters.allStatuses')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    {Object.entries(PROSPECT_STATUS_LABELS).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    <SelectItem value="all">{t('prospects.filters.allStatuses')}</SelectItem>
+                    {PROSPECT_STATUS_KEYS.map((key) => (
+                      <SelectItem key={key} value={key}>{t(`crm.statuses.${key}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="period-filter">Période</Label>
+                <Label htmlFor="period-filter">{t('prospects.filters.period')}</Label>
                 <Select value={filters.period} onValueChange={(value) => setFilters(prev => ({ ...prev, period: value }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="7">7 derniers jours</SelectItem>
-                    <SelectItem value="30">30 derniers jours</SelectItem>
-                    <SelectItem value="90">90 derniers jours</SelectItem>
+                    <SelectItem value="7">{t('prospects.filters.period7')}</SelectItem>
+                    <SelectItem value="30">{t('prospects.filters.period30')}</SelectItem>
+                    <SelectItem value="90">{t('prospects.filters.period90')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="search">Recherche</Label>
+                <Label htmlFor="search">{t('prospects.filters.search')}</Label>
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Nom, société, email..."
+                    placeholder={t('prospects.filters.searchPlaceholder')}
                     value={filters.search}
                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                     className="pl-8"
@@ -448,12 +435,12 @@ export default function Prospects() {
           <div className="flex gap-2">
             <Button onClick={handleExportCSV} variant="outline">
               <Download className="w-4 h-4 mr-2" />
-              Exporter CSV
+              {t('prospects.exportCSV')}
             </Button>
             <Button asChild variant="outline">
               <Link to="/pipeline">
                 <Kanban className="w-4 h-4 mr-2" />
-                Vue Kanban
+                {t('prospects.kanbanView')}
               </Link>
             </Button>
           </div>
@@ -462,20 +449,20 @@ export default function Prospects() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                Ajouter un prospect
+                {t('prospects.addProspect')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Créer un prospect</DialogTitle>
+                <DialogTitle>{t('crm.createDialog.title')}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="campaign">Campagne *</Label>
+                    <Label htmlFor="campaign">{t('crm.createDialog.campaign')}</Label>
                     <Select value={newProspect.campaign_id} onValueChange={(value) => setNewProspect(prev => ({ ...prev, campaign_id: value }))}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une campagne" />
+                        <SelectValue placeholder={t('crm.createDialog.campaignPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {campaigns.map(campaign => (
@@ -487,118 +474,118 @@ export default function Prospects() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="country">Pays</Label>
+                    <Label htmlFor="country">{t('crm.createDialog.country')}</Label>
                     <Input
                       value={newProspect.country}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, country: e.target.value }))}
-                      placeholder="France"
+                      placeholder={t('crm.createDialog.countryPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="first_name">Prénom *</Label>
+                    <Label htmlFor="first_name">{t('crm.createDialog.firstName')}</Label>
                     <Input
                       value={newProspect.first_name}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, first_name: e.target.value }))}
-                      placeholder="Jean"
+                      placeholder={t('crm.createDialog.firstNamePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="last_name">Nom *</Label>
+                    <Label htmlFor="last_name">{t('crm.createDialog.lastName')}</Label>
                     <Input
                       value={newProspect.last_name}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, last_name: e.target.value }))}
-                      placeholder="Dupont"
+                      placeholder={t('crm.createDialog.lastNamePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="company_name">Société *</Label>
+                  <Label htmlFor="company_name">{t('crm.createDialog.company')}</Label>
                   <Input
                     value={newProspect.company_name}
                     onChange={(e) => setNewProspect(prev => ({ ...prev, company_name: e.target.value }))}
-                    placeholder="Caves Martin"
+                    placeholder={t('crm.createDialog.companyPlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">{t('crm.createDialog.email')}</Label>
                   <Input
                     type="email"
                     value={newProspect.email}
                     onChange={(e) => setNewProspect(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="jean@caves-martin.fr"
+                    placeholder={t('crm.createDialog.emailPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="phone">Téléphone</Label>
+                    <Label htmlFor="phone">{t('crm.createDialog.phone')}</Label>
                     <Input
                       value={newProspect.phone}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="+33 6 12 34 56 78"
+                      placeholder={t('crm.createDialog.phonePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="website_url">Site web</Label>
+                    <Label htmlFor="website_url">{t('crm.createDialog.website')}</Label>
                     <Input
                       value={newProspect.website_url}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, website_url: e.target.value }))}
-                      placeholder="https://example.com"
+                      placeholder={t('crm.createDialog.websitePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="address">Adresse</Label>
+                  <Label htmlFor="address">{t('crm.createDialog.address')}</Label>
                   <Input
                     value={newProspect.address_line1}
                     onChange={(e) => setNewProspect(prev => ({ ...prev, address_line1: e.target.value }))}
-                    placeholder="123 rue du Commerce"
+                    placeholder={t('crm.createDialog.addressPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="city">Ville</Label>
+                    <Label htmlFor="city">{t('crm.createDialog.city')}</Label>
                     <Input
                       value={newProspect.city}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, city: e.target.value }))}
-                      placeholder="Paris"
+                      placeholder={t('crm.createDialog.cityPlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="postal_code">Code postal</Label>
+                    <Label htmlFor="postal_code">{t('crm.createDialog.postal')}</Label>
                     <Input
                       value={newProspect.postal_code}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, postal_code: e.target.value }))}
-                      placeholder="75001"
+                      placeholder={t('crm.createDialog.postalPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Actions demandées</Label>
+                  <Label>{t('crm.createDialog.requestedActions')}</Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
-                    {Object.entries(REQUESTED_ACTION_LABELS).map(([key, label]) => (
+                    {REQUESTED_ACTION_KEYS.map((key) => (
                       <div key={key} className="flex items-center space-x-2">
                         <Checkbox
                           id={key}
                           checked={newProspect.requested_actions.includes(key)}
                           onCheckedChange={(checked) => handleRequestedActionChange(key, !!checked)}
                         />
-                        <Label htmlFor={key} className="text-sm">{label}</Label>
+                        <Label htmlFor={key} className="text-sm">{t(`crm.actions.${key}`)}</Label>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <Label>Échantillons demandés</Label>
+                  <Label>{t('crm.createDialog.requestedSamples')}</Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {profileCuvees.map((cuvee) => (
                       <div key={cuvee} className="flex items-center space-x-2">
@@ -618,7 +605,7 @@ export default function Prospects() {
                       </div>
                     ))}
                     {profileCuvees.length === 0 && (
-                      <p className="text-sm text-muted-foreground col-span-2">Aucune cuvée dans votre profil</p>
+                      <p className="text-sm text-muted-foreground col-span-2">{t('crm.createDialog.noCuvees')}</p>
                     )}
                   </div>
                 </div>
@@ -626,13 +613,13 @@ export default function Prospects() {
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-                  Annuler
+                  {t('crm.createDialog.cancel')}
                 </Button>
                 <Button 
                   onClick={handleCreateProspect}
                   disabled={!newProspect.campaign_id || !newProspect.first_name || !newProspect.last_name || !newProspect.company_name || !newProspect.email}
                 >
-                  Créer
+                  {t('crm.createDialog.createShort')}
                 </Button>
               </div>
             </DialogContent>
@@ -646,30 +633,30 @@ export default function Prospects() {
               (filters.campaign !== 'all' || filters.country !== '' || filters.status !== 'all' || filters.requestedActions.length > 0 || filters.search !== '')
                 ? <EmptyState
                     icon={<SearchX className="h-10 w-10" />}
-                    title="Aucun résultat"
-                    description="Aucun prospect ne correspond à vos filtres actuels."
-                    action={{ label: "Effacer les filtres", onClick: () => setFilters({ campaign: 'all', country: '', status: 'all', requestedActions: [], period: '30', search: '' }) }}
+                    title={t('prospects.empty.filteredTitle')}
+                    description={t('prospects.empty.filteredDesc')}
+                    action={{ label: t('prospects.empty.clearFilters'), onClick: () => setFilters({ campaign: 'all', country: '', status: 'all', requestedActions: [], period: '30', search: '' }) }}
                   />
                 : <EmptyState
                     icon={<Users className="h-10 w-10" />}
-                    title="Vos premiers prospects apparaîtront ici"
-                    description="Lancez une campagne pour commencer à recevoir des réponses d'importateurs."
-                    action={{ label: "Voir mes campagnes", href: "/campaigns" }}
+                    title={t('prospects.empty.noneTitle')}
+                    description={t('prospects.empty.noneDesc')}
+                    action={{ label: t('prospects.empty.viewCampaigns'), href: "/campaigns" }}
                   />
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date ajout</TableHead>
-                    <TableHead>Campagne</TableHead>
-                    <TableHead>Société</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Pays</TableHead>
-                    <TableHead>Actions demandées</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Tag</TableHead>
-                    <TableHead>Rappel</TableHead>
-                    <TableHead>Dernière MAJ</TableHead>
+                    <TableHead>{t('prospects.table.dateAdded')}</TableHead>
+                    <TableHead>{t('prospects.table.campaign')}</TableHead>
+                    <TableHead>{t('prospects.table.company')}</TableHead>
+                    <TableHead>{t('prospects.table.contact')}</TableHead>
+                    <TableHead>{t('prospects.table.country')}</TableHead>
+                    <TableHead>{t('prospects.table.actions')}</TableHead>
+                    <TableHead>{t('prospects.table.status')}</TableHead>
+                    <TableHead>{t('prospects.table.tag')}</TableHead>
+                    <TableHead>{t('prospects.table.reminder')}</TableHead>
+                    <TableHead>{t('prospects.table.lastUpdate')}</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -677,7 +664,7 @@ export default function Prospects() {
                   {prospects.map((prospect) => (
                     <TableRow key={prospect.id} className="hover:bg-muted/50">
                       <TableCell>
-                        {format(new Date(prospect.created_at), 'dd/MM/yyyy', { locale: fr })}
+                        {format(new Date(prospect.created_at), 'dd/MM/yyyy', { locale: dateLocale })}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="cursor-pointer">
@@ -695,7 +682,7 @@ export default function Prospects() {
                         <div className="flex flex-wrap gap-1">
                           {prospect.requested_actions?.map(action => (
                             <Badge key={action} variant="secondary" className="text-xs">
-                              {REQUESTED_ACTION_LABELS[action as keyof typeof REQUESTED_ACTION_LABELS]}
+                              {t(`crm.actions.${action}`)}
                             </Badge>
                           ))}
                         </div>
@@ -705,7 +692,7 @@ export default function Prospects() {
                           variant={prospect.prospect_status === 'won' ? 'default' : 
                                   prospect.prospect_status === 'lost' ? 'destructive' : 'secondary'}
                         >
-                          {PROSPECT_STATUS_LABELS[prospect.prospect_status as keyof typeof PROSPECT_STATUS_LABELS]}
+                          {t(`crm.statuses.${prospect.prospect_status}`)}
                         </Badge>
                       </TableCell>
                       {/* Temperature tag cell */}
@@ -713,23 +700,23 @@ export default function Prospects() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button className="focus:outline-none">
-                              {prospect.status && LEAD_TAGS.find(t => t.key === prospect.status) ? (
-                                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium cursor-pointer ${LEAD_TAGS.find(t => t.key === prospect.status)!.classes}`}>
-                                  {LEAD_TAGS.find(t => t.key === prospect.status)!.label}
+                              {prospect.status && LEAD_TAG_KEYS.find(tg => tg.key === prospect.status) ? (
+                                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium cursor-pointer ${LEAD_TAG_KEYS.find(tg => tg.key === prospect.status)!.classes}`}>
+                                  {t(`crm.tags.${prospect.status}`)}
                                 </span>
                               ) : (
-                                <span className="text-xs text-muted-foreground border border-dashed rounded-full px-2 py-0.5 hover:border-foreground/40">+ Tag</span>
+                                <span className="text-xs text-muted-foreground border border-dashed rounded-full px-2 py-0.5 hover:border-foreground/40">{t('crm.tags.addTag')}</span>
                               )}
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start" className="w-32">
-                            {LEAD_TAGS.map(tag => (
+                            {LEAD_TAG_KEYS.map(tag => (
                               <DropdownMenuItem key={tag.key} onClick={() => handleTagUpdate(prospect.id, tag.key)}>
-                                <span className={`text-xs px-1.5 py-0.5 rounded-full border mr-2 ${tag.classes}`}>{tag.label}</span>
+                                <span className={`text-xs px-1.5 py-0.5 rounded-full border mr-2 ${tag.classes}`}>{t(`crm.tags.${tag.key}`)}</span>
                               </DropdownMenuItem>
                             ))}
                             <DropdownMenuItem onClick={() => handleTagUpdate(prospect.id, null)}>
-                              <span className="text-xs text-muted-foreground">Aucun</span>
+                              <span className="text-xs text-muted-foreground">{t('crm.tags.none')}</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -762,7 +749,7 @@ export default function Prospects() {
                       <TableCell>
                         <Link to={`/prospects/${prospect.id}`}>
                           <Button variant="ghost" size="sm">
-                            Ouvrir
+                            {t('prospects.table.open')}
                           </Button>
                         </Link>
                       </TableCell>
@@ -776,7 +763,7 @@ export default function Prospects() {
             {prospects.length > 0 && (
               <div className="flex items-center justify-between pt-4">
                 <div className="flex items-center gap-2">
-                  <Label>Afficher:</Label>
+                  <Label>{t('prospects.pagination.show')}</Label>
                   <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(parseInt(value))}>
                     <SelectTrigger className="w-20">
                       <SelectValue />
@@ -794,17 +781,17 @@ export default function Prospects() {
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                   >
-                    Précédent
+                    {t('prospects.pagination.previous')}
                   </Button>
                   <span className="text-sm text-muted-foreground">
-                    Page {currentPage}
+                    {t('prospects.pagination.page', { n: currentPage })}
                   </span>
                   <Button
                     variant="outline"
                     onClick={() => setCurrentPage(prev => prev + 1)}
                     disabled={prospects.length < pageSize}
                   >
-                    Suivant
+                    {t('prospects.pagination.next')}
                   </Button>
                 </div>
               </div>
