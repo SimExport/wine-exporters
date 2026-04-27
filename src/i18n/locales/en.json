@@ -803,5 +803,171 @@
       "warningBody": "Our team prepares your campaign within 72h. You will be notified upon validation. Then, within 7 days, interested importers and buyers will appear in your Prospects and Pipeline spaces.",
       "backToStep1": "Back to step 1"
     }
+  },
+  "crm": {
+    "tags": {
+      "hot": "Hot",
+      "warm": "Warm",
+      "cold": "Cold",
+      "none": "None",
+      "addTag": "+ Tag"
+    },
+    "inactivity": {
+      "none": "No activity",
+      "today": "Today",
+      "daysAgo": "{{count}}d ago"
+    },
+    "statuses": {
+      "new": "New",
+      "samples_requested": "Samples requested",
+      "samples_sent": "Samples sent",
+      "received": "Received",
+      "tasted": "Tasted",
+      "negotiation": "Negotiation",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "kanbanStatuses": {
+      "new": "To classify",
+      "samples_requested": "Samples to send",
+      "samples_sent": "Samples sent",
+      "received": "Samples received",
+      "tasted": "Samples tasted",
+      "negotiation": "Negotiation",
+      "won": "Order",
+      "lost": "Rejected"
+    },
+    "actions": {
+      "price_list": "Price list",
+      "samples": "Samples",
+      "video_call": "Video call",
+      "tech_sheets": "Tech sheets",
+      "other": "Other"
+    },
+    "toasts": {
+      "loadError": {
+        "title": "Error",
+        "description": "Unable to load data"
+      },
+      "statusUpdated": {
+        "title": "Status updated",
+        "description": "The prospect has been moved"
+      },
+      "statusError": {
+        "title": "Error",
+        "description": "Unable to update status"
+      },
+      "duplicate": {
+        "title": "Prospect already exists",
+        "description": "A prospect with this email already exists for this campaign"
+      },
+      "created": {
+        "title": "Prospect created",
+        "description": "The prospect has been added successfully"
+      },
+      "createError": {
+        "title": "Error",
+        "description": "Unable to create prospect"
+      }
+    },
+    "createDialog": {
+      "title": "Create a prospect",
+      "campaign": "Campaign *",
+      "campaignPlaceholder": "Select a campaign",
+      "country": "Country",
+      "countryPlaceholder": "France",
+      "firstName": "First name *",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last name *",
+      "lastNamePlaceholder": "Smith",
+      "company": "Company *",
+      "companyPlaceholder": "Martin Cellars",
+      "email": "Email *",
+      "emailPlaceholder": "john@martin-cellars.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 555 123 4567",
+      "website": "Website",
+      "websitePlaceholder": "https://example.com",
+      "address": "Address",
+      "addressPlaceholder": "123 Commerce St.",
+      "city": "City",
+      "cityPlaceholder": "Paris",
+      "postal": "Postal code",
+      "postalPlaceholder": "75001",
+      "requestedActions": "Requested actions",
+      "requestedSamples": "Requested samples",
+      "noCuvees": "No wines in your profile",
+      "samplesRequestedSnippet": "Samples requested: {{list}}",
+      "cancel": "Cancel",
+      "create": "Create prospect",
+      "createShort": "Create"
+    }
+  },
+  "pipeline": {
+    "title": "Pipeline",
+    "subtitle": "Kanban view of your prospects",
+    "listView": "List view",
+    "addProspect": "Add a prospect",
+    "noProspects": "No prospects",
+    "noName": "Unnamed"
+  },
+  "prospects": {
+    "title": "Prospects",
+    "subtitle": "Buyers interested following your campaigns",
+    "slaBanner": "Prospects are added by an admin within 7 days after sending.",
+    "filters": {
+      "campaign": "Campaign",
+      "allCampaigns": "All campaigns",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "period": "Period",
+      "period7": "Last 7 days",
+      "period30": "Last 30 days",
+      "period90": "Last 90 days",
+      "search": "Search",
+      "searchPlaceholder": "Name, company, email..."
+    },
+    "exportCSV": "Export CSV",
+    "kanbanView": "Kanban view",
+    "addProspect": "Add a prospect",
+    "csv": {
+      "headers": [
+        "Date",
+        "Campaign",
+        "Company",
+        "Contact",
+        "Country",
+        "Requested actions",
+        "Status"
+      ],
+      "filename": "prospects-{{date}}.csv"
+    },
+    "empty": {
+      "filteredTitle": "No results",
+      "filteredDesc": "No prospect matches your current filters.",
+      "clearFilters": "Clear filters",
+      "noneTitle": "Your first prospects will appear here",
+      "noneDesc": "Launch a campaign to start receiving replies from importers.",
+      "viewCampaigns": "View my campaigns"
+    },
+    "table": {
+      "dateAdded": "Added on",
+      "campaign": "Campaign",
+      "company": "Company",
+      "contact": "Contact",
+      "country": "Country",
+      "actions": "Requested actions",
+      "status": "Status",
+      "tag": "Tag",
+      "reminder": "Reminder",
+      "lastUpdate": "Last update",
+      "open": "Open"
+    },
+    "pagination": {
+      "show": "Show:",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{n}}"
+    }
   }
 }

@@ -803,5 +803,171 @@
       "warningBody": "Notre équipe prépare votre campagne sous 72h. Vous serez notifié(e) à la validation. Par la suite, sous 7 jours, les importateurs et acheteurs intéressés apparaîtront dans vos espaces Prospects et Pipeline.",
       "backToStep1": "Retour à l'étape 1"
     }
+  },
+  "crm": {
+    "tags": {
+      "hot": "Chaud",
+      "warm": "Tiède",
+      "cold": "Froid",
+      "none": "Aucun",
+      "addTag": "+ Tag"
+    },
+    "inactivity": {
+      "none": "Aucune activité",
+      "today": "Aujourd'hui",
+      "daysAgo": "Il y a {{count}}j"
+    },
+    "statuses": {
+      "new": "Nouveau",
+      "samples_requested": "Échantillons demandés",
+      "samples_sent": "Échantillons envoyés",
+      "received": "Reçu",
+      "tasted": "Dégusté",
+      "negotiation": "Négociation",
+      "won": "Gagné",
+      "lost": "Perdu"
+    },
+    "kanbanStatuses": {
+      "new": "À classer",
+      "samples_requested": "Échantillons à envoyer",
+      "samples_sent": "Échantillons envoyés",
+      "received": "Échantillons réceptionnés",
+      "tasted": "Échantillons dégustés",
+      "negotiation": "Négociation",
+      "won": "Commande",
+      "lost": "Refus"
+    },
+    "actions": {
+      "price_list": "Liste de prix",
+      "samples": "Échantillons",
+      "video_call": "Visioconférence",
+      "tech_sheets": "Fiches techniques",
+      "other": "Autre"
+    },
+    "toasts": {
+      "loadError": {
+        "title": "Erreur",
+        "description": "Impossible de charger les données"
+      },
+      "statusUpdated": {
+        "title": "Statut mis à jour",
+        "description": "Le prospect a été déplacé"
+      },
+      "statusError": {
+        "title": "Erreur",
+        "description": "Impossible de mettre à jour le statut"
+      },
+      "duplicate": {
+        "title": "Prospect existant",
+        "description": "Un prospect avec cet email existe déjà pour cette campagne"
+      },
+      "created": {
+        "title": "Prospect créé",
+        "description": "Le prospect a été ajouté avec succès"
+      },
+      "createError": {
+        "title": "Erreur",
+        "description": "Impossible de créer le prospect"
+      }
+    },
+    "createDialog": {
+      "title": "Créer un prospect",
+      "campaign": "Campagne *",
+      "campaignPlaceholder": "Sélectionner une campagne",
+      "country": "Pays",
+      "countryPlaceholder": "France",
+      "firstName": "Prénom *",
+      "firstNamePlaceholder": "Jean",
+      "lastName": "Nom *",
+      "lastNamePlaceholder": "Dupont",
+      "company": "Société *",
+      "companyPlaceholder": "Caves Martin",
+      "email": "Email *",
+      "emailPlaceholder": "jean@caves-martin.fr",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+33 6 12 34 56 78",
+      "website": "Site web",
+      "websitePlaceholder": "https://example.com",
+      "address": "Adresse",
+      "addressPlaceholder": "123 rue du Commerce",
+      "city": "Ville",
+      "cityPlaceholder": "Paris",
+      "postal": "Code postal",
+      "postalPlaceholder": "75001",
+      "requestedActions": "Actions demandées",
+      "requestedSamples": "Échantillons demandés",
+      "noCuvees": "Aucune cuvée dans votre profil",
+      "samplesRequestedSnippet": "Échantillons demandés: {{list}}",
+      "cancel": "Annuler",
+      "create": "Créer le prospect",
+      "createShort": "Créer"
+    }
+  },
+  "pipeline": {
+    "title": "Pipeline",
+    "subtitle": "Vue Kanban de vos prospects",
+    "listView": "Vue liste",
+    "addProspect": "Ajouter un prospect",
+    "noProspects": "Aucun prospect",
+    "noName": "Sans nom"
+  },
+  "prospects": {
+    "title": "Prospects",
+    "subtitle": "Acheteurs intéressés suite à vos campagnes",
+    "slaBanner": "Les prospects sont ajoutés par un admin sous 7 jours après l'envoi.",
+    "filters": {
+      "campaign": "Campagne",
+      "allCampaigns": "Toutes les campagnes",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts",
+      "period": "Période",
+      "period7": "7 derniers jours",
+      "period30": "30 derniers jours",
+      "period90": "90 derniers jours",
+      "search": "Recherche",
+      "searchPlaceholder": "Nom, société, email..."
+    },
+    "exportCSV": "Exporter CSV",
+    "kanbanView": "Vue Kanban",
+    "addProspect": "Ajouter un prospect",
+    "csv": {
+      "headers": [
+        "Date",
+        "Campagne",
+        "Société",
+        "Contact",
+        "Pays",
+        "Actions demandées",
+        "Statut"
+      ],
+      "filename": "prospects-{{date}}.csv"
+    },
+    "empty": {
+      "filteredTitle": "Aucun résultat",
+      "filteredDesc": "Aucun prospect ne correspond à vos filtres actuels.",
+      "clearFilters": "Effacer les filtres",
+      "noneTitle": "Vos premiers prospects apparaîtront ici",
+      "noneDesc": "Lancez une campagne pour commencer à recevoir des réponses d'importateurs.",
+      "viewCampaigns": "Voir mes campagnes"
+    },
+    "table": {
+      "dateAdded": "Date ajout",
+      "campaign": "Campagne",
+      "company": "Société",
+      "contact": "Contact",
+      "country": "Pays",
+      "actions": "Actions demandées",
+      "status": "Statut",
+      "tag": "Tag",
+      "reminder": "Rappel",
+      "lastUpdate": "Dernière MAJ",
+      "open": "Ouvrir"
+    },
+    "pagination": {
+      "show": "Afficher:",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "page": "Page {{n}}"
+    }
   }
 }
