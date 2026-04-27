@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import pillarNetworkImg from "@/assets/pillar-network.png";
 import pillarContactImg from "@/assets/pillar-contact.png";
@@ -53,95 +54,18 @@ const FadeIn = ({
 
 };
 
-/* ─── Data ─── */
-const painPoints = [
-{
-  icon: Search,
-  title: "La recherche interminable",
-  text: "Trouver les bons contacts prend des heures, et les salons coûtent une fortune pour un ROI incertain."
-},
-{
-  icon: MailQuestion,
-  title: "Le silence radio",
-  text: "Vos emails de prospection tombent dans les spams ou sont noyés dans la masse. Personne ne vous répond."
-},
-{
-  icon: FileSpreadsheet,
-  title: "Le suivi chaotique",
-  text: "Le suivi des échantillons et des relances finit toujours par se perdre dans un fichier Excel interminable."
-}];
+/* ─── Static config (icons + visuals) ─── */
+const painPointsConfig = [
+  { id: "search", icon: Search },
+  { id: "silence", icon: MailQuestion },
+  { id: "tracking", icon: FileSpreadsheet },
+] as const;
 
-
-const pillars = [
-{
-  step: "ÉTAPE 1",
-  title: "Ne cherchez plus les acheteurs. Trouvez-les.",
-  text: "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
-  bullets: [
-  { icon: Filter, text: "Filtrage précis par marché et par type d'acheteur." },
-  {
-    icon: Users,
-    text: "Recherche sur-mesure : Vous visez un marché précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vos vins afin de vous livrer une sélection d'importateurs pertinents."
-  }],
-
-  visual: pillarNetworkImg
-},
-{
-  step: "ÉTAPE 2",
-  title: "Des campagnes qui génèrent enfin des réponses.",
-  text: "Fini le démarchage à l'aveugle. Nous vous aidons à capter l'attention des décideurs grâce à une approche ciblée.",
-  bullets: [
-  { icon: Send, text: "Outil de création de campagnes intégré." },
-  {
-    icon: Eye,
-    text: "Campagne Mensuelle gérée : Vous validez, nous envoyons. Nous optimisons la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams."
-  }],
-
-  visual: pillarContactImg
-},
-{
-  step: "ÉTAPE 3",
-  title: "Transformez vos prospects en clients.",
-  text: "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
-  bullets: [
-  { icon: Kanban, text: "Pipeline visuel (CRM Kanban) dédié à la vente de vins à l'export." },
-  { icon: Package, text: "Suivi des envois d'échantillons." },
-  { icon: Clock, text: "Historique centralisé pour ne jamais oublier une relance." }],
-
-  visual: pillarSuiviImg
-}];
-
-
-const inclusions = [
-"Accès illimité aux bases de données",
-"1 recherche sur-mesure / mois",
-"1 campagne de prospection / mois",
-"Accès complet au CRM",
-"Support prioritaire"];
-
-
-const faqs = [
-{
-  q: "Qu'est ce que la recherche sur-mesure ?",
-  a: "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine."
-},
-{
-  q: "Puis-je lancer plus d'une campagne par mois ?",
-  a: "L'abonnement inclut l'envoi géré d'une campagne qualifiée pour garantir la qualité. Pour des besoins supérieurs, contactez-nous."
-},
-{
-  q: "Y a-t-il un engagement ?",
-  a: "Oui, 3 mois d'engagement. Ensuite l'abonnement à 199 € mensuel et sans engagement."
-},
-{
-  q: "Combien de temps pour recevoir une première commande ?",
-  a: "En moyenne 3 mois en Europe, 6 à 12 mois pour le grand export."
-},
-{
-  q: "Qui envoie les campagnes ?",
-  a: "Notre équipe s'occupe de l'envoi et de l'optimisation de la délivrabilité. Vous validez, nous envoyons."
-}];
-
+const pillarsConfig = [
+  { id: "step1", visual: pillarNetworkImg, bulletIcons: [Filter, Users], bulletKeys: ["bullet1", "bullet2"] },
+  { id: "step2", visual: pillarContactImg, bulletIcons: [Send, Eye], bulletKeys: ["bullet1", "bullet2"] },
+  { id: "step3", visual: pillarSuiviImg, bulletIcons: [Kanban, Package, Clock], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
+] as const;
 
 /* ─── Pillar visual ─── */
 const PillarVisual = ({ src }: {src: string;}) =>
@@ -177,6 +101,7 @@ const testimonials = [
 ];
 
 const TestimonialsGrid = () => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const visible = expanded ? testimonials : testimonials.slice(0, 6);
 
@@ -197,7 +122,7 @@ const TestimonialsGrid = () => {
       {!expanded && (
         <div className="flex justify-center mt-8">
           <Button variant="outline" onClick={() => setExpanded(true)}>
-            Voir tous les résultats ({testimonials.length})
+            {t("landing.testimonials.viewAll", { count: testimonials.length })}
           </Button>
         </div>
       )}
@@ -208,6 +133,14 @@ const TestimonialsGrid = () => {
 
 /* ─── Page ─── */
 const LandingPage = () => {
+  const { t } = useTranslation();
+  const inclusions = t("landing.pricing.inclusions", { returnObjects: true }) as string[];
+  const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
+  const heroStats = [
+    { value: "+100", label: t("landing.hero.stats.domains") },
+    { value: "+260", label: t("landing.hero.stats.importers") },
+    { value: "+24", label: t("landing.hero.stats.markets") },
+  ];
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ── Header ── */}
@@ -225,10 +158,10 @@ const LandingPage = () => {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Button variant="ghost" asChild>
-              <Link to="/auth">Se connecter</Link>
+              <Link to="/auth">{t("landing.nav.signIn")}</Link>
             </Button>
             <Button asChild>
-              <Link to="/auth">Démarrer</Link>
+              <Link to="/auth">{t("landing.nav.start")}</Link>
             </Button>
           </div>
         </div>
@@ -247,30 +180,25 @@ const LandingPage = () => {
         <div className="relative max-w-3xl mx-auto px-6 text-center py-24">
           <FadeIn>
             <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5">
-              🍷 La plateforme tout-en-un pour les domaines viticoles      
+              {t("landing.hero.badge")}
             </Badge>
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6">
-              Trouvez vos futurs importateurs,{" "}
+              {t("landing.hero.titleLead")}{" "}
               <span className="text-primary underline decoration-primary/40 underline-offset-4">
-développez vos ventes export.
+                {t("landing.hero.titleHighlight")}
               </span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">La première plateforme de prospection tout-en-un. 
-Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.
-
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed whitespace-pre-line">
+              {t("landing.hero.subtitle")}
             </p>
           </FadeIn>
           <FadeIn delay={0.25}>
             <div className="flex items-center justify-center gap-8 sm:gap-12 border-t border-border pt-8 mb-10">
-              {[
-                { value: "+100", label: "domaines accompagnés" },
-                { value: "+260", label: "importateurs trouvés" },
-                { value: "+24", label: "marchés ouverts" },
-              ].map((stat) => (
+              {heroStats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-2xl sm:text-3xl font-extrabold text-primary">{stat.value}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
@@ -282,12 +210,12 @@ Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez v
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild className="text-lg px-8">
                 <Link to="/auth">
-                  Démarrer ma prospection
+                  {t("landing.hero.ctaPrimary")}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                <a href="#method">Découvrir la méthode</a>
+                <a href="#method">{t("landing.hero.ctaSecondary")}</a>
               </Button>
             </div>
           </FadeIn>
@@ -299,18 +227,18 @@ Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez v
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-14">
-              L'export ne devrait pas être un parcours du combattant.
+              {t("landing.pain.title")}
             </h2>
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-8">
-            {painPoints.map((p, i) => <FadeIn key={p.title} delay={i * 0.1}>
+            {painPointsConfig.map((p, i) => <FadeIn key={p.id} delay={i * 0.1}>
                 <Card className="h-full border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                   <CardContent className="p-8">
                     <div className="h-12 w-12 rounded-xl bg-destructive/10 flex items-center justify-center mb-5">
                       <p.icon className="h-6 w-6 text-destructive" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">{p.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{p.text}</p>
+                    <h3 className="text-lg font-semibold mb-2">{t(`landing.pain.items.${p.id}.title`)}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{t(`landing.pain.items.${p.id}.text`)}</p>
                   </CardContent>
                 </Card>
               </FadeIn>
@@ -324,15 +252,15 @@ Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez v
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-20">
-              Notre méthode en 3 étapes pour développer vos marchés.
+              {t("landing.method.title")}
             </h2>
           </FadeIn>
 
           <div className="space-y-28">
-            {pillars.map((p, i) => {
+            {pillarsConfig.map((p, i) => {
               const reversed = i % 2 === 1;
               return (
-                <FadeIn key={p.step}>
+                <FadeIn key={p.id}>
                   <div
                     className={`flex flex-col ${
                     reversed ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`
@@ -341,21 +269,25 @@ Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez v
                     {/* Text */}
                     <div className="flex-1 space-y-5">
                       <Badge variant="outline" className="text-xs tracking-widest font-semibold">
-                        {p.step}
+                        {t(`landing.method.${p.id}.step`)}
                       </Badge>
                       <h3 className="text-2xl sm:text-3xl font-bold leading-tight">
-                        {p.title}
+                        {t(`landing.method.${p.id}.title`)}
                       </h3>
                       <p className="text-muted-foreground text-lg leading-relaxed">
-                        {p.text}
+                        {t(`landing.method.${p.id}.text`)}
                       </p>
                       <ul className="space-y-4 pt-2">
-                        {p.bullets.map((b) =>
-                        <li key={b.text} className="flex items-start gap-3">
-                            <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
-                            <span className="leading-relaxed">{b.text}</span>
-                          </li>
-                        )}
+                        {p.bulletKeys.map((bk, bi) => {
+                          const BIcon = p.bulletIcons[bi];
+                          const text = t(`landing.method.${p.id}.${bk}`);
+                          return (
+                            <li key={bk} className="flex items-start gap-3">
+                              <CheckCircle2 className="h-5 w-5 text-primary mt-1 shrink-0" />
+                              <span className="leading-relaxed">{text}</span>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                     {/* Visual */}
@@ -375,14 +307,12 @@ Accédez à des bases de données qualifiées, envoyez vos campagnes et suivez v
         <div className="max-w-3xl mx-auto px-6 text-center">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Une seule plateforme. Zéro friction. Et de l'humain.
+              {t("landing.synthesis.title")}
             </h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="text-lg leading-relaxed opacity-90">
-              Notre plateforme remplace vos fichiers Excel, vos outils d'emailing complexes et vos recherches Google. 
-
-Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et chaque campagne de prospection, notre équipe d'experts s'active pour vendre vos vins.            
+            <p className="text-lg leading-relaxed opacity-90 whitespace-pre-line">
+              {t("landing.synthesis.text")}
             </p>
           </FadeIn>
         </div>
@@ -393,10 +323,10 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-3">
-              Ils nous ont fait confiance. Ils ont obtenu des commandes.
+              {t("landing.testimonials.title")}
             </h2>
             <p className="text-center text-muted-foreground text-lg mb-14">
-              Ces domaines ont réalisé une Mission Performance Export avec ExportVins.
+              {t("landing.testimonials.subtitle")}
             </p>
           </FadeIn>
           <TestimonialsGrid />
@@ -408,10 +338,10 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
         <div className="max-w-2xl mx-auto px-6">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-              Un investissement rentabilisé dès la première palette.
+              {t("landing.pricing.title")}
             </h2>
             <p className="text-center text-muted-foreground text-lg mb-14">
-              Tout est inclus. Pas de coûts cachés.
+              {t("landing.pricing.subtitle")}
             </p>
           </FadeIn>
 
@@ -419,14 +349,12 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
             <Card className="border-2 border-primary shadow-xl shadow-primary/10">
               <CardContent className="p-10">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold mb-2">WineExporters</h3>
+                  <h3 className="text-2xl font-bold mb-2">{t("landing.pricing.planName")}</h3>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-5xl font-extrabold text-primary">199€</span>
-                    <span className="text-muted-foreground text-lg">HT / mois</span>
+                    <span className="text-muted-foreground text-lg">{t("landing.pricing.priceSuffix")}</span>
                   </div>
-                  <Badge variant="secondary" className="mt-3">engagement 3 mois
-
-                  </Badge>
+                  <Badge variant="secondary" className="mt-3">{t("landing.pricing.commitment")}</Badge>
                 </div>
                 <ul className="space-y-4 mb-10">
                   {inclusions.map((item) => <li key={item} className="flex items-start gap-3">
@@ -435,10 +363,10 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
                     </li>)}
                 </ul>
                 <Button size="lg" className="w-full text-lg" asChild>
-                  <Link to="/auth">Démarrer maintenant</Link>
+                  <Link to="/auth">{t("landing.pricing.ctaStart")}</Link>
                 </Button>
                 <p className="text-sm text-muted-foreground text-center mt-4">
-                  Accès fondateur disponible — contactez-nous pour bénéficier du tarif préférentiel.
+                  {t("landing.pricing.founders")}
                 </p>
               </CardContent>
             </Card>
@@ -451,7 +379,7 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
         <div className="max-w-2xl mx-auto px-6">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
-              Questions fréquentes
+              {t("landing.faq.title")}
             </h2>
           </FadeIn>
           <FadeIn delay={0.1}>
@@ -480,11 +408,11 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
         <div className="max-w-2xl mx-auto px-6 text-center">
           <FadeIn>
             <h2 className="text-3xl sm:text-4xl font-bold mb-8">
-              Prêt à conquérir de nouveaux marchés ?
+              {t("landing.finalCta.title")}
             </h2>
             <Button size="lg" asChild className="text-lg px-10">
               <Link to="/auth">
-                Démarrer maintenant
+                {t("landing.finalCta.button")}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -496,14 +424,14 @@ Surtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et 
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-2">
             <Grape className="h-4 w-4 text-primary" />
-            ExportVins © 2026 — L'outil de prospection des vignerons.
+            {t("landing.footer.copyright")}
           </span>
           <div className="flex gap-6">
             <a href="mailto:contact@exportvins.com" className="hover:text-foreground transition-colors">
-              Contact
+              {t("landing.footer.contact")}
             </a>
             <a href="#" className="hover:text-foreground transition-colors">
-              Mentions légales
+              {t("landing.footer.legal")}
             </a>
           </div>
         </div>
