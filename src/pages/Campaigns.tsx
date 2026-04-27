@@ -19,9 +19,8 @@ import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, C
 import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { fr, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
+import { formatDate, formatCurrency, formatTime } from '@/lib/format';
 interface Document {
   id: string;
   title: string;
@@ -102,7 +101,6 @@ const Campaigns = () => {
   } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -315,7 +313,7 @@ const Campaigns = () => {
           sendAsName: data.domain_name || '',
           name: `${i18n.language.startsWith('en') ? 'Campaign' : 'Campagne'} - ${new Date().toLocaleDateString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
           })}`
         });
       }
@@ -685,9 +683,7 @@ const Campaigns = () => {
         
         {availableWines.length > 0 ? <div className="space-y-3 mt-4">
             {availableWines.map(wine => {
-          const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${wine.exw_price_eur.toLocaleString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
-            minimumFractionDigits: 2
-          })}€${wine.vintages?.length ? ` - ${Math.max(...wine.vintages)}` : ''}`;
+          const displayText = `${wine.name}${wine.appellation ? ` - ${wine.appellation}` : ''} - ${wine.color} - ${formatCurrency(wine.exw_price_eur)}${wine.vintages?.length ? ` - ${Math.max(...wine.vintages)}` : ''}`;
           return <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/30">
                   <Checkbox id={wine.id} checked={campaignData.selectedWines.includes(wine.id)} onCheckedChange={checked => {
               const newSelectedWines = checked ? [...campaignData.selectedWines, wine.id] : campaignData.selectedWines.filter(id => id !== wine.id);
@@ -1005,9 +1001,7 @@ ${campaignData.sendAsName}`} />
                         )}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(campaign.created_at), 'dd/MM/yyyy', {
-                    locale: dateLocale
-                  })}
+                        {formatDate(campaign.created_at)}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
@@ -1049,7 +1043,7 @@ ${campaignData.sendAsName}`} />
 
           <div className="flex items-center space-x-4">
             {lastSaved && <Badge variant="outline" className="text-green-600">
-                {t('campaigns.wizard.savedAt', { time: lastSaved.toLocaleTimeString() })}
+                {t('campaigns.wizard.savedAt', { time: formatTime(lastSaved) })}
               </Badge>}
             {saving && <Badge variant="outline">{t('campaigns.wizard.saving')}</Badge>}
             
