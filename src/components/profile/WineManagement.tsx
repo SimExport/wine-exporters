@@ -36,8 +36,7 @@ const WINE_COLORS = ['Rouge', 'Blanc', 'Rosé', 'Pétillant'];
 const WineManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t, i18n } = useTranslation('common');
-  const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
+  const { t } = useTranslation('common');
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
