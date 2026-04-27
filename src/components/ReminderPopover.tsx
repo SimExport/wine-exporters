@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { addDays, format, isPast, isToday } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { fr, enUS } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
 import { Bell, BellOff, CalendarClock, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -27,6 +28,8 @@ function getReminderStatus(remindAt?: string | null): 'overdue' | 'today' | 'upc
 }
 
 export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size = 'sm' }: ReminderPopoverProps) {
+  const { t, i18n } = useTranslation()
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(remindAt ? new Date(remindAt) : undefined)
@@ -48,14 +51,14 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
 
       onUpdate?.(selectedDate ? selectedDate.toISOString() : null, selectedNote || null)
       toast({
-        title: selectedDate ? 'Rappel enregistré' : 'Rappel supprimé',
+        title: selectedDate ? t('reminders.savedTitle') : t('reminders.removedTitle'),
         description: selectedDate
-          ? `Relance prévue le ${format(selectedDate, 'dd MMMM yyyy', { locale: fr })}`
-          : 'Le rappel a été retiré',
+          ? t('reminders.savedDescription', { date: format(selectedDate, 'dd MMMM yyyy', { locale: dateLocale }) })
+          : t('reminders.removedDescription'),
       })
       setOpen(false)
     } catch {
-      toast({ title: 'Erreur', description: 'Impossible de sauvegarder le rappel', variant: 'destructive' })
+      toast({ title: t('reminders.errorTitle'), description: t('reminders.errorDescription'), variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -87,7 +90,9 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
         <PopoverTrigger asChild>
           <button
             className={cn('focus:outline-none transition-opacity', iconClass)}
-            title={remindAt ? `Rappel : ${format(new Date(remindAt), 'dd/MM/yyyy', { locale: fr })}` : 'Ajouter un rappel'}
+            title={remindAt
+              ? t('reminders.tooltipSet', { date: format(new Date(remindAt), 'dd/MM/yyyy', { locale: dateLocale }) })
+              : t('reminders.tooltipAdd')}
           >
             <Bell className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
           </button>
@@ -96,15 +101,15 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <CalendarClock className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-sm">Définir un rappel</span>
+              <span className="font-semibold text-sm">{t('reminders.title')}</span>
             </div>
 
             {/* Quick buttons */}
             <div className="flex gap-2">
               {[
-                { label: '+3j', days: 3 },
-                { label: '+7j', days: 7 },
-                { label: '+14j', days: 14 },
+                { label: t('reminders.quick3'), days: 3 },
+                { label: t('reminders.quick7'), days: 7 },
+                { label: t('reminders.quick14'), days: 14 },
               ].map(({ label, days }) => (
                 <Button
                   key={days}
@@ -127,12 +132,12 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
               disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
               initialFocus
               className={cn('p-0 pointer-events-auto')}
-              locale={fr}
+              locale={dateLocale}
             />
 
             {/* Note */}
             <Textarea
-              placeholder="Note de relance (optionnel)…"
+              placeholder={t('reminders.notePlaceholder')}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="text-sm resize-none"
@@ -146,7 +151,7 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
                 onClick={() => date && handleSave(date, note)}
                 disabled={!date || saving}
               >
-                Enregistrer
+                {t('reminders.save')}
               </Button>
               {remindAt && (
                 <Button variant="ghost" size="sm" onClick={handleClear} disabled={saving}>
@@ -168,7 +173,7 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
           })}
         >
           {status === 'overdue' && '⚠ '}
-          {format(new Date(remindAt), 'dd/MM', { locale: fr })}
+          {format(new Date(remindAt), 'dd/MM', { locale: dateLocale })}
           <button onClick={handleClear} className="opacity-60 hover:opacity-100">
             <X className="w-2.5 h-2.5" />
           </button>
