@@ -696,5 +696,112 @@
       "errorsCount": "{{count}} erreur(s) bloquante(s):",
       "fix": "Corriger"
     }
+  },
+  "createCampaign": {
+    "back": "Retour",
+    "title": "Créer une campagne",
+    "saveDraft": "Enregistrer brouillon",
+    "submit": "Soumettre pour validation",
+    "continents": {
+      "europe": "Europe",
+      "northAmerica": "Amérique du Nord",
+      "southAmerica": "Amérique du Sud",
+      "asia": "Asie",
+      "oceaniaAfrica": "Océanie & Afrique"
+    },
+    "toasts": {
+      "maxReached": {
+        "title": "Maximum atteint",
+        "description": "Vous pouvez sélectionner {{max}} marchés maximum."
+      },
+      "nameRequired": {
+        "title": "Nom de campagne requis",
+        "description": "Veuillez saisir un nom pour votre campagne"
+      },
+      "marketsInsufficient": {
+        "title": "Marchés insuffisants",
+        "description": "Veuillez sélectionner au moins {{min}} marchés à cibler."
+      },
+      "winesRequired": {
+        "title": "Vins requis",
+        "description": "Veuillez sélectionner au moins une cuvée"
+      },
+      "presentationRequired": {
+        "title": "Présentation du domaine requise",
+        "description": "Veuillez sélectionner une présentation du domaine"
+      },
+      "pricelistRequired": {
+        "title": "Liste des prix requise",
+        "description": "Veuillez sélectionner une liste des prix export"
+      },
+      "draftNameRequired": {
+        "title": "Nom requis",
+        "description": "Veuillez saisir un nom pour sauvegarder"
+      },
+      "draftSaved": {
+        "title": "Brouillon sauvegardé",
+        "description": "Votre campagne a été sauvegardée en brouillon"
+      },
+      "draftError": {
+        "title": "Erreur",
+        "description": "Impossible de sauvegarder le brouillon"
+      },
+      "subscriptionRequired": {
+        "title": "Abonnement requis",
+        "description": "Vous devez avoir un abonnement actif pour lancer une campagne."
+      },
+      "creditExhausted": {
+        "title": "Crédit de campagne épuisé"
+      },
+      "creditExhaustedShort": {
+        "title": "Crédit épuisé"
+      },
+      "submitted": {
+        "title": "Campagne soumise",
+        "description": "En attente de validation (≤72h)"
+      },
+      "submitError": {
+        "title": "Erreur",
+        "description": "Impossible de soumettre la campagne"
+      }
+    },
+    "step1": {
+      "title": "Étape 1 — Marchés & Vins",
+      "description": "Sélectionnez les marchés à cibler, vos cuvées et les documents liés à la campagne",
+      "campaignName": "Nom de la campagne *",
+      "campaignNamePlaceholder": "Ex: Lancement Millésime 2023",
+      "marketsLabel": "Marchés à cibler *",
+      "marketsCount": "({{count}}/{{max}} — minimum {{min}})",
+      "infoBlock": "Sélectionnez entre {{min}} et {{max}} marchés sur lesquels vous souhaitez prospecter. Notre équipe préparera votre campagne en ciblant les acheteurs pertinents sur ces marchés.",
+      "winesLabel": "Sélection des cuvées *",
+      "noWines": "Aucun vin actif trouvé. Veuillez d'abord ajouter des vins dans votre profil.",
+      "wineDetails": "{{color}} - {{appellation}} - {{price}}€ EXW",
+      "documentsRequired": "Documents requis",
+      "presentationLabel": "Présentation du domaine *",
+      "presentationPlaceholder": "Sélectionner une présentation",
+      "pricelistLabel": "Liste des prix export *",
+      "pricelistPlaceholder": "Sélectionner une liste de prix",
+      "techDocsLabel": "Fiches techniques (facultatif)",
+      "techDocsPlaceholder": "Sélectionner une fiche technique",
+      "clientNoteLabel": "Note à l'équipe (optionnel)",
+      "clientNotePlaceholder": "Objectifs, précisions, demandes particulières...",
+      "continueBtn": "Continuer vers le récapitulatif"
+    },
+    "step2": {
+      "title": "Étape 2 — Récapitulatif & Soumission",
+      "description": "Vérifiez les informations avant soumission",
+      "campaignNameLabel": "Nom de la campagne",
+      "marketsLabel": "Marchés ciblés ({{count}})",
+      "winesLabel": "Cuvées sélectionnées ({{count}})",
+      "documentsLabel": "Documents",
+      "presentationItem": "• Présentation: {{title}}",
+      "pricelistItem": "• Liste des prix: {{title}}",
+      "techDocsItem": "• Fiches techniques: {{titles}}",
+      "techLinkItem": "• Lien fiches techniques: {{link}}",
+      "clientNoteLabel": "Note à l'équipe",
+      "warningTitle": "À la soumission, votre campagne passe en attente de validation.",
+      "warningBody": "Notre équipe prépare votre campagne sous 72h. Vous serez notifié(e) à la validation. Par la suite, sous 7 jours, les importateurs et acheteurs intéressés apparaîtront dans vos espaces Prospects et Pipeline.",
+      "backToStep1": "Retour à l'étape 1"
+    }
   }
 }
