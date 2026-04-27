@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface DomainProfileData {
 }
 
 const DomainProfile = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,12 @@ const DomainProfile = () => {
     cuvees: []
   });
 
-  const wineColorOptions = ['Rouge', 'Blanc', 'Rosé', 'Pétillant'];
+  const wineColorOptions: { value: string; labelKey: string }[] = [
+    { value: 'Rouge', labelKey: 'domainProfile.production.colors.red' },
+    { value: 'Blanc', labelKey: 'domainProfile.production.colors.white' },
+    { value: 'Rosé', labelKey: 'domainProfile.production.colors.rose' },
+    { value: 'Pétillant', labelKey: 'domainProfile.production.colors.sparkling' },
+  ];
 
   useEffect(() => {
     if (user) {
@@ -78,8 +85,8 @@ const DomainProfile = () => {
     } catch (error) {
       console.error('Error loading profile:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les informations du profil.",
+        title: t('common.error'),
+        description: t('domainProfile.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -102,14 +109,14 @@ const DomainProfile = () => {
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Les informations de votre domaine ont été sauvegardées."
+        title: t('common.success'),
+        description: t('domainProfile.saveSuccess')
       });
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les informations.",
+        title: t('common.error'),
+        description: t('domainProfile.saveError'),
         variant: "destructive"
       });
     } finally {
@@ -147,60 +154,60 @@ const DomainProfile = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Configuration du Domaine</h1>
+            <h1 className="text-3xl font-bold text-foreground">{t('domainProfile.title')}</h1>
             <p className="text-muted-foreground mt-2">
-              Renseignez les informations de votre domaine viticole pour personnaliser votre profil.
+              {t('domainProfile.subtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Informations générales</CardTitle>
+                <CardTitle>{t('domainProfile.general.title')}</CardTitle>
                 <CardDescription>
-                  Les informations principales de votre domaine
+                  {t('domainProfile.general.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="domain_name">Nom du domaine</Label>
+                    <Label htmlFor="domain_name">{t('domainProfile.general.domainName')}</Label>
                     <Input
                       id="domain_name"
                       value={formData.domain_name}
                       onChange={(e) => setFormData(prev => ({ ...prev, domain_name: e.target.value }))}
-                      placeholder="Domaine de la Vallée"
+                      placeholder={t('domainProfile.general.domainNamePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location">Localisation</Label>
+                    <Label htmlFor="location">{t('domainProfile.general.location')}</Label>
                     <Input
                       id="location"
                       value={formData.location}
                       onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                      placeholder="Bordeaux, France"
+                      placeholder={t('domainProfile.general.locationPlaceholder')}
                     />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="aoc">AOC / Appellation</Label>
+                    <Label htmlFor="aoc">{t('domainProfile.general.aoc')}</Label>
                     <Input
                       id="aoc"
                       value={formData.aoc}
                       onChange={(e) => setFormData(prev => ({ ...prev, aoc: e.target.value }))}
-                      placeholder="AOC Bordeaux"
+                      placeholder={t('domainProfile.general.aocPlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="website">Site web</Label>
+                    <Label htmlFor="website">{t('domainProfile.general.website')}</Label>
                     <Input
                       id="website"
                       type="url"
                       value={formData.website}
                       onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                      placeholder="https://www.mondomaine.fr"
+                      placeholder={t('domainProfile.general.websitePlaceholder')}
                     />
                   </div>
                 </div>
@@ -209,15 +216,15 @@ const DomainProfile = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Production</CardTitle>
+                <CardTitle>{t('domainProfile.production.title')}</CardTitle>
                 <CardDescription>
-                  Informations sur votre production viticole
+                  {t('domainProfile.production.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="surface_area">Surface (hectares)</Label>
+                    <Label htmlFor="surface_area">{t('domainProfile.production.surface')}</Label>
                     <Input
                       id="surface_area"
                       type="number"
@@ -227,11 +234,11 @@ const DomainProfile = () => {
                         ...prev, 
                         surface_area: e.target.value ? parseFloat(e.target.value) : null 
                       }))}
-                      placeholder="25.5"
+                      placeholder={t('domainProfile.production.surfacePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bottles_per_year">Bouteilles par an</Label>
+                    <Label htmlFor="bottles_per_year">{t('domainProfile.production.bottles')}</Label>
                     <Input
                       id="bottles_per_year"
                       type="number"
@@ -240,25 +247,25 @@ const DomainProfile = () => {
                         ...prev, 
                         bottles_per_year: e.target.value ? parseInt(e.target.value) : null 
                       }))}
-                      placeholder="150000"
+                      placeholder={t('domainProfile.production.bottlesPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <Label>Types de vins produits</Label>
+                  <Label>{t('domainProfile.production.wineTypes')}</Label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {wineColorOptions.map((color) => (
-                      <div key={color} className="flex items-center space-x-2">
+                    {wineColorOptions.map(({ value, labelKey }) => (
+                      <div key={value} className="flex items-center space-x-2">
                         <Checkbox
-                          id={color}
-                          checked={formData.wine_colors.includes(color)}
+                          id={value}
+                          checked={formData.wine_colors.includes(value)}
                           onCheckedChange={(checked) => 
-                            handleWineColorChange(color, checked as boolean)
+                            handleWineColorChange(value, checked as boolean)
                           }
                         />
-                        <Label htmlFor={color} className="text-sm font-normal">
-                          {color}
+                        <Label htmlFor={value} className="text-sm font-normal">
+                          {t(labelKey)}
                         </Label>
                       </div>
                     ))}
@@ -274,7 +281,7 @@ const DomainProfile = () => {
                     }
                   />
                   <Label htmlFor="organic_conversion">
-                    En conversion biologique ou certifié bio
+                    {t('domainProfile.production.organic')}
                   </Label>
                 </div>
               </CardContent>
@@ -282,30 +289,30 @@ const DomainProfile = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Cépages et Cuvées</CardTitle>
+                <CardTitle>{t('domainProfile.varieties.title')}</CardTitle>
                 <CardDescription>
-                  Détails sur vos cépages et cuvées (séparez par des virgules)
+                  {t('domainProfile.varieties.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="grape_varieties">Cépages cultivés</Label>
+                  <Label htmlFor="grape_varieties">{t('domainProfile.varieties.grapes')}</Label>
                   <Textarea
                     id="grape_varieties"
                     value={formData.grape_varieties.join(', ')}
                     onChange={(e) => handleArrayInput('grape_varieties', e.target.value)}
-                    placeholder="Merlot, Cabernet Sauvignon, Petit Verdot"
+                    placeholder={t('domainProfile.varieties.grapesPlaceholder')}
                     className="min-h-[80px]"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="cuvees">Cuvées produites</Label>
+                  <Label htmlFor="cuvees">{t('domainProfile.varieties.cuvees')}</Label>
                   <Textarea
                     id="cuvees"
                     value={formData.cuvees.join(', ')}
                     onChange={(e) => handleArrayInput('cuvees', e.target.value)}
-                    placeholder="Cuvée Tradition, Cuvée Prestige, Réserve du Château"
+                    placeholder={t('domainProfile.varieties.cuveesPlaceholder')}
                     className="min-h-[80px]"
                   />
                 </div>
@@ -317,10 +324,10 @@ const DomainProfile = () => {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sauvegarde...
+                    {t('domainProfile.saving')}
                   </>
                 ) : (
-                  'Sauvegarder'
+                  t('domainProfile.save')
                 )}
               </Button>
             </div>

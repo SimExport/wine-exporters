@@ -1237,5 +1237,147 @@
       "created": "Prospect created",
       "lastUpdate": "Last update"
     }
+  },
+  "billing": {
+    "title": "Billing & Subscription",
+    "subtitle": "Manage your plan and access your billing portal.",
+    "successToast": "Subscription activated successfully!",
+    "canceledToast": "Payment canceled",
+    "loginRequired": "Please sign in to subscribe",
+    "loginRequiredShort": "Please sign in",
+    "checkoutError": "Error creating payment",
+    "portalError": "Error opening portal",
+    "loading": "Loading...",
+    "status": {
+      "active": "Active",
+      "pastDue": "Past due",
+      "inactive": "Inactive"
+    },
+    "premium": {
+      "title": "Go Premium",
+      "description": "Access 15,000+ qualified buyers worldwide",
+      "price": "€199",
+      "priceUnit": "excl. VAT / month",
+      "feature1": "✓ Unlimited access to importer database",
+      "feature2": "✓ 1 prospecting campaign per month",
+      "feature3": "✓ Dedicated CRM to manage your prospects",
+      "feature4": "✓ Priority support",
+      "subscribe": "Subscribe now"
+    },
+    "subscription": {
+      "title": "My Subscription",
+      "planName": "ExportVins Premium",
+      "renewal": "Automatic monthly renewal",
+      "manage": "Manage my subscription",
+      "manageHelp": "To download invoices, change card or cancel, access the management portal."
+    },
+    "usage": {
+      "title": "Plan usage",
+      "subtitle": "Monthly quotas",
+      "campaignsLabel": "Campaigns remaining",
+      "campaignsUsed": "You've used your campaign this month",
+      "campaignsAvailable": "{{count}} campaign available this month",
+      "sourcingLabel": "Bespoke searches",
+      "sourcingUsed": "You've used your bespoke search this month",
+      "sourcingAvailable": "{{count}} bespoke search available",
+      "renewInfo": "Your credits are automatically renewed each month on your subscription anniversary date."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "loadError": "Unable to load settings.",
+    "saveError": "Unable to save settings.",
+    "account": {
+      "title": "Account",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Your name",
+      "email": "Login email",
+      "password": "Password",
+      "changePassword": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords don't match.",
+      "passwordTooShort": "Password must be at least 8 characters long.",
+      "passwordSuccess": "Password changed successfully.",
+      "passwordError": "Unable to change password."
+    },
+    "replyTo": {
+      "title": "Default reply-to address",
+      "description": "This address will be used by default in your campaigns (Step 3). You can change it campaign by campaign.",
+      "label": "Default reply-to",
+      "placeholder": "export@domain.com",
+      "invalidEmail": "Invalid email format"
+    },
+    "data": {
+      "title": "Data & privacy",
+      "description": "Your data is stored securely and access is limited to authorized teams.",
+      "exportLabel": "Export my data",
+      "exportHelp": "Download all your campaigns and leads",
+      "export": "Export",
+      "exportInProgress": "Export in progress",
+      "exportInProgressDesc": "Generating your data...",
+      "exportDone": "Export generated",
+      "exportDoneDesc": "A download link will be sent to you by email.",
+      "exportError": "Unable to export data.",
+      "dangerZone": "Danger zone",
+      "dangerHelp": "Permanently delete your account",
+      "deleteAccount": "Delete my account",
+      "deleteTitle": "Delete your account",
+      "deleteWarning": "This action is irreversible. All your data (campaigns, leads, profile) will be permanently deleted.",
+      "deleteConfirmLabel": "Type <strong>DELETE</strong> to confirm",
+      "deleteConfirmPlaceholder": "DELETE",
+      "deleteConfirmKeyword": "DELETE",
+      "deleteConfirmError": "Please type 'DELETE' to confirm.",
+      "deleteScheduled": "Deletion scheduled",
+      "deleteScheduledDesc": "Your account will be deleted within the next 24 hours.",
+      "deleteError": "Unable to delete account.",
+      "deletePermanently": "Delete permanently"
+    }
+  },
+  "domainProfile": {
+    "title": "Domain Configuration",
+    "subtitle": "Fill in your wine estate information to personalize your profile.",
+    "loadError": "Unable to load profile information.",
+    "saveSuccess": "Your domain information has been saved.",
+    "saveError": "Unable to save information.",
+    "saving": "Saving...",
+    "save": "Save",
+    "general": {
+      "title": "General information",
+      "description": "Your domain's main information",
+      "domainName": "Domain name",
+      "domainNamePlaceholder": "Valley Estate",
+      "location": "Location",
+      "locationPlaceholder": "Bordeaux, France",
+      "aoc": "AOC / Appellation",
+      "aocPlaceholder": "AOC Bordeaux",
+      "website": "Website",
+      "websitePlaceholder": "https://www.mydomain.com"
+    },
+    "production": {
+      "title": "Production",
+      "description": "Information about your wine production",
+      "surface": "Surface (hectares)",
+      "surfacePlaceholder": "25.5",
+      "bottles": "Bottles per year",
+      "bottlesPlaceholder": "150000",
+      "wineTypes": "Types of wines produced",
+      "organic": "Organic conversion or certified organic",
+      "colors": {
+        "red": "Red",
+        "white": "White",
+        "rose": "Rosé",
+        "sparkling": "Sparkling"
+      }
+    },
+    "varieties": {
+      "title": "Grape varieties and Cuvées",
+      "description": "Details on your grape varieties and cuvées (separate with commas)",
+      "grapes": "Grape varieties grown",
+      "grapesPlaceholder": "Merlot, Cabernet Sauvignon, Petit Verdot",
+      "cuvees": "Cuvées produced",
+      "cuveesPlaceholder": "Tradition Cuvée, Prestige Cuvée, Château Reserve"
+    }
   }
 }
