@@ -1379,5 +1379,218 @@
       "cuvees": "Cuvées produites",
       "cuveesPlaceholder": "Cuvée Tradition, Cuvée Prestige, Réserve du Château"
     }
+  },
+  "landing": {
+    "nav": {
+      "signIn": "Se connecter",
+      "start": "Démarrer"
+    },
+    "hero": {
+      "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
+      "titleLead": "Trouvez vos futurs importateurs,",
+      "titleHighlight": "développez vos ventes export.",
+      "subtitle": "La première plateforme de prospection tout-en-un.\nAccédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.",
+      "ctaPrimary": "Démarrer ma prospection",
+      "ctaSecondary": "Découvrir la méthode",
+      "stats": {
+        "domains": "domaines accompagnés",
+        "importers": "importateurs trouvés",
+        "markets": "marchés ouverts"
+      }
+    },
+    "pain": {
+      "title": "L'export ne devrait pas être un parcours du combattant.",
+      "items": {
+        "search": {
+          "title": "La recherche interminable",
+          "text": "Trouver les bons contacts prend des heures, et les salons coûtent une fortune pour un ROI incertain."
+        },
+        "silence": {
+          "title": "Le silence radio",
+          "text": "Vos emails de prospection tombent dans les spams ou sont noyés dans la masse. Personne ne vous répond."
+        },
+        "tracking": {
+          "title": "Le suivi chaotique",
+          "text": "Le suivi des échantillons et des relances finit toujours par se perdre dans un fichier Excel interminable."
+        }
+      }
+    },
+    "method": {
+      "title": "Notre méthode en 3 étapes pour développer vos marchés.",
+      "step1": {
+        "step": "ÉTAPE 1",
+        "title": "Ne cherchez plus les acheteurs. Trouvez-les.",
+        "text": "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
+        "bullet1": "Filtrage précis par marché et par type d'acheteur.",
+        "bullet2": "Recherche sur-mesure : Vous visez un marché précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vos vins afin de vous livrer une sélection d'importateurs pertinents."
+      },
+      "step2": {
+        "step": "ÉTAPE 2",
+        "title": "Des campagnes qui génèrent enfin des réponses.",
+        "text": "Fini le démarchage à l'aveugle. Nous vous aidons à capter l'attention des décideurs grâce à une approche ciblée.",
+        "bullet1": "Outil de création de campagnes intégré.",
+        "bullet2": "Campagne Mensuelle gérée : Vous validez, nous envoyons. Nous optimisons la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams."
+      },
+      "step3": {
+        "step": "ÉTAPE 3",
+        "title": "Transformez vos prospects en clients.",
+        "text": "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
+        "bullet1": "Pipeline visuel (CRM Kanban) dédié à la vente de vins à l'export.",
+        "bullet2": "Suivi des envois d'échantillons.",
+        "bullet3": "Historique centralisé pour ne jamais oublier une relance."
+      }
+    },
+    "synthesis": {
+      "title": "Une seule plateforme. Zéro friction. Et de l'humain.",
+      "text": "Notre plateforme remplace vos fichiers Excel, vos outils d'emailing complexes et vos recherches Google.\n\nSurtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et chaque campagne de prospection, notre équipe d'experts s'active pour vendre vos vins."
+    },
+    "testimonials": {
+      "title": "Ils nous ont fait confiance. Ils ont obtenu des commandes.",
+      "subtitle": "Ces domaines ont réalisé une Mission Performance Export avec ExportVins.",
+      "viewAll": "Voir tous les résultats ({{count}})"
+    },
+    "pricing": {
+      "title": "Un investissement rentabilisé dès la première palette.",
+      "subtitle": "Tout est inclus. Pas de coûts cachés.",
+      "planName": "WineExporters",
+      "priceSuffix": "HT / mois",
+      "commitment": "engagement 3 mois",
+      "ctaStart": "Démarrer maintenant",
+      "founders": "Accès fondateur disponible — contactez-nous pour bénéficier du tarif préférentiel.",
+      "inclusions": [
+        "Accès illimité aux bases de données",
+        "1 recherche sur-mesure / mois",
+        "1 campagne de prospection / mois",
+        "Accès complet au CRM",
+        "Support prioritaire"
+      ]
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "items": [
+        { "q": "Qu'est ce que la recherche sur-mesure ?", "a": "C'est un service de conciergerie inclus. Vous choisissez un marché, nous cherchons pour vous 3 à 5 importateurs qui matchent parfaitement avec votre domaine." },
+        { "q": "Puis-je lancer plus d'une campagne par mois ?", "a": "L'abonnement inclut l'envoi géré d'une campagne qualifiée pour garantir la qualité. Pour des besoins supérieurs, contactez-nous." },
+        { "q": "Y a-t-il un engagement ?", "a": "Oui, 3 mois d'engagement. Ensuite l'abonnement à 199 € mensuel et sans engagement." },
+        { "q": "Combien de temps pour recevoir une première commande ?", "a": "En moyenne 3 mois en Europe, 6 à 12 mois pour le grand export." },
+        { "q": "Qui envoie les campagnes ?", "a": "Notre équipe s'occupe de l'envoi et de l'optimisation de la délivrabilité. Vous validez, nous envoyons." }
+      ]
+    },
+    "finalCta": {
+      "title": "Prêt à conquérir de nouveaux marchés ?",
+      "button": "Démarrer maintenant"
+    },
+    "footer": {
+      "copyright": "ExportVins © 2026 — L'outil de prospection des vignerons.",
+      "contact": "Contact",
+      "legal": "Mentions légales"
+    }
+  },
+  "adminCampaigns": {
+    "title": "Admin — Campagnes",
+    "subtitle": "Vue globale des campagnes. Ajoutez des prospects manuellement aux campagnes actives.",
+    "loadError": "Impossible de charger les campagnes",
+    "errorTitle": "Erreur",
+    "copiedTitle": "Copié",
+    "copiedDesc": "Nom copié dans le presse-papier",
+    "validateConfirm": "Valider la campagne \"{{name}}\" ?",
+    "validatedTitle": "Campagne validée",
+    "validatedDesc": "La campagne \"{{name}}\" est maintenant active",
+    "validateError": "Impossible de valider la campagne",
+    "rejectPrompt": "Motif de refus pour \"{{name}}\" :",
+    "rejectedTitle": "Campagne refusée",
+    "rejectedDesc": "La campagne \"{{name}}\" a été refusée",
+    "rejectError": "Impossible de refuser la campagne",
+    "fillRequired": "Veuillez remplir tous les champs obligatoires",
+    "duplicateTitle": "Double détecté",
+    "duplicateDesc": "Un prospect avec cet email existe déjà pour cette campagne",
+    "createSuccess": "Prospect ajouté avec succès",
+    "createError": "Impossible de créer le prospect",
+    "successTitle": "Succès",
+    "statuses": {
+      "draft": "Brouillon",
+      "pending_validation": "En attente",
+      "active": "Active",
+      "approved": "Approuvée",
+      "sending": "Envoi en cours",
+      "results": "Terminée",
+      "failed": "Échec"
+    },
+    "actionsOptions": {
+      "price_list": "Recevoir la liste de prix",
+      "samples": "Demander des échantillons",
+      "video_call": "Planifier une visio",
+      "tech_sheets": "Recevoir fiches techniques",
+      "other": "Autre"
+    },
+    "filters": {
+      "title": "Filtres",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts",
+      "inProgressDefault": "En cours (défaut)",
+      "draft": "Brouillon",
+      "pendingValidation": "En attente de validation",
+      "active": "Actives",
+      "sending": "En envoi",
+      "results": "Terminées",
+      "failed": "Échec",
+      "winery": "Domaine",
+      "wineryPlaceholder": "Rechercher un domaine...",
+      "period": "Période",
+      "periodAll": "Toute période",
+      "period7": "7 derniers jours",
+      "period30": "30 derniers jours",
+      "period90": "3 derniers mois",
+      "market": "Marché",
+      "allMarkets": "Tous les marchés",
+      "search": "Recherche",
+      "searchPlaceholder": "Nom campagne..."
+    },
+    "results": {
+      "title": "Campagnes ({{count}})",
+      "emptyTitle": "Aucune campagne ne correspond à vos filtres",
+      "emptyDesc": "Essayez de modifier ou réinitialiser vos critères de recherche.",
+      "resetFilters": "Réinitialiser les filtres"
+    },
+    "table": {
+      "date": "Date",
+      "campaign": "Campagne",
+      "client": "Client",
+      "markets": "Marchés",
+      "status": "Statut",
+      "prospects": "Prospects",
+      "actions": "Actions",
+      "validate": "Valider",
+      "reject": "Refuser",
+      "addProspect": "Ajouter prospect",
+      "viewProspects": "Voir prospects"
+    },
+    "drawer": {
+      "title": "Ajouter un prospect à \"{{name}}\"",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "company": "Société",
+      "email": "Email",
+      "phone": "Téléphone",
+      "website": "Site web",
+      "address1": "Adresse ligne 1",
+      "address2": "Adresse ligne 2",
+      "city": "Ville",
+      "postalCode": "Code postal",
+      "country": "Pays",
+      "requestedActions": "Actions demandées",
+      "specifyOther": "Préciser \"Autre\"",
+      "specifyPlaceholder": "Précisez la demande...",
+      "tallyUrl": "Lien réponse Tally",
+      "samples": "Échantillons demandés",
+      "addWine": "Ajouter un vin",
+      "wine": "Vin",
+      "selectWine": "Sélectionner un vin",
+      "quantity": "Quantité",
+      "comment": "Commentaire",
+      "commentPlaceholder": "Optionnel...",
+      "remove": "Supprimer",
+      "cancel": "Annuler",
+      "save": "Enregistrer"
+    }
   }
 }

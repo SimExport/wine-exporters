@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
@@ -41,16 +42,6 @@ interface Wine {
   vintages: number[];
 }
 
-const CAMPAIGN_STATUS_LABELS = {
-  draft: 'Brouillon',
-  pending_validation: 'En attente',
-  active: 'Active',
-  approved: 'Approuvée',
-  sending: 'Envoi en cours',
-  results: 'Terminée',
-  failed: 'Échec'
-};
-
 const CAMPAIGN_STATUS_COLORS = {
   draft: 'secondary',
   pending_validation: 'yellow',
@@ -61,19 +52,15 @@ const CAMPAIGN_STATUS_COLORS = {
   failed: 'red'
 } as const;
 
-const REQUESTED_ACTIONS_OPTIONS = [
-  { value: 'price_list', label: 'Recevoir la liste de prix' },
-  { value: 'samples', label: 'Demander des échantillons' },
-  { value: 'video_call', label: 'Planifier une visio' },
-  { value: 'tech_sheets', label: 'Recevoir fiches techniques' },
-  { value: 'other', label: 'Autre' }
-];
+const REQUESTED_ACTIONS_VALUES = ['price_list', 'samples', 'video_call', 'tech_sheets', 'other'] as const;
 
 const COUNTRIES = [
   'FR', 'BE', 'CH', 'DE', 'UK', 'US', 'CA', 'AU', 'NZ', 'JP', 'SG', 'HK'
 ];
 
 export default function AdminCampaigns() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,8 +136,8 @@ export default function AdminCampaigns() {
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les campagnes",
+        title: t('adminCampaigns.errorTitle'),
+        description: t('adminCampaigns.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -217,13 +204,13 @@ export default function AdminCampaigns() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copié",
-      description: "Nom copié dans le presse-papier",
+      title: t('adminCampaigns.copiedTitle'),
+      description: t('adminCampaigns.copiedDesc'),
     });
   };
 
   const validateCampaign = async (campaignId: string, campaignName: string) => {
-    if (!confirm(`Valider la campagne "${campaignName}" ?`)) {
+    if (!confirm(t('adminCampaigns.validateConfirm', { name: campaignName }))) {
       return;
     }
 
@@ -243,21 +230,21 @@ export default function AdminCampaigns() {
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
 
       toast({
-        title: "Campagne validée",
-        description: `La campagne "${campaignName}" est maintenant active`,
+        title: t('adminCampaigns.validatedTitle'),
+        description: t('adminCampaigns.validatedDesc', { name: campaignName }),
       });
     } catch (error) {
       console.error('Error validating campaign:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de valider la campagne",
+        title: t('adminCampaigns.errorTitle'),
+        description: t('adminCampaigns.validateError'),
         variant: "destructive"
       });
     }
   };
 
   const rejectCampaign = async (campaignId: string, campaignName: string) => {
-    const comment = prompt(`Motif de refus pour "${campaignName}" :`);
+    const comment = prompt(t('adminCampaigns.rejectPrompt', { name: campaignName }));
     if (!comment) return;
 
     try {
@@ -276,14 +263,14 @@ export default function AdminCampaigns() {
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
 
       toast({
-        title: "Campagne refusée",
-        description: `La campagne "${campaignName}" a été refusée`,
+        title: t('adminCampaigns.rejectedTitle'),
+        description: t('adminCampaigns.rejectedDesc', { name: campaignName }),
       });
     } catch (error) {
       console.error('Error rejecting campaign:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de refuser la campagne",
+        title: t('adminCampaigns.errorTitle'),
+        description: t('adminCampaigns.rejectError'),
         variant: "destructive"
       });
     }
@@ -316,8 +303,8 @@ export default function AdminCampaigns() {
       if (!prospectForm.first_name || !prospectForm.last_name || 
           !prospectForm.company_name || !prospectForm.email) {
         toast({
-          title: "Erreur",
-          description: "Veuillez remplir tous les champs obligatoires",
+          title: t('adminCampaigns.errorTitle'),
+          description: t('adminCampaigns.fillRequired'),
           variant: "destructive"
         });
         return;
@@ -337,8 +324,8 @@ export default function AdminCampaigns() {
 
       if (existing) {
         toast({
-          title: "Double détecté",
-          description: "Un prospect avec cet email existe déjà pour cette campagne",
+          title: t('adminCampaigns.duplicateTitle'),
+          description: t('adminCampaigns.duplicateDesc'),
           variant: "destructive"
         });
         return;
@@ -391,8 +378,8 @@ export default function AdminCampaigns() {
       }
 
       toast({
-        title: "Succès",
-        description: "Prospect ajouté avec succès",
+        title: t('adminCampaigns.successTitle'),
+        description: t('adminCampaigns.createSuccess'),
       });
 
       // Reset form and close drawer
@@ -421,8 +408,8 @@ export default function AdminCampaigns() {
     } catch (error) {
       console.error('Error creating prospect:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de créer le prospect",
+        title: t('adminCampaigns.errorTitle'),
+        description: t('adminCampaigns.createError'),
         variant: "destructive"
       });
     }
@@ -444,9 +431,10 @@ export default function AdminCampaigns() {
 
   const getStatusBadge = (status: string) => {
     const color = CAMPAIGN_STATUS_COLORS[status as keyof typeof CAMPAIGN_STATUS_COLORS] || 'secondary';
+    const label = t(`adminCampaigns.statuses.${status}`, { defaultValue: status });
     return (
       <Badge variant={color as any}>
-        {CAMPAIGN_STATUS_LABELS[status as keyof typeof CAMPAIGN_STATUS_LABELS] || status}
+        {label}
       </Badge>
     );
   };
@@ -486,9 +474,9 @@ export default function AdminCampaigns() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Admin — Campagnes</h1>
+          <h1 className="text-3xl font-bold">{t('adminCampaigns.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            Vue globale des campagnes. Ajoutez des prospects manuellement aux campagnes actives.
+            {t('adminCampaigns.subtitle')}
           </p>
         </div>
         <ParseAddressesButton />
@@ -497,47 +485,47 @@ export default function AdminCampaigns() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filtres</CardTitle>
+          <CardTitle>{t('adminCampaigns.filters.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-              <Label>Statut</Label>
+              <Label>{t('adminCampaigns.filters.status')}</Label>
               <Select 
                 value={filters.status.join(',')} 
                 onValueChange={(value) => setFilters(prev => ({ ...prev, status: value.split(',') }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Tous les statuts" />
+                  <SelectValue placeholder={t('adminCampaigns.filters.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="draft,pending_validation,active,approved,sending,results,failed">
-                    Tous les statuts
+                    {t('adminCampaigns.filters.allStatuses')}
                   </SelectItem>
                   <SelectItem value="pending_validation,active,approved,sending">
-                    En cours (défaut)
+                    {t('adminCampaigns.filters.inProgressDefault')}
                   </SelectItem>
-                  <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="pending_validation">En attente de validation</SelectItem>
-                  <SelectItem value="active">Actives</SelectItem>
-                  <SelectItem value="sending">En envoi</SelectItem>
-                  <SelectItem value="results">Terminées</SelectItem>
-                  <SelectItem value="failed">Échec</SelectItem>
+                  <SelectItem value="draft">{t('adminCampaigns.filters.draft')}</SelectItem>
+                  <SelectItem value="pending_validation">{t('adminCampaigns.filters.pendingValidation')}</SelectItem>
+                  <SelectItem value="active">{t('adminCampaigns.filters.active')}</SelectItem>
+                  <SelectItem value="sending">{t('adminCampaigns.filters.sending')}</SelectItem>
+                  <SelectItem value="results">{t('adminCampaigns.filters.results')}</SelectItem>
+                  <SelectItem value="failed">{t('adminCampaigns.filters.failed')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>Domaine</Label>
+              <Label>{t('adminCampaigns.filters.winery')}</Label>
               <Input
-                placeholder="Rechercher un domaine..."
+                placeholder={t('adminCampaigns.filters.wineryPlaceholder')}
                 value={filters.winery}
                 onChange={(e) => setFilters(prev => ({ ...prev, winery: e.target.value }))}
               />
             </div>
 
             <div>
-              <Label>Période</Label>
+              <Label>{t('adminCampaigns.filters.period')}</Label>
               <Select 
                 value={filters.period} 
                 onValueChange={(value) => setFilters(prev => ({ ...prev, period: value }))}
@@ -546,25 +534,25 @@ export default function AdminCampaigns() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toute période</SelectItem>
-                  <SelectItem value="7">7 derniers jours</SelectItem>
-                  <SelectItem value="30">30 derniers jours</SelectItem>
-                  <SelectItem value="90">3 derniers mois</SelectItem>
+                  <SelectItem value="all">{t('adminCampaigns.filters.periodAll')}</SelectItem>
+                  <SelectItem value="7">{t('adminCampaigns.filters.period7')}</SelectItem>
+                  <SelectItem value="30">{t('adminCampaigns.filters.period30')}</SelectItem>
+                  <SelectItem value="90">{t('adminCampaigns.filters.period90')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>Marché</Label>
+              <Label>{t('adminCampaigns.filters.market')}</Label>
               <Select 
                 value={filters.market} 
                 onValueChange={(value) => setFilters(prev => ({ ...prev, market: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Tous les marchés" />
+                  <SelectValue placeholder={t('adminCampaigns.filters.allMarkets')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous les marchés</SelectItem>
+                  <SelectItem value="all">{t('adminCampaigns.filters.allMarkets')}</SelectItem>
                   {COUNTRIES.map(country => (
                     <SelectItem key={country} value={country}>{country}</SelectItem>
                   ))}
@@ -573,10 +561,10 @@ export default function AdminCampaigns() {
             </div>
 
             <div>
-              <Label>Recherche</Label>
+              <Label>{t('adminCampaigns.filters.search')}</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Nom campagne..."
+                  placeholder={t('adminCampaigns.filters.searchPlaceholder')}
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                 />
@@ -593,35 +581,35 @@ export default function AdminCampaigns() {
       <Card>
         <CardHeader>
           <CardTitle>
-            Campagnes ({filteredCampaigns.length})
+            {t('adminCampaigns.results.title', { count: filteredCampaigns.length })}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {filteredCampaigns.length === 0 ? (
             <EmptyState
               icon={<SearchX className="h-10 w-10" />}
-              title="Aucune campagne ne correspond à vos filtres"
-              description="Essayez de modifier ou réinitialiser vos critères de recherche."
-              action={{ label: "Réinitialiser les filtres", onClick: resetFilters }}
+              title={t('adminCampaigns.results.emptyTitle')}
+              description={t('adminCampaigns.results.emptyDesc')}
+              action={{ label: t('adminCampaigns.results.resetFilters'), onClick: resetFilters }}
             />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Campagne</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Marchés</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Prospects</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('adminCampaigns.table.date')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.campaign')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.client')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.markets')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.status')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.prospects')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCampaigns.map((campaign) => (
                   <TableRow key={campaign.id} className="hover:bg-muted/50">
                     <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(campaign.created_at), 'dd/MM/yyyy', { locale: fr })}
+                      {format(new Date(campaign.created_at), 'dd/MM/yyyy', { locale: dateLocale })}
                     </TableCell>
                     <TableCell>
                       <Button 
@@ -670,7 +658,7 @@ export default function AdminCampaigns() {
                                className="bg-green-600 hover:bg-green-700"
                              >
                                <CheckCircle className="h-4 w-4 mr-1" />
-                               Valider
+                               {t('adminCampaigns.table.validate')}
                              </Button>
                              <Button
                                size="sm"
@@ -678,7 +666,7 @@ export default function AdminCampaigns() {
                                onClick={() => rejectCampaign(campaign.id, campaign.name)}
                              >
                                <X className="h-4 w-4 mr-1" />
-                               Refuser
+                               {t('adminCampaigns.table.reject')}
                              </Button>
                            </>
                          )}
@@ -688,7 +676,7 @@ export default function AdminCampaigns() {
                            onClick={() => openProspectDrawer(campaign)}
                          >
                            <Plus className="h-4 w-4 mr-1" />
-                           Ajouter prospect
+                           {t('adminCampaigns.table.addProspect')}
                          </Button>
                          <Button
                            size="sm"
@@ -696,7 +684,7 @@ export default function AdminCampaigns() {
                            onClick={() => window.open(`/prospects?campaign=${campaign.id}`, '_blank')}
                          >
                            <Eye className="h-4 w-4 mr-1" />
-                           Voir prospects
+                           {t('adminCampaigns.table.viewProspects')}
                          </Button>
                        </div>
                      </TableCell>
@@ -713,14 +701,14 @@ export default function AdminCampaigns() {
         <DrawerContent className="max-h-[90vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>
-              Ajouter un prospect à "{selectedCampaign?.name}"
+              {t('adminCampaigns.drawer.title', { name: selectedCampaign?.name ?? '' })}
             </DrawerTitle>
           </DrawerHeader>
           <div className="px-6 pb-6 space-y-6">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="first_name">Prénom *</Label>
+                <Label htmlFor="first_name">{t('adminCampaigns.drawer.firstName')} *</Label>
                 <Input
                   id="first_name"
                   value={prospectForm.first_name}
@@ -728,7 +716,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="last_name">Nom *</Label>
+                <Label htmlFor="last_name">{t('adminCampaigns.drawer.lastName')} *</Label>
                 <Input
                   id="last_name"
                   value={prospectForm.last_name}
@@ -736,7 +724,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="company_name">Société *</Label>
+                <Label htmlFor="company_name">{t('adminCampaigns.drawer.company')} *</Label>
                 <Input
                   id="company_name"
                   value={prospectForm.company_name}
@@ -744,7 +732,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{t('adminCampaigns.drawer.email')} *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -753,7 +741,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Téléphone</Label>
+                <Label htmlFor="phone">{t('adminCampaigns.drawer.phone')}</Label>
                 <Input
                   id="phone"
                   value={prospectForm.phone}
@@ -761,7 +749,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="website_url">Site web</Label>
+                <Label htmlFor="website_url">{t('adminCampaigns.drawer.website')}</Label>
                 <Input
                   id="website_url"
                   value={prospectForm.website_url}
@@ -773,7 +761,7 @@ export default function AdminCampaigns() {
             {/* Address */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="address_line1">Adresse ligne 1</Label>
+                <Label htmlFor="address_line1">{t('adminCampaigns.drawer.address1')}</Label>
                 <Input
                   id="address_line1"
                   value={prospectForm.address_line1}
@@ -781,7 +769,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="address_line2">Adresse ligne 2</Label>
+                <Label htmlFor="address_line2">{t('adminCampaigns.drawer.address2')}</Label>
                 <Input
                   id="address_line2"
                   value={prospectForm.address_line2}
@@ -789,7 +777,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="city">Ville</Label>
+                <Label htmlFor="city">{t('adminCampaigns.drawer.city')}</Label>
                 <Input
                   id="city"
                   value={prospectForm.city}
@@ -797,7 +785,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="postal_code">Code postal</Label>
+                <Label htmlFor="postal_code">{t('adminCampaigns.drawer.postalCode')}</Label>
                 <Input
                   id="postal_code"
                   value={prospectForm.postal_code}
@@ -805,7 +793,7 @@ export default function AdminCampaigns() {
                 />
               </div>
               <div>
-                <Label htmlFor="country">Pays</Label>
+                <Label htmlFor="country">{t('adminCampaigns.drawer.country')}</Label>
                 <Select 
                   value={prospectForm.country} 
                   onValueChange={(value) => setProspectForm(prev => ({ ...prev, country: value }))}
@@ -824,41 +812,41 @@ export default function AdminCampaigns() {
 
             {/* Requested Actions */}
             <div>
-              <Label>Actions demandées</Label>
+              <Label>{t('adminCampaigns.drawer.requestedActions')}</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                {REQUESTED_ACTIONS_OPTIONS.map(option => (
-                  <div key={option.value} className="flex items-center space-x-2">
+                {REQUESTED_ACTIONS_VALUES.map(value => (
+                  <div key={value} className="flex items-center space-x-2">
                     <Checkbox
-                      id={option.value}
-                      checked={prospectForm.requested_actions.includes(option.value)}
+                      id={value}
+                      checked={prospectForm.requested_actions.includes(value)}
                       onCheckedChange={(checked) => {
                         if (checked) {
                           setProspectForm(prev => ({
                             ...prev,
-                            requested_actions: [...prev.requested_actions, option.value]
+                            requested_actions: [...prev.requested_actions, value]
                           }));
                         } else {
                           setProspectForm(prev => ({
                             ...prev,
-                            requested_actions: prev.requested_actions.filter(a => a !== option.value)
+                            requested_actions: prev.requested_actions.filter(a => a !== value)
                           }));
                         }
                       }}
                     />
-                    <Label htmlFor={option.value} className="text-sm">
-                      {option.label}
+                    <Label htmlFor={value} className="text-sm">
+                      {t(`adminCampaigns.actionsOptions.${value}`)}
                     </Label>
                   </div>
                 ))}
               </div>
               {prospectForm.requested_actions.includes('other') && (
                 <div className="mt-2">
-                  <Label htmlFor="requested_other">Préciser "Autre"</Label>
+                  <Label htmlFor="requested_other">{t('adminCampaigns.drawer.specifyOther')}</Label>
                   <Textarea
                     id="requested_other"
                     value={prospectForm.requested_other}
                     onChange={(e) => setProspectForm(prev => ({ ...prev, requested_other: e.target.value }))}
-                    placeholder="Précisez la demande..."
+                    placeholder={t('adminCampaigns.drawer.specifyPlaceholder')}
                   />
                 </div>
               )}
@@ -866,7 +854,7 @@ export default function AdminCampaigns() {
 
             {/* Tally Response URL */}
             <div>
-              <Label htmlFor="tally_response_url">Lien réponse Tally</Label>
+              <Label htmlFor="tally_response_url">{t('adminCampaigns.drawer.tallyUrl')}</Label>
               <Input
                 id="tally_response_url"
                 value={prospectForm.tally_response_url}
@@ -878,22 +866,22 @@ export default function AdminCampaigns() {
             {/* Sample Items */}
             <div>
               <div className="flex items-center justify-between">
-                <Label>Échantillons demandés</Label>
+                <Label>{t('adminCampaigns.drawer.samples')}</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addSampleItem}>
                   <Plus className="h-4 w-4 mr-1" />
-                  Ajouter un vin
+                  {t('adminCampaigns.drawer.addWine')}
                 </Button>
               </div>
               {sampleItems.map((item, index) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 p-3 border rounded">
                   <div>
-                    <Label>Vin</Label>
+                    <Label>{t('adminCampaigns.drawer.wine')}</Label>
                     <Select
                       value={item.wine_id}
                       onValueChange={(value) => updateSampleItem(index, 'wine_id', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un vin" />
+                        <SelectValue placeholder={t('adminCampaigns.drawer.selectWine')} />
                       </SelectTrigger>
                       <SelectContent>
                         {wines.map(wine => (
@@ -905,7 +893,7 @@ export default function AdminCampaigns() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Quantité</Label>
+                    <Label>{t('adminCampaigns.drawer.quantity')}</Label>
                     <Input
                       type="number"
                       min="1"
@@ -914,11 +902,11 @@ export default function AdminCampaigns() {
                     />
                   </div>
                   <div>
-                    <Label>Commentaire</Label>
+                    <Label>{t('adminCampaigns.drawer.comment')}</Label>
                     <Input
                       value={item.comment}
                       onChange={(e) => updateSampleItem(index, 'comment', e.target.value)}
-                      placeholder="Optionnel..."
+                      placeholder={t('adminCampaigns.drawer.commentPlaceholder')}
                     />
                   </div>
                   <div className="flex items-end">
@@ -928,7 +916,7 @@ export default function AdminCampaigns() {
                       size="sm"
                       onClick={() => removeSampleItem(index)}
                     >
-                      Supprimer
+                      {t('adminCampaigns.drawer.remove')}
                     </Button>
                   </div>
                 </div>
@@ -938,10 +926,10 @@ export default function AdminCampaigns() {
             {/* Actions */}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDrawerOpen(false)}>
-                Annuler
+                {t('adminCampaigns.drawer.cancel')}
               </Button>
               <Button onClick={handleProspectSubmit}>
-                Enregistrer
+                {t('adminCampaigns.drawer.save')}
               </Button>
             </div>
           </div>
