@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ interface UserSettings {
   daily_digest_enabled: boolean;
 }
 const Settings = () => {
+  const { t } = useTranslation();
   const {
     user
   } = useAuth();
@@ -72,8 +74,8 @@ const Settings = () => {
     } catch (error) {
       console.error('Error loading settings:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les paramètres.",
+        title: t('common.error'),
+        description: t('settings.loadError'),
         variant: "destructive"
       });
     } finally {
@@ -94,8 +96,8 @@ const Settings = () => {
     } catch (error) {
       console.error('Error updating settings:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres.",
+        title: t('common.error'),
+        description: t('settings.saveError'),
         variant: "destructive"
       });
     }
@@ -126,7 +128,7 @@ const Settings = () => {
         reply_to_default: value
       } : null);
     } else {
-      setEmailError('Format email invalide');
+      setEmailError(t('settings.replyTo.invalidEmail'));
       setSettings(prev => prev ? {
         ...prev,
         reply_to_default: value
@@ -136,16 +138,16 @@ const Settings = () => {
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas.",
+        title: t('common.error'),
+        description: t('settings.account.passwordMismatch'),
         variant: "destructive"
       });
       return;
     }
     if (passwordForm.newPassword.length < 8) {
       toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 8 caractères.",
+        title: t('common.error'),
+        description: t('settings.account.passwordTooShort'),
         variant: "destructive"
       });
       return;
@@ -158,8 +160,8 @@ const Settings = () => {
       });
       if (error) throw error;
       toast({
-        title: "Succès",
-        description: "Mot de passe modifié avec succès."
+        title: t('common.success'),
+        description: t('settings.account.passwordSuccess')
       });
       setPasswordModalOpen(false);
       setPasswordForm({
@@ -170,8 +172,8 @@ const Settings = () => {
     } catch (error) {
       console.error('Error updating password:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de modifier le mot de passe.",
+        title: t('common.error'),
+        description: t('settings.account.passwordError'),
         variant: "destructive"
       });
     }
@@ -179,30 +181,30 @@ const Settings = () => {
   const handleExportData = async () => {
     try {
       toast({
-        title: "Export en cours",
-        description: "Génération de vos données en cours..."
+        title: t('settings.data.exportInProgress'),
+        description: t('settings.data.exportInProgressDesc')
       });
 
       // This would call an edge function to generate the export
       // For now, just show a success message
       toast({
-        title: "Export généré",
-        description: "Un lien de téléchargement vous sera envoyé par email."
+        title: t('settings.data.exportDone'),
+        description: t('settings.data.exportDoneDesc')
       });
     } catch (error) {
       console.error('Error exporting data:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'exporter les données.",
+        title: t('common.error'),
+        description: t('settings.data.exportError'),
         variant: "destructive"
       });
     }
   };
   const handleDeleteAccount = async () => {
-    if (deleteConfirmation !== 'SUPPRIMER') {
+    if (deleteConfirmation !== t('settings.data.deleteConfirmKeyword')) {
       toast({
-        title: "Erreur",
-        description: "Veuillez taper 'SUPPRIMER' pour confirmer.",
+        title: t('common.error'),
+        description: t('settings.data.deleteConfirmError'),
         variant: "destructive"
       });
       return;
@@ -210,16 +212,16 @@ const Settings = () => {
     try {
       // This would call an edge function to handle account deletion
       toast({
-        title: "Suppression programmée",
-        description: "Votre compte sera supprimé dans les prochaines 24h."
+        title: t('settings.data.deleteScheduled'),
+        description: t('settings.data.deleteScheduledDesc')
       });
       setDeleteModalOpen(false);
       setDeleteConfirmation('');
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le compte.",
+        title: t('common.error'),
+        description: t('settings.data.deleteError'),
         variant: "destructive"
       });
     }
@@ -234,22 +236,22 @@ const Settings = () => {
   if (!settings) {
     return <div className="container mx-auto p-6">
         <div className="text-center">
-          <p>Impossible de charger les paramètres.</p>
+          <p>{t('settings.loadError')}</p>
         </div>
       </div>;
   }
   return <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Paramètres</h1>
+      <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
 
       {/* Account Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Compte</CardTitle>
+          <CardTitle>{t('settings.account.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="displayName">Nom affiché</Label>
+              <Label htmlFor="displayName">{t('settings.account.displayName')}</Label>
               <Input id="displayName" value={settings.display_name || ''} onChange={e => {
               const value = e.target.value;
               setSettings(prev => prev ? {
@@ -259,41 +261,41 @@ const Settings = () => {
               debouncedUpdate({
                 display_name: value
               });
-            }} placeholder="Votre nom" />
+            }} placeholder={t('settings.account.displayNamePlaceholder')} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email de connexion</Label>
+              <Label htmlFor="email">{t('settings.account.email')}</Label>
               <Input id="email" value={user?.email || ''} disabled className="bg-muted" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Mot de passe</Label>
+            <Label>{t('settings.account.password')}</Label>
             <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">Changer le mot de passe</Button>
+                <Button variant="outline">{t('settings.account.changePassword')}</Button>
               </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Changer le mot de passe</DialogTitle>
+                    <DialogTitle>{t('settings.account.changePassword')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                      <Label htmlFor="currentPassword">{t('settings.account.currentPassword')}</Label>
                       <Input id="currentPassword" type="password" value={passwordForm.currentPassword} onChange={e => setPasswordForm(prev => ({
                     ...prev,
                     currentPassword: e.target.value
                   }))} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                      <Label htmlFor="newPassword">{t('settings.account.newPassword')}</Label>
                       <Input id="newPassword" type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm(prev => ({
                     ...prev,
                     newPassword: e.target.value
                   }))} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                      <Label htmlFor="confirmPassword">{t('settings.account.confirmPassword')}</Label>
                       <Input id="confirmPassword" type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(prev => ({
                     ...prev,
                     confirmPassword: e.target.value
@@ -301,10 +303,10 @@ const Settings = () => {
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setPasswordModalOpen(false)}>
-                        Annuler
+                        {t('common.cancel')}
                       </Button>
                       <Button onClick={handlePasswordChange}>
-                        Changer le mot de passe
+                        {t('settings.account.changePassword')}
                       </Button>
                     </div>
                   </div>
@@ -317,15 +319,15 @@ const Settings = () => {
       {/* Reply-to Default */}
       <Card>
         <CardHeader>
-          <CardTitle>Adresse reply-to par défaut</CardTitle>
+          <CardTitle>{t('settings.replyTo.title')}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Cette adresse sera utilisée par défaut dans vos campagnes (Étape 3). Vous pourrez la modifier campagne par campagne.
+            {t('settings.replyTo.description')}
           </p>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="replyTo">Reply-to par défaut</Label>
-            <Input id="replyTo" type="email" value={settings.reply_to_default || ''} onChange={e => handleReplyToChange(e.target.value)} placeholder="export@domaine.com" className={emailError ? 'border-destructive' : ''} />
+            <Label htmlFor="replyTo">{t('settings.replyTo.label')}</Label>
+            <Input id="replyTo" type="email" value={settings.reply_to_default || ''} onChange={e => handleReplyToChange(e.target.value)} placeholder={t('settings.replyTo.placeholder')} className={emailError ? 'border-destructive' : ''} />
             {emailError && <p className="text-sm text-destructive">{emailError}</p>}
           </div>
         </CardContent>
@@ -340,62 +342,60 @@ const Settings = () => {
       {/* Data & Privacy */}
       <Card>
         <CardHeader>
-          <CardTitle>Données & confidentialité</CardTitle>
+          <CardTitle>{t('settings.data.title')}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Vos données sont stockées de manière sécurisée et l'accès est limité aux équipes autorisées.
+            {t('settings.data.description')}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Exporter mes données</Label>
-              <p className="text-sm text-muted-foreground">Téléchargez toutes vos campagnes et leads</p>
+              <Label>{t('settings.data.exportLabel')}</Label>
+              <p className="text-sm text-muted-foreground">{t('settings.data.exportHelp')}</p>
             </div>
             <Button onClick={handleExportData} variant="outline">
               <Download className="h-4 w-4 mr-2" />
-              Exporter
+              {t('settings.data.export')}
             </Button>
           </div>
 
           <div className="border-t pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-destructive">Zone de danger</Label>
-                <p className="text-sm text-muted-foreground">Supprimer définitivement votre compte</p>
+                <Label className="text-destructive">{t('settings.data.dangerZone')}</Label>
+                <p className="text-sm text-muted-foreground">{t('settings.data.dangerHelp')}</p>
               </div>
               <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
                 <DialogTrigger asChild>
                   <Button variant="destructive">
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Supprimer mon compte
+                    {t('settings.data.deleteAccount')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-destructive" />
-                      Supprimer votre compte
+                      {t('settings.data.deleteTitle')}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Cette action est irréversible. Toutes vos données (campagnes, leads, profil) seront définitivement supprimées.
+                      {t('settings.data.deleteWarning')}
                     </p>
                     <div className="space-y-2">
-                      <Label htmlFor="deleteConfirm">
-                        Tapez <strong>SUPPRIMER</strong> pour confirmer
-                      </Label>
-                      <Input id="deleteConfirm" value={deleteConfirmation} onChange={e => setDeleteConfirmation(e.target.value)} placeholder="SUPPRIMER" />
+                      <Label htmlFor="deleteConfirm" dangerouslySetInnerHTML={{ __html: t('settings.data.deleteConfirmLabel') }} />
+                      <Input id="deleteConfirm" value={deleteConfirmation} onChange={e => setDeleteConfirmation(e.target.value)} placeholder={t('settings.data.deleteConfirmPlaceholder')} />
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => {
                       setDeleteModalOpen(false);
                       setDeleteConfirmation('');
                     }}>
-                        Annuler
+                        {t('common.cancel')}
                       </Button>
                       <Button variant="destructive" onClick={handleDeleteAccount}>
-                        Supprimer définitivement
+                        {t('settings.data.deletePermanently')}
                       </Button>
                     </div>
                   </div>
