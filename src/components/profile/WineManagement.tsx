@@ -526,7 +526,7 @@ const WineManagement = () => {
                       <TableCell>
                         <Badge variant="secondary">{t(`wines.wineColors.${wine.color}`, wine.color)}</Badge>
                       </TableCell>
-                      <TableCell>{wine.exw_price_eur.toLocaleString(localeCode, { minimumFractionDigits: 2 })}€</TableCell>
+                      <TableCell>{formatCurrency(wine.exw_price_eur)}</TableCell>
                       <TableCell>
                         <Badge variant={wine.organic ? "default" : "outline"}>
                           {wine.organic ? t('wines.table.yes') : t('wines.table.no')}
