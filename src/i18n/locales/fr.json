@@ -35,6 +35,22 @@
     "french": "Français",
     "english": "Anglais"
   },
+  "reminders": {
+    "tooltipSet": "Rappel : {{date}}",
+    "tooltipAdd": "Ajouter un rappel",
+    "title": "Définir un rappel",
+    "quick3": "+3j",
+    "quick7": "+7j",
+    "quick14": "+14j",
+    "notePlaceholder": "Note de relance (optionnel)…",
+    "save": "Enregistrer",
+    "savedTitle": "Rappel enregistré",
+    "removedTitle": "Rappel supprimé",
+    "savedDescription": "Relance prévue le {{date}}",
+    "removedDescription": "Le rappel a été retiré",
+    "errorTitle": "Erreur",
+    "errorDescription": "Impossible de sauvegarder le rappel"
+  },
   "nav": {
     "navigation": "Navigation",
     "administration": "Administration",

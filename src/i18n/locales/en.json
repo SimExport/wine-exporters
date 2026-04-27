@@ -35,6 +35,22 @@
     "french": "French",
     "english": "English"
   },
+  "reminders": {
+    "tooltipSet": "Reminder: {{date}}",
+    "tooltipAdd": "Add a reminder",
+    "title": "Set a reminder",
+    "quick3": "+3d",
+    "quick7": "+7d",
+    "quick14": "+14d",
+    "notePlaceholder": "Follow-up note (optional)…",
+    "save": "Save",
+    "savedTitle": "Reminder saved",
+    "removedTitle": "Reminder removed",
+    "savedDescription": "Follow-up scheduled on {{date}}",
+    "removedDescription": "The reminder was removed",
+    "errorTitle": "Error",
+    "errorDescription": "Unable to save the reminder"
+  },
   "nav": {
     "navigation": "Navigation",
     "administration": "Administration",
