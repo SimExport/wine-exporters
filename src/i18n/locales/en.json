@@ -969,5 +969,273 @@
       "next": "Next",
       "page": "Page {{n}}"
     }
+  },
+  "help": {
+    "title": "Help & Support",
+    "subtitle": "Everything you need to know to get started and make the most of WineExporters.",
+    "firstStepsHeading": "Getting started",
+    "stepLabel": "Step {{n}}",
+    "steps": [
+      {
+        "title": "Create your domain profile",
+        "description": "Fill in your domain name, location, certifications, and a description of your wine style. A complete profile improves campaign relevance."
+      },
+      {
+        "title": "Add your wines",
+        "description": "From the Profile page, add each wine with its color, appellation, EXW price, and vintages. This information helps target the right buyers."
+      },
+      {
+        "title": "Launch your first campaign",
+        "description": "Choose your target markets, write your message or let us help you, then submit your campaign. Our team validates it within 24–48h before sending."
+      },
+      {
+        "title": "Track your prospects",
+        "description": "Interested importers appear in your CRM. Manage them in list or Kanban view, add notes, and track each opportunity's progress."
+      }
+    ],
+    "faqHeading": "Frequently asked questions",
+    "sections": {
+      "profil": {
+        "title": "Profile & Wines",
+        "qa": [
+          {
+            "q": "How do I properly fill in my domain profile?",
+            "a": "Fill in all fields: domain name, location, certifications (organic, biodynamic…), description of your wines and current markets. A complete profile increases targeting quality. Don't forget to add at least one wine."
+          },
+          {
+            "q": "Which wines should I add?",
+            "a": "Add the wines you want to export. For each, specify color, appellation, EXW price in euros, available vintages, and whether it is organic/natural. This information helps target matching importers."
+          },
+          {
+            "q": "What are certifications used for?",
+            "a": "Certifications (AB, Demeter, Nature & Progrès…) are important search criteria for many importers, especially in Northern Europe and North America. Filling them improves targeting precision."
+          },
+          {
+            "q": "Can I edit my profile after launching a campaign?",
+            "a": "Yes, you can edit your profile anytime. Information is used at campaign creation; edits do not affect campaigns already sent."
+          }
+        ]
+      },
+      "campagnes": {
+        "title": "Prospecting campaigns",
+        "qa": [
+          {
+            "q": "How does a campaign work?",
+            "a": "You define your target markets, choose wines to highlight, write a personalized message, and submit the campaign. Our team validates the content then sends the email to a selection of qualified importers in your markets."
+          },
+          {
+            "q": "How long does validation take?",
+            "a": "Our team reviews each campaign within 24–48 business hours. You receive a notification as soon as the campaign is validated and ready to go."
+          },
+          {
+            "q": "What happens after sending?",
+            "a": "Importers who respond positively (price requests, samples, meetings…) automatically appear in your CRM as prospects. You can then contact them directly."
+          },
+          {
+            "q": "Can I cancel a campaign after submission?",
+            "a": "You can contact our support before validation to cancel or modify a campaign. Once validated and launched, sending can no longer be cancelled."
+          }
+        ]
+      },
+      "crm": {
+        "title": "CRM & Prospects",
+        "qa": [
+          {
+            "q": "How do prospects appear in my CRM?",
+            "a": "When an importer responds positively to your campaign, they are automatically added to your CRM with available information (country, company, requested action). You'll find all your prospects in the CRM List and CRM Kanban pages."
+          },
+          {
+            "q": "How to manage the sales pipeline?",
+            "a": "The Kanban view lets you drag prospects from one column to another based on progress: New → Samples requested → Tasting → Negotiation → Won / Lost. Add notes to each prospect to track exchanges."
+          },
+          {
+            "q": "Can I add a prospect manually?",
+            "a": "This feature is under development. For now, prospects are created automatically from campaign responses."
+          }
+        ]
+      },
+      "abonnement": {
+        "title": "Subscription & Billing",
+        "qa": [
+          {
+            "q": "What's the difference between Free and Premium?",
+            "a": "The Free plan lets you create your profile and explore the platform. Premium includes 1 prospecting campaign per month, full CRM access, and priority validation."
+          },
+          {
+            "q": "How do I upgrade to Premium?",
+            "a": "Go to the Billing section in the sidebar. You can subscribe to the monthly plan in a few clicks via our secure Stripe payment system."
+          },
+          {
+            "q": "Are unused campaigns rolled over?",
+            "a": "No, campaign credits are monthly and do not stack. We recommend using your campaign every month to maximize prospecting."
+          }
+        ]
+      }
+    },
+    "contactHeading": "Contact support",
+    "contactTitle": "Can't find your answer?",
+    "contactBody": "Our team replies within <strong>72 business hours</strong>, Monday to Friday. Describe your issue with as much detail as possible for fast help.",
+    "contactCTA": "Send an email"
+  },
+  "roadmap": {
+    "title": "Upcoming features",
+    "subtitle": "Discover our projects to accelerate your exports. Vote for your favorite tools!",
+    "voteSuccess": {
+      "title": "Thanks for your vote!",
+      "description": "Your interest has been recorded."
+    },
+    "voteError": {
+      "title": "Error",
+      "description": "Unable to record your vote."
+    },
+    "interestedOne": "🔥 {{count}} winemaker interested",
+    "interestedOther": "🔥 {{count}} winemakers interested",
+    "voted": "Voted!",
+    "interested": "I'm interested",
+    "features": {
+      "marketplace": {
+        "title": "Marketplace",
+        "description": "Connect directly with importers via a digital and interactive wine catalog."
+      },
+      "tenders": {
+        "title": "Tenders",
+        "description": "A simple tool that lists all available tenders and lets you respond intuitively."
+      },
+      "calculator": {
+        "title": "Export Price Calculator",
+        "description": "Know exactly how much to sell your wines on each market by including taxes and margins."
+      },
+      "tech-sheets": {
+        "title": "Tech Sheets Generator",
+        "description": "Create modern tech sheets, automatically adapted and translated into multiple languages."
+      },
+      "market-guides": {
+        "title": "Market Guides",
+        "description": "Detailed country guides to know where to prospect and how to enter each market."
+      }
+    }
+  },
+  "prospectDetail": {
+    "back": "Back",
+    "notFound": "Prospect not found",
+    "backToProspects": "Back to prospects",
+    "actions": {
+      "price_list": "Receive price list",
+      "samples": "Request samples",
+      "video_call": "Schedule a video call",
+      "tech_sheets": "Receive tech sheets",
+      "other": "Other"
+    },
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "toasts": {
+      "loadError": {
+        "title": "Error",
+        "description": "Unable to load prospect data"
+      },
+      "amountRequired": {
+        "title": "Amount required",
+        "description": "Estimated amount is required to mark as won"
+      },
+      "reasonRequired": {
+        "title": "Reason required",
+        "description": "Lost reason is required"
+      },
+      "statusUpdated": {
+        "title": "Status updated",
+        "description": "Status changed to \"{{label}}\""
+      },
+      "statusError": {
+        "title": "Error",
+        "description": "Unable to update status"
+      },
+      "noteAdded": {
+        "title": "Note added",
+        "description": "The note has been saved"
+      },
+      "noteError": {
+        "title": "Error",
+        "description": "Unable to add note"
+      },
+      "sampleAdded": {
+        "title": "Sample added",
+        "description": "The sample has been added to the request"
+      },
+      "sampleError": {
+        "title": "Error",
+        "description": "Unable to add sample"
+      },
+      "saved": {
+        "title": "Changes saved",
+        "description": "Information has been updated"
+      },
+      "saveError": {
+        "title": "Error",
+        "description": "Unable to save changes"
+      }
+    },
+    "contact": {
+      "title": "Contact info",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "company": "Company",
+      "email": "Email",
+      "phone": "Phone",
+      "website": "Website",
+      "address": "Address",
+      "addressLine1": "Line 1",
+      "addressLine2": "Line 2",
+      "city": "City",
+      "postal": "Postal code",
+      "contact": "Contact",
+      "sendEmail": "Send an email",
+      "emailSubject": "[Performance Export] {{company}} — following your interest"
+    },
+    "requested": {
+      "title": "Requested actions",
+      "otherLabel": "Other request:"
+    },
+    "samples": {
+      "title": "Requested samples",
+      "addWine": "Add a wine",
+      "dialogTitle": "Add a sample",
+      "wineLabel": "Wine",
+      "winePlaceholder": "Select a wine",
+      "quantity": "Quantity",
+      "comment": "Comment",
+      "commentPlaceholder": "Notes about this sample...",
+      "cancel": "Cancel",
+      "add": "Add",
+      "empty": "No sample requested",
+      "quantityLabel": "Quantity: {{q}}",
+      "markSent": "Mark as \"Samples sent\"",
+      "cuveePrefix": "Wine: {{name}}",
+      "cuveeFallback": "Wine"
+    },
+    "commercial": {
+      "title": "Sales tracking",
+      "estimatedAmount": "Estimated amount (€)",
+      "notSet": "Not set",
+      "lostReason": "Lost reason",
+      "lostPlaceholder": "Why was this prospect lost?",
+      "noReason": "Reason not provided"
+    },
+    "notes": {
+      "title": "Internal notes",
+      "placeholder": "Add a note...",
+      "addBtn": "Add note",
+      "empty": "No notes yet"
+    },
+    "tally": {
+      "title": "Tally reference",
+      "responseId": "Response ID",
+      "viewResponse": "View Tally response"
+    },
+    "history": {
+      "title": "History",
+      "created": "Prospect created",
+      "lastUpdate": "Last update"
+    }
   }
 }

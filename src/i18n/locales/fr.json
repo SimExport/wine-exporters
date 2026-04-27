@@ -969,5 +969,273 @@
       "next": "Suivant",
       "page": "Page {{n}}"
     }
+  },
+  "help": {
+    "title": "Aide & Support",
+    "subtitle": "Tout ce qu'il faut savoir pour démarrer et tirer le meilleur de WineExporters.",
+    "firstStepsHeading": "Premiers pas",
+    "stepLabel": "Étape {{n}}",
+    "steps": [
+      {
+        "title": "Créez votre profil domaine",
+        "description": "Renseignez le nom de votre domaine, votre localisation, vos certifications et une description de votre style de vins. Un profil complet améliore la pertinence de vos campagnes."
+      },
+      {
+        "title": "Ajoutez vos cuvées",
+        "description": "Depuis la page Profil, ajoutez chaque cuvée avec sa couleur, son appellation, son prix EXW et ses millésimes. Ces informations serviront à cibler les bons acheteurs."
+      },
+      {
+        "title": "Lancez votre première campagne",
+        "description": "Choisissez vos marchés cibles, rédigez votre message ou laissez-nous vous aider, puis soumettez votre campagne. Notre équipe la valide sous 24-48h avant envoi."
+      },
+      {
+        "title": "Suivez vos prospects",
+        "description": "Les importateurs intéressés apparaissent dans votre CRM. Gérez-les en liste ou en vue Kanban, ajoutez des notes et suivez l'avancement de chaque opportunité."
+      }
+    ],
+    "faqHeading": "Questions fréquentes",
+    "sections": {
+      "profil": {
+        "title": "Profil & Vins",
+        "qa": [
+          {
+            "q": "Comment bien remplir mon profil domaine ?",
+            "a": "Renseignez tous les champs : nom du domaine, localisation, certifications (bio, biodynamie…), description de vos vins et marchés actuels. Un profil complet augmente la qualité du ciblage dans vos campagnes. N'oubliez pas d'ajouter au moins une cuvée."
+          },
+          {
+            "q": "Quelles cuvées dois-je ajouter ?",
+            "a": "Ajoutez les cuvées que vous souhaitez exporter. Pour chacune, précisez la couleur, l'appellation, le prix EXW en euros, les millésimes disponibles et si elle est bio/naturelle. Ces informations permettent de cibler les importateurs correspondants."
+          },
+          {
+            "q": "À quoi servent les certifications ?",
+            "a": "Les certifications (AB, Demeter, Nature & Progrès…) sont des critères de recherche importants pour de nombreux importateurs, notamment en Europe du Nord et en Amérique du Nord. Les renseigner améliore la précision du ciblage."
+          },
+          {
+            "q": "Puis-je modifier mon profil après avoir lancé une campagne ?",
+            "a": "Oui, vous pouvez modifier votre profil à tout moment. Les informations sont utilisées lors de la création de la campagne ; les modifications n'impactent pas les campagnes déjà envoyées."
+          }
+        ]
+      },
+      "campagnes": {
+        "title": "Campagnes de Prospection",
+        "qa": [
+          {
+            "q": "Comment fonctionne une campagne ?",
+            "a": "Vous définissez vos marchés cibles, choisissez vos cuvées à mettre en avant, rédigez un message personnalisé et soumettez la campagne. Notre équipe valide le contenu puis envoie l'e-mail à une sélection d'importateurs qualifiés sur vos marchés."
+          },
+          {
+            "q": "Combien de temps dure la validation ?",
+            "a": "Notre équipe examine chaque campagne sous 24 à 48h ouvrées. Vous recevez une notification dès que la campagne est validée et prête à partir."
+          },
+          {
+            "q": "Que se passe-t-il après l'envoi ?",
+            "a": "Les importateurs qui répondent positivement (demande de tarifs, d'échantillons, de rendez-vous…) apparaissent automatiquement dans votre CRM sous forme de prospects. Vous pouvez alors les contacter directement."
+          },
+          {
+            "q": "Puis-je annuler une campagne après soumission ?",
+            "a": "Vous pouvez contacter notre support avant la validation pour annuler ou modifier une campagne. Une fois validée et lancée, il n'est plus possible d'annuler l'envoi."
+          }
+        ]
+      },
+      "crm": {
+        "title": "CRM & Prospects",
+        "qa": [
+          {
+            "q": "Comment apparaissent les prospects dans mon CRM ?",
+            "a": "Lorsqu'un importateur répond positivement à votre campagne, il est automatiquement ajouté à votre CRM avec les informations disponibles (pays, société, action demandée). Vous retrouvez tous vos prospects dans les pages CRM Liste et CRM Kanban."
+          },
+          {
+            "q": "Comment gérer le pipeline de ventes ?",
+            "a": "La vue Kanban vous permet de faire glisser vos prospects d'une colonne à l'autre selon leur avancement : Nouveau → Échantillons demandés → Dégustation → Négociation → Gagné / Perdu. Ajoutez des notes à chaque prospect pour suivre vos échanges."
+          },
+          {
+            "q": "Puis-je ajouter manuellement un prospect ?",
+            "a": "Cette fonctionnalité est en cours de développement. Pour l'instant, les prospects sont créés automatiquement à partir des réponses aux campagnes."
+          }
+        ]
+      },
+      "abonnement": {
+        "title": "Abonnement & Facturation",
+        "qa": [
+          {
+            "q": "Quelle est la différence entre le plan Free et Premium ?",
+            "a": "Le plan Free vous permet de créer votre profil et d'explorer la plateforme. Le plan Premium inclut 1 campagne de prospection par mois, l'accès complet au CRM, et la priorité dans la validation des campagnes."
+          },
+          {
+            "q": "Comment passer à Premium ?",
+            "a": "Rendez-vous dans la section Facturation de la barre de navigation latérale. Vous pouvez souscrire à l'abonnement mensuel en quelques clics via notre système de paiement sécurisé Stripe."
+          },
+          {
+            "q": "Mes campagnes non utilisées sont-elles reportées ?",
+            "a": "Non, les crédits de campagne sont mensuels et ne se cumulent pas d'un mois à l'autre. Nous recommandons d'utiliser votre campagne chaque mois pour maximiser votre prospection."
+          }
+        ]
+      }
+    },
+    "contactHeading": "Contacter le support",
+    "contactTitle": "Vous ne trouvez pas votre réponse ?",
+    "contactBody": "Notre équipe vous répond sous <strong>72h ouvrées</strong>, du lundi au vendredi. Décrivez votre problème avec le plus de détails possible pour une aide rapide.",
+    "contactCTA": "Envoyer un e-mail"
+  },
+  "roadmap": {
+    "title": "Fonctionnalités à venir",
+    "subtitle": "Découvrez nos projets pour accélérer votre export. Votez pour vos outils préférés !",
+    "voteSuccess": {
+      "title": "Merci pour votre vote !",
+      "description": "Votre intérêt a été enregistré."
+    },
+    "voteError": {
+      "title": "Erreur",
+      "description": "Impossible d'enregistrer votre vote."
+    },
+    "interestedOne": "🔥 {{count}} vigneron intéressé",
+    "interestedOther": "🔥 {{count}} vignerons intéressés",
+    "voted": "Voté !",
+    "interested": "Je suis intéressé",
+    "features": {
+      "marketplace": {
+        "title": "Marketplace",
+        "description": "Connectez-vous directement aux importateurs via un catalogue de cuvées digital et interactif."
+      },
+      "tenders": {
+        "title": "Appels d'Offres",
+        "description": "Un outil simple qui liste tous les appels d'offres disponibles et vous propose d'y répondre de manière intuitive."
+      },
+      "calculator": {
+        "title": "Calculateur Prix Export",
+        "description": "Sachez exactement à combien vendre vos vins sur quels marchés en intégrant taxes et marges."
+      },
+      "tech-sheets": {
+        "title": "Générateur Fiches Techniques",
+        "description": "Créez des fiches techniques modernes, adaptées et traduites automatiquement en plusieurs langues."
+      },
+      "market-guides": {
+        "title": "Fiches Marchés",
+        "description": "Guides détaillés par pays pour savoir où prospecter et comment pénétrer le marché."
+      }
+    }
+  },
+  "prospectDetail": {
+    "back": "Retour",
+    "notFound": "Prospect non trouvé",
+    "backToProspects": "Retour aux prospects",
+    "actions": {
+      "price_list": "Recevoir la liste de prix",
+      "samples": "Demander des échantillons",
+      "video_call": "Planifier une visio",
+      "tech_sheets": "Recevoir fiches techniques",
+      "other": "Autre"
+    },
+    "edit": "Éditer",
+    "cancel": "Annuler",
+    "save": "Sauvegarder",
+    "toasts": {
+      "loadError": {
+        "title": "Erreur",
+        "description": "Impossible de charger les données du prospect"
+      },
+      "amountRequired": {
+        "title": "Montant requis",
+        "description": "Le montant estimé est requis pour marquer comme gagné"
+      },
+      "reasonRequired": {
+        "title": "Raison requise",
+        "description": "La raison de perte est requise"
+      },
+      "statusUpdated": {
+        "title": "Statut mis à jour",
+        "description": "Statut changé vers \"{{label}}\""
+      },
+      "statusError": {
+        "title": "Erreur",
+        "description": "Impossible de mettre à jour le statut"
+      },
+      "noteAdded": {
+        "title": "Note ajoutée",
+        "description": "La note a été enregistrée"
+      },
+      "noteError": {
+        "title": "Erreur",
+        "description": "Impossible d'ajouter la note"
+      },
+      "sampleAdded": {
+        "title": "Échantillon ajouté",
+        "description": "L'échantillon a été ajouté à la demande"
+      },
+      "sampleError": {
+        "title": "Erreur",
+        "description": "Impossible d'ajouter l'échantillon"
+      },
+      "saved": {
+        "title": "Modifications sauvegardées",
+        "description": "Les informations ont été mises à jour"
+      },
+      "saveError": {
+        "title": "Erreur",
+        "description": "Impossible de sauvegarder les modifications"
+      }
+    },
+    "contact": {
+      "title": "Coordonnées",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "company": "Société",
+      "email": "Email",
+      "phone": "Téléphone",
+      "website": "Site web",
+      "address": "Adresse",
+      "addressLine1": "Ligne 1",
+      "addressLine2": "Ligne 2",
+      "city": "Ville",
+      "postal": "Code postal",
+      "contact": "Contact",
+      "sendEmail": "Envoyer un email",
+      "emailSubject": "[Performance Export] {{company}} — suite à votre intérêt"
+    },
+    "requested": {
+      "title": "Actions demandées",
+      "otherLabel": "Autre demande:"
+    },
+    "samples": {
+      "title": "Échantillons demandés",
+      "addWine": "Ajouter un vin",
+      "dialogTitle": "Ajouter un échantillon",
+      "wineLabel": "Cuvée",
+      "winePlaceholder": "Sélectionner un vin",
+      "quantity": "Quantité",
+      "comment": "Commentaire",
+      "commentPlaceholder": "Notes sur cet échantillon...",
+      "cancel": "Annuler",
+      "add": "Ajouter",
+      "empty": "Aucun échantillon demandé",
+      "quantityLabel": "Quantité: {{q}}",
+      "markSent": "Marquer \"Échantillons envoyés\"",
+      "cuveePrefix": "Cuvée: {{name}}",
+      "cuveeFallback": "Cuvée"
+    },
+    "commercial": {
+      "title": "Suivi commercial",
+      "estimatedAmount": "Montant estimé (€)",
+      "notSet": "Non renseigné",
+      "lostReason": "Raison de perte",
+      "lostPlaceholder": "Pourquoi ce prospect a-t-il été perdu ?",
+      "noReason": "Raison non renseignée"
+    },
+    "notes": {
+      "title": "Notes internes",
+      "placeholder": "Ajouter une note...",
+      "addBtn": "Ajouter note",
+      "empty": "Aucune note pour l'instant"
+    },
+    "tally": {
+      "title": "Référence Tally",
+      "responseId": "ID Réponse",
+      "viewResponse": "Voir la réponse Tally"
+    },
+    "history": {
+      "title": "Historique",
+      "created": "Prospect créé",
+      "lastUpdate": "Dernière mise à jour"
+    }
   }
 }
