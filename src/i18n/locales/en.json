@@ -696,5 +696,112 @@
       "errorsCount": "{{count}} blocking error(s):",
       "fix": "Fix"
     }
+  },
+  "createCampaign": {
+    "back": "Back",
+    "title": "Create a campaign",
+    "saveDraft": "Save draft",
+    "submit": "Submit for validation",
+    "continents": {
+      "europe": "Europe",
+      "northAmerica": "North America",
+      "southAmerica": "South America",
+      "asia": "Asia",
+      "oceaniaAfrica": "Oceania & Africa"
+    },
+    "toasts": {
+      "maxReached": {
+        "title": "Maximum reached",
+        "description": "You can select up to {{max}} markets."
+      },
+      "nameRequired": {
+        "title": "Campaign name required",
+        "description": "Please enter a name for your campaign"
+      },
+      "marketsInsufficient": {
+        "title": "Not enough markets",
+        "description": "Please select at least {{min}} markets to target."
+      },
+      "winesRequired": {
+        "title": "Wines required",
+        "description": "Please select at least one wine"
+      },
+      "presentationRequired": {
+        "title": "Domain presentation required",
+        "description": "Please select a domain presentation"
+      },
+      "pricelistRequired": {
+        "title": "Price list required",
+        "description": "Please select an export price list"
+      },
+      "draftNameRequired": {
+        "title": "Name required",
+        "description": "Please enter a name to save"
+      },
+      "draftSaved": {
+        "title": "Draft saved",
+        "description": "Your campaign has been saved as a draft"
+      },
+      "draftError": {
+        "title": "Error",
+        "description": "Unable to save draft"
+      },
+      "subscriptionRequired": {
+        "title": "Subscription required",
+        "description": "You need an active subscription to launch a campaign."
+      },
+      "creditExhausted": {
+        "title": "Campaign credit exhausted"
+      },
+      "creditExhaustedShort": {
+        "title": "Credit exhausted"
+      },
+      "submitted": {
+        "title": "Campaign submitted",
+        "description": "Pending validation (≤72h)"
+      },
+      "submitError": {
+        "title": "Error",
+        "description": "Unable to submit campaign"
+      }
+    },
+    "step1": {
+      "title": "Step 1 — Markets & Wines",
+      "description": "Select target markets, your wines, and the campaign documents",
+      "campaignName": "Campaign name *",
+      "campaignNamePlaceholder": "E.g. 2023 Vintage Launch",
+      "marketsLabel": "Target markets *",
+      "marketsCount": "({{count}}/{{max}} — minimum {{min}})",
+      "infoBlock": "Select between {{min}} and {{max}} markets to prospect. Our team will prepare your campaign by targeting relevant buyers in these markets.",
+      "winesLabel": "Wine selection *",
+      "noWines": "No active wine found. Please add wines to your profile first.",
+      "wineDetails": "{{color}} - {{appellation}} - {{price}}€ EXW",
+      "documentsRequired": "Required documents",
+      "presentationLabel": "Domain presentation *",
+      "presentationPlaceholder": "Select a presentation",
+      "pricelistLabel": "Export price list *",
+      "pricelistPlaceholder": "Select a price list",
+      "techDocsLabel": "Tech sheets (optional)",
+      "techDocsPlaceholder": "Select a tech sheet",
+      "clientNoteLabel": "Note to the team (optional)",
+      "clientNotePlaceholder": "Goals, details, specific requests...",
+      "continueBtn": "Continue to recap"
+    },
+    "step2": {
+      "title": "Step 2 — Recap & Submission",
+      "description": "Review the information before submission",
+      "campaignNameLabel": "Campaign name",
+      "marketsLabel": "Target markets ({{count}})",
+      "winesLabel": "Selected wines ({{count}})",
+      "documentsLabel": "Documents",
+      "presentationItem": "• Presentation: {{title}}",
+      "pricelistItem": "• Price list: {{title}}",
+      "techDocsItem": "• Tech sheets: {{titles}}",
+      "techLinkItem": "• Tech sheets link: {{link}}",
+      "clientNoteLabel": "Note to the team",
+      "warningTitle": "Upon submission, your campaign moves to pending validation.",
+      "warningBody": "Our team prepares your campaign within 72h. You will be notified upon validation. Then, within 7 days, interested importers and buyers will appear in your Prospects and Pipeline spaces.",
+      "backToStep1": "Back to step 1"
+    }
   }
 }

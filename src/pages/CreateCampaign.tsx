@@ -14,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 interface Wine {
   id: string;
   name: string;
@@ -28,15 +29,16 @@ interface Document {
   file_name: string;
 }
 const MARKETS_BY_CONTINENT: Record<string, string[]> = {
-  'Europe': ['Austria', 'Belgium', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'Germany', 'Ireland', 'Italy', 'Netherlands', 'Norway', 'Poland', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom'],
-  'Amérique du Nord': ['Canada', 'United States'],
-  'Amérique du Sud': ['Brazil', 'Mexico'],
-  'Asie': ['China', 'Hong Kong', 'Japan', 'South Korea', 'Taiwan', 'Thailand'],
-  'Océanie & Afrique': ['Australia', 'South Africa'],
+  'europe': ['Austria', 'Belgium', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'Germany', 'Ireland', 'Italy', 'Netherlands', 'Norway', 'Poland', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom'],
+  'northAmerica': ['Canada', 'United States'],
+  'southAmerica': ['Brazil', 'Mexico'],
+  'asia': ['China', 'Hong Kong', 'Japan', 'South Korea', 'Taiwan', 'Thailand'],
+  'oceaniaAfrica': ['Australia', 'South Africa'],
 };
 const MAX_MARKETS = 10;
 const MIN_MARKETS = 3;
 const CreateCampaign = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     user
@@ -101,7 +103,7 @@ const CreateCampaign = () => {
     setSelectedMarkets(prev => {
       if (prev.includes(market)) return prev.filter(m => m !== market);
       if (prev.length >= MAX_MARKETS) {
-        toast({ title: "Maximum atteint", description: `Vous pouvez sélectionner ${MAX_MARKETS} marchés maximum.`, variant: "destructive" });
+        toast({ title: t('createCampaign.toasts.maxReached.title'), description: t('createCampaign.toasts.maxReached.description', { max: MAX_MARKETS }), variant: "destructive" });
         return prev;
       }
       return [...prev, market];
@@ -115,29 +117,29 @@ const CreateCampaign = () => {
   };
   const validateStep1 = () => {
     if (!campaignName.trim()) {
-      toast({ title: "Nom de campagne requis", description: "Veuillez saisir un nom pour votre campagne", variant: "destructive" });
+      toast({ title: t('createCampaign.toasts.nameRequired.title'), description: t('createCampaign.toasts.nameRequired.description'), variant: "destructive" });
       return false;
     }
     if (selectedMarkets.length < MIN_MARKETS) {
-      toast({ title: "Marchés insuffisants", description: `Veuillez sélectionner au moins ${MIN_MARKETS} marchés à cibler.`, variant: "destructive" });
+      toast({ title: t('createCampaign.toasts.marketsInsufficient.title'), description: t('createCampaign.toasts.marketsInsufficient.description', { min: MIN_MARKETS }), variant: "destructive" });
       return false;
     }
     if (selectedWines.length === 0) {
-      toast({ title: "Vins requis", description: "Veuillez sélectionner au moins une cuvée", variant: "destructive" });
+      toast({ title: t('createCampaign.toasts.winesRequired.title'), description: t('createCampaign.toasts.winesRequired.description'), variant: "destructive" });
       return false;
     }
     if (!presentationDoc) {
       toast({
-        title: "Présentation du domaine requise",
-        description: "Veuillez sélectionner une présentation du domaine",
+        title: t('createCampaign.toasts.presentationRequired.title'),
+        description: t('createCampaign.toasts.presentationRequired.description'),
         variant: "destructive"
       });
       return false;
     }
     if (!pricelistDoc) {
       toast({
-        title: "Liste des prix requise",
-        description: "Veuillez sélectionner une liste des prix export",
+        title: t('createCampaign.toasts.pricelistRequired.title'),
+        description: t('createCampaign.toasts.pricelistRequired.description'),
         variant: "destructive"
       });
       return false;
@@ -147,8 +149,8 @@ const CreateCampaign = () => {
   const saveDraft = async () => {
     if (!campaignName.trim()) {
       toast({
-        title: "Nom requis",
-        description: "Veuillez saisir un nom pour sauvegarder",
+        title: t('createCampaign.toasts.draftNameRequired.title'),
+        description: t('createCampaign.toasts.draftNameRequired.description'),
         variant: "destructive"
       });
       return;
@@ -173,15 +175,15 @@ const CreateCampaign = () => {
       } = await supabase.from('campaigns').insert(campaignData).select().single();
       if (error) throw error;
       toast({
-        title: "Brouillon sauvegardé",
-        description: "Votre campagne a été sauvegardée en brouillon"
+        title: t('createCampaign.toasts.draftSaved.title'),
+        description: t('createCampaign.toasts.draftSaved.description')
       });
       navigate('/campaigns');
     } catch (error) {
       console.error('Error saving draft:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder le brouillon",
+        title: t('createCampaign.toasts.draftError.title'),
+        description: t('createCampaign.toasts.draftError.description'),
         variant: "destructive"
       });
     } finally {
@@ -192,8 +194,8 @@ const CreateCampaign = () => {
     // Block free users from submitting
     if (isFreeUser) {
       toast({
-        title: "Abonnement requis",
-        description: "Vous devez avoir un abonnement actif pour lancer une campagne.",
+        title: t('createCampaign.toasts.subscriptionRequired.title'),
+        description: t('createCampaign.toasts.subscriptionRequired.description'),
         variant: "destructive"
       });
       return;
@@ -202,7 +204,7 @@ const CreateCampaign = () => {
     // Check if user has campaigns remaining (admins bypass this check)
     if (!isAdmin && campaignCredits <= 0) {
       toast({
-        title: "Crédit de campagne épuisé",
+        title: t('createCampaign.toasts.creditExhausted.title'),
         description: noCreditsMessage('campaign'),
         variant: "destructive"
       });
@@ -237,7 +239,7 @@ const CreateCampaign = () => {
         const { ok } = await consumeCampaignCredit();
         if (!ok) {
           toast({
-            title: 'Crédit épuisé',
+            title: t('createCampaign.toasts.creditExhaustedShort.title'),
             description: noCreditsMessage('campaign'),
             variant: 'destructive',
           });
@@ -260,15 +262,15 @@ const CreateCampaign = () => {
       }
 
       toast({
-        title: "Campagne soumise",
-        description: "En attente de validation (≤72h)"
+        title: t('createCampaign.toasts.submitted.title'),
+        description: t('createCampaign.toasts.submitted.description')
       });
       navigate('/campaigns');
     } catch (error: any) {
       console.error('Error submitting campaign:', error);
       toast({
-        title: "Erreur",
-        description: error?.message || "Impossible de soumettre la campagne",
+        title: t('createCampaign.toasts.submitError.title'),
+        description: error?.message || t('createCampaign.toasts.submitError.description'),
         variant: "destructive"
       });
     } finally {
@@ -289,19 +291,19 @@ const CreateCampaign = () => {
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/campaigns')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
+              {t('createCampaign.back')}
             </Button>
-            <h1 className="text-2xl font-bold">Créer une campagne</h1>
+            <h1 className="text-2xl font-bold">{t('createCampaign.title')}</h1>
           </div>
           
           <div className="flex gap-2">
             <Button variant="outline" onClick={saveDraft} disabled={loading}>
               <Save className="h-4 w-4 mr-2" />
-              Enregistrer brouillon
+              {t('createCampaign.saveDraft')}
             </Button>
             {step === 2 && <Button onClick={submitForValidation} disabled={loading}>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Soumettre pour validation
+                {t('createCampaign.submit')}
               </Button>}
           </div>
         </div>
@@ -312,24 +314,24 @@ const CreateCampaign = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
-                  Étape 1 — Marchés & Vins
+                  {t('createCampaign.step1.title')}
                 </CardTitle>
-                <CardDescription>Sélectionnez les marchés à cibler, vos cuvées et les documents liés à la campagne</CardDescription>
+                <CardDescription>{t('createCampaign.step1.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Campaign Name */}
                 <div>
-                  <Label htmlFor="campaignName">Nom de la campagne *</Label>
-                  <Input id="campaignName" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder="Ex: Lancement Millésime 2023" className="mt-1" />
+                  <Label htmlFor="campaignName">{t('createCampaign.step1.campaignName')}</Label>
+                  <Input id="campaignName" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder={t('createCampaign.step1.campaignNamePlaceholder')} className="mt-1" />
                 </div>
 
                 {/* Markets to target */}
                 <div>
-                  <Label>Marchés à cibler * <span className="text-muted-foreground font-normal">({selectedMarkets.length}/{MAX_MARKETS} — minimum {MIN_MARKETS})</span></Label>
+                  <Label>{t('createCampaign.step1.marketsLabel')} <span className="text-muted-foreground font-normal">{t('createCampaign.step1.marketsCount', { count: selectedMarkets.length, max: MAX_MARKETS, min: MIN_MARKETS })}</span></Label>
                   <div className="space-y-4 mt-3">
-                    {Object.entries(MARKETS_BY_CONTINENT).map(([continent, markets]) => (
-                      <div key={continent}>
-                        <p className="text-sm font-semibold text-muted-foreground mb-2">{continent}</p>
+                    {Object.entries(MARKETS_BY_CONTINENT).map(([continentKey, markets]) => (
+                      <div key={continentKey}>
+                        <p className="text-sm font-semibold text-muted-foreground mb-2">{t(`createCampaign.continents.${continentKey}`)}</p>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {markets.map(market => (
                             <div key={market} className="flex items-center space-x-2">
@@ -347,17 +349,17 @@ const CreateCampaign = () => {
                 <Alert className="bg-muted/50 border-primary/20">
                   <Lightbulb className="h-4 w-4 text-primary" />
                   <AlertDescription className="text-sm text-muted-foreground">
-                    Sélectionnez entre {MIN_MARKETS} et {MAX_MARKETS} marchés sur lesquels vous souhaitez prospecter. Notre équipe préparera votre campagne en ciblant les acheteurs pertinents sur ces marchés.
+                    {t('createCampaign.step1.infoBlock', { min: MIN_MARKETS, max: MAX_MARKETS })}
                   </AlertDescription>
                 </Alert>
 
                 {/* Wines */}
                 <div>
-                  <Label>Sélection des cuvées *</Label>
+                  <Label>{t('createCampaign.step1.winesLabel')}</Label>
                   {wines.length === 0 ? <Alert className="mt-2">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Aucun vin actif trouvé. Veuillez d'abord ajouter des vins dans votre profil.
+                        {t('createCampaign.step1.noWines')}
                       </AlertDescription>
                     </Alert> : <div className="space-y-2 mt-2">
                       {wines.map(wine => <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg">
@@ -368,7 +370,7 @@ const CreateCampaign = () => {
                               {wine.name}
                             </Label>
                             <p className="text-sm text-muted-foreground">
-                              {wine.color} - {wine.appellation} - {wine.exw_price_eur}€ EXW
+                              {t('createCampaign.step1.wineDetails', { color: wine.color, appellation: wine.appellation, price: wine.exw_price_eur })}
                             </p>
                           </div>
                         </div>)}
@@ -377,14 +379,14 @@ const CreateCampaign = () => {
 
                 {/* Documents */}
                 <div className="space-y-4">
-                  <h3 className="font-medium">Documents requis</h3>
+                  <h3 className="font-medium">{t('createCampaign.step1.documentsRequired')}</h3>
                   
                   {/* Presentation */}
                   <div>
-                    <Label htmlFor="presentation">Présentation du domaine *</Label>
+                    <Label htmlFor="presentation">{t('createCampaign.step1.presentationLabel')}</Label>
                     <Select value={presentationDoc} onValueChange={setPresentationDoc}>
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Sélectionner une présentation" />
+                        <SelectValue placeholder={t('createCampaign.step1.presentationPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {documents.filter(doc => doc.category === 'presentation').map(doc => <SelectItem key={doc.id} value={doc.id}>
@@ -396,10 +398,10 @@ const CreateCampaign = () => {
 
                   {/* Pricelist */}
                   <div>
-                    <Label htmlFor="pricelist">Liste des prix export *</Label>
+                    <Label htmlFor="pricelist">{t('createCampaign.step1.pricelistLabel')}</Label>
                     <Select value={pricelistDoc} onValueChange={setPricelistDoc}>
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Sélectionner une liste de prix" />
+                        <SelectValue placeholder={t('createCampaign.step1.pricelistPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {documents.filter(doc => doc.category === 'price_list').map(doc => <SelectItem key={doc.id} value={doc.id}>
@@ -411,14 +413,14 @@ const CreateCampaign = () => {
 
                   {/* Tech docs */}
                   <div>
-                    <Label>Fiches techniques (facultatif)</Label>
+                    <Label>{t('createCampaign.step1.techDocsLabel')}</Label>
                     <Select value={techDocs.length > 0 ? techDocs[0] : ''} onValueChange={value => {
                   if (value && !techDocs.includes(value)) {
                     setTechDocs(prev => [...prev, value]);
                   }
                 }}>
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Sélectionner une fiche technique" />
+                        <SelectValue placeholder={t('createCampaign.step1.techDocsPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {documents.filter(doc => doc.category === 'tech_sheet').map(doc => <SelectItem key={doc.id} value={doc.id}>
@@ -442,8 +444,8 @@ const CreateCampaign = () => {
 
                   {/* Client note */}
                   <div>
-                    <Label htmlFor="clientNote">Note à l'équipe (optionnel)</Label>
-                    <Textarea id="clientNote" value={clientNote} onChange={e => setClientNote(e.target.value)} placeholder="Objectifs, précisions, demandes particulières..." className="mt-1" rows={3} />
+                    <Label htmlFor="clientNote">{t('createCampaign.step1.clientNoteLabel')}</Label>
+                    <Textarea id="clientNote" value={clientNote} onChange={e => setClientNote(e.target.value)} placeholder={t('createCampaign.step1.clientNotePlaceholder')} className="mt-1" rows={3} />
                   </div>
                 </div>
 
@@ -452,7 +454,7 @@ const CreateCampaign = () => {
                 setStep(2);
               }
             }} className="w-full">
-                  Continuer vers le récapitulatif
+                  {t('createCampaign.step1.continueBtn')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </CardContent>
@@ -463,45 +465,45 @@ const CreateCampaign = () => {
         {step === 2 && <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Étape 2 — Récapitulatif & Soumission</CardTitle>
+                <CardTitle>{t('createCampaign.step2.title')}</CardTitle>
                 <CardDescription>
-                  Vérifiez les informations avant soumission
+                  {t('createCampaign.step2.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Recap */}
                 <div className="space-y-4">
                   <div>
-                    <Label className="font-medium">Nom de la campagne</Label>
+                    <Label className="font-medium">{t('createCampaign.step2.campaignNameLabel')}</Label>
                     <p className="text-sm text-muted-foreground mt-1">{campaignName}</p>
                   </div>
 
                   <div>
-                    <Label className="font-medium">Marchés ciblés ({selectedMarkets.length})</Label>
+                    <Label className="font-medium">{t('createCampaign.step2.marketsLabel', { count: selectedMarkets.length })}</Label>
                     <p className="text-sm text-muted-foreground mt-1">
                       {selectedMarkets.join(', ')}
                     </p>
                   </div>
 
                   <div>
-                    <Label className="font-medium">Cuvées sélectionnées ({selectedWines.length})</Label>
+                    <Label className="font-medium">{t('createCampaign.step2.winesLabel', { count: selectedWines.length })}</Label>
                     <p className="text-sm text-muted-foreground mt-1">
                       {getSelectedWineNames().join(', ')}
                     </p>
                   </div>
 
                   <div>
-                    <Label className="font-medium">Documents</Label>
+                    <Label className="font-medium">{t('createCampaign.step2.documentsLabel')}</Label>
                     <div className="text-sm text-muted-foreground mt-1 space-y-1">
-                      <p>• Présentation: {getDocumentTitle(presentationDoc)}</p>
-                      <p>• Liste des prix: {getDocumentTitle(pricelistDoc)}</p>
-                      {techDocs.length > 0 && <p>• Fiches techniques: {techDocs.map(id => getDocumentTitle(id)).join(', ')}</p>}
-                      {techsLink && <p>• Lien fiches techniques: {techsLink}</p>}
+                      <p>{t('createCampaign.step2.presentationItem', { title: getDocumentTitle(presentationDoc) })}</p>
+                      <p>{t('createCampaign.step2.pricelistItem', { title: getDocumentTitle(pricelistDoc) })}</p>
+                      {techDocs.length > 0 && <p>{t('createCampaign.step2.techDocsItem', { titles: techDocs.map(id => getDocumentTitle(id)).join(', ') })}</p>}
+                      {techsLink && <p>{t('createCampaign.step2.techLinkItem', { link: techsLink })}</p>}
                     </div>
                   </div>
 
                   {clientNote && <div>
-                      <Label className="font-medium">Note à l'équipe</Label>
+                      <Label className="font-medium">{t('createCampaign.step2.clientNoteLabel')}</Label>
                       <p className="text-sm text-muted-foreground mt-1">{clientNote}</p>
                     </div>}
                 </div>
@@ -510,19 +512,19 @@ const CreateCampaign = () => {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>À la soumission, votre campagne passe en attente de validation.</strong><br />
-                    Notre équipe prépare votre campagne sous 72h. Vous serez notifié(e) à la validation. Par la suite, sous 7 jours, les importateurs et acheteurs intéressés apparaîtront dans vos espaces Prospects et Pipeline.
+                    <strong>{t('createCampaign.step2.warningTitle')}</strong><br />
+                    {t('createCampaign.step2.warningBody')}
                   </AlertDescription>
                 </Alert>
 
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setStep(1)}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Retour à l'étape 1
+                    {t('createCampaign.step2.backToStep1')}
                   </Button>
                   <Button onClick={submitForValidation} disabled={loading} className="flex-1">
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Soumettre pour validation
+                    {t('createCampaign.submit')}
                   </Button>
                 </div>
               </CardContent>
