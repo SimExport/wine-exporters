@@ -24,8 +24,7 @@ import {
   ExternalLink,
   MessageSquare
 } from 'lucide-react'
-import { format } from 'date-fns'
-import { fr, enUS } from 'date-fns/locale'
+import { formatDateTime, formatCurrency } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
 
 interface Prospect {
@@ -82,8 +81,7 @@ const PROSPECT_STATUS_KEYS = ['new','samples_requested','samples_sent','received
 const REQUESTED_ACTION_KEYS = ['price_list','samples','video_call','tech_sheets','other'] as const
 
 export default function ProspectDetail() {
-  const { t, i18n } = useTranslation()
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr
+  const { t } = useTranslation()
   const { id } = useParams()
   const { user } = useAuth()
   const { toast } = useToast()
@@ -773,7 +771,7 @@ export default function ProspectDetail() {
                       />
                     ) : (
                       <p className="text-lg font-semibold text-green-600">
-                        {prospect.estimated_amount ? `${prospect.estimated_amount.toLocaleString(i18n.language)} €` : t('prospectDetail.commercial.notSet')}
+                        {prospect.estimated_amount ? formatCurrency(prospect.estimated_amount, 'EUR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : t('prospectDetail.commercial.notSet')}
                       </p>
                     )}
                   </div>
@@ -831,7 +829,7 @@ export default function ProspectDetail() {
                     <div key={note.id} className="p-3 bg-muted rounded-lg">
                       <p className="text-sm">{note.body}</p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        {format(new Date(note.created_at), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}
+                        {formatDateTime(note.created_at)}
                       </p>
                     </div>
                   ))
@@ -882,7 +880,7 @@ export default function ProspectDetail() {
                   <div>
                     <div>{t('prospectDetail.history.created')}</div>
                     <div className="text-xs text-muted-foreground">
-                      {format(new Date(prospect.created_at), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}
+                      {formatDateTime(prospect.created_at)}
                     </div>
                   </div>
                 </div>
@@ -892,7 +890,7 @@ export default function ProspectDetail() {
                     <div>
                       <div>{t('prospectDetail.history.lastUpdate')}</div>
                       <div className="text-xs text-muted-foreground">
-                        {format(new Date(prospect.last_activity_at), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}
+                        {formatDateTime(prospect.last_activity_at)}
                       </div>
                     </div>
                   </div>
