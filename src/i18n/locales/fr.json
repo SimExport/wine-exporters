@@ -1237,5 +1237,147 @@
       "created": "Prospect créé",
       "lastUpdate": "Dernière mise à jour"
     }
+  },
+  "billing": {
+    "title": "Facturation & Abonnement",
+    "subtitle": "Gérez votre forfait et accédez à votre portail de facturation.",
+    "successToast": "Abonnement activé avec succès !",
+    "canceledToast": "Paiement annulé",
+    "loginRequired": "Veuillez vous connecter pour souscrire",
+    "loginRequiredShort": "Veuillez vous connecter",
+    "checkoutError": "Erreur lors de la création du paiement",
+    "portalError": "Erreur lors de l'ouverture du portail",
+    "loading": "Chargement...",
+    "status": {
+      "active": "Actif",
+      "pastDue": "Impayé",
+      "inactive": "Inactif"
+    },
+    "premium": {
+      "title": "Passer Premium",
+      "description": "Accédez à 15 000+ acheteurs qualifiés dans le monde entier",
+      "price": "199€",
+      "priceUnit": "HT / mois",
+      "feature1": "✓ Accès illimité à la base importateurs",
+      "feature2": "✓ 1 campagne de prospection par mois",
+      "feature3": "✓ CRM dédié pour gérer vos prospects",
+      "feature4": "✓ Support prioritaire",
+      "subscribe": "Souscrire maintenant"
+    },
+    "subscription": {
+      "title": "Mon Abonnement",
+      "planName": "ExportVins Premium",
+      "renewal": "Renouvellement automatique mensuel",
+      "manage": "Gérer mon abonnement",
+      "manageHelp": "Pour télécharger vos factures, changer de carte ou résilier, accédez au portail de gestion."
+    },
+    "usage": {
+      "title": "Utilisation du forfait",
+      "subtitle": "Quotas mensuels",
+      "campaignsLabel": "Campagnes restantes",
+      "campaignsUsed": "Vous avez utilisé votre campagne ce mois-ci",
+      "campaignsAvailable": "{{count}} campagne disponible ce mois-ci",
+      "sourcingLabel": "Recherches sur mesure",
+      "sourcingUsed": "Vous avez utilisé votre recherche sur mesure ce mois-ci",
+      "sourcingAvailable": "{{count}} recherche sur mesure disponible",
+      "renewInfo": "Vos crédits sont renouvelés automatiquement chaque mois à la date anniversaire de votre abonnement."
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "loadError": "Impossible de charger les paramètres.",
+    "saveError": "Impossible de sauvegarder les paramètres.",
+    "account": {
+      "title": "Compte",
+      "displayName": "Nom affiché",
+      "displayNamePlaceholder": "Votre nom",
+      "email": "Email de connexion",
+      "password": "Mot de passe",
+      "changePassword": "Changer le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "passwordSuccess": "Mot de passe modifié avec succès.",
+      "passwordError": "Impossible de modifier le mot de passe."
+    },
+    "replyTo": {
+      "title": "Adresse reply-to par défaut",
+      "description": "Cette adresse sera utilisée par défaut dans vos campagnes (Étape 3). Vous pourrez la modifier campagne par campagne.",
+      "label": "Reply-to par défaut",
+      "placeholder": "export@domaine.com",
+      "invalidEmail": "Format email invalide"
+    },
+    "data": {
+      "title": "Données & confidentialité",
+      "description": "Vos données sont stockées de manière sécurisée et l'accès est limité aux équipes autorisées.",
+      "exportLabel": "Exporter mes données",
+      "exportHelp": "Téléchargez toutes vos campagnes et leads",
+      "export": "Exporter",
+      "exportInProgress": "Export en cours",
+      "exportInProgressDesc": "Génération de vos données en cours...",
+      "exportDone": "Export généré",
+      "exportDoneDesc": "Un lien de téléchargement vous sera envoyé par email.",
+      "exportError": "Impossible d'exporter les données.",
+      "dangerZone": "Zone de danger",
+      "dangerHelp": "Supprimer définitivement votre compte",
+      "deleteAccount": "Supprimer mon compte",
+      "deleteTitle": "Supprimer votre compte",
+      "deleteWarning": "Cette action est irréversible. Toutes vos données (campagnes, leads, profil) seront définitivement supprimées.",
+      "deleteConfirmLabel": "Tapez <strong>SUPPRIMER</strong> pour confirmer",
+      "deleteConfirmPlaceholder": "SUPPRIMER",
+      "deleteConfirmKeyword": "SUPPRIMER",
+      "deleteConfirmError": "Veuillez taper 'SUPPRIMER' pour confirmer.",
+      "deleteScheduled": "Suppression programmée",
+      "deleteScheduledDesc": "Votre compte sera supprimé dans les prochaines 24h.",
+      "deleteError": "Impossible de supprimer le compte.",
+      "deletePermanently": "Supprimer définitivement"
+    }
+  },
+  "domainProfile": {
+    "title": "Configuration du Domaine",
+    "subtitle": "Renseignez les informations de votre domaine viticole pour personnaliser votre profil.",
+    "loadError": "Impossible de charger les informations du profil.",
+    "saveSuccess": "Les informations de votre domaine ont été sauvegardées.",
+    "saveError": "Impossible de sauvegarder les informations.",
+    "saving": "Sauvegarde...",
+    "save": "Sauvegarder",
+    "general": {
+      "title": "Informations générales",
+      "description": "Les informations principales de votre domaine",
+      "domainName": "Nom du domaine",
+      "domainNamePlaceholder": "Domaine de la Vallée",
+      "location": "Localisation",
+      "locationPlaceholder": "Bordeaux, France",
+      "aoc": "AOC / Appellation",
+      "aocPlaceholder": "AOC Bordeaux",
+      "website": "Site web",
+      "websitePlaceholder": "https://www.mondomaine.fr"
+    },
+    "production": {
+      "title": "Production",
+      "description": "Informations sur votre production viticole",
+      "surface": "Surface (hectares)",
+      "surfacePlaceholder": "25.5",
+      "bottles": "Bouteilles par an",
+      "bottlesPlaceholder": "150000",
+      "wineTypes": "Types de vins produits",
+      "organic": "En conversion biologique ou certifié bio",
+      "colors": {
+        "red": "Rouge",
+        "white": "Blanc",
+        "rose": "Rosé",
+        "sparkling": "Pétillant"
+      }
+    },
+    "varieties": {
+      "title": "Cépages et Cuvées",
+      "description": "Détails sur vos cépages et cuvées (séparez par des virgules)",
+      "grapes": "Cépages cultivés",
+      "grapesPlaceholder": "Merlot, Cabernet Sauvignon, Petit Verdot",
+      "cuvees": "Cuvées produites",
+      "cuveesPlaceholder": "Cuvée Tradition, Cuvée Prestige, Réserve du Château"
+    }
   }
 }
