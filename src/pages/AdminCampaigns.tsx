@@ -12,11 +12,10 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { fr, enUS } from 'date-fns/locale';
 import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
+import { formatDate } from '@/lib/format';
 
 interface Campaign {
   id: string;
@@ -59,8 +58,7 @@ const COUNTRIES = [
 ];
 
 export default function AdminCampaigns() {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
+  const { t } = useTranslation();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -609,7 +607,7 @@ export default function AdminCampaigns() {
                 {filteredCampaigns.map((campaign) => (
                   <TableRow key={campaign.id} className="hover:bg-muted/50">
                     <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(campaign.created_at), 'dd/MM/yyyy', { locale: dateLocale })}
+                      {formatDate(campaign.created_at)}
                     </TableCell>
                     <TableCell>
                       <Button 
