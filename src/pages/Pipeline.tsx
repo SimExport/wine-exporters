@@ -16,7 +16,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { fr, enUS } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
 
 interface Prospect {
   id: string
@@ -38,48 +39,44 @@ interface Prospect {
   }
 }
 
-const LEAD_TAGS = [
-  { key: 'hot',  label: 'Chaud', dot: '🔴', classes: 'bg-red-100 text-red-700 border-red-200' },
-  { key: 'warm', label: 'Tiède', dot: '🟡', classes: 'bg-amber-100 text-amber-700 border-amber-200' },
-  { key: 'cold', label: 'Froid', dot: '🔵', classes: 'bg-blue-100 text-blue-700 border-blue-200' },
-]
-
-function getInactivityInfo(lastActivityAt?: string): { label: string; isAlert: boolean } {
-  if (!lastActivityAt) return { label: 'Aucune activité', isAlert: false }
-  const days = differenceInDays(new Date(), new Date(lastActivityAt))
-  return {
-    label: days === 0 ? "Aujourd'hui" : `Il y a ${days}j`,
-    isAlert: days >= 15,
-  }
-}
+const LEAD_TAG_KEYS = [
+  { key: 'hot',  classes: 'bg-red-100 text-red-700 border-red-200' },
+  { key: 'warm', classes: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { key: 'cold', classes: 'bg-blue-100 text-blue-700 border-blue-200' },
+] as const
 
 interface Campaign {
   id: string
   name: string
 }
 
-const PIPELINE_STATUSES = [
-  { key: 'new', label: 'À classer', color: 'bg-slate-100 dark:bg-slate-800' },
-  { key: 'samples_requested', label: 'Échantillons à envoyer', color: 'bg-amber-50 dark:bg-amber-950' },
-  { key: 'samples_sent', label: 'Échantillons envoyés', color: 'bg-blue-50 dark:bg-blue-950' },
-  { key: 'received', label: 'Échantillons réceptionnés', color: 'bg-indigo-50 dark:bg-indigo-950' },
-  { key: 'tasted', label: 'Échantillons dégustés', color: 'bg-purple-50 dark:bg-purple-950' },
-  { key: 'negotiation', label: 'Négociation', color: 'bg-orange-50 dark:bg-orange-950' },
-  { key: 'won', label: 'Commande', color: 'bg-green-50 dark:bg-green-950' },
-  { key: 'lost', label: 'Refus', color: 'bg-red-50 dark:bg-red-950' },
-]
+const PIPELINE_STATUS_KEYS = [
+  { key: 'new', color: 'bg-slate-100 dark:bg-slate-800' },
+  { key: 'samples_requested', color: 'bg-amber-50 dark:bg-amber-950' },
+  { key: 'samples_sent', color: 'bg-blue-50 dark:bg-blue-950' },
+  { key: 'received', color: 'bg-indigo-50 dark:bg-indigo-950' },
+  { key: 'tasted', color: 'bg-purple-50 dark:bg-purple-950' },
+  { key: 'negotiation', color: 'bg-orange-50 dark:bg-orange-950' },
+  { key: 'won', color: 'bg-green-50 dark:bg-green-950' },
+  { key: 'lost', color: 'bg-red-50 dark:bg-red-950' },
+] as const
 
-const REQUESTED_ACTION_LABELS = {
-  price_list: 'Liste de prix',
-  samples: 'Échantillons',
-  video_call: 'Visioconférence',
-  tech_sheets: 'Fiches techniques',
-  other: 'Autre'
-}
+const REQUESTED_ACTION_KEYS = ['price_list', 'samples', 'video_call', 'tech_sheets', 'other'] as const
 
 export default function Pipeline() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { toast } = useToast()
+
+  const getInactivityInfo = (lastActivityAt?: string): { label: string; isAlert: boolean } => {
+    if (!lastActivityAt) return { label: t('crm.inactivity.none'), isAlert: false }
+    const days = differenceInDays(new Date(), new Date(lastActivityAt))
+    return {
+      label: days === 0 ? t('crm.inactivity.today') : t('crm.inactivity.daysAgo', { count: days }),
+      isAlert: days >= 15,
+    }
+  }
+
   const [prospects, setProspects] = useState<Prospect[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
@@ -152,8 +149,8 @@ export default function Pipeline() {
     } catch (error) {
       console.error('Error loading data:', error)
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les données",
+        title: t('crm.toasts.loadError.title'),
+        description: t('crm.toasts.loadError.description'),
         variant: "destructive",
       })
     } finally {
@@ -190,15 +187,15 @@ export default function Pipeline() {
       ))
 
       toast({
-        title: "Statut mis à jour",
-        description: "Le prospect a été déplacé",
+        title: t('crm.toasts.statusUpdated.title'),
+        description: t('crm.toasts.statusUpdated.description'),
       })
 
     } catch (error) {
       console.error('Error updating status:', error)
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
+        title: t('crm.toasts.statusError.title'),
+        description: t('crm.toasts.statusError.description'),
         variant: "destructive",
       })
     } finally {
@@ -217,8 +214,8 @@ export default function Pipeline() {
 
       if (existing) {
         toast({
-          title: "Prospect existant",
-          description: "Un prospect avec cet email existe déjà pour cette campagne",
+          title: t('crm.toasts.duplicate.title'),
+          description: t('crm.toasts.duplicate.description'),
           variant: "destructive",
         })
         return
@@ -245,15 +242,15 @@ export default function Pipeline() {
           created_by: user?.id,
           requested_actions: newProspect.requested_actions as any,
           message_snippet: newProspect.requested_samples.length > 0 
-            ? `Échantillons demandés: ${newProspect.requested_samples.join(', ')}`
+            ? t('crm.createDialog.samplesRequestedSnippet', { list: newProspect.requested_samples.join(', ') })
             : null
         })
 
       if (error) throw error
 
       toast({
-        title: "Prospect créé",
-        description: "Le prospect a été ajouté avec succès",
+        title: t('crm.toasts.created.title'),
+        description: t('crm.toasts.created.description'),
       })
 
       setShowCreateModal(false)
@@ -277,8 +274,8 @@ export default function Pipeline() {
     } catch (error) {
       console.error('Error creating prospect:', error)
       toast({
-        title: "Erreur",
-        description: "Impossible de créer le prospect",
+        title: t('crm.toasts.createError.title'),
+        description: t('crm.toasts.createError.description'),
         variant: "destructive",
       })
     }
@@ -320,33 +317,33 @@ export default function Pipeline() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Pipeline</h1>
-            <p className="text-muted-foreground">Vue Kanban de vos prospects</p>
+            <h1 className="text-3xl font-bold">{t('pipeline.title')}</h1>
+            <p className="text-muted-foreground">{t('pipeline.subtitle')}</p>
           </div>
 
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link to="/prospects">Vue liste</Link>
+              <Link to="/prospects">{t('pipeline.listView')}</Link>
             </Button>
             
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  Ajouter un prospect
+                  {t('pipeline.addProspect')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>Créer un prospect</DialogTitle>
+                  <DialogTitle>{t('crm.createDialog.title')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="campaign">Campagne *</Label>
+                      <Label htmlFor="campaign">{t('crm.createDialog.campaign')}</Label>
                       <Select value={newProspect.campaign_id} onValueChange={(value) => setNewProspect(prev => ({ ...prev, campaign_id: value }))}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une campagne" />
+                          <SelectValue placeholder={t('crm.createDialog.campaignPlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
                           {campaigns.map(campaign => (
@@ -358,118 +355,118 @@ export default function Pipeline() {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="country">Pays</Label>
+                      <Label htmlFor="country">{t('crm.createDialog.country')}</Label>
                       <Input
                         value={newProspect.country}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, country: e.target.value }))}
-                        placeholder="France"
+                        placeholder={t('crm.createDialog.countryPlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="first_name">Prénom *</Label>
+                      <Label htmlFor="first_name">{t('crm.createDialog.firstName')}</Label>
                       <Input
                         value={newProspect.first_name}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, first_name: e.target.value }))}
-                        placeholder="Jean"
+                        placeholder={t('crm.createDialog.firstNamePlaceholder')}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="last_name">Nom *</Label>
+                      <Label htmlFor="last_name">{t('crm.createDialog.lastName')}</Label>
                       <Input
                         value={newProspect.last_name}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, last_name: e.target.value }))}
-                        placeholder="Dupont"
+                        placeholder={t('crm.createDialog.lastNamePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="company_name">Société *</Label>
+                    <Label htmlFor="company_name">{t('crm.createDialog.company')}</Label>
                     <Input
                       value={newProspect.company_name}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, company_name: e.target.value }))}
-                      placeholder="Caves Martin"
+                      placeholder={t('crm.createDialog.companyPlaceholder')}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">{t('crm.createDialog.email')}</Label>
                     <Input
                       type="email"
                       value={newProspect.email}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="jean@caves-martin.fr"
+                      placeholder={t('crm.createDialog.emailPlaceholder')}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="phone">Téléphone</Label>
+                      <Label htmlFor="phone">{t('crm.createDialog.phone')}</Label>
                       <Input
                         value={newProspect.phone}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="+33 6 12 34 56 78"
+                        placeholder={t('crm.createDialog.phonePlaceholder')}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="website_url">Site web</Label>
+                      <Label htmlFor="website_url">{t('crm.createDialog.website')}</Label>
                       <Input
                         value={newProspect.website_url}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, website_url: e.target.value }))}
-                        placeholder="https://example.com"
+                        placeholder={t('crm.createDialog.websitePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="address">Adresse</Label>
+                    <Label htmlFor="address">{t('crm.createDialog.address')}</Label>
                     <Input
                       value={newProspect.address_line1}
                       onChange={(e) => setNewProspect(prev => ({ ...prev, address_line1: e.target.value }))}
-                      placeholder="123 rue du Commerce"
+                      placeholder={t('crm.createDialog.addressPlaceholder')}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="city">Ville</Label>
+                      <Label htmlFor="city">{t('crm.createDialog.city')}</Label>
                       <Input
                         value={newProspect.city}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, city: e.target.value }))}
-                        placeholder="Paris"
+                        placeholder={t('crm.createDialog.cityPlaceholder')}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="postal_code">Code postal</Label>
+                      <Label htmlFor="postal_code">{t('crm.createDialog.postal')}</Label>
                       <Input
                         value={newProspect.postal_code}
                         onChange={(e) => setNewProspect(prev => ({ ...prev, postal_code: e.target.value }))}
-                        placeholder="75001"
+                        placeholder={t('crm.createDialog.postalPlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label>Actions demandées</Label>
+                    <Label>{t('crm.createDialog.requestedActions')}</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
-                      {Object.entries(REQUESTED_ACTION_LABELS).map(([key, label]) => (
+                      {REQUESTED_ACTION_KEYS.map((key) => (
                         <div key={key} className="flex items-center space-x-2">
                           <Checkbox
                             id={`pipeline-${key}`}
                             checked={newProspect.requested_actions.includes(key)}
                             onCheckedChange={(checked) => handleRequestedActionChange(key, !!checked)}
                           />
-                          <Label htmlFor={`pipeline-${key}`} className="text-sm">{label}</Label>
+                          <Label htmlFor={`pipeline-${key}`} className="text-sm">{t(`crm.actions.${key}`)}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <Label>Échantillons demandés</Label>
+                    <Label>{t('crm.createDialog.requestedSamples')}</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {profileCuvees.map((cuvee) => (
                         <div key={cuvee} className="flex items-center space-x-2">
@@ -489,7 +486,7 @@ export default function Pipeline() {
                         </div>
                       ))}
                       {profileCuvees.length === 0 && (
-                        <p className="text-sm text-muted-foreground col-span-2">Aucune cuvée dans votre profil</p>
+                        <p className="text-sm text-muted-foreground col-span-2">{t('crm.createDialog.noCuvees')}</p>
                       )}
                     </div>
                   </div>
@@ -497,13 +494,13 @@ export default function Pipeline() {
 
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-                    Annuler
+                    {t('crm.createDialog.cancel')}
                   </Button>
                   <Button 
                     onClick={handleCreateProspect}
                     disabled={!newProspect.campaign_id || !newProspect.first_name || !newProspect.last_name || !newProspect.company_name || !newProspect.email}
                   >
-                    Créer le prospect
+                    {t('crm.createDialog.create')}
                   </Button>
                 </div>
               </DialogContent>
@@ -513,7 +510,7 @@ export default function Pipeline() {
 
         {/* Kanban Board */}
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {PIPELINE_STATUSES.map(status => {
+          {PIPELINE_STATUS_KEYS.map(status => {
             const statusProspects = getProspectsByStatus(status.key)
             
             return (
@@ -525,7 +522,7 @@ export default function Pipeline() {
               >
                 <div className="p-3 border-b border-border/50">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm">{status.label}</h3>
+                    <h3 className="font-semibold text-sm">{t(`crm.kanbanStatuses.${status.key}`)}</h3>
                     <Badge variant="secondary" className="text-xs">
                       {statusProspects.length}
                     </Badge>
@@ -550,15 +547,15 @@ export default function Pipeline() {
                                   to={`/prospects/${prospect.id}`}
                                   className="font-medium text-sm hover:underline block truncate"
                                 >
-                                  {prospect.company_name || 'Sans nom'}
+                                  {prospect.company_name || t('pipeline.noName')}
                                 </Link>
                                 {/* Temperature tag */}
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <button className="flex-shrink-0 focus:outline-none">
-                                      {prospect.status && LEAD_TAGS.find(t => t.key === prospect.status) ? (
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${LEAD_TAGS.find(t => t.key === prospect.status)!.classes}`}>
-                                          {LEAD_TAGS.find(t => t.key === prospect.status)!.label}
+                                      {prospect.status && LEAD_TAG_KEYS.find(tg => tg.key === prospect.status) ? (
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${LEAD_TAG_KEYS.find(tg => tg.key === prospect.status)!.classes}`}>
+                                          {t(`crm.tags.${prospect.status}`)}
                                         </span>
                                       ) : (
                                         <Tag className="w-3 h-3 text-muted-foreground opacity-50 hover:opacity-100" />
@@ -566,13 +563,13 @@ export default function Pipeline() {
                                     </button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="w-32">
-                                    {LEAD_TAGS.map(tag => (
+                                    {LEAD_TAG_KEYS.map(tag => (
                                       <DropdownMenuItem key={tag.key} onClick={() => handleTagUpdate(prospect.id, tag.key)}>
-                                        <span className={`text-xs px-1.5 py-0.5 rounded-full border mr-2 ${tag.classes}`}>{tag.label}</span>
+                                        <span className={`text-xs px-1.5 py-0.5 rounded-full border mr-2 ${tag.classes}`}>{t(`crm.tags.${tag.key}`)}</span>
                                       </DropdownMenuItem>
                                     ))}
                                     <DropdownMenuItem onClick={() => handleTagUpdate(prospect.id, null)}>
-                                      <span className="text-xs text-muted-foreground">Aucun</span>
+                                      <span className="text-xs text-muted-foreground">{t('crm.tags.none')}</span>
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -597,7 +594,7 @@ export default function Pipeline() {
                                 <div className="flex flex-wrap gap-1 mt-2">
                                   {prospect.requested_actions.slice(0, 2).map(action => (
                                     <Badge key={action} variant="outline" className="text-[10px] px-1 py-0">
-                                      {REQUESTED_ACTION_LABELS[action as keyof typeof REQUESTED_ACTION_LABELS]}
+                                      {t(`crm.actions.${action}`)}
                                     </Badge>
                                   ))}
                                   {prospect.requested_actions.length > 2 && (
@@ -643,7 +640,7 @@ export default function Pipeline() {
                     
                     {statusProspects.length === 0 && (
                       <div className="text-center py-8 text-muted-foreground text-sm">
-                        Aucun prospect
+                        {t('pipeline.noProspects')}
                       </div>
                     )}
                   </div>
