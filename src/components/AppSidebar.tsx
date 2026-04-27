@@ -8,10 +8,9 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { formatDistanceToNow } from 'date-fns';
-import { fr, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { formatRelative } from '@/lib/format';
 
 const navigationItems = [
   { key: "dashboard", url: "/dashboard", icon: Target },
@@ -30,8 +29,7 @@ const settingsItems = [
 ] as const;
 
 export function AppSidebar() {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr;
+  const { t } = useTranslation();
   const {
     user,
     signOut
@@ -198,7 +196,7 @@ export function AppSidebar() {
                           <p className="text-xs font-semibold text-foreground leading-tight">{notif.title}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground leading-snug line-clamp-2">{notif.description}</p>
                           <p className="mt-1 text-[10px] text-muted-foreground/70">
-                            {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: dateLocale })}
+                            {formatRelative(notif.created_at)}
                           </p>
                         </div>
                         {!notif.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
