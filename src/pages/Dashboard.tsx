@@ -43,7 +43,7 @@ interface ActivityItem {
 }
 
 const Dashboard = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
