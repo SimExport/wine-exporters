@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { addDays, format, isPast, isToday } from 'date-fns'
-import { fr, enUS } from 'date-fns/locale'
+import { addDays, isPast, isToday } from 'date-fns'
 import { useTranslation } from 'react-i18next'
 import { Bell, BellOff, CalendarClock, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { formatDate, formatDateLong, getDateFnsLocale } from '@/lib/format'
 
 interface ReminderPopoverProps {
   leadId: string
@@ -28,8 +28,8 @@ function getReminderStatus(remindAt?: string | null): 'overdue' | 'today' | 'upc
 }
 
 export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size = 'sm' }: ReminderPopoverProps) {
-  const { t, i18n } = useTranslation()
-  const dateLocale = i18n.language.startsWith('en') ? enUS : fr
+  const { t } = useTranslation()
+  const dateLocale = getDateFnsLocale()
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(remindAt ? new Date(remindAt) : undefined)
@@ -53,7 +53,7 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
       toast({
         title: selectedDate ? t('reminders.savedTitle') : t('reminders.removedTitle'),
         description: selectedDate
-          ? t('reminders.savedDescription', { date: format(selectedDate, 'dd MMMM yyyy', { locale: dateLocale }) })
+          ? t('reminders.savedDescription', { date: formatDateLong(selectedDate) })
           : t('reminders.removedDescription'),
       })
       setOpen(false)
@@ -91,7 +91,7 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
           <button
             className={cn('focus:outline-none transition-opacity', iconClass)}
             title={remindAt
-              ? t('reminders.tooltipSet', { date: format(new Date(remindAt), 'dd/MM/yyyy', { locale: dateLocale }) })
+              ? t('reminders.tooltipSet', { date: formatDate(remindAt) })
               : t('reminders.tooltipAdd')}
           >
             <Bell className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
@@ -173,7 +173,7 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
           })}
         >
           {status === 'overdue' && '⚠ '}
-          {format(new Date(remindAt), 'dd/MM', { locale: dateLocale })}
+          {formatDate(remindAt).slice(0, 5)}
           <button onClick={handleClear} className="opacity-60 hover:opacity-100">
             <X className="w-2.5 h-2.5" />
           </button>
