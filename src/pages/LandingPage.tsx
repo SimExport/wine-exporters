@@ -68,10 +68,14 @@ const pillarsConfig = [
 ] as const;
 
 /* ─── Pillar visual ─── */
-const PillarVisual = ({ src }: {src: string;}) =>
-<div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-border">
-    <img src={src} alt="Aperçu de la fonctionnalité" className="w-full h-full object-fill" />
-  </div>;
+const PillarVisual = ({ src }: {src: string;}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-border">
+      <img src={src} alt={t('landingExtra.featurePreviewAlt')} className="w-full h-full object-fill" />
+    </div>
+  );
+};
 
 
 /* ─── Testimonials with expand ─── */

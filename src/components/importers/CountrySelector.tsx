@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Globe, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { formatNumber } from '@/lib/format';
 import {
   ComposableMap,
   Geographies,
@@ -70,6 +72,7 @@ const NUMERIC_TO_CODE: Record<string, string> = {
 };
 
 export function CountrySelector({ selectedCountry, onSelectCountry, onTotalCountChange }: CountrySelectorProps) {
+  const { t } = useTranslation();
   const [countryCounts, setCountryCounts] = useState<Record<string, number>>({});
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -217,21 +220,21 @@ export function CountrySelector({ selectedCountry, onSelectCountry, onTotalCount
         <div className="p-4 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Globe className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Sélectionnez un marché</span>
+            <span className="text-sm font-medium">{t('countrySelector.selectMarket')}</span>
           </div>
           <div className="flex items-center gap-2">
             {!loading && (
               <span className="text-xs text-muted-foreground mr-2">
-                {totalContacts.toLocaleString()} contacts · {Object.values(countryCounts).filter(c => c > 0).length} marchés
+                {t('countrySelector.contactsMarkets', { contacts: formatNumber(totalContacts), markets: Object.values(countryCounts).filter(c => c > 0).length })}
               </span>
             )}
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleZoomIn} title="Zoom avant">
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleZoomIn} title={t('countrySelector.zoomIn')}>
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleZoomOut} title="Zoom arrière">
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleZoomOut} title={t('countrySelector.zoomOut')}>
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleReset} title="Réinitialiser">
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleReset} title={t('countrySelector.reset')}>
               <RotateCcw className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -288,7 +291,9 @@ export function CountrySelector({ selectedCountry, onSelectCountry, onTotalCount
                             if (countryDef) {
                               setHoveredCountry(appCode!);
                               setTooltipContent(
-                                `${countryDef.name} — ${count > 0 ? `${count.toLocaleString()} contacts` : 'Aucun contact'}`
+                                count > 0
+                                  ? t('countrySelector.tooltipContacts', { name: countryDef.name, count: formatNumber(count) })
+                                  : t('countrySelector.tooltipNoContact', { name: countryDef.name })
                               );
                             } else {
                               const geoName = geo.properties?.NAME || '';
