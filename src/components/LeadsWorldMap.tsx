@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { formatNumber } from '@/lib/format';
 
 // Country ISO 2-letter code → display name (French)
 const COUNTRY_NAMES: Record<string, string> = {
