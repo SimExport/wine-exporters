@@ -1633,5 +1633,22 @@
     "errorsCount_other": "{{count}} erreurs",
     "errorTitle": "Erreur",
     "errorNotAuth": "Non authentifié"
+  },
+  "leadsWorldMap": {
+    "title": "Répartition géographique des leads",
+    "empty": "Aucun lead géolocalisé pour l'instant",
+    "emptyHint": "Les pays apparaîtront ici dès que des leads seront reçus"
+  },
+  "countrySelector": {
+    "selectMarket": "Sélectionnez un marché",
+    "contactsMarkets": "{{contacts}} contacts · {{markets}} marchés",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "reset": "Réinitialiser",
+    "tooltipContacts": "{{name}} — {{count}} contacts",
+    "tooltipNoContact": "{{name}} — Aucun contact"
+  },
+  "landingExtra": {
+    "featurePreviewAlt": "Aperçu de la fonctionnalité"
   }
 }

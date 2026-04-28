@@ -1633,5 +1633,22 @@
     "errorsCount_other": "{{count}} errors",
     "errorTitle": "Error",
     "errorNotAuth": "Not authenticated"
+  },
+  "leadsWorldMap": {
+    "title": "Geographic distribution of leads",
+    "empty": "No geolocated leads yet",
+    "emptyHint": "Countries will appear here as soon as leads are received"
+  },
+  "countrySelector": {
+    "selectMarket": "Select a market",
+    "contactsMarkets": "{{contacts}} contacts · {{markets}} markets",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "reset": "Reset",
+    "tooltipContacts": "{{name}} — {{count}} contacts",
+    "tooltipNoContact": "{{name}} — No contact"
+  },
+  "landingExtra": {
+    "featurePreviewAlt": "Feature preview"
   }
 }
