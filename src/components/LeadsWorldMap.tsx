@@ -63,6 +63,7 @@ interface LeadsWorldMapProps {
 
 export function LeadsWorldMap({ campaignIds }: LeadsWorldMapProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [bubbles, setBubbles] = useState<CountryBubble[]>([]);
   const [maxCount, setMaxCount] = useState(1);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string; count: number } | null>(null);
@@ -117,7 +118,7 @@ export function LeadsWorldMap({ campaignIds }: LeadsWorldMapProps) {
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
         <Globe className="h-4 w-4 text-muted-foreground" />
-        <CardTitle className="text-base">Répartition géographique des leads</CardTitle>
+        <CardTitle className="text-base">{t('leadsWorldMap.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -127,8 +128,8 @@ export function LeadsWorldMap({ campaignIds }: LeadsWorldMapProps) {
         ) : bubbles.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-center">
             <Globe className="h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground">Aucun lead géolocalisé pour l'instant</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Les pays apparaîtront ici dès que des leads seront reçus</p>
+            <p className="text-sm text-muted-foreground">{t('leadsWorldMap.empty')}</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">{t('leadsWorldMap.emptyHint')}</p>
           </div>
         ) : (
           <div className="space-y-4">
