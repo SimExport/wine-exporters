@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Globe, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { formatNumber } from '@/lib/format';
 import {
   ComposableMap,
   Geographies,
