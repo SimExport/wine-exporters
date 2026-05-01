@@ -65,7 +65,8 @@
     "help": "Aide",
     "settings": "Paramètres",
     "billing": "Facturation",
-    "adminCampaigns": "Campagnes Admin"
+    "adminCampaigns": "Campagnes Admin",
+    "adminInvitations": "Invitations"
   },
   "sidebar": {
     "notifications": "Notifications",
@@ -103,7 +104,9 @@
     "accountCreated": "Compte créé avec succès",
     "accountCreatedDescription": "Vérifiez votre email pour confirmer votre compte",
     "signedIn": "Connexion réussie",
-    "welcome": "Bienvenue sur ExportVins !"
+    "welcome": "Bienvenue sur ExportVins !",
+    "noAccountQ": "Pas encore de compte ?",
+    "requestDemo": "Demander une démo"
   },
   "credits": {
     "nextPeriod": "la prochaine période",
@@ -1400,15 +1403,17 @@
   "landing": {
     "nav": {
       "signIn": "Se connecter",
-      "start": "Démarrer"
+      "start": "Démarrer",
+      "requestDemo": "Demander une démo"
     },
     "hero": {
       "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
       "titleLead": "Trouvez vos futurs importateurs,",
       "titleHighlight": "développez vos ventes export.",
       "subtitle": "La première plateforme de prospection tout-en-un.\nAccédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.",
-      "ctaPrimary": "Démarrer ma prospection",
+      "ctaPrimary": "Demander une démo",
       "ctaSecondary": "Découvrir la méthode",
+      "haveAccount": "J'ai déjà un compte → Se connecter",
       "stats": {
         "domains": "domaines accompagnés",
         "importers": "importateurs trouvés",
