@@ -313,6 +313,51 @@ export type Database = {
           },
         ]
       }
+      demo_requests: {
+        Row: {
+          annual_volume: string | null
+          consent: boolean
+          created_at: string
+          domain_name: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          message: string | null
+          region: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          annual_volume?: string | null
+          consent?: boolean
+          created_at?: string
+          domain_name: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          message?: string | null
+          region?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          annual_volume?: string | null
+          consent?: boolean
+          created_at?: string
+          domain_name?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          message?: string | null
+          region?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string
