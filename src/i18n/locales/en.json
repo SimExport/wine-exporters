@@ -989,6 +989,7 @@
   "help": {
     "title": "Help & Support",
     "subtitle": "Everything you need to know to get started and make the most of WineExporters.",
+    "replayTutorial": "Replay the getting-started tutorial",
     "firstStepsHeading": "Getting started",
     "stepLabel": "Step {{n}}",
     "steps": [
@@ -1650,5 +1651,67 @@
   },
   "landingExtra": {
     "featurePreviewAlt": "Feature preview"
+  },
+  "onboarding": {
+    "brand": "Account setup",
+    "stepCounter": "Step {{current}}/{{total}}",
+    "skip": "Skip for now",
+    "start": "Get started",
+    "nextStep": "Next step",
+    "welcome": {
+      "title": "Welcome to WineExporters",
+      "subtitle": "Let's configure your account in 4 steps — 5 minutes is all it takes.",
+      "s1": "Your estate",
+      "s2": "Your markets",
+      "s3": "First campaign",
+      "s4": "Ready"
+    },
+    "step2": {
+      "title": "Tell us about your estate",
+      "subtitle": "These details personalize your recommendations.",
+      "domainName": "Estate name",
+      "region": "Wine region",
+      "regionPh": "Select a region",
+      "wineTypes": "Wine types produced",
+      "volume": "Annual volume produced",
+      "volumePh": "Select",
+      "certifs": "Certifications",
+      "priceRange": "Export price range",
+      "priceRangePh": "Select"
+    },
+    "step3": {
+      "title": "Which markets do you want to conquer?",
+      "subtitle": "Pick at least 1 market to personalize your importer recommendations.",
+      "other": "Other markets",
+      "otherPh": "E.g. Brazil, UAE...",
+      "minMarketTitle": "Selection required",
+      "minMarketDesc": "Please select at least one target market to continue."
+    },
+    "markets": {
+      "scandinavia": "Scandinavia (Sweden, Denmark, Norway, Finland)",
+      "benelux": "Benelux (Belgium, Netherlands, Luxembourg)",
+      "dach": "Germany / Austria / Switzerland",
+      "uk": "United Kingdom",
+      "usaCanada": "USA / Canada",
+      "asia": "Asia (Japan, China, Korea)"
+    },
+    "step4": {
+      "title": "Your account is ready ✓",
+      "subtitle": "Here's a recap. Pick how you'd like to continue.",
+      "recap": "Summary",
+      "optionA": {
+        "title": "Guide me",
+        "desc": "Create my first campaign now with a pre-filled template."
+      },
+      "optionB": {
+        "title": "I'll do it later",
+        "desc": "Go straight to my dashboard."
+      }
+    },
+    "resume": {
+      "title": "Resume my setup",
+      "subtitle": "{{done}} of {{total}} steps completed",
+      "cta": "Resume"
+    }
   }
 }

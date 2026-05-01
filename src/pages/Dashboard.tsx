@@ -10,6 +10,8 @@ import { Grape, Settings, LogOut, CreditCard, Globe, Clock, CheckCircle, AlertCi
 import { LeadsWorldMap } from '@/components/LeadsWorldMap';
 import { useTranslation } from 'react-i18next';
 import { formatDate, formatNumber, formatRelative } from '@/lib/format';
+import { OnboardingResumeBanner } from '@/components/onboarding/OnboardingResumeBanner';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface Profile {
   id: string;
@@ -47,6 +49,7 @@ const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const onboarding = useOnboarding();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -205,6 +208,13 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {!onboarding.loading && !onboarding.completed && onboarding.dismissed && (
+          <OnboardingResumeBanner
+            progress={onboarding.progress}
+            onResume={() => window.dispatchEvent(new Event('open-onboarding'))}
+            onDismiss={onboarding.refresh}
+          />
+        )}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-1">{t('dashboardPage.title')}</h2>
           <p className="text-muted-foreground">

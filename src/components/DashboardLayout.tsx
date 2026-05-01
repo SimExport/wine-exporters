@@ -1,8 +1,10 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -10,6 +12,21 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, loading } = useAuth();
+  const onboarding = useOnboarding();
+  const location = useLocation();
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  // Auto-open on very first visit
+  useEffect(() => {
+    if (!onboarding.loading && onboarding.shouldShow) setWizardOpen(true);
+  }, [onboarding.loading, onboarding.shouldShow]);
+
+  // Allow other components to trigger the wizard via custom event
+  useEffect(() => {
+    const handler = () => setWizardOpen(true);
+    window.addEventListener('open-onboarding', handler);
+    return () => window.removeEventListener('open-onboarding', handler);
+  }, []);
 
   if (loading) {
     return (
@@ -30,6 +47,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <main className="flex-1 overflow-auto">
           {children}
         </main>
+        <OnboardingWizard
+          open={wizardOpen}
+          onClose={() => { setWizardOpen(false); onboarding.refresh(); }}
+          onComplete={() => { setWizardOpen(false); onboarding.refresh(); }}
+        />
       </div>
     </SidebarProvider>
   );

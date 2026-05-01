@@ -553,6 +553,8 @@ export type Database = {
           id: string
           is_published: boolean | null
           location: string | null
+          onboarding_completed: boolean
+          onboarding_dismissed_at: string | null
           organic_body: string | null
           organic_conversion: boolean | null
           organic_year: number | null
@@ -586,6 +588,8 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           location?: string | null
+          onboarding_completed?: boolean
+          onboarding_dismissed_at?: string | null
           organic_body?: string | null
           organic_conversion?: boolean | null
           organic_year?: number | null
@@ -619,6 +623,8 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           location?: string | null
+          onboarding_completed?: boolean
+          onboarding_dismissed_at?: string | null
           organic_body?: string | null
           organic_conversion?: boolean | null
           organic_year?: number | null
