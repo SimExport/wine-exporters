@@ -161,11 +161,11 @@ const LandingPage = () => {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
-            <Button variant="ghost" asChild>
-              <Link to="/auth">{t("landing.nav.signIn")}</Link>
-            </Button>
             <Button asChild>
-              <Link to="/auth">{t("landing.nav.start")}</Link>
+              <Link to="/demande-demo">{t("landing.nav.requestDemo")}</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/auth" className="text-muted-foreground">{t("landing.nav.signIn")}</Link>
             </Button>
           </div>
         </div>
@@ -211,16 +211,21 @@ const LandingPage = () => {
             </div>
           </FadeIn>
           <FadeIn delay={0.35}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" asChild className="text-lg px-8">
-                <Link to="/auth">
-                  {t("landing.hero.ctaPrimary")}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                <a href="#method">{t("landing.hero.ctaSecondary")}</a>
-              </Button>
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button size="lg" asChild className="text-lg px-8">
+                  <Link to="/demande-demo">
+                    {t("landing.hero.ctaPrimary")}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="text-lg px-8">
+                  <a href="#method">{t("landing.hero.ctaSecondary")}</a>
+                </Button>
+              </div>
+              <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {t("landing.hero.haveAccount")}
+              </Link>
             </div>
           </FadeIn>
         </div>
@@ -367,7 +372,7 @@ const LandingPage = () => {
                     </li>)}
                 </ul>
                 <Button size="lg" className="w-full text-lg" asChild>
-                  <Link to="/auth">{t("landing.pricing.ctaStart")}</Link>
+                  <Link to="/demande-demo">{t("landing.pricing.ctaStart")}</Link>
                 </Button>
                 <p className="text-sm text-muted-foreground text-center mt-4">
                   {t("landing.pricing.founders")}
@@ -415,7 +420,7 @@ const LandingPage = () => {
               {t("landing.finalCta.title")}
             </h2>
             <Button size="lg" asChild className="text-lg px-10">
-              <Link to="/auth">
+              <Link to="/demande-demo">
                 {t("landing.finalCta.button")}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
