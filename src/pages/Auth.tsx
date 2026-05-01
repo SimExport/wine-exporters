@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Grape } from 'lucide-react';
@@ -15,30 +14,25 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const handleSubmit = async (isSignUp: boolean) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!email || !password) {
       toast({ title: t('common.error'), description: t('auth.fillAllFields'), variant: "destructive" });
       return;
     }
     setLoading(true);
     try {
-      const { error } = isSignUp ? await signUp(email, password) : await signIn(email, password);
+      const { error } = await signIn(email, password);
       if (error) {
         let errorMessage = t('auth.genericError');
         if (error.message.includes('Invalid login credentials')) errorMessage = t('auth.invalidCredentials');
-        else if (error.message.includes('User already registered')) errorMessage = t('auth.userExists');
-        else if (error.message.includes('Password should be at least')) errorMessage = t('auth.passwordTooShort');
         toast({ title: t('auth.errorTitle'), description: errorMessage, variant: "destructive" });
       } else {
-        if (isSignUp) {
-          toast({ title: t('auth.accountCreated'), description: t('auth.accountCreatedDescription') });
-        } else {
-          toast({ title: t('auth.signedIn'), description: t('auth.welcome') });
-          navigate('/');
-        }
+        toast({ title: t('auth.signedIn'), description: t('auth.welcome') });
+        navigate('/');
       }
     } catch (error) {
       toast({ title: t('common.error'), description: t('auth.unexpectedError') });
@@ -67,38 +61,25 @@ const Auth = () => {
           <CardDescription className="text-muted-foreground">{t('auth.description')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">{t('auth.signIn')}</TabsTrigger>
-              <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signin-email">{t('auth.email')}</Label>
-                <Input id="signin-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signin-password">{t('auth.password')}</Label>
-                <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
-              </div>
-              <Button onClick={() => handleSubmit(false)} className="w-full" disabled={loading}>
-                {loading ? t('auth.signingIn') : t('auth.signInButton')}
-              </Button>
-            </TabsContent>
-            <TabsContent value="signup" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">{t('auth.email')}</Label>
-                <Input id="signup-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">{t('auth.password')}</Label>
-                <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
-              </div>
-              <Button onClick={() => handleSubmit(true)} className="w-full" disabled={loading}>
-                {loading ? t('auth.signingUp') : t('auth.signUpButton')}
-              </Button>
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signin-email">{t('auth.email')}</Label>
+              <Input id="signin-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="signin-password">{t('auth.password')}</Label>
+              <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? t('auth.signingIn') : t('auth.signInButton')}
+            </Button>
+          </form>
+          <div className="mt-6 pt-6 border-t border-border text-center text-sm text-muted-foreground">
+            {t('auth.noAccountQ')}{' '}
+            <Link to="/demande-demo" className="text-primary font-medium hover:underline">
+              {t('auth.requestDemo')}
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>;
