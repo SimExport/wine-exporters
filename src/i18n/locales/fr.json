@@ -1650,5 +1650,67 @@
   },
   "landingExtra": {
     "featurePreviewAlt": "Aperçu de la fonctionnalité"
+  },
+  "onboarding": {
+    "brand": "Configuration de votre compte",
+    "stepCounter": "Étape {{current}}/{{total}}",
+    "skip": "Passer pour l'instant",
+    "start": "Commencer",
+    "nextStep": "Étape suivante",
+    "welcome": {
+      "title": "Bienvenue sur WineExporters",
+      "subtitle": "Configurons votre compte en 4 étapes — 5 minutes suffisent.",
+      "s1": "Votre domaine",
+      "s2": "Vos marchés",
+      "s3": "Première campagne",
+      "s4": "C'est prêt"
+    },
+    "step2": {
+      "title": "Parlez-nous de votre domaine",
+      "subtitle": "Ces informations personnalisent vos recommandations.",
+      "domainName": "Nom du domaine",
+      "region": "Région viticole",
+      "regionPh": "Choisir une région",
+      "wineTypes": "Types de vins produits",
+      "volume": "Volume annuel produit",
+      "volumePh": "Sélectionner",
+      "certifs": "Certifications",
+      "priceRange": "Fourchette de prix export",
+      "priceRangePh": "Sélectionner"
+    },
+    "step3": {
+      "title": "Quels marchés voulez-vous conquérir ?",
+      "subtitle": "Sélectionnez au moins 1 marché pour personnaliser vos recommandations d'importateurs.",
+      "other": "Autres marchés",
+      "otherPh": "Ex : Brésil, Émirats Arabes Unis...",
+      "minMarketTitle": "Sélection requise",
+      "minMarketDesc": "Choisissez au moins un marché cible pour continuer."
+    },
+    "markets": {
+      "scandinavia": "Scandinavie (Suède, Danemark, Norvège, Finlande)",
+      "benelux": "Benelux (Belgique, Pays-Bas, Luxembourg)",
+      "dach": "Allemagne / Autriche / Suisse",
+      "uk": "Royaume-Uni",
+      "usaCanada": "États-Unis / Canada",
+      "asia": "Asie (Japon, Chine, Corée)"
+    },
+    "step4": {
+      "title": "Votre compte est prêt ✓",
+      "subtitle": "Voici un récapitulatif. Choisissez la suite que vous préférez.",
+      "recap": "Récapitulatif",
+      "optionA": {
+        "title": "Je veux être guidé",
+        "desc": "Créer ma première campagne maintenant avec un modèle pré-rempli."
+      },
+      "optionB": {
+        "title": "Je le ferai plus tard",
+        "desc": "Accéder directement à mon tableau de bord."
+      }
+    },
+    "resume": {
+      "title": "Reprendre mon setup",
+      "subtitle": "{{done}} sur {{total}} étapes complétées",
+      "cta": "Reprendre"
+    }
   }
 }
