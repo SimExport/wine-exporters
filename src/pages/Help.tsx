@@ -1,4 +1,4 @@
-import { BookOpen, MessageCircle, User, Grape, Megaphone, Users, Mail, ChevronRight, HelpCircle } from "lucide-react";
+import { BookOpen, MessageCircle, User, Grape, Megaphone, Users, Mail, ChevronRight, HelpCircle, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,15 @@ const Help = () => {
         <p className="text-muted-foreground text-lg">
           {t("help.subtitle")}
         </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-4"
+          onClick={() => window.dispatchEvent(new Event('open-onboarding'))}
+        >
+          <Sparkles className="h-4 w-4 mr-2 text-primary" />
+          {t("help.replayTutorial")}
+        </Button>
       </div>
 
       {/* Premiers pas */}
