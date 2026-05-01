@@ -7,9 +7,9 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/DashboardLayout";
 import AdminRoute from "@/components/AdminRoute";
-import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
+import DemoRequest from "./pages/DemoRequest";
 import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
 import Profile from "./pages/Profile";
@@ -22,6 +22,7 @@ import Prospects from "./pages/Prospects";
 import ProspectDetail from "./pages/ProspectDetail";
 import Pipeline from "./pages/Pipeline";
 import AdminCampaigns from "./pages/AdminCampaigns";
+import AdminInvitations from "./pages/AdminInvitations";
 import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
@@ -58,6 +59,17 @@ const App = () => (
           <Routes>
             <Route path="/" element={<AuthenticatedApp />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<Navigate to="/auth" replace />} />
+            <Route path="/demande-demo" element={<DemoRequest />} />
+            <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
+            <Route
+              path="/register"
+              element={<Navigate to="/demande-demo" replace state={{ fromRegister: true }} />}
+            />
+            <Route
+              path="/signup"
+              element={<Navigate to="/demande-demo" replace state={{ fromRegister: true }} />}
+            />
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
             <Route path="/campaigns" element={<DashboardLayout><Campaigns /></DashboardLayout>} />
@@ -74,6 +86,13 @@ const App = () => (
               <DashboardLayout>
                 <AdminRoute>
                   <AdminCampaigns />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
+            <Route path="/admin/invitations" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminInvitations />
                 </AdminRoute>
               </DashboardLayout>
             } />
