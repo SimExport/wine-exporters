@@ -989,6 +989,7 @@
   "help": {
     "title": "Aide & Support",
     "subtitle": "Tout ce qu'il faut savoir pour démarrer et tirer le meilleur de WineExporters.",
+    "replayTutorial": "Revoir le tutoriel de démarrage",
     "firstStepsHeading": "Premiers pas",
     "stepLabel": "Étape {{n}}",
     "steps": [
