@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -113,6 +113,14 @@ export function AppSidebar() {
                     <NavLink to="/admin/campaigns" end className={getNavCls}>
                       <Shield className="h-4 w-4" />
                       <span>{t('nav.adminCampaigns')}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/invitations" end className={getNavCls}>
+                      <UserPlus className="h-4 w-4" />
+                      <span>{t('nav.adminInvitations')}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

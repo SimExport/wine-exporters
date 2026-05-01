@@ -65,7 +65,8 @@
     "help": "Help",
     "settings": "Settings",
     "billing": "Billing",
-    "adminCampaigns": "Admin Campaigns"
+    "adminCampaigns": "Admin Campaigns",
+    "adminInvitations": "Invitations"
   },
   "sidebar": {
     "notifications": "Notifications",
@@ -103,7 +104,9 @@
     "accountCreated": "Account created",
     "accountCreatedDescription": "Check your email to confirm your account",
     "signedIn": "Signed in successfully",
-    "welcome": "Welcome to ExportVins!"
+    "welcome": "Welcome to ExportVins!",
+    "noAccountQ": "No account yet?",
+    "requestDemo": "Request a demo"
   },
   "credits": {
     "nextPeriod": "the next period",
@@ -1400,15 +1403,17 @@
   "landing": {
     "nav": {
       "signIn": "Sign in",
-      "start": "Get started"
+      "start": "Get started",
+      "requestDemo": "Request a demo"
     },
     "hero": {
       "badge": "🍷 The all-in-one platform for wineries",
       "titleLead": "Find your future importers,",
       "titleHighlight": "grow your export sales.",
       "subtitle": "The first all-in-one prospecting platform.\nAccess qualified databases, send your campaigns, and track your contacts in one place.",
-      "ctaPrimary": "Start prospecting",
+      "ctaPrimary": "Request a demo",
       "ctaSecondary": "Discover the method",
+      "haveAccount": "I already have an account → Sign in",
       "stats": {
         "domains": "wineries supported",
         "importers": "importers found",
@@ -1472,7 +1477,7 @@
       "planName": "WineExporters",
       "priceSuffix": "excl. tax / month",
       "commitment": "3-month commitment",
-      "ctaStart": "Get started now",
+      "ctaStart": "Request a demo",
       "founders": "Founder access available — contact us for preferential pricing.",
       "inclusions": [
         "Unlimited access to databases",
@@ -1509,7 +1514,7 @@
     },
     "finalCta": {
       "title": "Ready to conquer new markets?",
-      "button": "Get started now"
+      "button": "Request a demo"
     },
     "footer": {
       "copyright": "ExportVins © 2026 — The prospecting tool for winegrowers.",
@@ -1713,5 +1718,44 @@
       "subtitle": "{{done}} of {{total}} steps completed",
       "cta": "Resume"
     }
+  },
+  "demoRequest": {
+    "title": "Request a demo",
+    "subtitle": "Tell us about your winery. We'll get back to you within 48h to schedule a call.",
+    "subtitleRedirect": "Access to WineExporters is by invitation only. Request your demo below — we'll get back to you within 48h.",
+    "haveAccount": "Sign in",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Work email",
+    "domainName": "Winery name",
+    "region": "Region",
+    "regionPh": "Choose a region",
+    "volume": "Annual volume",
+    "volumePh": "Select",
+    "message": "What brings you here?",
+    "messagePh": "Tell us about your export goals, target markets, current challenges…",
+    "consent": "I agree to be contacted by the WineExporters team about my request.",
+    "submit": "Send my request",
+    "submitting": "Sending…",
+    "thanksTitle": "Thank you {{name}}!",
+    "thanksBody": "We'll get back to you within 48h to schedule your demo.",
+    "backHome": "Back to home",
+    "errorTitle": "Error",
+    "errorValidation": "Please check the required fields (first name, last name, email, winery, consent).",
+    "errorGeneric": "Couldn't send your request. Please try again in a moment."
+  },
+  "adminInvitations": {
+    "title": "User invitations",
+    "subtitle": "Create an account for a winery after their demo request is approved. The recipient gets a link to set their password.",
+    "formTitle": "Invite a new user",
+    "formDesc": "Enter the contact's work email. A Supabase invitation email will be sent.",
+    "emailLabel": "Contact email",
+    "send": "Send invitation",
+    "sending": "Sending…",
+    "successTitle": "Invitation sent",
+    "successDesc": "{{email}} will receive an email to set their password.",
+    "errorTitle": "Error",
+    "errorGeneric": "Couldn't send the invitation.",
+    "invalidEmail": "Invalid email."
   }
 }

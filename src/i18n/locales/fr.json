@@ -65,7 +65,8 @@
     "help": "Aide",
     "settings": "Paramètres",
     "billing": "Facturation",
-    "adminCampaigns": "Campagnes Admin"
+    "adminCampaigns": "Campagnes Admin",
+    "adminInvitations": "Invitations"
   },
   "sidebar": {
     "notifications": "Notifications",
@@ -103,7 +104,9 @@
     "accountCreated": "Compte créé avec succès",
     "accountCreatedDescription": "Vérifiez votre email pour confirmer votre compte",
     "signedIn": "Connexion réussie",
-    "welcome": "Bienvenue sur ExportVins !"
+    "welcome": "Bienvenue sur ExportVins !",
+    "noAccountQ": "Pas encore de compte ?",
+    "requestDemo": "Demander une démo"
   },
   "credits": {
     "nextPeriod": "la prochaine période",
@@ -1400,15 +1403,17 @@
   "landing": {
     "nav": {
       "signIn": "Se connecter",
-      "start": "Démarrer"
+      "start": "Démarrer",
+      "requestDemo": "Demander une démo"
     },
     "hero": {
       "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
       "titleLead": "Trouvez vos futurs importateurs,",
       "titleHighlight": "développez vos ventes export.",
       "subtitle": "La première plateforme de prospection tout-en-un.\nAccédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.",
-      "ctaPrimary": "Démarrer ma prospection",
+      "ctaPrimary": "Demander une démo",
       "ctaSecondary": "Découvrir la méthode",
+      "haveAccount": "J'ai déjà un compte → Se connecter",
       "stats": {
         "domains": "domaines accompagnés",
         "importers": "importateurs trouvés",
@@ -1472,7 +1477,7 @@
       "planName": "WineExporters",
       "priceSuffix": "HT / mois",
       "commitment": "engagement 3 mois",
-      "ctaStart": "Démarrer maintenant",
+      "ctaStart": "Demander une démo",
       "founders": "Accès fondateur disponible — contactez-nous pour bénéficier du tarif préférentiel.",
       "inclusions": [
         "Accès illimité aux bases de données",
@@ -1509,7 +1514,7 @@
     },
     "finalCta": {
       "title": "Prêt à conquérir de nouveaux marchés ?",
-      "button": "Démarrer maintenant"
+      "button": "Demander une démo"
     },
     "footer": {
       "copyright": "ExportVins © 2026 — L'outil de prospection des vignerons.",
@@ -1713,5 +1718,44 @@
       "subtitle": "{{done}} sur {{total}} étapes complétées",
       "cta": "Reprendre"
     }
+  },
+  "demoRequest": {
+    "title": "Demander une démo",
+    "subtitle": "Présentez-nous votre domaine. Nous reviendrons vers vous sous 48h pour organiser un échange.",
+    "subtitleRedirect": "L'accès à WineExporters se fait sur invitation. Demandez votre démo ci-dessous — nous reviendrons vers vous sous 48h.",
+    "haveAccount": "Se connecter",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email professionnel",
+    "domainName": "Nom du domaine viticole",
+    "region": "Région",
+    "regionPh": "Choisir une région",
+    "volume": "Volume annuel",
+    "volumePh": "Sélectionner",
+    "message": "Qu'est-ce qui vous amène ?",
+    "messagePh": "Parlez-nous de vos objectifs export, marchés visés, défis actuels…",
+    "consent": "J'accepte d'être contacté par l'équipe WineExporters concernant ma demande.",
+    "submit": "Envoyer ma demande",
+    "submitting": "Envoi en cours…",
+    "thanksTitle": "Merci {{name}} !",
+    "thanksBody": "Nous reviendrons vers vous sous 48h pour organiser votre démo.",
+    "backHome": "Retour à l'accueil",
+    "errorTitle": "Erreur",
+    "errorValidation": "Vérifiez les champs obligatoires (prénom, nom, email, domaine, consentement).",
+    "errorGeneric": "Impossible d'envoyer votre demande. Réessayez dans un instant."
+  },
+  "adminInvitations": {
+    "title": "Invitations utilisateurs",
+    "subtitle": "Créez un compte pour un domaine après validation de sa demande de démo. Le destinataire reçoit un lien pour définir son mot de passe.",
+    "formTitle": "Inviter un nouvel utilisateur",
+    "formDesc": "Saisissez l'email professionnel du contact. Un email d'invitation Supabase lui sera envoyé.",
+    "emailLabel": "Email du contact",
+    "send": "Envoyer l'invitation",
+    "sending": "Envoi…",
+    "successTitle": "Invitation envoyée",
+    "successDesc": "{{email}} recevra un email pour définir son mot de passe.",
+    "errorTitle": "Erreur",
+    "errorGeneric": "Impossible d'envoyer l'invitation.",
+    "invalidEmail": "Email invalide."
   }
 }
