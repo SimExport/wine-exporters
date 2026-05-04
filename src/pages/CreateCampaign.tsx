@@ -12,7 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb, Check } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 interface Wine {
@@ -28,15 +31,38 @@ interface Document {
   category: string;
   file_name: string;
 }
-const MARKETS_BY_CONTINENT: Record<string, string[]> = {
-  'europe': ['Austria', 'Belgium', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'Germany', 'Ireland', 'Italy', 'Netherlands', 'Norway', 'Poland', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom'],
-  'northAmerica': ['Canada', 'United States'],
-  'southAmerica': ['Brazil', 'Mexico'],
-  'asia': ['China', 'Hong Kong', 'Japan', 'South Korea', 'Taiwan', 'Thailand'],
-  'oceaniaAfrica': ['Australia', 'South Africa'],
+type MarketEntry = { name: string; flag: string };
+const MARKETS_BY_CONTINENT: Record<string, MarketEntry[]> = {
+  europe: [
+    { name: 'Austria', flag: '🇦🇹' }, { name: 'Belgium', flag: '🇧🇪' }, { name: 'Croatia', flag: '🇭🇷' },
+    { name: 'Czech Republic', flag: '🇨🇿' }, { name: 'Denmark', flag: '🇩🇰' }, { name: 'Estonia', flag: '🇪🇪' },
+    { name: 'Finland', flag: '🇫🇮' }, { name: 'Germany', flag: '🇩🇪' }, { name: 'Greece', flag: '🇬🇷' },
+    { name: 'Hungary', flag: '🇭🇺' }, { name: 'Ireland', flag: '🇮🇪' }, { name: 'Italy', flag: '🇮🇹' },
+    { name: 'Netherlands', flag: '🇳🇱' }, { name: 'Norway', flag: '🇳🇴' }, { name: 'Poland', flag: '🇵🇱' },
+    { name: 'Portugal', flag: '🇵🇹' }, { name: 'Romania', flag: '🇷🇴' }, { name: 'Serbia', flag: '🇷🇸' },
+    { name: 'Spain', flag: '🇪🇸' }, { name: 'Sweden', flag: '🇸🇪' }, { name: 'Switzerland', flag: '🇨🇭' },
+    { name: 'United Kingdom', flag: '🇬🇧' },
+  ],
+  northAmerica: [
+    { name: 'Canada', flag: '🇨🇦' }, { name: 'Mexico', flag: '🇲🇽' }, { name: 'United States', flag: '🇺🇸' },
+  ],
+  latinAmerica: [
+    { name: 'Argentina', flag: '🇦🇷' }, { name: 'Brazil', flag: '🇧🇷' }, { name: 'Chile', flag: '🇨🇱' },
+    { name: 'Colombia', flag: '🇨🇴' }, { name: 'Peru', flag: '🇵🇪' },
+  ],
+  asia: [
+    { name: 'China', flag: '🇨🇳' }, { name: 'Hong Kong', flag: '🇭🇰' }, { name: 'India', flag: '🇮🇳' },
+    { name: 'Japan', flag: '🇯🇵' }, { name: 'Singapore', flag: '🇸🇬' }, { name: 'South Korea', flag: '🇰🇷' },
+    { name: 'Taiwan', flag: '🇹🇼' }, { name: 'Thailand', flag: '🇹🇭' },
+    { name: 'UAE', flag: '🇦🇪' }, { name: 'Vietnam', flag: '🇻🇳' },
+  ],
+  oceaniaAfrica: [
+    { name: 'Australia', flag: '🇦🇺' }, { name: 'Morocco', flag: '🇲🇦' },
+    { name: 'Nigeria', flag: '🇳🇬' }, { name: 'South Africa', flag: '🇿🇦' },
+  ],
 };
-const MAX_MARKETS = 10;
-const MIN_MARKETS = 3;
+const MAX_MARKETS = 15;
+const MIN_MARKETS = 5;
 const CreateCampaign = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -63,6 +89,7 @@ const CreateCampaign = () => {
   // Form data
   const [campaignName, setCampaignName] = useState('');
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
+  const [openToOtherMarkets, setOpenToOtherMarkets] = useState(false);
   const [selectedWines, setSelectedWines] = useState<string[]>([]);
   const [presentationDoc, setPresentationDoc] = useState('');
   const [pricelistDoc, setPricelistDoc] = useState('');
