@@ -169,6 +169,7 @@ export type Database = {
           message_html: string | null
           message_text: string | null
           name: string
+          open_to_other_markets: boolean
           price_max: number | null
           price_min: number | null
           reply_to: string | null
@@ -216,6 +217,7 @@ export type Database = {
           message_html?: string | null
           message_text?: string | null
           name: string
+          open_to_other_markets?: boolean
           price_max?: number | null
           price_min?: number | null
           reply_to?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           message_html?: string | null
           message_text?: string | null
           name?: string
+          open_to_other_markets?: boolean
           price_max?: number | null
           price_min?: number | null
           reply_to?: string | null
