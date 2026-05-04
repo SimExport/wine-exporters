@@ -3,12 +3,10 @@ import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import pillarNetworkImg from "@/assets/pillar-network.png";
-import pillarContactImg from "@/assets/pillar-contact.png";
-import pillarSuiviImg from "@/assets/pillar-suivi.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
@@ -30,7 +28,10 @@ import {
   Send,
   Eye,
   Package,
-  Clock } from
+  Clock,
+  KanbanSquare,
+  List,
+  Megaphone } from
 "lucide-react";
 
 /* ─── Animation wrapper ─── */
@@ -62,19 +63,170 @@ const painPointsConfig = [
 ] as const;
 
 const pillarsConfig = [
-  { id: "step1", visual: pillarNetworkImg, bulletIcons: [Filter, Users], bulletKeys: ["bullet1", "bullet2"] },
-  { id: "step2", visual: pillarContactImg, bulletIcons: [Send, Eye], bulletKeys: ["bullet1", "bullet2"] },
-  { id: "step3", visual: pillarSuiviImg, bulletIcons: [Kanban, Package, Clock], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
+  { id: "step1", bulletIcons: [Filter, Users], bulletKeys: ["bullet1", "bullet2"] },
+  { id: "step2", bulletIcons: [Send, Eye], bulletKeys: ["bullet1", "bullet2"] },
+  { id: "step3", bulletIcons: [Kanban, Package, Clock], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
 ] as const;
 
-/* ─── Pillar visual ─── */
-const PillarVisual = ({ src }: {src: string;}) => {
-  const { t } = useTranslation();
-  return (
-    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-border">
-      <img src={src} alt={t('landingExtra.featurePreviewAlt')} className="w-full h-full object-fill" />
+/* ─── Pillar mockups (real React components, hardcoded data) ─── */
+const MOCK_IMPORTERS = [
+  { name: "Vinos del Mundo", country: "Espagne", flag: "🇪🇸", type: "Rouge", status: "Nouveau", tone: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  { name: "Tokyo Wine Co.", country: "Japon", flag: "🇯🇵", type: "Blanc", status: "Actif", tone: "bg-green-500/10 text-green-600 dark:text-green-400" },
+  { name: "Nordic Cellars", country: "Suède", flag: "🇸🇪", type: "Rosé", status: "Actif", tone: "bg-green-500/10 text-green-600 dark:text-green-400" },
+  { name: "Atlantic Imports", country: "USA", flag: "🇺🇸", type: "Rouge", status: "Nouveau", tone: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  { name: "Berlin Vintage", country: "Allemagne", flag: "🇩🇪", type: "Pétillant", status: "Contacté", tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+];
+
+const ImportersMock = () => (
+  <div className="w-full rounded-2xl border bg-card shadow-lg overflow-hidden">
+    <div className="p-4 border-b bg-muted/30 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          readOnly
+          value="Rechercher un importateur…"
+          className="pl-9 h-9 bg-background pointer-events-none"
+        />
+      </div>
+      <Badge variant="outline" className="gap-1.5 self-start sm:self-auto">
+        <Filter className="h-3 w-3" /> Marché : Tous
+      </Badge>
     </div>
-  );
+    <div className="divide-y">
+      <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground bg-muted/20">
+        <div className="col-span-5">Importateur</div>
+        <div className="col-span-3 hidden sm:block">Pays</div>
+        <div className="col-span-2 hidden sm:block">Type</div>
+        <div className="col-span-7 sm:col-span-2 text-right">Statut</div>
+      </div>
+      {MOCK_IMPORTERS.map((imp, i) => (
+        <div
+          key={i}
+          className={`grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm ${i >= 2 ? "hidden sm:grid" : ""}`}
+        >
+          <div className="col-span-5 font-medium truncate">{imp.name}</div>
+          <div className="col-span-3 hidden sm:flex items-center gap-1.5 text-muted-foreground">
+            <span>{imp.flag}</span>
+            <span className="truncate">{imp.country}</span>
+          </div>
+          <div className="col-span-2 hidden sm:block text-muted-foreground">{imp.type}</div>
+          <div className="col-span-7 sm:col-span-2 text-right">
+            <span className={`inline-block text-[10px] font-semibold rounded px-2 py-0.5 ${imp.tone}`}>
+              {imp.status}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const MOCK_CAMPAIGNS = [
+  {
+    title: "Export Premium — Asie",
+    markets: ["🇯🇵 Japon", "🇸🇬 Singapour", "🇰🇷 Corée"],
+    status: "Active",
+    statusTone: "bg-green-500/10 text-green-600 dark:text-green-400",
+    progress: 78,
+    contacted: "18 importateurs contactés",
+  },
+  {
+    title: "Bio & Biodynamie — Europe du Nord",
+    markets: ["🇸🇪 Suède", "🇩🇰 Danemark", "🇳🇱 Pays-Bas"],
+    status: "En cours",
+    statusTone: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    progress: 45,
+    contacted: "7 importateurs contactés",
+  },
+  {
+    title: "Cuvée Tradition — UK & USA",
+    markets: ["🇬🇧 UK", "🇺🇸 USA"],
+    status: "Terminée",
+    statusTone: "bg-muted text-foreground",
+    progress: 100,
+    contacted: "24 mises en relation générées",
+  },
+];
+
+const CampaignsMock = () => (
+  <div className="w-full space-y-3">
+    {MOCK_CAMPAIGNS.map((c, i) => (
+      <div
+        key={i}
+        className={`rounded-xl border bg-card p-4 sm:p-5 shadow-sm space-y-3 ${i >= 2 ? "hidden sm:block" : ""}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <Megaphone className="h-4 w-4 text-primary" />
+            </div>
+            <p className="font-semibold truncate">{c.title}</p>
+          </div>
+          <span className={`shrink-0 text-[10px] font-semibold rounded px-2 py-0.5 ${c.statusTone}`}>
+            {c.status}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {c.markets.map(m => (
+            <Badge key={m} variant="outline" className="font-normal">{m}</Badge>
+          ))}
+        </div>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{c.contacted}</span>
+            <span className="tabular-nums">{c.progress}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all"
+              style={{ width: `${c.progress}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const KANBAN_STATUSES = [
+  { label: "Contacté", tone: "bg-muted text-foreground", cards: [{ name: "Vinos del Mundo", flag: "🇪🇸" }, { name: "Berlin Vintage", flag: "🇩🇪" }] },
+  { label: "Intéressé", tone: "bg-blue-500/10 text-blue-600 dark:text-blue-400", cards: [{ name: "Tokyo Wine Co.", flag: "🇯🇵" }, { name: "Nordic Cellars", flag: "🇸🇪" }] },
+  { label: "Négociation", tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400", cards: [{ name: "Atlantic Imports", flag: "🇺🇸" }] },
+  { label: "Converti", tone: "bg-green-500/10 text-green-600 dark:text-green-400", cards: [{ name: "London Cellars", flag: "🇬🇧" }] },
+];
+
+const PipelineMock = () => (
+  <div className="w-full rounded-2xl border bg-card p-4 shadow-lg">
+    <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
+      <Badge variant="secondary" className="gap-1.5"><KanbanSquare className="h-3 w-3" />Kanban</Badge>
+      <Badge variant="outline" className="gap-1.5"><List className="h-3 w-3" />Liste</Badge>
+    </div>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {KANBAN_STATUSES.map((s, i) => (
+        <div key={i} className="rounded-lg bg-muted/40 p-2 space-y-2 min-w-0">
+          <div className={`text-[10px] font-semibold uppercase tracking-wide rounded px-1.5 py-0.5 ${s.tone}`}>
+            {s.label}
+          </div>
+          <div className="space-y-1.5">
+            {s.cards.map((c, j) => (
+              <div key={j} className="rounded-md bg-card border p-2 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span aria-hidden>{c.flag}</span>
+                  <span className="font-medium truncate">{c.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const PillarVisual = ({ id }: { id: "step1" | "step2" | "step3" }) => {
+  if (id === "step1") return <ImportersMock />;
+  if (id === "step2") return <CampaignsMock />;
+  return <PipelineMock />;
 };
 
 
