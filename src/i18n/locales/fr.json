@@ -1672,25 +1672,21 @@
       "s4": "C'est prêt"
     },
     "step2": {
-      "title": "Parlez-nous de votre domaine",
-      "subtitle": "Ces informations personnalisent vos recommandations.",
-      "domainName": "Nom du domaine",
-      "region": "Région viticole",
-      "regionPh": "Choisir une région",
-      "wineTypes": "Types de vins produits",
-      "volume": "Volume annuel produit",
-      "volumePh": "Sélectionner",
-      "certifs": "Certifications",
-      "priceRange": "Fourchette de prix export",
-      "priceRangePh": "Sélectionner"
+      "title": "Complétez votre profil domaine",
+      "subtitle": "C'est la base pour cibler les bons importateurs et personnaliser vos campagnes.",
+      "intro": "Rendez-vous dans la page Profil pour renseigner :",
+      "b1": "Nom du domaine et région viticole",
+      "b2": "Types de vins, cépages et cuvées",
+      "b3": "Volume annuel et gamme de prix export",
+      "b4": "Certifications (Bio, HVE, Biodynamie…)",
+      "tip": "Astuce : un profil complet améliore nettement la pertinence des suggestions.",
+      "ctaGo": "Aller à mon profil"
     },
     "step3": {
-      "title": "Quels marchés voulez-vous conquérir ?",
-      "subtitle": "Sélectionnez au moins 1 marché pour personnaliser vos recommandations d'importateurs.",
-      "other": "Autres marchés",
-      "otherPh": "Ex : Brésil, Émirats Arabes Unis...",
-      "minMarketTitle": "Sélection requise",
-      "minMarketDesc": "Choisissez au moins un marché cible pour continuer."
+      "title": "Choisissez vos marchés cibles",
+      "subtitle": "Indiquez les pays que vous visez en priorité. Vous pourrez les ajuster à tout moment depuis votre profil.",
+      "preview": "Aperçu des marchés disponibles :",
+      "ctaGo": "Définir mes marchés"
     },
     "markets": {
       "scandinavia": "Scandinavie (Suède, Danemark, Norvège, Finlande)",
@@ -1701,17 +1697,13 @@
       "asia": "Asie (Japon, Chine, Corée)"
     },
     "step4": {
-      "title": "Votre compte est prêt ✓",
-      "subtitle": "Voici un récapitulatif. Choisissez la suite que vous préférez.",
-      "recap": "Récapitulatif",
-      "optionA": {
-        "title": "Je veux être guidé",
-        "desc": "Créer ma première campagne maintenant avec un modèle pré-rempli."
-      },
-      "optionB": {
-        "title": "Je le ferai plus tard",
-        "desc": "Accéder directement à mon tableau de bord."
-      }
+      "title": "Lancez votre première campagne",
+      "subtitle": "Une fois votre profil prêt, créez une campagne ciblée. Notre équipe la valide manuellement avant l'envoi.",
+      "c1": "Notre équipe vérifie chaque campagne",
+      "c2": "Vous suivez les ouvertures et les réponses en direct",
+      "c3": "Les leads chauds atterrissent dans votre CRM",
+      "ctaCampaign": "Créer ma première campagne",
+      "ctaDashboard": "Accéder à mon tableau de bord"
     },
     "resume": {
       "title": "Reprendre mon setup",
