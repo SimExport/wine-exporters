@@ -1672,45 +1672,46 @@
     "nextStep": "Étape suivante",
     "welcome": {
       "title": "Bienvenue sur WineExporters",
-      "subtitle": "Configurons votre compte en 4 étapes — 5 minutes suffisent.",
-      "s1": "Votre domaine",
-      "s2": "Vos marchés",
-      "s3": "Première campagne",
-      "s4": "C'est prêt"
+      "subtitle": "Trouvez vos prochains importateurs à l'international.",
+      "p1": "Vous définissez vos marchés cibles",
+      "p2": "On identifie les importateurs qualifiés",
+      "p3": "Vous recevez des mises en relation directes",
+      "cta": "Découvrir comment ça marche"
     },
-    "step2": {
-      "title": "Complétez votre profil domaine",
-      "subtitle": "C'est la base pour cibler les bons importateurs et personnaliser vos campagnes.",
-      "intro": "Rendez-vous dans la page Profil pour renseigner :",
-      "b1": "Nom du domaine et région viticole",
-      "b2": "Types de vins, cépages et cuvées",
-      "b3": "Volume annuel et gamme de prix export",
-      "b4": "Certifications (Bio, HVE, Biodynamie…)",
-      "tip": "Astuce : un profil complet améliore nettement la pertinence des suggestions.",
-      "ctaGo": "Aller à mon profil"
+    "campaign": {
+      "title": "Votre première campagne en 3 minutes",
+      "subtitle": "Une campagne, c'est cibler des marchés et présenter vos cuvées aux bons importateurs.",
+      "f1": "Vous ciblez vos marchés",
+      "f2": "On valide votre campagne",
+      "f3": "On contacte les importateurs",
+      "f4": "Vous recevez les réponses",
+      "mockLabel": "Exemple de campagne",
+      "mockTitle": "Domaine des Coteaux — Export Premium",
+      "mockStatus": "En cours",
+      "mockMarkets": "Marchés ciblés",
+      "mockCuvees": "Cuvées présentées",
+      "mockStat1": "Contacts",
+      "mockStat2": "Ouvertures",
+      "mockStat3": "Réponses",
+      "cta": "Créer ma première campagne",
+      "example": "Voir un exemple de résultat"
     },
-    "step3": {
-      "title": "Choisissez vos marchés cibles",
-      "subtitle": "Indiquez les pays que vous visez en priorité. Vous pourrez les ajuster à tout moment depuis votre profil.",
-      "preview": "Aperçu des marchés disponibles :",
-      "ctaGo": "Définir mes marchés"
+    "profile": {
+      "title": "Complétez votre profil pour de meilleurs résultats",
+      "subtitle": "Un profil complet améliore la qualité des mises en relation.",
+      "completion": "Profil complété",
+      "hint": "Type de vins, cépages, certifications, volumes… ces infos affinent le ciblage.",
+      "cta": "Compléter mon profil",
+      "later": "Je le fais plus tard"
     },
-    "markets": {
-      "scandinavia": "Scandinavie (Suède, Danemark, Norvège, Finlande)",
-      "benelux": "Benelux (Belgique, Pays-Bas, Luxembourg)",
-      "dach": "Allemagne / Autriche / Suisse",
-      "uk": "Royaume-Uni",
-      "usaCanada": "États-Unis / Canada",
-      "asia": "Asie (Japon, Chine, Corée)"
-    },
-    "step4": {
-      "title": "Lancez votre première campagne",
-      "subtitle": "Une fois votre profil prêt, créez une campagne ciblée. Notre équipe la valide manuellement avant l'envoi.",
-      "c1": "Notre équipe vérifie chaque campagne",
-      "c2": "Vous suivez les ouvertures et les réponses en direct",
-      "c3": "Les leads chauds atterrissent dans votre CRM",
-      "ctaCampaign": "Créer ma première campagne",
-      "ctaDashboard": "Accéder à mon tableau de bord"
+    "ready": {
+      "title": "Vous êtes prêt !",
+      "subtitle": "Tout est en place pour lancer votre prospection export.",
+      "r1": "Créer et suivre vos campagnes",
+      "r2": "Tableau de bord en temps réel",
+      "r3": "CRM avec leads chauds",
+      "r4": "Équipe support à vos côtés",
+      "cta": "Créer ma première campagne"
     },
     "resume": {
       "title": "Reprendre mon setup",
