@@ -453,7 +453,7 @@ const LandingPage = () => {
                     </div>
                     {/* Visual */}
                     <div className="flex-1 w-full max-w-md lg:max-w-none">
-                      <PillarVisual src={p.visual} />
+                      <PillarVisual id={p.id} />
                     </div>
                   </div>
                 </FadeIn>);
