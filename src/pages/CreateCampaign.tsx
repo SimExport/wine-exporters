@@ -354,29 +354,93 @@ const CreateCampaign = () => {
 
                 {/* Markets to target */}
                 <div>
-                  <Label>{t('createCampaign.step1.marketsLabel')} <span className="text-muted-foreground font-normal">{t('createCampaign.step1.marketsCount', { count: selectedMarkets.length, max: MAX_MARKETS, min: MIN_MARKETS })}</span></Label>
+                  <Label>{t('createCampaign.step1.marketsLabel')}</Label>
+
+                  {/* Counter + progress */}
+                  <div className="mt-3 mb-4 p-3 rounded-lg bg-muted/40 border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">
+                        {t('createCampaign.step1.marketsBadge', { count: selectedMarkets.length, max: MAX_MARKETS })}
+                      </span>
+                      <span className="text-xs text-muted-foreground">min {MIN_MARKETS}</span>
+                    </div>
+                    <Progress
+                      value={(selectedMarkets.length / MAX_MARKETS) * 100}
+                      className={cn(
+                        selectedMarkets.length >= MIN_MARKETS
+                          ? '[&>div]:bg-emerald-500'
+                          : '[&>div]:bg-orange-500'
+                      )}
+                    />
+                  </div>
+
                   <div className="space-y-4 mt-3">
                     {Object.entries(MARKETS_BY_CONTINENT).map(([continentKey, markets]) => (
-                      <div key={continentKey}>
-                        <p className="text-sm font-semibold text-muted-foreground mb-2">{t(`createCampaign.continents.${continentKey}`)}</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {markets.map(market => (
-                            <div key={market} className="flex items-center space-x-2">
-                              <Checkbox id={market} checked={selectedMarkets.includes(market)} onCheckedChange={() => handleMarketToggle(market)} disabled={!selectedMarkets.includes(market) && selectedMarkets.length >= MAX_MARKETS} />
-                              <Label htmlFor={market} className="text-sm">{market}</Label>
-                            </div>
-                          ))}
+                      <div key={continentKey} className="rounded-lg border bg-card overflow-hidden">
+                        <div className="bg-muted/60 px-3 py-2 border-b">
+                          <p className="text-sm font-semibold">{t(`createCampaign.continents.${continentKey}`)}</p>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-3">
+                          {markets.map(({ name, flag }) => {
+                            const isSelected = selectedMarkets.includes(name);
+                            const isDisabled = !isSelected && selectedMarkets.length >= MAX_MARKETS;
+                            return (
+                              <button
+                                type="button"
+                                key={name}
+                                onClick={() => !isDisabled && handleMarketToggle(name)}
+                                disabled={isDisabled}
+                                className={cn(
+                                  'flex items-center justify-between gap-2 px-3 py-2 rounded-md border text-sm text-left transition-colors',
+                                  isSelected
+                                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                                    : 'border-border bg-card hover:bg-muted/50',
+                                  isDisabled && 'opacity-50 cursor-not-allowed'
+                                )}
+                              >
+                                <span className="flex items-center gap-2 min-w-0">
+                                  <span aria-hidden className="text-base leading-none">{flag}</span>
+                                  <span className="truncate">{name}</span>
+                                </span>
+                                {isSelected && <Check className="h-4 w-4 shrink-0" />}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Open to other markets */}
+                  <Separator className="my-4" />
+                  <label
+                    htmlFor="openToOthers"
+                    className="flex items-start gap-3 p-4 rounded-lg border border-dashed bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <Checkbox
+                      id="openToOthers"
+                      checked={openToOtherMarkets}
+                      onCheckedChange={(c) => setOpenToOtherMarkets(c === true)}
+                      className="mt-0.5"
+                    />
+                    <span className="text-sm leading-snug">
+                      {t('createCampaign.step1.openToOthersLabel')}
+                    </span>
+                  </label>
                 </div>
 
-                {/* Info block */}
+                {/* Dynamic helper */}
                 <Alert className="bg-muted/50 border-primary/20">
                   <Lightbulb className="h-4 w-4 text-primary" />
                   <AlertDescription className="text-sm text-muted-foreground">
-                    {t('createCampaign.step1.infoBlock', { min: MIN_MARKETS, max: MAX_MARKETS })}
+                    {selectedMarkets.length === 0 &&
+                      t('createCampaign.step1.helperEmpty', { min: MIN_MARKETS })}
+                    {selectedMarkets.length > 0 && selectedMarkets.length < MIN_MARKETS &&
+                      t('createCampaign.step1.helperPartial', { remaining: MIN_MARKETS - selectedMarkets.length })}
+                    {selectedMarkets.length >= MIN_MARKETS && selectedMarkets.length < MAX_MARKETS &&
+                      t('createCampaign.step1.helperGood', { remaining: MAX_MARKETS - selectedMarkets.length })}
+                    {selectedMarkets.length >= MAX_MARKETS &&
+                      t('createCampaign.step1.helperFull', { max: MAX_MARKETS })}
                   </AlertDescription>
                 </Alert>
 
