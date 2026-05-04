@@ -1,27 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Grape, Globe, Megaphone, CheckCircle2, ArrowRight, Sparkles, X, Wand2, Calendar } from "lucide-react";
+import {
+  Grape, Globe, Megaphone, CheckCircle2, ArrowRight, Sparkles, X,
+  User, ListChecks, ShieldCheck, BarChart3, Inbox,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 const LS_KEY = "onboarding_completed";
-
-const REGIONS = ["Bordeaux", "Bourgogne", "Alsace", "Rhône", "Loire", "Languedoc", "Provence", "Autres"];
-const WINE_TYPES = ["Rouge", "Blanc", "Rosé", "Effervescent", "Liquoreux"];
-const VOLUMES = ["< 10 000 btl", "10-50K", "50-100K", "> 100K"];
-const CERTIFS = ["Bio", "HVE", "Biodynamie", "Aucune"];
-const PRICE_RANGES = ["5-10€", "10-20€", "20€+"];
 
 const MARKETS = [
   { id: "scandinavia", emoji: "🇸🇪", labelKey: "markets.scandinavia" },
@@ -42,100 +32,23 @@ interface OnboardingWizardProps {
 export function OnboardingWizard({ open, onClose, onComplete, initialStep = 0 }: OnboardingWizardProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(initialStep);
-  const [saving, setSaving] = useState(false);
-
-  // Form state
-  const [domainName, setDomainName] = useState("");
-  const [region, setRegion] = useState("");
-  const [wineTypes, setWineTypes] = useState<string[]>([]);
-  const [volume, setVolume] = useState("");
-  const [certifs, setCertifs] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState("");
-  const [markets, setMarkets] = useState<string[]>([]);
-  const [otherMarket, setOtherMarket] = useState("");
-
-  // Pre-fill from profile
-  useEffect(() => {
-    if (!open || !user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("domain_name, location, wine_types, certifications, bottles_per_year, priority_markets")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (!data) return;
-      if (data.domain_name) setDomainName(data.domain_name);
-      if (data.location && REGIONS.includes(data.location)) setRegion(data.location);
-      if (data.wine_types?.length) setWineTypes(data.wine_types as string[]);
-      if (data.certifications?.length) setCertifs(data.certifications as string[]);
-      if (data.bottles_per_year) {
-        const b = data.bottles_per_year;
-        if (b < 10000) setVolume("< 10 000 btl");
-        else if (b < 50000) setVolume("10-50K");
-        else if (b < 100000) setVolume("50-100K");
-        else setVolume("> 100K");
-      }
-      if (data.priority_markets) {
-        const csv = data.priority_markets.split(",").map(s => s.trim()).filter(Boolean);
-        setMarkets(csv.filter(m => MARKETS.some(opt => opt.id === m)));
-        const other = csv.find(m => !MARKETS.some(opt => opt.id === m));
-        if (other) setOtherMarket(other);
-      }
-    })();
-  }, [open, user]);
+  const [busy, setBusy] = useState(false);
 
   if (!open) return null;
 
   const totalSteps = 4;
   const progress = ((step + 1) / totalSteps) * 100;
 
-  const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
-    setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
-  };
-
-  const persistStep2 = async () => {
-    if (!user) return false;
-    const bottles = volume === "< 10 000 btl" ? 5000
-      : volume === "10-50K" ? 30000
-      : volume === "50-100K" ? 75000
-      : volume === "> 100K" ? 150000 : null;
-    const { error } = await supabase.from("profiles").update({
-      domain_name: domainName || null,
-      location: region || null,
-      wine_types: wineTypes,
-      certifications: certifs,
-      bottles_per_year: bottles,
-    }).eq("user_id", user.id);
-    if (error) {
-      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
-      return false;
-    }
-    return true;
-  };
-
-  const persistStep3 = async () => {
-    if (!user) return false;
-    const all = [...markets, otherMarket.trim()].filter(Boolean).join(", ");
-    const { error } = await supabase.from("profiles").update({
-      priority_markets: all || null,
-    }).eq("user_id", user.id);
-    if (error) {
-      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
-      return false;
-    }
-    return true;
-  };
-
   const markCompleted = async () => {
-    if (!user) return;
     localStorage.setItem(LS_KEY, "true");
-    await supabase.from("profiles").update({
-      onboarding_completed: true,
-      onboarding_dismissed_at: null,
-    }).eq("user_id", user.id);
+    if (user) {
+      await supabase.from("profiles").update({
+        onboarding_completed: true,
+        onboarding_dismissed_at: null,
+      }).eq("user_id", user.id);
+    }
   };
 
   const dismiss = async () => {
@@ -147,40 +60,24 @@ export function OnboardingWizard({ open, onClose, onComplete, initialStep = 0 }:
     onClose();
   };
 
-  const handleNext = async () => {
-    setSaving(true);
-    try {
-      if (step === 1) {
-        if (!(await persistStep2())) return;
-      } else if (step === 2) {
-        if (markets.length === 0 && !otherMarket.trim()) {
-          toast({ title: t("onboarding.step3.minMarketTitle"), description: t("onboarding.step3.minMarketDesc"), variant: "destructive" });
-          return;
-        }
-        if (!(await persistStep3())) return;
-      }
-      setStep(s => Math.min(s + 1, totalSteps - 1));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleFinish = async (goToCampaign: boolean) => {
-    setSaving(true);
+  const finishAndGo = async (path: string) => {
+    setBusy(true);
     try {
       await markCompleted();
       onComplete();
-      if (goToCampaign) navigate("/create-campaign");
-      else navigate("/dashboard");
+      navigate(path);
     } finally {
-      setSaving(false);
+      setBusy(false);
     }
   };
+
+  const next = () => setStep(s => Math.min(s + 1, totalSteps - 1));
+  const back = () => setStep(s => Math.max(s - 1, 0));
 
   return (
     <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm overflow-y-auto">
       <div className="min-h-screen flex flex-col">
-        {/* Top progress bar */}
+        {/* Top progress */}
         <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
           <div className="max-w-3xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-2">
@@ -199,31 +96,30 @@ export function OnboardingWizard({ open, onClose, onComplete, initialStep = 0 }:
         {/* Content */}
         <div className="flex-1 flex items-center justify-center px-6 py-10">
           <div className="w-full max-w-2xl">
-            {step === 0 && <StepWelcome onNext={() => setStep(1)} />}
+            {step === 0 && <StepWelcome onNext={next} />}
             {step === 1 && (
-              <StepDomain
-                domainName={domainName} setDomainName={setDomainName}
-                region={region} setRegion={setRegion}
-                wineTypes={wineTypes} toggleWine={(v) => toggle(wineTypes, v, setWineTypes)}
-                volume={volume} setVolume={setVolume}
-                certifs={certifs} toggleCertif={(v) => toggle(certifs, v, setCertifs)}
-                priceRange={priceRange} setPriceRange={setPriceRange}
+              <StepProfileGuide
+                onGo={() => finishAndGo("/profile")}
+                busy={busy}
               />
             )}
             {step === 2 && (
-              <StepMarkets
-                markets={markets}
-                toggleMarket={(v) => toggle(markets, v, setMarkets)}
-                otherMarket={otherMarket} setOtherMarket={setOtherMarket}
+              <StepMarketsGuide
+                onGo={() => finishAndGo("/profile")}
+                busy={busy}
               />
             )}
             {step === 3 && (
-              <StepCampaign onChoose={handleFinish} saving={saving} summary={{ domainName, region, wineTypes, markets: [...markets, otherMarket].filter(Boolean) }} />
+              <StepCampaignGuide
+                onCampaign={() => finishAndGo("/create-campaign")}
+                onDashboard={() => finishAndGo("/dashboard")}
+                busy={busy}
+              />
             )}
           </div>
         </div>
 
-        {/* Footer actions */}
+        {/* Footer */}
         {step < 3 && (
           <div className="border-t bg-background/80 backdrop-blur sticky bottom-0">
             <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
@@ -235,11 +131,11 @@ export function OnboardingWizard({ open, onClose, onComplete, initialStep = 0 }:
               </button>
               <div className="flex items-center gap-2">
                 {step > 0 && (
-                  <Button variant="ghost" onClick={() => setStep(s => s - 1)} disabled={saving}>
+                  <Button variant="ghost" onClick={back} disabled={busy}>
                     {t("common.back")}
                   </Button>
                 )}
-                <Button onClick={step === 0 ? () => setStep(1) : handleNext} disabled={saving}>
+                <Button onClick={step === 0 ? next : next} disabled={busy}>
                   {step === 0 ? t("onboarding.start") : t("onboarding.nextStep")}
                   <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
@@ -261,7 +157,7 @@ export function OnboardingWizard({ open, onClose, onComplete, initialStep = 0 }:
   );
 }
 
-/* ---------- Step components ---------- */
+/* ---------- Steps ---------- */
 
 function StepWelcome({ onNext }: { onNext: () => void }) {
   const { t } = useTranslation();
@@ -298,198 +194,123 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
   );
 }
 
-function StepDomain(p: {
-  domainName: string; setDomainName: (v: string) => void;
-  region: string; setRegion: (v: string) => void;
-  wineTypes: string[]; toggleWine: (v: string) => void;
-  volume: string; setVolume: (v: string) => void;
-  certifs: string[]; toggleCertif: (v: string) => void;
-  priceRange: string; setPriceRange: (v: string) => void;
-}) {
+function StepProfileGuide({ onGo, busy }: { onGo: () => void; busy: boolean }) {
   const { t } = useTranslation();
+  const bullets = [
+    { icon: User, text: t("onboarding.step2.b1") },
+    { icon: Grape, text: t("onboarding.step2.b2") },
+    { icon: BarChart3, text: t("onboarding.step2.b3") },
+    { icon: ShieldCheck, text: t("onboarding.step2.b4") },
+  ];
   return (
-    <div className="space-y-6">
-      <header>
+    <div className="space-y-7">
+      <header className="text-center">
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-3">
+          <User className="h-6 w-6 text-primary" />
+        </div>
         <h2 className="text-2xl font-bold tracking-tight">{t("onboarding.step2.title")}</h2>
-        <p className="text-muted-foreground text-sm mt-1">{t("onboarding.step2.subtitle")}</p>
+        <p className="text-muted-foreground mt-2">{t("onboarding.step2.subtitle")}</p>
       </header>
-      <div className="space-y-5">
-        <div>
-          <Label>{t("onboarding.step2.domainName")}</Label>
-          <Input value={p.domainName} onChange={e => p.setDomainName(e.target.value)} className="mt-1.5" placeholder="Château ..." />
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label>{t("onboarding.step2.region")}</Label>
-            <Select value={p.region} onValueChange={p.setRegion}>
-              <SelectTrigger className="mt-1.5"><SelectValue placeholder={t("onboarding.step2.regionPh")} /></SelectTrigger>
-              <SelectContent>
-                {REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>{t("onboarding.step2.volume")}</Label>
-            <Select value={p.volume} onValueChange={p.setVolume}>
-              <SelectTrigger className="mt-1.5"><SelectValue placeholder={t("onboarding.step2.volumePh")} /></SelectTrigger>
-              <SelectContent>
-                {VOLUMES.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div>
-          <Label className="mb-2 block">{t("onboarding.step2.wineTypes")}</Label>
-          <div className="flex flex-wrap gap-2">
-            {WINE_TYPES.map(w => (
-              <button
-                key={w}
-                type="button"
-                onClick={() => p.toggleWine(w)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full border text-sm transition",
-                  p.wineTypes.includes(w)
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background hover:bg-muted"
-                )}
-              >{w}</button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <Label className="mb-2 block">{t("onboarding.step2.certifs")}</Label>
-          <div className="flex flex-wrap gap-2">
-            {CERTIFS.map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => p.toggleCertif(c)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full border text-sm transition",
-                  p.certifs.includes(c)
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background hover:bg-muted"
-                )}
-              >{c}</button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <Label>{t("onboarding.step2.priceRange")}</Label>
-          <Select value={p.priceRange} onValueChange={p.setPriceRange}>
-            <SelectTrigger className="mt-1.5"><SelectValue placeholder={t("onboarding.step2.priceRangePh")} /></SelectTrigger>
-            <SelectContent>
-              {PRICE_RANGES.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+
+      <div className="rounded-2xl border bg-card p-6 space-y-4">
+        <p className="text-sm font-medium">{t("onboarding.step2.intro")}</p>
+        <ul className="space-y-3">
+          {bullets.map((b, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                <b.icon className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-sm text-foreground/90 pt-1.5">{b.text}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-muted-foreground italic pt-2 border-t">{t("onboarding.step2.tip")}</p>
+      </div>
+
+      <div className="flex justify-center">
+        <Button size="lg" onClick={onGo} disabled={busy}>
+          {t("onboarding.step2.ctaGo")}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
 }
 
-function StepMarkets(p: {
-  markets: string[]; toggleMarket: (v: string) => void;
-  otherMarket: string; setOtherMarket: (v: string) => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight">{t("onboarding.step3.title")}</h2>
-        <p className="text-muted-foreground text-sm mt-1">{t("onboarding.step3.subtitle")}</p>
-      </header>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {MARKETS.map(m => {
-          const active = p.markets.includes(m.id);
-          return (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => p.toggleMarket(m.id)}
-              className={cn(
-                "flex items-center gap-3 p-4 rounded-xl border text-left transition",
-                active ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:bg-muted/50"
-              )}
-            >
-              <span className="text-2xl">{m.emoji}</span>
-              <span className="text-sm font-medium flex-1">{t(`onboarding.${m.labelKey}`)}</span>
-              <Checkbox checked={active} className="pointer-events-none" />
-            </button>
-          );
-        })}
-      </div>
-      <div>
-        <Label>{t("onboarding.step3.other")}</Label>
-        <Input
-          value={p.otherMarket}
-          onChange={e => p.setOtherMarket(e.target.value)}
-          className="mt-1.5"
-          placeholder={t("onboarding.step3.otherPh")}
-        />
-      </div>
-    </div>
-  );
-}
-
-function StepCampaign({ onChoose, saving, summary }: {
-  onChoose: (goToCampaign: boolean) => void;
-  saving: boolean;
-  summary: { domainName: string; region: string; wineTypes: string[]; markets: string[] };
-}) {
+function StepMarketsGuide({ onGo, busy }: { onGo: () => void; busy: boolean }) {
   const { t } = useTranslation();
   return (
     <div className="space-y-7">
       <header className="text-center">
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-3">
-          <CheckCircle2 className="h-6 w-6 text-primary" />
+          <Globe className="h-6 w-6 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold tracking-tight">{t("onboarding.step4.title")}</h2>
-        <p className="text-muted-foreground text-sm mt-1">{t("onboarding.step4.subtitle")}</p>
+        <h2 className="text-2xl font-bold tracking-tight">{t("onboarding.step3.title")}</h2>
+        <p className="text-muted-foreground mt-2">{t("onboarding.step3.subtitle")}</p>
       </header>
 
-      {/* Summary recap */}
-      <Card className="p-4 bg-muted/30">
-        <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">{t("onboarding.step4.recap")}</p>
-        <div className="space-y-1.5 text-sm">
-          {summary.domainName && <div><span className="text-muted-foreground">{t("onboarding.step2.domainName")}: </span><span className="font-medium">{summary.domainName}</span></div>}
-          {summary.region && <div><span className="text-muted-foreground">{t("onboarding.step2.region")}: </span><span className="font-medium">{summary.region}</span></div>}
-          {summary.wineTypes.length > 0 && (
-            <div className="flex flex-wrap gap-1 items-center">
-              <span className="text-muted-foreground">{t("onboarding.step2.wineTypes")}: </span>
-              {summary.wineTypes.map(w => <Badge key={w} variant="secondary" className="text-xs">{w}</Badge>)}
-            </div>
-          )}
-          {summary.markets.length > 0 && (
-            <div className="flex flex-wrap gap-1 items-center">
-              <span className="text-muted-foreground">{t("onboarding.step3.title")}: </span>
-              {summary.markets.map(m => <Badge key={m} variant="outline" className="text-xs">{m}</Badge>)}
-            </div>
-          )}
+      <div className="rounded-2xl border bg-card p-6 space-y-4">
+        <p className="text-sm font-medium">{t("onboarding.step3.preview")}</p>
+        <div className="flex flex-wrap gap-2">
+          {MARKETS.map(m => (
+            <Badge key={m.id} variant="secondary" className="text-sm py-1.5 px-3 font-normal">
+              <span className="mr-1.5">{m.emoji}</span>
+              {t(`onboarding.${m.labelKey}`)}
+            </Badge>
+          ))}
         </div>
-      </Card>
+      </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Card
-          className="p-5 cursor-pointer hover:shadow-md transition border-2 hover:border-primary"
-          onClick={() => !saving && onChoose(true)}
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mb-3">
-            <Wand2 className="h-5 w-5 text-primary" />
-          </div>
-          <h3 className="font-semibold mb-1">{t("onboarding.step4.optionA.title")}</h3>
-          <p className="text-xs text-muted-foreground">{t("onboarding.step4.optionA.desc")}</p>
-        </Card>
-        <Card
-          className="p-5 cursor-pointer hover:shadow-md transition border-2 hover:border-muted-foreground/30"
-          onClick={() => !saving && onChoose(false)}
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-            <Calendar className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <h3 className="font-semibold mb-1">{t("onboarding.step4.optionB.title")}</h3>
-          <p className="text-xs text-muted-foreground">{t("onboarding.step4.optionB.desc")}</p>
-        </Card>
+      <div className="flex justify-center">
+        <Button size="lg" onClick={onGo} disabled={busy}>
+          {t("onboarding.step3.ctaGo")}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function StepCampaignGuide({
+  onCampaign, onDashboard, busy,
+}: { onCampaign: () => void; onDashboard: () => void; busy: boolean }) {
+  const { t } = useTranslation();
+  const items = [
+    { icon: ShieldCheck, text: t("onboarding.step4.c1") },
+    { icon: BarChart3, text: t("onboarding.step4.c2") },
+    { icon: Inbox, text: t("onboarding.step4.c3") },
+  ];
+  return (
+    <div className="space-y-7">
+      <header className="text-center">
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-3">
+          <Megaphone className="h-6 w-6 text-primary" />
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight">{t("onboarding.step4.title")}</h2>
+        <p className="text-muted-foreground mt-2">{t("onboarding.step4.subtitle")}</p>
+      </header>
+
+      <div className="rounded-2xl border bg-card p-6">
+        <ul className="space-y-3">
+          {items.map((it, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                <it.icon className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-sm text-foreground/90 pt-1.5">{it.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <Button size="lg" onClick={onCampaign} disabled={busy} className="sm:order-2">
+          {t("onboarding.step4.ctaCampaign")}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+        <Button size="lg" variant="outline" onClick={onDashboard} disabled={busy} className="sm:order-1">
+          {t("onboarding.step4.ctaDashboard")}
+        </Button>
       </div>
     </div>
   );
