@@ -60,8 +60,12 @@ serve(async (req) => {
 
     if (error) {
       console.error("invite error:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      const code = (error as any).code;
+      const friendly = code === "email_exists"
+        ? "Cet email est déjà enregistré."
+        : error.message;
+      return new Response(JSON.stringify({ error: friendly, code }), {
+        status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
