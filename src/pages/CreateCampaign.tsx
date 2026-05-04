@@ -12,7 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb, Check } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 interface Wine {
@@ -28,15 +31,38 @@ interface Document {
   category: string;
   file_name: string;
 }
-const MARKETS_BY_CONTINENT: Record<string, string[]> = {
-  'europe': ['Austria', 'Belgium', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'Germany', 'Ireland', 'Italy', 'Netherlands', 'Norway', 'Poland', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom'],
-  'northAmerica': ['Canada', 'United States'],
-  'southAmerica': ['Brazil', 'Mexico'],
-  'asia': ['China', 'Hong Kong', 'Japan', 'South Korea', 'Taiwan', 'Thailand'],
-  'oceaniaAfrica': ['Australia', 'South Africa'],
+type MarketEntry = { name: string; flag: string };
+const MARKETS_BY_CONTINENT: Record<string, MarketEntry[]> = {
+  europe: [
+    { name: 'Austria', flag: '🇦🇹' }, { name: 'Belgium', flag: '🇧🇪' }, { name: 'Croatia', flag: '🇭🇷' },
+    { name: 'Czech Republic', flag: '🇨🇿' }, { name: 'Denmark', flag: '🇩🇰' }, { name: 'Estonia', flag: '🇪🇪' },
+    { name: 'Finland', flag: '🇫🇮' }, { name: 'Germany', flag: '🇩🇪' }, { name: 'Greece', flag: '🇬🇷' },
+    { name: 'Hungary', flag: '🇭🇺' }, { name: 'Ireland', flag: '🇮🇪' }, { name: 'Italy', flag: '🇮🇹' },
+    { name: 'Netherlands', flag: '🇳🇱' }, { name: 'Norway', flag: '🇳🇴' }, { name: 'Poland', flag: '🇵🇱' },
+    { name: 'Portugal', flag: '🇵🇹' }, { name: 'Romania', flag: '🇷🇴' }, { name: 'Serbia', flag: '🇷🇸' },
+    { name: 'Spain', flag: '🇪🇸' }, { name: 'Sweden', flag: '🇸🇪' }, { name: 'Switzerland', flag: '🇨🇭' },
+    { name: 'United Kingdom', flag: '🇬🇧' },
+  ],
+  northAmerica: [
+    { name: 'Canada', flag: '🇨🇦' }, { name: 'Mexico', flag: '🇲🇽' }, { name: 'United States', flag: '🇺🇸' },
+  ],
+  latinAmerica: [
+    { name: 'Argentina', flag: '🇦🇷' }, { name: 'Brazil', flag: '🇧🇷' }, { name: 'Chile', flag: '🇨🇱' },
+    { name: 'Colombia', flag: '🇨🇴' }, { name: 'Peru', flag: '🇵🇪' },
+  ],
+  asia: [
+    { name: 'China', flag: '🇨🇳' }, { name: 'Hong Kong', flag: '🇭🇰' }, { name: 'India', flag: '🇮🇳' },
+    { name: 'Japan', flag: '🇯🇵' }, { name: 'Singapore', flag: '🇸🇬' }, { name: 'South Korea', flag: '🇰🇷' },
+    { name: 'Taiwan', flag: '🇹🇼' }, { name: 'Thailand', flag: '🇹🇭' },
+    { name: 'UAE', flag: '🇦🇪' }, { name: 'Vietnam', flag: '🇻🇳' },
+  ],
+  oceaniaAfrica: [
+    { name: 'Australia', flag: '🇦🇺' }, { name: 'Morocco', flag: '🇲🇦' },
+    { name: 'Nigeria', flag: '🇳🇬' }, { name: 'South Africa', flag: '🇿🇦' },
+  ],
 };
-const MAX_MARKETS = 10;
-const MIN_MARKETS = 3;
+const MAX_MARKETS = 15;
+const MIN_MARKETS = 5;
 const CreateCampaign = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -63,6 +89,7 @@ const CreateCampaign = () => {
   // Form data
   const [campaignName, setCampaignName] = useState('');
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
+  const [openToOtherMarkets, setOpenToOtherMarkets] = useState(false);
   const [selectedWines, setSelectedWines] = useState<string[]>([]);
   const [presentationDoc, setPresentationDoc] = useState('');
   const [pricelistDoc, setPricelistDoc] = useState('');
@@ -162,6 +189,7 @@ const CreateCampaign = () => {
         user_id: user?.id,
         status: 'draft',
         target_markets: selectedMarkets,
+        open_to_other_markets: openToOtherMarkets,
         selected_wines: selectedWines,
         doc_presentation: presentationDoc || null,
         doc_pricelist: pricelistDoc || null,
@@ -218,6 +246,7 @@ const CreateCampaign = () => {
         user_id: user?.id,
         status: 'pending_validation',
         target_markets: selectedMarkets,
+        open_to_other_markets: openToOtherMarkets,
         selected_wines: selectedWines,
         doc_presentation: presentationDoc,
         doc_pricelist: pricelistDoc,
@@ -327,29 +356,93 @@ const CreateCampaign = () => {
 
                 {/* Markets to target */}
                 <div>
-                  <Label>{t('createCampaign.step1.marketsLabel')} <span className="text-muted-foreground font-normal">{t('createCampaign.step1.marketsCount', { count: selectedMarkets.length, max: MAX_MARKETS, min: MIN_MARKETS })}</span></Label>
+                  <Label>{t('createCampaign.step1.marketsLabel')}</Label>
+
+                  {/* Counter + progress */}
+                  <div className="mt-3 mb-4 p-3 rounded-lg bg-muted/40 border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">
+                        {t('createCampaign.step1.marketsBadge', { count: selectedMarkets.length, max: MAX_MARKETS })}
+                      </span>
+                      <span className="text-xs text-muted-foreground">min {MIN_MARKETS}</span>
+                    </div>
+                    <Progress
+                      value={(selectedMarkets.length / MAX_MARKETS) * 100}
+                      className={cn(
+                        selectedMarkets.length >= MIN_MARKETS
+                          ? '[&>div]:bg-emerald-500'
+                          : '[&>div]:bg-orange-500'
+                      )}
+                    />
+                  </div>
+
                   <div className="space-y-4 mt-3">
                     {Object.entries(MARKETS_BY_CONTINENT).map(([continentKey, markets]) => (
-                      <div key={continentKey}>
-                        <p className="text-sm font-semibold text-muted-foreground mb-2">{t(`createCampaign.continents.${continentKey}`)}</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {markets.map(market => (
-                            <div key={market} className="flex items-center space-x-2">
-                              <Checkbox id={market} checked={selectedMarkets.includes(market)} onCheckedChange={() => handleMarketToggle(market)} disabled={!selectedMarkets.includes(market) && selectedMarkets.length >= MAX_MARKETS} />
-                              <Label htmlFor={market} className="text-sm">{market}</Label>
-                            </div>
-                          ))}
+                      <div key={continentKey} className="rounded-lg border bg-card overflow-hidden">
+                        <div className="bg-muted/60 px-3 py-2 border-b">
+                          <p className="text-sm font-semibold">{t(`createCampaign.continents.${continentKey}`)}</p>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-3">
+                          {markets.map(({ name, flag }) => {
+                            const isSelected = selectedMarkets.includes(name);
+                            const isDisabled = !isSelected && selectedMarkets.length >= MAX_MARKETS;
+                            return (
+                              <button
+                                type="button"
+                                key={name}
+                                onClick={() => !isDisabled && handleMarketToggle(name)}
+                                disabled={isDisabled}
+                                className={cn(
+                                  'flex items-center justify-between gap-2 px-3 py-2 rounded-md border text-sm text-left transition-colors',
+                                  isSelected
+                                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                                    : 'border-border bg-card hover:bg-muted/50',
+                                  isDisabled && 'opacity-50 cursor-not-allowed'
+                                )}
+                              >
+                                <span className="flex items-center gap-2 min-w-0">
+                                  <span aria-hidden className="text-base leading-none">{flag}</span>
+                                  <span className="truncate">{name}</span>
+                                </span>
+                                {isSelected && <Check className="h-4 w-4 shrink-0" />}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Open to other markets */}
+                  <Separator className="my-4" />
+                  <label
+                    htmlFor="openToOthers"
+                    className="flex items-start gap-3 p-4 rounded-lg border border-dashed bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <Checkbox
+                      id="openToOthers"
+                      checked={openToOtherMarkets}
+                      onCheckedChange={(c) => setOpenToOtherMarkets(c === true)}
+                      className="mt-0.5"
+                    />
+                    <span className="text-sm leading-snug">
+                      {t('createCampaign.step1.openToOthersLabel')}
+                    </span>
+                  </label>
                 </div>
 
-                {/* Info block */}
+                {/* Dynamic helper */}
                 <Alert className="bg-muted/50 border-primary/20">
                   <Lightbulb className="h-4 w-4 text-primary" />
                   <AlertDescription className="text-sm text-muted-foreground">
-                    {t('createCampaign.step1.infoBlock', { min: MIN_MARKETS, max: MAX_MARKETS })}
+                    {selectedMarkets.length === 0 &&
+                      t('createCampaign.step1.helperEmpty', { min: MIN_MARKETS })}
+                    {selectedMarkets.length > 0 && selectedMarkets.length < MIN_MARKETS &&
+                      t('createCampaign.step1.helperPartial', { remaining: MIN_MARKETS - selectedMarkets.length })}
+                    {selectedMarkets.length >= MIN_MARKETS && selectedMarkets.length < MAX_MARKETS &&
+                      t('createCampaign.step1.helperGood', { remaining: MAX_MARKETS - selectedMarkets.length })}
+                    {selectedMarkets.length >= MAX_MARKETS &&
+                      t('createCampaign.step1.helperFull', { max: MAX_MARKETS })}
                   </AlertDescription>
                 </Alert>
 
