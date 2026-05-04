@@ -1672,25 +1672,21 @@
       "s4": "Ready"
     },
     "step2": {
-      "title": "Tell us about your estate",
-      "subtitle": "These details personalize your recommendations.",
-      "domainName": "Estate name",
-      "region": "Wine region",
-      "regionPh": "Select a region",
-      "wineTypes": "Wine types produced",
-      "volume": "Annual volume produced",
-      "volumePh": "Select",
-      "certifs": "Certifications",
-      "priceRange": "Export price range",
-      "priceRangePh": "Select"
+      "title": "Complete your estate profile",
+      "subtitle": "This is the foundation we use to target the right importers and tailor your campaigns.",
+      "intro": "Head to the Profile page to fill in:",
+      "b1": "Estate name and wine region",
+      "b2": "Wine types, grape varieties and cuvées",
+      "b3": "Annual volume and export price range",
+      "b4": "Certifications (Organic, HVE, Biodynamic…)",
+      "tip": "Tip: a complete profile sharply improves recommendation quality.",
+      "ctaGo": "Go to my profile"
     },
     "step3": {
-      "title": "Which markets do you want to conquer?",
-      "subtitle": "Pick at least 1 market to personalize your importer recommendations.",
-      "other": "Other markets",
-      "otherPh": "E.g. Brazil, UAE...",
-      "minMarketTitle": "Selection required",
-      "minMarketDesc": "Please select at least one target market to continue."
+      "title": "Pick your target markets",
+      "subtitle": "Tell us which countries you want to focus on. You can adjust them anytime from your profile.",
+      "preview": "Available markets:",
+      "ctaGo": "Set my markets"
     },
     "markets": {
       "scandinavia": "Scandinavia (Sweden, Denmark, Norway, Finland)",
@@ -1701,17 +1697,13 @@
       "asia": "Asia (Japan, China, Korea)"
     },
     "step4": {
-      "title": "Your account is ready ✓",
-      "subtitle": "Here's a recap. Pick how you'd like to continue.",
-      "recap": "Summary",
-      "optionA": {
-        "title": "Guide me",
-        "desc": "Create my first campaign now with a pre-filled template."
-      },
-      "optionB": {
-        "title": "I'll do it later",
-        "desc": "Go straight to my dashboard."
-      }
+      "title": "Launch your first campaign",
+      "subtitle": "Once your profile is ready, create a targeted campaign. Our team reviews each one manually before sending.",
+      "c1": "Our team reviews every campaign",
+      "c2": "Track opens and replies in real time",
+      "c3": "Hot leads land directly in your CRM",
+      "ctaCampaign": "Create my first campaign",
+      "ctaDashboard": "Go to my dashboard"
     },
     "resume": {
       "title": "Resume my setup",
