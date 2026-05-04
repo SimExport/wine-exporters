@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
 import { useRole } from '@/hooks/useRole';
+import { ShieldAlert } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminRouteProps {
   children: ReactNode;
@@ -8,6 +10,7 @@ interface AdminRouteProps {
 
 const AdminRoute = ({ children }: AdminRouteProps) => {
   const { isAdmin, loading } = useRole();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -18,7 +21,22 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-4 border rounded-lg p-8 bg-card">
+          <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+            <ShieldAlert className="h-6 w-6 text-destructive" />
+          </div>
+          <h2 className="text-xl font-semibold">Accès refusé</h2>
+          <p className="text-sm text-muted-foreground">
+            Cette page est réservée aux administrateurs (HTTP 403).
+          </p>
+          <Button onClick={() => navigate('/dashboard')} variant="outline">
+            Retour au tableau de bord
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

@@ -64,10 +64,23 @@ serve(async (req) => {
       const friendly = code === "email_exists"
         ? "Cet email est déjà enregistré."
         : error.message;
+      await admin.from("admin_invitations").insert({
+        email: email.trim().toLowerCase(),
+        status: "failed",
+        error_message: friendly,
+        invited_by: userData.user.id,
+      });
       return new Response(JSON.stringify({ error: friendly, code }), {
         status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+
+    await admin.from("admin_invitations").insert({
+      email: email.trim().toLowerCase(),
+      status: "sent",
+      invited_user_id: data.user?.id ?? null,
+      invited_by: userData.user.id,
+    });
 
     return new Response(JSON.stringify({ success: true, user: data.user }), {
       status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
