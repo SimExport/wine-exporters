@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          error_message: string | null
+          id: string
+          invited_by: string | null
+          invited_user_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          error_message?: string | null
+          id?: string
+          invited_by?: string | null
+          invited_user_id?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          id?: string
+          invited_by?: string | null
+          invited_user_id?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       admin_tasks: {
         Row: {
           admin_comment: string | null
