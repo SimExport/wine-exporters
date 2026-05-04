@@ -1,66 +1,85 @@
-# Plan: Full FR/EN i18n Migration
 
-## 1. Dependencies
-Install:
-- `i18next`
-- `react-i18next`
-- `i18next-browser-languagedetector`
+# Simplifier l'onboarding wizard : guide pédagogique au lieu de formulaire
 
-## 2. i18n Setup
-- **`src/i18n/index.ts`**: Initialize i18next with `LanguageDetector` + `initReactI18next`. Default & fallback = `fr`. Detection order: `['localStorage', 'navigator']`, cache: `['localStorage']`, key: `i18nextLng`.
-- **`src/i18n/locales/fr.json`** and **`src/i18n/locales/en.json`**: Namespaced translation files grouped by area:
-  - `common` (boutons: save, cancel, delete, loading, error, success, search, …)
-  - `nav` (sidebar items, footer)
-  - `auth` (login, signup, errors)
-  - `dashboard` (KPIs, activity feed, empty states)
-  - `profile`, `importers`, `campaigns`, `crm`, `pipeline`, `billing`, `settings`, `roadmap`, `help`, `landing`
-  - `credits` (incl. `noCreditsCampaign`, `noCreditsSearch` with `{{date}}` interpolation)
-  - `notifications`, `reminders`, `emptyStates`
-- Import `./i18n` once in **`src/main.tsx`** before `<App />` renders.
+## Objectif
 
-## 3. Language Switcher
-- **`src/components/LanguageSwitcher.tsx`**: Compact toggle (FR | EN) using two buttons or a `Toggle`/`Select`. Calls `i18n.changeLanguage()`; selection auto-persists via the detector's localStorage cache. Updates instantly (no reload).
-- Mount in:
-  - **`src/components/AppSidebar.tsx`** — in `SidebarFooter`, above the notifications bell, visible when sidebar expanded; icon-only when collapsed.
-  - **`src/pages/LandingPage.tsx`** — top-right of the public navbar.
+Transformer le wizard de bienvenue d'un **formulaire de saisie** (où le domaine remplit nom, région, marchés, etc.) en un **tour guidé pédagogique** qui :
+- Explique en 4 étapes ce qu'il faut faire pour bien démarrer sur WineExporters
+- Renvoie le domaine vers les bonnes pages (Profil, Campagnes) pour qu'il agisse lui-même
+- Garde la même structure visuelle (modal plein écran, barre de progression, dismissible)
 
-## 4. String Externalization
-Replace all hardcoded French UI text with `t('namespace.key')` via `useTranslation()`. Files to refactor:
+## Nouvelle structure des 4 étapes
 
-**Layout/shared**
-- `src/components/AppSidebar.tsx`, `DashboardLayout.tsx`, `ProtectedRoute.tsx`, `AdminRoute.tsx`
-- `CampaignStatusBanner.tsx`, `PreflightBar.tsx`, `CampaignSidebar.tsx`
-- `ParseAddressesButton.tsx`, `PremiumOnlyState.tsx`, `ReminderPopover.tsx`
-- `LeadsWorldMap.tsx`, `importers/CountrySelector.tsx`, `profile/CountryMultiSelect.tsx`, `profile/WineManagement.tsx`
-- `ui/empty-state.tsx` (default copy props)
+Toutes les étapes deviennent **informatives** avec une icône, un titre, une description courte et un CTA "Aller à...".
 
-**Pages** (~19): `LandingPage`, `Auth`, `Dashboard`, `Profile`, `Importers`, `Campaigns`, `CreateCampaign`, `CampaignDetail`, `Prospects`, `Pipeline`, `ProspectDetail`, `DomainProfile`, `Billing`, `Settings`, `Roadmap`, `Help`, `AdminCampaigns`, `NotFound`, `Index`.
+```text
+Step 1/4 — Bienvenue 🍷
+  Pitch produit + ce qu'on va couvrir (inchangé, déjà pédagogique)
+  CTA: "Commencer le tour"
 
-**Hooks with user-facing strings**
-- `useCredits.tsx` — replace `formatResetDate` (use `i18n.language` for locale) and `noCreditsMessage` with `t('credits.noCredits…', { date })`.
-- `useAuth.tsx`, `useNotifications.tsx`, `useSubscription.tsx` — translate toast messages.
+Step 2/4 — Complétez votre profil domaine
+  Icône Grape. Texte: "Renseignez votre domaine (nom, région, cuvées,
+  certifications, volumes). C'est la base pour cibler les bons importateurs."
+  Liste à puces des champs à remplir (nom, région, types de vins, volume,
+  certifs, gamme de prix)
+  CTA primaire: "Aller à mon profil" → /profile
+  CTA secondaire: "Étape suivante"
 
-## 5. Locale-aware formatting
-- Date formatting (`date-fns` `formatDistanceToNow`, `format`) — pick locale from `i18n.language` (`fr` or `enUS`). Centralize in `src/lib/dateLocale.ts`.
-- `Date.toLocaleDateString` / `Number.toLocaleString` calls — pass `i18n.language`.
+Step 3/4 — Choisissez vos marchés cibles
+  Icône Globe. Texte: "Indiquez les marchés que vous visez en priorité
+  (Scandinavie, Benelux, DACH, UK, USA, Asie...). Vous pourrez les modifier
+  à tout moment."
+  Aperçu des marchés disponibles (chips visuelles non-cliquables, juste
+  pour montrer)
+  CTA primaire: "Définir mes marchés" → /profile (section marchés)
+  CTA secondaire: "Étape suivante"
 
-## 6. What stays untranslated
-- Brand names: "WineExporters", "ExportVins", "Lovable".
-- Database content: importer names, contact data, country values from `buyer_contacts`, campaign names, user-entered notes.
-- Continent/country labels already coming from `country-data.ts` (already translated map — leave as-is for now; can be wired to i18n later if needed).
-- Proper nouns in roadmap items / help articles when they are product-specific names.
+Step 4/4 — Lancez votre première campagne
+  Icône Megaphone. Texte: "Une fois votre profil prêt, créez une campagne
+  ciblée. Notre équipe la valide manuellement avant envoi."
+  Mini-checklist visuelle: ✓ Profil complété  ✓ Marchés définis  → Campagne
+  CTA primaire: "Créer ma première campagne" → /create-campaign
+  CTA secondaire: "Accéder à mon tableau de bord" → /dashboard
+```
 
-## 7. Memory updates
-- **Remove** the Core rule "Exclusively in French. Do not add i18n or English translations." from `mem://index.md`.
-- **Add** new memory `mem://features/i18n` describing: react-i18next setup, default `fr`, `localStorage` key `i18nextLng`, switcher locations, JSON file structure, rule to never translate DB data or brand names.
-- Update Core to note: "Bilingual FR/EN via react-i18next. Default FR. Never translate DB data or brand names."
+## Comportement
 
-## 8. QA checklist
-- Toggle FR ↔ EN updates sidebar, dashboard, forms, toasts instantly.
-- Refresh persists selection.
-- Dates and reset messages reformat per locale.
-- No raw translation keys (`xxx.yyy`) visible — every key exists in both files.
-- Database-driven content (importer rows, campaign names) stays untouched.
+- **Aucune écriture en base** pendant les étapes (plus de `persistStep2` / `persistStep3`).
+- À la fin (clic sur n'importe quel CTA final OU "Terminer le tour"), on appelle `markCompleted()` qui :
+  - met `profiles.onboarding_completed = true`
+  - met `localStorage.onboarding_completed = "true"`
+  - puis redirige vers la destination du CTA choisi
+- "Passer pour l'instant" et la croix X restent inchangés (set `onboarding_dismissed_at`).
+- Possibilité de revenir en arrière entre les étapes.
+- Le hook `useOnboarding` reste **inchangé** : il continue à calculer `progress.domain / markets / campaign` en lisant le profil et les campagnes — ça alimente toujours la bannière `OnboardingResumeBanner` et la checklist sidebar.
 
-## Scope
-~25–30 files edited, 2 new files (`i18n/index.ts`, `LanguageSwitcher.tsx`), 2 JSON locale files (~500 keys each), 3 new deps.
+## Changements de code
+
+**Fichier modifié : `src/components/onboarding/OnboardingWizard.tsx`**
+- Supprimer tout le state de formulaire (`domainName`, `region`, `wineTypes`, `volume`, `certifs`, `priceRange`, `markets`, `otherMarket`).
+- Supprimer le `useEffect` de pré-remplissage du profil.
+- Supprimer `persistStep2` et `persistStep3`.
+- Supprimer les composants `StepDomain` et `StepMarkets`.
+- Créer 3 nouveaux composants pédagogiques : `StepProfileGuide`, `StepMarketsGuide`, `StepCampaignGuide`, chacun avec icône, description, liste/aperçu, et 2 CTA (action + suivant).
+- Garder `StepWelcome` et `markCompleted` / `dismiss`.
+- Ajouter un helper `goTo(path: string)` qui appelle `markCompleted()` puis `navigate(path)`.
+
+**Fichier modifié : `src/i18n/locales/fr.json` et `en.json`**
+- Remplacer les clés `onboarding.step2.*` (champs de formulaire) par des clés pédagogiques :
+  `onboarding.step2.title`, `subtitle`, `bullets.*`, `ctaGoProfile`
+- Remplacer `onboarding.step3.*` de la même façon : titre, description, `ctaGoMarkets`
+- Adapter `onboarding.step4.*` : ajouter `ctaCreateCampaign` et `ctaDashboard`
+- Garder les clés `welcome.*`, `skip`, `start`, `nextStep`, `stepCounter`, `brand`.
+
+**Fichiers non modifiés** :
+- `useOnboarding.tsx` — la logique de détection du first-visit reste identique
+- `OnboardingResumeBanner.tsx` — continue à fonctionner via le hook
+- `DashboardLayout.tsx` — déclenchement inchangé
+- Page Help — le lien "Revoir le tutoriel" continue à fonctionner via l'event `open-onboarding`
+
+## Avantages
+
+- Onboarding 2× plus rapide (juste lire 4 écrans, pas de saisie obligatoire).
+- Le domaine voit où aller dans l'app et utilise la vraie page Profil (qui a tous les champs propres, validations, etc.) au lieu d'un mini-formulaire dupliqué.
+- Moins de duplication de logique entre wizard et page Profil.
+- La checklist sidebar et la bannière "Reprendre l'onboarding" restent fonctionnelles puisqu'elles lisent l'état réel du profil.
