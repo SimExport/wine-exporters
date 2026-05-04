@@ -1672,45 +1672,46 @@
     "nextStep": "Next step",
     "welcome": {
       "title": "Welcome to WineExporters",
-      "subtitle": "Let's configure your account in 4 steps — 5 minutes is all it takes.",
-      "s1": "Your estate",
-      "s2": "Your markets",
-      "s3": "First campaign",
-      "s4": "Ready"
+      "subtitle": "Find your next importers worldwide.",
+      "p1": "You define your target markets",
+      "p2": "We identify qualified importers",
+      "p3": "You receive direct introductions",
+      "cta": "See how it works"
     },
-    "step2": {
-      "title": "Complete your estate profile",
-      "subtitle": "This is the foundation we use to target the right importers and tailor your campaigns.",
-      "intro": "Head to the Profile page to fill in:",
-      "b1": "Estate name and wine region",
-      "b2": "Wine types, grape varieties and cuvées",
-      "b3": "Annual volume and export price range",
-      "b4": "Certifications (Organic, HVE, Biodynamic…)",
-      "tip": "Tip: a complete profile sharply improves recommendation quality.",
-      "ctaGo": "Go to my profile"
+    "campaign": {
+      "title": "Your first campaign in 3 minutes",
+      "subtitle": "A campaign means targeting markets and presenting your cuvées to the right importers.",
+      "f1": "You target your markets",
+      "f2": "We validate your campaign",
+      "f3": "We contact importers",
+      "f4": "You get the replies",
+      "mockLabel": "Sample campaign",
+      "mockTitle": "Domaine des Coteaux — Premium Export",
+      "mockStatus": "In progress",
+      "mockMarkets": "Targeted markets",
+      "mockCuvees": "Featured cuvées",
+      "mockStat1": "Contacts",
+      "mockStat2": "Opens",
+      "mockStat3": "Replies",
+      "cta": "Create my first campaign",
+      "example": "See a sample result"
     },
-    "step3": {
-      "title": "Pick your target markets",
-      "subtitle": "Tell us which countries you want to focus on. You can adjust them anytime from your profile.",
-      "preview": "Available markets:",
-      "ctaGo": "Set my markets"
+    "profile": {
+      "title": "Complete your profile for better results",
+      "subtitle": "A complete profile improves the quality of introductions.",
+      "completion": "Profile completion",
+      "hint": "Wine types, grapes, certifications, volumes… these refine the targeting.",
+      "cta": "Complete my profile",
+      "later": "I'll do it later"
     },
-    "markets": {
-      "scandinavia": "Scandinavia (Sweden, Denmark, Norway, Finland)",
-      "benelux": "Benelux (Belgium, Netherlands, Luxembourg)",
-      "dach": "Germany / Austria / Switzerland",
-      "uk": "United Kingdom",
-      "usaCanada": "USA / Canada",
-      "asia": "Asia (Japan, China, Korea)"
-    },
-    "step4": {
-      "title": "Launch your first campaign",
-      "subtitle": "Once your profile is ready, create a targeted campaign. Our team reviews each one manually before sending.",
-      "c1": "Our team reviews every campaign",
-      "c2": "Track opens and replies in real time",
-      "c3": "Hot leads land directly in your CRM",
-      "ctaCampaign": "Create my first campaign",
-      "ctaDashboard": "Go to my dashboard"
+    "ready": {
+      "title": "You're ready!",
+      "subtitle": "Everything is in place to launch your export prospecting.",
+      "r1": "Create and track campaigns",
+      "r2": "Real-time dashboard",
+      "r3": "CRM with hot leads",
+      "r4": "Support team by your side",
+      "cta": "Create my first campaign"
     },
     "resume": {
       "title": "Resume my setup",
