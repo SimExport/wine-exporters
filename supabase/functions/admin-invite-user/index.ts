@@ -56,19 +56,21 @@ serve(async (req) => {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    const sendMagicLink = async () => {
-      return await admin.auth.admin.generateLink({
-        type: "magiclink",
+    const sendMagicLinkEmail = async () => {
+      return await admin.auth.signInWithOtp({
         email: cleanEmail,
-        options: { redirectTo: redirectTo || undefined },
-      } as any);
+        options: {
+          emailRedirectTo: redirectTo || undefined,
+          shouldCreateUser: false,
+        },
+      });
     };
 
     let data: any;
     let error: any;
 
     if (mode === "resend") {
-      const res = await sendMagicLink();
+      const res = await sendMagicLinkEmail();
       data = res.data;
       error = res.error;
     } else {
@@ -78,7 +80,7 @@ serve(async (req) => {
       data = res.data;
       error = res.error;
       if (error && (error as any).code === "email_exists") {
-        const res2 = await sendMagicLink();
+        const res2 = await sendMagicLinkEmail();
         data = res2.data;
         error = res2.error;
       }
