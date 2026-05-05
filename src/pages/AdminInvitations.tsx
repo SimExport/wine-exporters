@@ -32,7 +32,7 @@ const AdminInvitations = () => {
   const [resendingId, setResendingId] = useState<string | null>(null);
 
   const sendInvite = async (target: string, mode?: "resend") => {
-    const PROD_ORIGIN = "https://wineexporters.com";
+    const PROD_ORIGIN = "https://wine-exporters.com";
     const currentOrigin = window.location.origin;
     const isProdHost =
       currentOrigin === PROD_ORIGIN ||
