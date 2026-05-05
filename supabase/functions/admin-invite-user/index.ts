@@ -47,16 +47,42 @@ serve(async (req) => {
       });
     }
 
-    const { email, redirectTo } = await req.json();
+    const { email, redirectTo, mode } = await req.json();
     if (!email || typeof email !== "string") {
       return new Response(JSON.stringify({ error: "missing_email" }), {
         status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(email.trim().toLowerCase(), {
-      redirectTo: redirectTo || undefined,
-    });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const sendMagicLink = async () => {
+      return await admin.auth.admin.generateLink({
+        type: "magiclink",
+        email: cleanEmail,
+        options: { redirectTo: redirectTo || undefined },
+      } as any);
+    };
+
+    let data: any;
+    let error: any;
+
+    if (mode === "resend") {
+      const res = await sendMagicLink();
+      data = res.data;
+      error = res.error;
+    } else {
+      const res = await admin.auth.admin.inviteUserByEmail(cleanEmail, {
+        redirectTo: redirectTo || undefined,
+      });
+      data = res.data;
+      error = res.error;
+      if (error && (error as any).code === "email_exists") {
+        const res2 = await sendMagicLink();
+        data = res2.data;
+        error = res2.error;
+      }
+    }
 
     if (error) {
       console.error("invite error:", error);
@@ -65,7 +91,7 @@ serve(async (req) => {
         ? "Cet email est déjà enregistré."
         : error.message;
       await admin.from("admin_invitations").insert({
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         status: "failed",
         error_message: friendly,
         invited_by: userData.user.id,
@@ -76,7 +102,7 @@ serve(async (req) => {
     }
 
     await admin.from("admin_invitations").insert({
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       status: "sent",
       invited_user_id: data.user?.id ?? null,
       invited_by: userData.user.id,
