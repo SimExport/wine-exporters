@@ -52,7 +52,13 @@ const AdminInvitations = () => {
     }
     setLoading(true);
     try {
-      const redirectTo = `${window.location.origin}/auth`;
+      // Toujours rediriger vers la prod, jamais localhost ou la preview Lovable
+      const PROD_ORIGIN = "https://wineexporters.com";
+      const currentOrigin = window.location.origin;
+      const isProdHost =
+        currentOrigin === PROD_ORIGIN ||
+        currentOrigin === "https://wine-exporters.lovable.app";
+      const redirectTo = `${isProdHost ? currentOrigin : PROD_ORIGIN}/auth`;
       const { data, error } = await supabase.functions.invoke("admin-invite-user", {
         body: { email: parsed.data, redirectTo },
       });
