@@ -1,23 +1,23 @@
 ## Problème
 
-L'erreur **"Cet email est déjà enregistré"** vient de `inviteUserByEmail` dans l'edge function `admin-invite-user`. Cette méthode Supabase échoue avec le code `email_exists` dès que l'utilisateur existe déjà dans `auth.users` — ce qui est toujours le cas lors d'un renvoi (la 1ère invitation a déjà créé le compte).
+Dans `src/pages/AdminInvitations.tsx`, la constante `PROD_ORIGIN` utilise `https://wineexporters.com` (sans tiret), alors que le vrai domaine du projet est `https://wine-exporters.com` (avec tiret). Ce mauvais `redirectTo` est envoyé à l'edge function `admin-invite-user`, donc les liens Supabase dans les mails d'invitation/magic link pointent vers un domaine qui n'existe pas.
 
-C'est aussi pourquoi tes 2 dernières tentatives sur `slemonnier57@gmail.com` apparaissent "Échouée" dans le journal : l'utilisateur a été créé lors de l'envoi 11:32:01, et toutes les invitations suivantes sont rejetées.
+## Correctifs
 
-## Correctif
+### 1. `src/pages/AdminInvitations.tsx`
+- Remplacer `const PROD_ORIGIN = "https://wineexporters.com"` par `"https://wine-exporters.com"`.
+- La détection `isProdHost` utilise déjà la bonne URL Lovable, on garde.
 
-Modifier `supabase/functions/admin-invite-user/index.ts` :
+### 2. Vérification côté Supabase Dashboard (à faire manuellement)
+Le `redirectTo` n'est utilisé que si l'URL est dans la liste blanche **Authentication → URL Configuration**. Il faut t'assurer côté dashboard Supabase que :
+- **Site URL** = `https://wine-exporters.com`
+- **Redirect URLs** contient :
+  - `https://wine-exporters.com/**`
+  - `https://wine-exporters.lovable.app/**`
+  - `https://id-preview--2cbf3846-6e77-4cb7-aac8-1f5496e7b841.lovable.app/**`
+- Toute entrée `wineexporters.com` (sans tiret) doit être supprimée.
 
-1. Accepter un nouveau paramètre `mode: "invite" | "resend"` dans le body.
-2. **Si `mode === "resend"`** → utiliser `admin.auth.admin.generateLink({ type: "magiclink", email, options: { redirectTo } })` au lieu de `inviteUserByEmail`. Cela envoie un lien de connexion à l'utilisateur existant (mêmes templates Supabase).
-3. **Si `mode` absent (premier envoi)** → garder `inviteUserByEmail`, mais en cas d'erreur `email_exists`, retomber automatiquement sur le magic link plutôt que d'échouer. Comme ça l'admin n'a plus besoin de supprimer manuellement l'utilisateur en base.
-4. Le reste (vérif admin, log dans `admin_invitations`) reste identique.
+### 3. SMTP / Templates
+Si du SMTP custom (Resend) est configuré dans Supabase, vérifier que le domaine expéditeur est bien `wine-exporters.com` (et non `wineexporters.com`) et que les templates d'email ne contiennent aucune URL hardcodée vers le mauvais domaine.
 
-## Côté front (`src/pages/AdminInvitations.tsx`)
-
-Le bouton "Renvoyer" ajouté précédemment passe désormais `mode: "resend"` dans l'appel à l'edge function. Le formulaire principal reste sans `mode`.
-
-## Résultat attendu
-
-- Bouton "Renvoyer" → envoie un magic link à l'utilisateur existant, log "Envoyée" dans le journal.
-- Premier envoi sur un email déjà inscrit → bascule auto sur magic link au lieu d'afficher l'erreur.
+Une fois le fichier corrigé et le dashboard Supabase vérifié, les liens d'invitation pointeront vers `https://wine-exporters.com/auth`.
