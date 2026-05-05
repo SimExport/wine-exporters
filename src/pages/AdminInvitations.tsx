@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, UserPlus, CheckCircle2, XCircle, History } from "lucide-react";
+import { Mail, UserPlus, CheckCircle2, XCircle, History, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -29,6 +29,35 @@ const AdminInvitations = () => {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<InvitationRow[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  const sendInvite = async (target: string) => {
+    const PROD_ORIGIN = "https://wineexporters.com";
+    const currentOrigin = window.location.origin;
+    const isProdHost =
+      currentOrigin === PROD_ORIGIN ||
+      currentOrigin === "https://wine-exporters.lovable.app";
+    const redirectTo = `${isProdHost ? currentOrigin : PROD_ORIGIN}/auth`;
+    const { data, error } = await supabase.functions.invoke("admin-invite-user", {
+      body: { email: target, redirectTo },
+    });
+    if (error) throw error;
+    if ((data as any)?.error) throw new Error((data as any).error);
+  };
+
+  const onResend = async (row: InvitationRow) => {
+    setResendingId(row.id);
+    try {
+      await sendInvite(row.email);
+      toast({ title: t("adminInvitations.successTitle"), description: t("adminInvitations.successDesc", { email: row.email }) });
+      loadRows();
+    } catch (err: any) {
+      toast({ title: t("adminInvitations.errorTitle"), description: err?.message || t("adminInvitations.errorGeneric"), variant: "destructive" });
+      loadRows();
+    } finally {
+      setResendingId(null);
+    }
+  };
 
   const loadRows = useCallback(async () => {
     setLoadingRows(true);
@@ -52,18 +81,7 @@ const AdminInvitations = () => {
     }
     setLoading(true);
     try {
-      // Toujours rediriger vers la prod, jamais localhost ou la preview Lovable
-      const PROD_ORIGIN = "https://wineexporters.com";
-      const currentOrigin = window.location.origin;
-      const isProdHost =
-        currentOrigin === PROD_ORIGIN ||
-        currentOrigin === "https://wine-exporters.lovable.app";
-      const redirectTo = `${isProdHost ? currentOrigin : PROD_ORIGIN}/auth`;
-      const { data, error } = await supabase.functions.invoke("admin-invite-user", {
-        body: { email: parsed.data, redirectTo },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      await sendInvite(parsed.data);
       toast({ title: t("adminInvitations.successTitle"), description: t("adminInvitations.successDesc", { email: parsed.data }) });
       setEmail("");
       loadRows();
@@ -135,6 +153,7 @@ const AdminInvitations = () => {
                     <TableHead>Date</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>User ID</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -157,6 +176,17 @@ const AdminInvitations = () => {
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {r.invited_user_id ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onResend(r)}
+                          disabled={resendingId === r.id}
+                        >
+                          <Send className="h-3 w-3 mr-1" />
+                          {resendingId === r.id ? "Envoi…" : "Renvoyer"}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
