@@ -31,7 +31,7 @@ const AdminInvitations = () => {
   const [loadingRows, setLoadingRows] = useState(true);
   const [resendingId, setResendingId] = useState<string | null>(null);
 
-  const sendInvite = async (target: string) => {
+  const sendInvite = async (target: string, mode?: "resend") => {
     const PROD_ORIGIN = "https://wineexporters.com";
     const currentOrigin = window.location.origin;
     const isProdHost =
@@ -39,7 +39,7 @@ const AdminInvitations = () => {
       currentOrigin === "https://wine-exporters.lovable.app";
     const redirectTo = `${isProdHost ? currentOrigin : PROD_ORIGIN}/auth`;
     const { data, error } = await supabase.functions.invoke("admin-invite-user", {
-      body: { email: target, redirectTo },
+      body: { email: target, redirectTo, mode },
     });
     if (error) throw error;
     if ((data as any)?.error) throw new Error((data as any).error);
@@ -48,7 +48,7 @@ const AdminInvitations = () => {
   const onResend = async (row: InvitationRow) => {
     setResendingId(row.id);
     try {
-      await sendInvite(row.email);
+      await sendInvite(row.email, "resend");
       toast({ title: t("adminInvitations.successTitle"), description: t("adminInvitations.successDesc", { email: row.email }) });
       loadRows();
     } catch (err: any) {
