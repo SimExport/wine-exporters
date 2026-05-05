@@ -10,8 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle } from 'lucide-react';
-import { KeyRound } from 'lucide-react';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle, KeyRound } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
@@ -920,6 +919,55 @@ const Profile = () => {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <KeyRound className="h-5 w-5" />
+                    {isFr ? 'Changer mon mot de passe' : 'Change my password'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isFr
+                      ? 'Définissez un nouveau mot de passe pour votre compte.'
+                      : 'Set a new password for your account.'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">
+                        {isFr ? 'Nouveau mot de passe' : 'New password'}
+                      </Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        minLength={8}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">
+                        {isFr ? 'Confirmer le mot de passe' : 'Confirm password'}
+                      </Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        minLength={8}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <Button type="submit" disabled={changingPassword || !newPassword || !confirmPassword}>
+                      {changingPassword
+                        ? (isFr ? 'Enregistrement…' : 'Saving…')
+                        : (isFr ? 'Mettre à jour le mot de passe' : 'Update password')}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
