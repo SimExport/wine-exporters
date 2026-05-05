@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle } from 'lucide-react';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle, KeyRound } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
@@ -87,6 +87,48 @@ const Profile = () => {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Password change state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const isFr = i18n.language?.startsWith('fr');
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast({
+        title: isFr ? 'Mot de passe trop court' : 'Password too short',
+        description: isFr ? '8 caractères minimum.' : '8 characters minimum.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: isFr ? 'Les mots de passe ne correspondent pas' : 'Passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+    if (error) {
+      toast({
+        title: isFr ? 'Erreur' : 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+    setNewPassword('');
+    setConfirmPassword('');
+    toast({
+      title: isFr ? 'Mot de passe mis à jour' : 'Password updated',
+      description: isFr ? 'Votre mot de passe a été modifié avec succès.' : 'Your password has been changed successfully.',
+    });
+  };
 
   // Refs for file inputs
   const presentationInputRef = useRef<HTMLInputElement>(null);
@@ -877,6 +919,55 @@ const Profile = () => {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <KeyRound className="h-5 w-5" />
+                    {isFr ? 'Changer mon mot de passe' : 'Change my password'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isFr
+                      ? 'Définissez un nouveau mot de passe pour votre compte.'
+                      : 'Set a new password for your account.'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">
+                        {isFr ? 'Nouveau mot de passe' : 'New password'}
+                      </Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        minLength={8}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">
+                        {isFr ? 'Confirmer le mot de passe' : 'Confirm password'}
+                      </Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        minLength={8}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <Button type="submit" disabled={changingPassword || !newPassword || !confirmPassword}>
+                      {changingPassword
+                        ? (isFr ? 'Enregistrement…' : 'Saving…')
+                        : (isFr ? 'Mettre à jour le mot de passe' : 'Update password')}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
