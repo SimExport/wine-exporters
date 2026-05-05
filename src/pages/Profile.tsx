@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
@@ -87,6 +88,48 @@ const Profile = () => {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Password change state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const isFr = i18n.language?.startsWith('fr');
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast({
+        title: isFr ? 'Mot de passe trop court' : 'Password too short',
+        description: isFr ? '8 caractères minimum.' : '8 characters minimum.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: isFr ? 'Les mots de passe ne correspondent pas' : 'Passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+    if (error) {
+      toast({
+        title: isFr ? 'Erreur' : 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+    setNewPassword('');
+    setConfirmPassword('');
+    toast({
+      title: isFr ? 'Mot de passe mis à jour' : 'Password updated',
+      description: isFr ? 'Votre mot de passe a été modifié avec succès.' : 'Your password has been changed successfully.',
+    });
+  };
 
   // Refs for file inputs
   const presentationInputRef = useRef<HTMLInputElement>(null);
