@@ -23,6 +23,7 @@ import ProspectDetail from "./pages/ProspectDetail";
 import Pipeline from "./pages/Pipeline";
 import AdminCampaigns from "./pages/AdminCampaigns";
 import AdminInvitations from "./pages/AdminInvitations";
+import SetPassword from "./pages/SetPassword";
 import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
@@ -59,6 +60,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<AuthenticatedApp />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/set-password" element={<SetPassword />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
             <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
