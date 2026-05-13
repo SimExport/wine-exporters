@@ -1,46 +1,59 @@
-## 1. À quoi correspond « Localisation » dans le Profil
+## Problème
 
-Sur l'onglet **Général**, le champ « Localisation » est un simple champ texte libre où le client renseigne **la ville et le pays du domaine** (placeholder existant : « Bordeaux, France »).
+L'erreur affichée par le client :
 
-Dans le cas de Maison Kieffer, c'est le seul champ manquant pour atteindre 100 % (12/13) — il suffit d'écrire par exemple « Eguisheim, France » ou « Alsace, France ».
+```
+Erreur d'upload
+Invalid key: 55a6277e-.../tech_sheet/1778661412756_2022 Pinot Gris Réserve KIEFFER.pdf
+```
 
-Ce champ sert ensuite à :
-- afficher le domaine sur la carte / dans les fiches importateur,
-- améliorer la pertinence du ciblage des campagnes.
+Vient de Supabase Storage qui **rejette les clés contenant des caractères non-ASCII** (ici l'accent `é` de « Réserve »). Les espaces et autres caractères spéciaux (`’`, `«`, `°`, `–`, etc.) posent aussi régulièrement problème. C'est la raison pour laquelle :
+- 2 fiches passent (noms « propres »)
+- 2 fiches échouent systématiquement (noms avec accents / caractères spéciaux)
+- Ce n'est ni une limite de taille ni une limite de quota.
 
-Aucune action de notre côté n'est nécessaire pour ce point — c'est juste à expliquer au client. Si tu veux, on peut aussi rendre le label plus explicite (ex: « Localisation (ville, pays) ») pour éviter la confusion à l'avenir.
+## Correctif
 
-## 2. Pourquoi le « glissé-déposé » ne fonctionne pas
-
-J'ai vérifié `src/pages/Profile.tsx` : les 5 zones d'upload (Présentation, Tarifs, Autres documents, Fiches techniques, Médias) **affichent le texte « Glissez-déposez vos fichiers ici »** mais **n'ont aucun handler `onDrop` / `onDragOver`**. Seul le bouton « Ajouter » fonctionne (il ouvre le sélecteur de fichiers).
-
-C'est donc un bug : le visuel promet du drag & drop, mais le code ne l'implémente pas.
-
-## 3. Correctif proposé
-
-Ajouter de vrais handlers drag & drop sur les 5 zones pointillées :
-
-- `onDragOver` → `e.preventDefault()` + état `isDragging` pour feedback visuel (bordure primary)
-- `onDragLeave` → reset `isDragging`
-- `onDrop` → `e.preventDefault()` + récupération de `e.dataTransfer.files` + appel de `handleMultipleDocumentUpload(files, category)` (ou l'équivalent média)
-
-Zones concernées dans `src/pages/Profile.tsx` :
-1. Documents → Présentation (cat. `presentation`)
-2. Documents → Tarifs (cat. `price_list`)
-3. Documents → Autres (cat. `other`)
-4. Fiches techniques (cat. `tech_sheet`)
-5. Médias → Photos & Vidéos (upload média existant)
-
-Pour éviter la duplication, créer un petit composant `DropZone` réutilisable (props : `accept`, `onFiles`, `label`, `buttonLabel`, `disabled`) et remplacer les 5 blocs actuels par ce composant.
+Dans `src/pages/Profile.tsx`, fonctions `handleDocumentUpload` (ligne 513) et `handleMediaUpload` (ligne 573), le `filePath` est construit directement avec `file.name`. Il faut sanitiser **uniquement la clé Storage**, tout en gardant le nom original pour l'affichage (`title`, `file_name` en base et le toast).
 
 ### Détails techniques
 
-- Filtrage côté client par extension/MIME selon le `accept` pour rejeter proprement les fichiers non supportés (toast d'erreur via `useToast`).
-- Conserver le `<input type="file" hidden>` pour le clic bouton (fallback + accessibilité).
-- Ajouter un état visuel `data-dragging` qui passe la bordure et le fond en couleur `primary/10` pendant le survol.
-- Aucun changement backend, RLS, ou base de données.
+Ajouter une petite fonction utilitaire en haut du fichier :
 
-## 4. Hors scope
+```ts
+const sanitizeStorageKey = (name: string) => {
+  // Sépare nom + extension
+  const dot = name.lastIndexOf('.');
+  const base = dot > 0 ? name.slice(0, dot) : name;
+  const ext  = dot > 0 ? name.slice(dot) : '';
+  const cleanBase = base
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // retire les accents
+    .replace(/[^a-zA-Z0-9._-]+/g, '_')                  // remplace tout caractère non sûr
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80) || 'file';
+  const cleanExt = ext.toLowerCase().replace(/[^a-z0-9.]/g, '');
+  return cleanBase + cleanExt;
+};
+```
 
-- Pas de modification de la logique d'upload Supabase Storage existante.
-- Pas de changement du label « Localisation » (à confirmer si tu veux qu'on le renomme en « Localisation (ville, pays) »).
+Puis remplacer :
+
+- `${user.id}/${category}/${Date.now()}_${file.name}` → `${user.id}/${category}/${Date.now()}_${sanitizeStorageKey(file.name)}`
+- `${user.id}/${type}/${Date.now()}_${file.name}` → idem pour les médias.
+
+**Important :** on continue d'enregistrer `file.name` (avec les accents) dans `documents.file_name` / `documents.title` / `media.title`, pour que l'utilisateur retrouve son nom d'origine dans l'UI. Seule la clé Storage est nettoyée.
+
+### Bonus très court
+
+Améliorer aussi le message d'erreur affiché : si le `error.message` contient `Invalid key`, afficher un toast plus parlant en FR/EN (« Le nom du fichier contient des caractères non supportés. Réessayez. ») — utile uniquement si jamais un cas reste après sanitization. (Optionnel, je peux l'inclure ou non.)
+
+## Hors scope
+
+- Pas de changement du bucket, des policies RLS, ni de la base.
+- Pas de modification des handlers drag & drop déjà ajoutés.
+- Pas de retraitement des anciens fichiers déjà uploadés.
+
+## Vérification
+
+Après déploiement, demander au client de re-tenter les 2 fiches techniques qui échouaient (`2022 Pinot Gris Réserve KIEFFER.pdf` etc.). L'upload doit aboutir et le nom affiché dans le tableau doit rester avec ses accents.
