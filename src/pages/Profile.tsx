@@ -16,6 +16,20 @@ import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
 import { useTranslation } from 'react-i18next';
 
+const sanitizeStorageKey = (name: string) => {
+  const dot = name.lastIndexOf('.');
+  const base = dot > 0 ? name.slice(0, dot) : name;
+  const ext = dot > 0 ? name.slice(dot) : '';
+  const cleanBase = base
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80) || 'file';
+  const cleanExt = ext.toLowerCase().replace(/[^a-z0-9.]/g, '');
+  return cleanBase + cleanExt;
+};
+
 const FieldHint = ({ text }: { text: string }) => (
   <TooltipProvider delayDuration={200}>
     <Tooltip>
@@ -570,7 +584,7 @@ const Profile = () => {
     }
     setUploading(true);
     try {
-      const filePath = `${user.id}/${type}/${Date.now()}_${file.name}`;
+      const filePath = `${user.id}/${type}/${Date.now()}_${sanitizeStorageKey(file.name)}`;
       const {
         error: uploadError
       } = await supabase.storage.from('media').upload(filePath, file);
