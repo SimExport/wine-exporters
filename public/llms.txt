@@ -1,0 +1,13 @@
+# WineExporters
+
+> Plateforme SaaS et conciergerie d'exportation de vins par ExportVins. Aide les domaines viticoles français à trouver des importateurs qualifiés à l'international via des campagnes ciblées et un CRM intégré.
+
+## Pages
+
+- [Accueil](/): Présentation de la plateforme, fonctionnement, tarification (199€/mois HT) et FAQ.
+- [Demande de démo](/demande-demo): Formulaire pour demander une démo personnalisée de la plateforme.
+- [Connexion](/auth): Connexion à l'espace client (domaines abonnés).
+
+## Optional
+
+- [Roadmap](/roadmap): Roadmap publique des fonctionnalités à venir (accès authentifié).

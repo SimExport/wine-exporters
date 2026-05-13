@@ -323,6 +323,7 @@ const LandingPage = () => {
         </div>
       </header>
 
+      <main>
       {/* ── 1. HERO ── */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         {/* grid pattern */}
@@ -580,6 +581,7 @@ const LandingPage = () => {
           </FadeIn>
         </div>
       </section>
+      </main>
 
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
