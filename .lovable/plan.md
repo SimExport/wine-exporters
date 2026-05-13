@@ -1,59 +1,62 @@
-## Problème
+## Audit du flux d'invitation
 
-L'erreur affichée par le client :
+### Ce qui est en place et fonctionne
 
-```
-Erreur d'upload
-Invalid key: 55a6277e-.../tech_sheet/1778661412756_2022 Pinot Gris Réserve KIEFFER.pdf
-```
+1. **Page admin** (`AdminInvitations.tsx`) — formulaire envoie l'email à l'Edge Function `admin-invite-user`, avec `redirectTo = https://wine-exporters.com/set-password` (forcé sur la prod même quand on déclenche depuis le preview).
+2. **Edge Function `admin-invite-user`** — vérifie le JWT, vérifie que l'appelant est `admin`, puis :
+   - 1er envoi → `auth.admin.inviteUserByEmail(email, { redirectTo })`
+   - Renvoi (`mode: "resend"`) ou email déjà existant → bascule sur `signInWithOtp` (magic link), ce qui est correct car l'utilisateur existe déjà.
+   - Loggue tout dans `admin_invitations` (sent / failed + message d'erreur).
+3. **Page `/set-password`** — déclarée dans `App.tsx`, lit le hash `#access_token & refresh_token`, ouvre la session, puis `supabase.auth.updateUser({ password })` → redirection vers `/dashboard`.
+4. **Triggers** — à la création de l'utilisateur, `handle_new_user`, `handle_new_user_role`, `handle_new_user_credits`, `handle_new_user_settings` créent profile + role free + crédits + settings. OK.
+5. **Email** — pas de domaine email Lovable configuré → Supabase envoie son template par défaut "You have been invited" (bouton "Accept the invite") qui pointe vers `redirectTo`. Fonctionnel.
 
-Vient de Supabase Storage qui **rejette les clés contenant des caractères non-ASCII** (ici l'accent `é` de « Réserve »). Les espaces et autres caractères spéciaux (`’`, `«`, `°`, `–`, etc.) posent aussi régulièrement problème. C'est la raison pour laquelle :
-- 2 fiches passent (noms « propres »)
-- 2 fiches échouent systématiquement (noms avec accents / caractères spéciaux)
-- Ce n'est ni une limite de taille ni une limite de quota.
+### Points d'attention (à vérifier côté dashboard Supabase, pas dans le code)
 
-## Correctif
+A. **Redirect URLs autorisées** — dans Supabase → Authentication → URL Configuration, il faut que ces URLs soient dans la liste « Redirect URLs » :
+   - `https://wine-exporters.com/set-password`
+   - `https://wine-exporters.lovable.app/set-password`
+   Sinon le lien dans l'email retombe sur la Site URL et le SetPassword ne reçoit pas les tokens.
 
-Dans `src/pages/Profile.tsx`, fonctions `handleDocumentUpload` (ligne 513) et `handleMediaUpload` (ligne 573), le `filePath` est construit directement avec `file.name`. Il faut sanitiser **uniquement la clé Storage**, tout en gardant le nom original pour l'affichage (`title`, `file_name` en base et le toast).
+B. **Rate limit Supabase** — l'historique montre déjà des erreurs « For security purposes, you can only request this after 26 seconds » et « email rate limit exceeded ». Pour 2 invitations espacées, aucun souci ; mais éviter de spammer le bouton « Renvoyer ».
+
+### Petit bug latent à corriger dans `/set-password`
+
+La page ne gère que le format **implicit** (`#access_token=...`). Selon la version du template d'email Supabase, le lien peut arriver en **PKCE** (`?code=...`) ou bien expirer côté Supabase et être recyclé. On rend la page robuste aux deux formats :
+
+- Si l'URL contient `?code=...` → appeler `supabase.auth.exchangeCodeForSession(code)`.
+- Sinon, garder le comportement actuel (hash tokens).
+- Nettoyer l'URL après.
+
+Cela évite le « Lien invalide ou expiré » sur certains comptes / certains clients mail qui pré-fetchent le lien.
+
+### Plan d'action
+
+1. **Code** : durcir `src/pages/SetPassword.tsx` pour gérer aussi le flow PKCE (`?code=...`) avec `exchangeCodeForSession`.
+2. **Vérification manuelle** que vous (admin) faites avant l'envoi réel :
+   - Confirmer dans Supabase Auth que les deux Redirect URLs ci-dessus sont bien autorisées.
+   - Faire un test end-to-end avec une adresse à vous : invitation → réception mail → clic → page SetPassword → mot de passe défini → connexion.
+3. **Aucun changement** côté Edge Function `admin-invite-user` (logique correcte) ni côté `AdminInvitations.tsx`.
 
 ### Détails techniques
 
-Ajouter une petite fonction utilitaire en haut du fichier :
-
 ```ts
-const sanitizeStorageKey = (name: string) => {
-  // Sépare nom + extension
-  const dot = name.lastIndexOf('.');
-  const base = dot > 0 ? name.slice(0, dot) : name;
-  const ext  = dot > 0 ? name.slice(dot) : '';
-  const cleanBase = base
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // retire les accents
-    .replace(/[^a-zA-Z0-9._-]+/g, '_')                  // remplace tout caractère non sûr
-    .replace(/_+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 80) || 'file';
-  const cleanExt = ext.toLowerCase().replace(/[^a-z0-9.]/g, '');
-  return cleanBase + cleanExt;
-};
+// SetPassword.tsx — init() devient :
+const url = new URL(window.location.href);
+const code = url.searchParams.get("code");
+if (code) {
+  await supabase.auth.exchangeCodeForSession(code);
+  window.history.replaceState(null, "", url.pathname);
+} else {
+  const params = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
+  const access_token = params.get("access_token");
+  const refresh_token = params.get("refresh_token");
+  if (access_token && refresh_token) {
+    await supabase.auth.setSession({ access_token, refresh_token });
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+}
+// puis getSession() comme aujourd'hui
 ```
 
-Puis remplacer :
-
-- `${user.id}/${category}/${Date.now()}_${file.name}` → `${user.id}/${category}/${Date.now()}_${sanitizeStorageKey(file.name)}`
-- `${user.id}/${type}/${Date.now()}_${file.name}` → idem pour les médias.
-
-**Important :** on continue d'enregistrer `file.name` (avec les accents) dans `documents.file_name` / `documents.title` / `media.title`, pour que l'utilisateur retrouve son nom d'origine dans l'UI. Seule la clé Storage est nettoyée.
-
-### Bonus très court
-
-Améliorer aussi le message d'erreur affiché : si le `error.message` contient `Invalid key`, afficher un toast plus parlant en FR/EN (« Le nom du fichier contient des caractères non supportés. Réessayez. ») — utile uniquement si jamais un cas reste après sanitization. (Optionnel, je peux l'inclure ou non.)
-
-## Hors scope
-
-- Pas de changement du bucket, des policies RLS, ni de la base.
-- Pas de modification des handlers drag & drop déjà ajoutés.
-- Pas de retraitement des anciens fichiers déjà uploadés.
-
-## Vérification
-
-Après déploiement, demander au client de re-tenter les 2 fiches techniques qui échouaient (`2022 Pinot Gris Réserve KIEFFER.pdf` etc.). L'upload doit aboutir et le nom affiché dans le tableau doit rester avec ses accents.
+Aucune modification de DB, ni de policies, ni de secrets.

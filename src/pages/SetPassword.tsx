@@ -22,14 +22,21 @@ const SetPassword = () => {
   useEffect(() => {
     // Supabase JS auto-parses the hash and creates a session for invite/recovery links.
     const init = async () => {
-      const hash = window.location.hash || "";
-      const params = new URLSearchParams(hash.replace(/^#/, ""));
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-      if (access_token && refresh_token) {
-        await supabase.auth.setSession({ access_token, refresh_token });
-        // Clean the URL hash
-        window.history.replaceState(null, "", window.location.pathname);
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (code) {
+        // PKCE flow (newer Supabase email templates)
+        await supabase.auth.exchangeCodeForSession(code);
+        window.history.replaceState(null, "", url.pathname);
+      } else {
+        // Implicit flow (#access_token=...&refresh_token=...)
+        const params = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+        if (access_token && refresh_token) {
+          await supabase.auth.setSession({ access_token, refresh_token });
+          window.history.replaceState(null, "", window.location.pathname);
+        }
       }
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
