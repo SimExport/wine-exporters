@@ -1096,7 +1096,17 @@ const Profile = () => {
                     }
                     e.target.value = '';
                   }} />
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4 transition-colors hover:border-primary/50 data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/5"
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.dataset.dragging = 'true'; }}
+                      onDragLeave={(e) => { e.currentTarget.dataset.dragging = 'false'; }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.dataset.dragging = 'false';
+                        const files = e.dataTransfer.files;
+                        if (files && files.length > 0) handleMultipleDocumentUpload(files, 'presentation');
+                      }}
+                    >
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         {t('profile.documents.presentationDrop')}
@@ -1138,7 +1148,17 @@ const Profile = () => {
                     }
                     e.target.value = '';
                   }} />
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4 transition-colors hover:border-primary/50 data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/5"
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.dataset.dragging = 'true'; }}
+                      onDragLeave={(e) => { e.currentTarget.dataset.dragging = 'false'; }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.dataset.dragging = 'false';
+                        const files = e.dataTransfer.files;
+                        if (files && files.length > 0) handleMultipleDocumentUpload(files, 'price_list');
+                      }}
+                    >
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         {t('profile.documents.pricelistDrop')}
@@ -1180,7 +1200,17 @@ const Profile = () => {
                     }
                     e.target.value = '';
                   }} />
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4 transition-colors hover:border-primary/50 data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/5"
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.dataset.dragging = 'true'; }}
+                      onDragLeave={(e) => { e.currentTarget.dataset.dragging = 'false'; }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.dataset.dragging = 'false';
+                        const files = e.dataTransfer.files;
+                        if (files && files.length > 0) handleMultipleDocumentUpload(files, 'other');
+                      }}
+                    >
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         {t('profile.documents.otherDrop')}
@@ -1225,7 +1255,17 @@ const Profile = () => {
                   }
                   e.target.value = '';
                 }} />
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                  <div
+                    className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4 transition-colors hover:border-primary/50 data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/5"
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.dataset.dragging = 'true'; }}
+                    onDragLeave={(e) => { e.currentTarget.dataset.dragging = 'false'; }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.dataset.dragging = 'false';
+                      const files = e.dataTransfer.files;
+                      if (files && files.length > 0) handleMultipleDocumentUpload(files, 'tech_sheet');
+                    }}
+                  >
                     <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
                       {t('profile.techSheets.drop')}
@@ -1300,7 +1340,17 @@ const Profile = () => {
                     }
                     e.target.value = '';
                   }} />
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4 transition-colors hover:border-primary/50 data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/5"
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.dataset.dragging = 'true'; }}
+                      onDragLeave={(e) => { e.currentTarget.dataset.dragging = 'false'; }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.dataset.dragging = 'false';
+                        const files = e.dataTransfer.files;
+                        if (files && files.length > 0) handleMultipleMediaUpload(files, 'image');
+                      }}
+                    >
                       <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         {t('profile.media.photosDrop')}
@@ -1347,7 +1397,17 @@ const Profile = () => {
                     }
                     e.target.value = '';
                   }} />
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4">
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-4 transition-colors hover:border-primary/50 data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/5"
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.dataset.dragging = 'true'; }}
+                      onDragLeave={(e) => { e.currentTarget.dataset.dragging = 'false'; }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.dataset.dragging = 'false';
+                        const files = e.dataTransfer.files;
+                        if (files && files.length > 0) handleMultipleMediaUpload(files, 'video');
+                      }}
+                    >
                       <Play className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         {t('profile.media.videosDrop')}
