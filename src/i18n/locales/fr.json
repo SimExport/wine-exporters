@@ -306,6 +306,8 @@
       "contactNamePlaceholder": "Jean Dupont",
       "domainName": "Nom du domaine",
       "domainNamePlaceholder": "Domaine de la Vallée",
+      "location": "Localisation (ville, pays)",
+      "locationPlaceholder": "Bordeaux, France",
       "aoc": "AOC / Appellations",
       "aocPlaceholder": "Ajouter une appellation et appuyez sur Entrée",
       "surface": "Surface (hectares)",
