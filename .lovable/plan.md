@@ -1,23 +1,46 @@
-## Problème
+## 1. À quoi correspond « Localisation » dans le Profil
 
-Dans `src/pages/AdminInvitations.tsx`, la constante `PROD_ORIGIN` utilise `https://wineexporters.com` (sans tiret), alors que le vrai domaine du projet est `https://wine-exporters.com` (avec tiret). Ce mauvais `redirectTo` est envoyé à l'edge function `admin-invite-user`, donc les liens Supabase dans les mails d'invitation/magic link pointent vers un domaine qui n'existe pas.
+Sur l'onglet **Général**, le champ « Localisation » est un simple champ texte libre où le client renseigne **la ville et le pays du domaine** (placeholder existant : « Bordeaux, France »).
 
-## Correctifs
+Dans le cas de Maison Kieffer, c'est le seul champ manquant pour atteindre 100 % (12/13) — il suffit d'écrire par exemple « Eguisheim, France » ou « Alsace, France ».
 
-### 1. `src/pages/AdminInvitations.tsx`
-- Remplacer `const PROD_ORIGIN = "https://wineexporters.com"` par `"https://wine-exporters.com"`.
-- La détection `isProdHost` utilise déjà la bonne URL Lovable, on garde.
+Ce champ sert ensuite à :
+- afficher le domaine sur la carte / dans les fiches importateur,
+- améliorer la pertinence du ciblage des campagnes.
 
-### 2. Vérification côté Supabase Dashboard (à faire manuellement)
-Le `redirectTo` n'est utilisé que si l'URL est dans la liste blanche **Authentication → URL Configuration**. Il faut t'assurer côté dashboard Supabase que :
-- **Site URL** = `https://wine-exporters.com`
-- **Redirect URLs** contient :
-  - `https://wine-exporters.com/**`
-  - `https://wine-exporters.lovable.app/**`
-  - `https://id-preview--2cbf3846-6e77-4cb7-aac8-1f5496e7b841.lovable.app/**`
-- Toute entrée `wineexporters.com` (sans tiret) doit être supprimée.
+Aucune action de notre côté n'est nécessaire pour ce point — c'est juste à expliquer au client. Si tu veux, on peut aussi rendre le label plus explicite (ex: « Localisation (ville, pays) ») pour éviter la confusion à l'avenir.
 
-### 3. SMTP / Templates
-Si du SMTP custom (Resend) est configuré dans Supabase, vérifier que le domaine expéditeur est bien `wine-exporters.com` (et non `wineexporters.com`) et que les templates d'email ne contiennent aucune URL hardcodée vers le mauvais domaine.
+## 2. Pourquoi le « glissé-déposé » ne fonctionne pas
 
-Une fois le fichier corrigé et le dashboard Supabase vérifié, les liens d'invitation pointeront vers `https://wine-exporters.com/auth`.
+J'ai vérifié `src/pages/Profile.tsx` : les 5 zones d'upload (Présentation, Tarifs, Autres documents, Fiches techniques, Médias) **affichent le texte « Glissez-déposez vos fichiers ici »** mais **n'ont aucun handler `onDrop` / `onDragOver`**. Seul le bouton « Ajouter » fonctionne (il ouvre le sélecteur de fichiers).
+
+C'est donc un bug : le visuel promet du drag & drop, mais le code ne l'implémente pas.
+
+## 3. Correctif proposé
+
+Ajouter de vrais handlers drag & drop sur les 5 zones pointillées :
+
+- `onDragOver` → `e.preventDefault()` + état `isDragging` pour feedback visuel (bordure primary)
+- `onDragLeave` → reset `isDragging`
+- `onDrop` → `e.preventDefault()` + récupération de `e.dataTransfer.files` + appel de `handleMultipleDocumentUpload(files, category)` (ou l'équivalent média)
+
+Zones concernées dans `src/pages/Profile.tsx` :
+1. Documents → Présentation (cat. `presentation`)
+2. Documents → Tarifs (cat. `price_list`)
+3. Documents → Autres (cat. `other`)
+4. Fiches techniques (cat. `tech_sheet`)
+5. Médias → Photos & Vidéos (upload média existant)
+
+Pour éviter la duplication, créer un petit composant `DropZone` réutilisable (props : `accept`, `onFiles`, `label`, `buttonLabel`, `disabled`) et remplacer les 5 blocs actuels par ce composant.
+
+### Détails techniques
+
+- Filtrage côté client par extension/MIME selon le `accept` pour rejeter proprement les fichiers non supportés (toast d'erreur via `useToast`).
+- Conserver le `<input type="file" hidden>` pour le clic bouton (fallback + accessibilité).
+- Ajouter un état visuel `data-dragging` qui passe la bordure et le fond en couleur `primary/10` pendant le survol.
+- Aucun changement backend, RLS, ou base de données.
+
+## 4. Hors scope
+
+- Pas de modification de la logique d'upload Supabase Storage existante.
+- Pas de changement du label « Localisation » (à confirmer si tu veux qu'on le renomme en « Localisation (ville, pays) »).
