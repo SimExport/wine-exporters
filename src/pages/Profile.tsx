@@ -510,7 +510,7 @@ const Profile = () => {
     }
     setUploading(true);
     try {
-      const filePath = `${user.id}/${category}/${Date.now()}_${file.name}`;
+      const filePath = `${user.id}/${category}/${Date.now()}_${sanitizeStorageKey(file.name)}`;
       const {
         error: uploadError
       } = await supabase.storage.from('documents').upload(filePath, file);
