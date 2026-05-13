@@ -806,7 +806,17 @@ const Profile = () => {
                     }))} placeholder={t('profile.general.domainNamePlaceholder')} />
                     </div>
                   </div>
-                  
+
+                  <div className="space-y-2">
+                    <Label htmlFor="location">{t('profile.general.location')}</Label>
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                      placeholder={t('profile.general.locationPlaceholder')}
+                    />
+                  </div>
+
                   <div className="space-y-2">
                     <Label>{t('profile.general.aoc')}</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
