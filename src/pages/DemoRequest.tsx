@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SEO } from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Grape, ArrowLeft, CheckCircle2 } from "lucide-react";
@@ -91,6 +92,7 @@ const DemoRequest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title={t("seo.demo.title")} description={t("seo.demo.description")} path="/demande-demo" />
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">

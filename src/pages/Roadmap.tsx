@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { SEO } from "@/components/SEO";
 
 const FEATURES = [
   { id: "marketplace", icon: Store },
@@ -85,6 +86,7 @@ const Roadmap = () => {
 
   return (
     <div className="p-8 lg:p-10 space-y-10">
+      <SEO title={t("seo.roadmap.title")} description={t("seo.roadmap.description")} path="/roadmap" />
       <div className="mb-12">
         <h1 className="text-4xl font-bold text-foreground">{t("roadmap.title")}</h1>
         <p className="text-muted-foreground mt-3 text-lg">

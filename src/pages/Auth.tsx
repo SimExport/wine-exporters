@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Grape } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { SEO } from '@/components/SEO';
 const Auth = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -41,6 +42,7 @@ const Auth = () => {
     }
   };
   return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <SEO title={t('seo.auth.title')} description={t('seo.auth.description')} path="/auth" />
       <div className="absolute top-4 right-4">
         <LanguageSwitcher />
       </div>

@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -299,6 +300,7 @@ const LandingPage = () => {
   ];
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
