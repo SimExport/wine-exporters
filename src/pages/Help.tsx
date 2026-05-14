@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { SEO } from "@/components/SEO";
 
 const STEP_ICONS = [User, Grape, Megaphone, Users] as const;
 const FAQ_IDS = ["profil", "campagnes", "crm", "abonnement"] as const;
@@ -13,6 +14,7 @@ const Help = () => {
 
   return (
     <div className="p-8 lg:p-10 space-y-12 max-w-4xl">
+      <SEO title={t("seo.help.title")} description={t("seo.help.description")} path="/help" />
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-3">

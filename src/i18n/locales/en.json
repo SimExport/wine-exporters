@@ -1,4 +1,11 @@
 {
+  "seo": {
+    "landing": { "title": "WineExporters — Export your wines worldwide", "description": "Find qualified importers for your wines. Targeted campaigns, built-in CRM, bespoke sourcing." },
+    "demo": { "title": "Request a demo — WineExporters", "description": "Book a personalized WineExporters demo and learn how to export your wines." },
+    "auth": { "title": "Sign in — WineExporters", "description": "Sign in to your WineExporters workspace to manage export campaigns." },
+    "help": { "title": "Help Center — WineExporters", "description": "Guides, FAQs and resources to get the most out of WineExporters." },
+    "roadmap": { "title": "Roadmap — WineExporters", "description": "Discover upcoming WineExporters features and vote for your favorites." }
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
