@@ -1,62 +1,107 @@
-## Audit du flux d'invitation
+## Plan : Section Timeline Roadmap sur la page "À venir"
 
-### Ce qui est en place et fonctionne
+### Objectif
+Ajouter une timeline horizontale visuelle au-dessus des cartes de vote existantes sur la page Roadmap. Elle présente les jalons produit de Mai à Fin 2026 avec un statut visuel (accompli / en cours / à venir).
 
-1. **Page admin** (`AdminInvitations.tsx`) — formulaire envoie l'email à l'Edge Function `admin-invite-user`, avec `redirectTo = https://wine-exporters.com/set-password` (forcé sur la prod même quand on déclenche depuis le preview).
-2. **Edge Function `admin-invite-user`** — vérifie le JWT, vérifie que l'appelant est `admin`, puis :
-   - 1er envoi → `auth.admin.inviteUserByEmail(email, { redirectTo })`
-   - Renvoi (`mode: "resend"`) ou email déjà existant → bascule sur `signInWithOtp` (magic link), ce qui est correct car l'utilisateur existe déjà.
-   - Loggue tout dans `admin_invitations` (sent / failed + message d'erreur).
-3. **Page `/set-password`** — déclarée dans `App.tsx`, lit le hash `#access_token & refresh_token`, ouvre la session, puis `supabase.auth.updateUser({ password })` → redirection vers `/dashboard`.
-4. **Triggers** — à la création de l'utilisateur, `handle_new_user`, `handle_new_user_role`, `handle_new_user_credits`, `handle_new_user_settings` créent profile + role free + crédits + settings. OK.
-5. **Email** — pas de domaine email Lovable configuré → Supabase envoie son template par défaut "You have been invited" (bouton "Accept the invite") qui pointe vers `redirectTo`. Fonctionnel.
+### Fichiers concernés
+- `src/pages/Roadmap.tsx`
+- `src/i18n/locales/fr.json`
+- `src/i18n/locales/en.json`
+- `tailwind.config.ts` (pour l'animation pulse)
 
-### Points d'attention (à vérifier côté dashboard Supabase, pas dans le code)
+### Implémentation détaillée
 
-A. **Redirect URLs autorisées** — dans Supabase → Authentication → URL Configuration, il faut que ces URLs soient dans la liste « Redirect URLs » :
-   - `https://wine-exporters.com/set-password`
-   - `https://wine-exporters.lovable.app/set-password`
-   Sinon le lien dans l'email retombe sur la Site URL et le SetPassword ne reçoit pas les tokens.
+#### 1. Composant Timeline (`src/pages/Roadmap.tsx`)
+Insérer une nouvelle section entre le bloc titre/sous-titre et la grille de cartes.
 
-B. **Rate limit Supabase** — l'historique montre déjà des erreurs « For security purposes, you can only request this after 26 seconds » et « email rate limit exceeded ». Pour 2 invitations espacées, aucun souci ; mais éviter de spammer le bouton « Renvoyer ».
+**Données des étapes (tableau statique, 7 items) :**
+| Date | Titre | Statut |
+|------|-------|--------|
+| Mai 2026 | Lancement de la plateforme | `done` |
+| Juin 2026 | Opportunités importateurs | `current` |
+| Été 2026 | Générateur de Fiches Techniques | `upcoming` |
+| Été 2026 | Fiches Marchés | `upcoming` |
+| Automne 2026 | Guides & Vidéos Export | `upcoming` |
+| Automne 2026 | Calculateur Prix Export | `upcoming` |
+| Fin 2026 | Appels d'Offres | `upcoming` |
 
-### Petit bug latent à corriger dans `/set-password`
+**Structure visuelle desktop :**
+- Conteneur flex horizontal, `justify-between`, espacement généreux.
+- Une ligne horizontale (`div` pleine hauteur fine) en arrière-plan, couleur `muted-foreground/30`.
+- Une seconde ligne (`div` superposée) partiellement remplie : largeur en % calculée selon l'index de l'étape `current` (ici ~1/6 de la distance entre le centre du 1er nœud et le centre du 7e).
+- Chaque étape = colonne flex centrée.
+  - **Date** : texte petit (`text-sm`), `text-muted-foreground`, au-dessus du nœud.
+  - **Nœud** : cercle (`w-4 h-4 rounded-full`) positionné sur la ligne.
+    - `done` : `bg-primary`
+    - `current` : `bg-primary` + animation pulse (`animate-pulse-custom` ou `shadow-lg ring-2 ring-primary` avec pulse)
+    - `upcoming` : `border-2 border-muted-foreground/50 bg-background`
+  - **Titre** : texte en gras (`font-semibold`), `text-foreground`, en dessous du nœud, centré, largeur fixe (`max-w-[140px]`).
 
-La page ne gère que le format **implicit** (`#access_token=...`). Selon la version du template d'email Supabase, le lien peut arriver en **PKCE** (`?code=...`) ou bien expirer côté Supabase et être recyclé. On rend la page robuste aux deux formats :
+**Responsive :**
+- Sur mobile / écran étroit : transformation en layout vertical empilé (flex-col) avec une ligne verticale à gauche. Les nœuds sont alignés sur cette ligne. Le texte date+titre est à droite de la ligne.
 
-- Si l'URL contient `?code=...` → appeler `supabase.auth.exchangeCodeForSession(code)`.
-- Sinon, garder le comportement actuel (hash tokens).
-- Nettoyer l'URL après.
+**Mention discrète :**
+- Sous la timeline, texte `text-xs text-muted-foreground italic` : "Planning prévisionnel, susceptible d'évoluer" (via `t("roadmap.timeline.disclaimer")`).
 
-Cela évite le « Lien invalide ou expiré » sur certains comptes / certains clients mail qui pré-fetchent le lien.
-
-### Plan d'action
-
-1. **Code** : durcir `src/pages/SetPassword.tsx` pour gérer aussi le flow PKCE (`?code=...`) avec `exchangeCodeForSession`.
-2. **Vérification manuelle** que vous (admin) faites avant l'envoi réel :
-   - Confirmer dans Supabase Auth que les deux Redirect URLs ci-dessus sont bien autorisées.
-   - Faire un test end-to-end avec une adresse à vous : invitation → réception mail → clic → page SetPassword → mot de passe défini → connexion.
-3. **Aucun changement** côté Edge Function `admin-invite-user` (logique correcte) ni côté `AdminInvitations.tsx`.
-
-### Détails techniques
-
-```ts
-// SetPassword.tsx — init() devient :
-const url = new URL(window.location.href);
-const code = url.searchParams.get("code");
-if (code) {
-  await supabase.auth.exchangeCodeForSession(code);
-  window.history.replaceState(null, "", url.pathname);
-} else {
-  const params = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
-  const access_token = params.get("access_token");
-  const refresh_token = params.get("refresh_token");
-  if (access_token && refresh_token) {
-    await supabase.auth.setSession({ access_token, refresh_token });
-    window.history.replaceState(null, "", window.location.pathname);
-  }
+#### 2. Animations (`tailwind.config.ts`)
+Ajouter une keyframe `pulse-ring` dans la section `keyframes` :
+```
+'pulse-ring': {
+  '0%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.4)' },
+  '70%': { boxShadow: '0 0 0 8px hsl(var(--primary) / 0)' },
+  '100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0)' },
 }
-// puis getSession() comme aujourd'hui
+```
+Et l'animation correspondante `animate-pulse-ring: 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'`.
+Appliquer cette classe au nœud `current`.
+
+#### 3. Traductions i18n
+
+**`fr.json` — ajouter sous la clé `roadmap` :**
+```json
+"timeline": {
+  "title": "Notre feuille de route",
+  "disclaimer": "Planning prévisionnel, susceptible d'évoluer",
+  "status": {
+    "done": "Lancé",
+    "current": "En cours",
+    "upcoming": "À venir"
+  },
+  "steps": [
+    { "date": "Mai 2026", "title": "Lancement de la plateforme" },
+    { "date": "Juin 2026", "title": "Opportunités importateurs" },
+    { "date": "Été 2026", "title": "Générateur de Fiches Techniques" },
+    { "date": "Été 2026", "title": "Fiches Marchés" },
+    { "date": "Automne 2026", "title": "Guides & Vidéos Export" },
+    { "date": "Automne 2026", "title": "Calculateur Prix Export" },
+    { "date": "Fin 2026", "title": "Appels d'Offres" }
+  ]
+}
 ```
 
-Aucune modification de DB, ni de policies, ni de secrets.
+**`en.json` — ajouter sous la clé `roadmap` :**
+```json
+"timeline": {
+  "title": "Our roadmap",
+  "disclaimer": "Tentative schedule, subject to change",
+  "status": {
+    "done": "Launched",
+    "current": "In progress",
+    "upcoming": "Coming soon"
+  },
+  "steps": [
+    { "date": "May 2026", "title": "Platform launch" },
+    { "date": "June 2026", "title": "Importer opportunities" },
+    { "date": "Summer 2026", "title": "Tech Sheet Generator" },
+    { "date": "Summer 2026", "title": "Market Reports" },
+    { "date": "Fall 2026", "title": "Export Guides & Videos" },
+    { "date": "Fall 2026", "title": "Export Price Calculator" },
+    { "date": "End 2026", "title": "Tenders" }
+  ]
+}
+```
+
+### Règles de cohérence
+- Utiliser exclusivement les tokens du design system (`text-primary`, `bg-primary`, `text-muted-foreground`, `text-foreground`, `border-muted-foreground/50`, etc.). Aucune couleur hexadécimale directe dans le composant.
+- Conserver intégralement la logique de vote et les cartes existantes en dessous de la timeline.
+- Pas de modification de la base de données ni d'appels API supplémentaires.
