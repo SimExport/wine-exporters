@@ -1109,6 +1109,24 @@
   "roadmap": {
     "title": "Fonctionnalités à venir",
     "subtitle": "Découvrez nos projets pour accélérer votre export. Votez pour vos outils préférés !",
+    "timeline": {
+      "title": "Notre feuille de route",
+      "disclaimer": "Planning prévisionnel, susceptible d'évoluer",
+      "status": {
+        "done": "Lancé",
+        "current": "En cours",
+        "upcoming": "À venir"
+      },
+      "steps": [
+        { "date": "Mai 2026", "title": "Lancement de la plateforme" },
+        { "date": "Juin 2026", "title": "Opportunités importateurs" },
+        { "date": "Été 2026", "title": "Générateur de Fiches Techniques" },
+        { "date": "Été 2026", "title": "Fiches Marchés" },
+        { "date": "Automne 2026", "title": "Guides & Vidéos Export" },
+        { "date": "Automne 2026", "title": "Calculateur Prix Export" },
+        { "date": "Fin 2026", "title": "Appels d'Offres" }
+      ]
+    },
     "voteSuccess": {
       "title": "Merci pour votre vote !",
       "description": "Votre intérêt a été enregistré."
