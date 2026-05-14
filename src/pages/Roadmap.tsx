@@ -179,6 +179,10 @@ const Roadmap = () => {
         </p>
       </section>
 
+      <div className="rounded-lg border border-border/60 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        {t("roadmap.databaseUpdate")}
+      </div>
+
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((feature) => {
           const voted = votedFeatures.has(feature.id);
