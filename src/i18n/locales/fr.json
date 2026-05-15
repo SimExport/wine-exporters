@@ -206,6 +206,52 @@
       "title": "Dernière activité",
       "empty": "Aucune activité récente",
       "emptyHint": "Lancez votre première campagne pour voir l'activité ici"
+    },
+    "hub": {
+      "hello": "Bonjour",
+      "profileIncompleteTitle": "Profil incomplet",
+      "profileIncompleteDesc": "Vos informations domaine sont nécessaires pour lancer une campagne.",
+      "completeProfile": "Compléter mon profil",
+      "search": {
+        "title": "Recherche sur-mesure",
+        "desc": "Ciblez un marché précis. Résultats qualifiés sous 72h.",
+        "cta": "Lancer une recherche",
+        "available": "{{count}} disponible",
+        "available_other": "{{count}} disponibles"
+      },
+      "campaign": {
+        "title": "Campagne en cours",
+        "active": "Active",
+        "none": "Aucune",
+        "emptyDesc": "Aucune campagne active pour le moment.",
+        "ctaView": "Voir la campagne",
+        "ctaCreate": "Créer une campagne"
+      },
+      "importers": {
+        "title": "Importateurs",
+        "badge": "Base complète",
+        "desc": "Explorez +20 000 contacts dans +140 pays.",
+        "cta": "Explorer la base"
+      },
+      "pipeline": {
+        "title": "Pipeline export",
+        "desc": "Suivez vos relances, échantillons et négociations.",
+        "cta": "Voir le pipeline",
+        "opportunities": "{{count}} opportunité",
+        "opportunities_other": "{{count}} opportunités"
+      },
+      "pipelineStrip": {
+        "title": "État du pipeline",
+        "viewAll": "Voir tout",
+        "contacted": "Contactés",
+        "samples": "Échantillons",
+        "followUps": "Relances",
+        "negotiation": "Négociation",
+        "contactedSub": "importateurs",
+        "samplesSub": "en attente",
+        "followUpsSub": "programmées",
+        "negotiationSub": "en cours"
+      }
     }
   },
   "billingSummary": {

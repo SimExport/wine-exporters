@@ -206,6 +206,52 @@
       "title": "Recent activity",
       "empty": "No recent activity",
       "emptyHint": "Launch your first campaign to see activity here"
+    },
+    "hub": {
+      "hello": "Hello",
+      "profileIncompleteTitle": "Incomplete profile",
+      "profileIncompleteDesc": "Your estate information is required to launch a campaign.",
+      "completeProfile": "Complete my profile",
+      "search": {
+        "title": "Bespoke search",
+        "desc": "Target a specific market. Qualified results within 72h.",
+        "cta": "Start a search",
+        "available": "{{count}} available",
+        "available_other": "{{count}} available"
+      },
+      "campaign": {
+        "title": "Active campaign",
+        "active": "Active",
+        "none": "None",
+        "emptyDesc": "No active campaign yet.",
+        "ctaView": "View campaign",
+        "ctaCreate": "Create a campaign"
+      },
+      "importers": {
+        "title": "Importers",
+        "badge": "Full database",
+        "desc": "Browse 20,000+ contacts across 140+ countries.",
+        "cta": "Explore database"
+      },
+      "pipeline": {
+        "title": "Export pipeline",
+        "desc": "Track your follow-ups, samples and negotiations.",
+        "cta": "View pipeline",
+        "opportunities": "{{count}} opportunity",
+        "opportunities_other": "{{count}} opportunities"
+      },
+      "pipelineStrip": {
+        "title": "Pipeline status",
+        "viewAll": "View all",
+        "contacted": "Contacted",
+        "samples": "Samples",
+        "followUps": "Follow-ups",
+        "negotiation": "Negotiation",
+        "contactedSub": "importers",
+        "samplesSub": "pending",
+        "followUpsSub": "scheduled",
+        "negotiationSub": "in progress"
+      }
     }
   },
   "billingSummary": {
