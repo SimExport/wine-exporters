@@ -107,7 +107,7 @@ const Dashboard = () => {
       badge: activeCampaign ? t('dashboardPage.hub.campaign.active') : t('dashboardPage.hub.campaign.none'),
       badgeVariant: activeCampaign ? ('success' as const) : ('muted' as const),
       cta: activeCampaign ? t('dashboardPage.hub.campaign.ctaView') : t('dashboardPage.hub.campaign.ctaCreate'),
-      to: activeCampaign ? `/campaigns/${activeCampaign.id}` : '/create-campaign',
+      to: activeCampaign ? '/campaigns' : '/create-campaign',
     },
     {
       key: 'importers',
