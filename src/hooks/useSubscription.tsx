@@ -23,6 +23,13 @@ export const useSubscription = () => {
     }
 
     try {
+      // Resync depuis Stripe pour rattraper d'éventuels webhooks manqués
+      try {
+        await supabase.functions.invoke('check-subscription');
+      } catch (syncErr) {
+        console.warn('check-subscription sync failed (non-blocking):', syncErr);
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('subscription_plan, campaigns_remaining, sourcing_requests_remaining')
