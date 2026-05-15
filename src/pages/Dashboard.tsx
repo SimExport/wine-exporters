@@ -12,7 +12,7 @@ interface Profile {
   domain_name: string | null;
   contact_name: string | null;
   location: string | null;
-  wine_colors: string[] | null;
+  priority_markets: string | null;
 }
 
 interface Campaign {
@@ -41,15 +41,27 @@ const Dashboard = () => {
     if (!user) return;
     (async () => {
       try {
-        const [profileRes, campaignsRes, leadsRes] = await Promise.all([
-          supabase.from('profiles').select('domain_name,contact_name,location,wine_colors').eq('user_id', user.id).maybeSingle(),
-          supabase.from('campaigns').select('id,name,status,target_markets').eq('user_id', user.id).eq('status', 'active').order('launched_at', { ascending: false }).limit(1),
-          supabase.from('leads').select('prospect_status,campaign_id,campaigns!inner(user_id)').eq('campaigns.user_id', user.id),
+        const [profileRes, allCampaignsRes] = await Promise.all([
+          supabase.from('profiles').select('domain_name,contact_name,location,priority_markets').eq('user_id', user.id).maybeSingle(),
+          supabase.from('campaigns').select('id,name,status,target_markets,launched_at,created_at').eq('user_id', user.id),
         ]);
         setProfile(profileRes.data as Profile);
-        setActiveCampaign((campaignsRes.data?.[0] as Campaign) ?? null);
 
-        const leads = (leadsRes.data ?? []) as Array<{ prospect_status: string }>;
+        const allCampaigns = (allCampaignsRes.data ?? []) as Array<Campaign & { launched_at: string | null; created_at: string }>;
+        const active = allCampaigns
+          .filter(c => c.status === 'active')
+          .sort((a, b) => new Date(b.launched_at ?? b.created_at).getTime() - new Date(a.launched_at ?? a.created_at).getTime())[0];
+        setActiveCampaign(active ?? null);
+
+        const campaignIds = allCampaigns.map(c => c.id);
+        let leads: Array<{ prospect_status: string | null }> = [];
+        if (campaignIds.length > 0) {
+          const { data } = await supabase
+            .from('leads')
+            .select('prospect_status')
+            .in('campaign_id', campaignIds);
+          leads = (data ?? []) as Array<{ prospect_status: string | null }>;
+        }
         const counts = { contacted: 0, samples: 0, followUps: 0, negotiation: 0, openOpportunities: 0 };
         for (const l of leads) {
           const s = l.prospect_status;
@@ -81,8 +93,7 @@ const Dashboard = () => {
     !profile?.domain_name ||
     !profile?.contact_name ||
     !profile?.location ||
-    !profile?.wine_colors ||
-    profile.wine_colors.length === 0;
+    !profile?.priority_markets;
 
   const firstName = profile?.contact_name?.split(' ')[0] ?? t('dashboardPage.welcomeFallback');
 
