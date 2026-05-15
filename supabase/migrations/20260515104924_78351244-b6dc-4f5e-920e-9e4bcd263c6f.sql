@@ -1,0 +1,2 @@
+UPDATE public.profiles SET subscription_plan='monthly', stripe_customer_id='cus_UUu3uqtoekMWiI', campaigns_remaining=GREATEST(campaigns_remaining,1) WHERE user_id='5d739dc7-71cc-42a0-94ce-946d929e5b3a';
+INSERT INTO public.user_roles(user_id, role) VALUES ('5d739dc7-71cc-42a0-94ce-946d929e5b3a','paid'::app_role) ON CONFLICT (user_id, role) DO NOTHING;
