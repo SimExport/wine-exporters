@@ -154,7 +154,7 @@ const Dashboard = () => {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Greeting */}
         <h1 className="text-3xl font-bold text-foreground mb-6">
-          {t('dashboardPage.hub.hello')}, <span className="text-primary">{firstName}</span>
+          {t('dashboardPage.hub.hello')}, <span className="text-primary">{firstName}</span> 👋
         </h1>
 
         {/* Profile incomplete banner */}
