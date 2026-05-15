@@ -72,17 +72,29 @@ serve(async (req) => {
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      subscriptionPlan = "premium"; // WineExporters Premium
+      subscriptionPlan = "monthly"; // Aligné avec le webhook Stripe
       logStep("Active subscription found", { 
         subscriptionId: subscription.id, 
         endDate: subscriptionEnd,
         plan: subscriptionPlan
       });
 
-      // Update the profiles table with subscription info
+      // Récupérer le profil pour conserver campaigns_remaining s'il est déjà > 0
+      const { data: existingProfile } = await supabaseClient
+        .from('profiles')
+        .select('campaigns_remaining')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const nextCampaigns = Math.max(existingProfile?.campaigns_remaining ?? 0, 1);
+
       const { error: updateError } = await supabaseClient
         .from('profiles')
-        .update({ subscription_plan: subscriptionPlan })
+        .update({
+          subscription_plan: subscriptionPlan,
+          stripe_customer_id: customerId,
+          campaigns_remaining: nextCampaigns,
+        })
         .eq('user_id', user.id);
 
       if (updateError) {
@@ -90,13 +102,28 @@ serve(async (req) => {
       } else {
         logStep("Profile updated with subscription plan");
       }
+
+      // S'assurer que le rôle est bien 'paid' (sauf admin)
+      const { data: existingRole } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingRole?.role !== 'admin' && existingRole?.role !== 'paid') {
+        if (existingRole) {
+          await supabaseClient.from('user_roles').update({ role: 'paid' }).eq('user_id', user.id);
+        } else {
+          await supabaseClient.from('user_roles').insert({ user_id: user.id, role: 'paid' });
+        }
+      }
     } else {
       logStep("No active subscription found");
       
-      // Clear subscription plan if no active subscription
+      // Remettre subscription_plan à 'none' si aucun abonnement actif
       await supabaseClient
         .from('profiles')
-        .update({ subscription_plan: null })
+        .update({ subscription_plan: 'none' })
         .eq('user_id', user.id);
     }
 
