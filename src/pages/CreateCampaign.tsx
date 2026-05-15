@@ -297,9 +297,14 @@ const CreateCampaign = () => {
       navigate('/campaigns');
     } catch (error: any) {
       console.error('Error submitting campaign:', error);
+      const raw = String(error?.message || '');
+      let friendly = error?.message || t('createCampaign.toasts.submitError.description');
+      if (raw.includes('campaigns_markets_count_check')) {
+        friendly = t('createCampaign.toasts.marketsRange', { min: MIN_MARKETS, max: MAX_MARKETS, defaultValue: `Sélectionnez entre ${MIN_MARKETS} et ${MAX_MARKETS} marchés.` });
+      }
       toast({
         title: t('createCampaign.toasts.submitError.title'),
-        description: error?.message || t('createCampaign.toasts.submitError.description'),
+        description: friendly,
         variant: "destructive"
       });
     } finally {
