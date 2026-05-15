@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { formatDate, formatNumber, formatRelative } from '@/lib/format';
 import { OnboardingResumeBanner } from '@/components/onboarding/OnboardingResumeBanner';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { BillingSummary } from '@/components/dashboard/BillingSummary';
 
 interface Profile {
   id: string;
@@ -374,6 +375,9 @@ const Dashboard = () => {
 
         {/* Campaigns list */}
         <div className="mt-8">
+          <div className="mb-8">
+            <BillingSummary />
+          </div>
           <h3 className="text-lg font-semibold text-foreground mb-4">{t('dashboardPage.campaignsList.title')}</h3>
 
           {campaigns.length === 0 ? (

@@ -208,6 +208,37 @@
       "emptyHint": "Lancez votre première campagne pour voir l'activité ici"
     }
   },
+  "billingSummary": {
+    "title": "Mon abonnement & mes paiements",
+    "subtitle": "Suivez l'état de votre abonnement, vos crédits et vos achats",
+    "manage": "Gérer mon abonnement",
+    "subscription": {
+      "title": "Abonnement",
+      "active": "Actif",
+      "inactive": "Aucun abonnement",
+      "inactiveHint": "Souscrivez pour lancer vos campagnes export",
+      "renewsOn": "Renouvellement le {{date}}",
+      "renewsMonthly": "Renouvellement automatique mensuel"
+    },
+    "usage": {
+      "campaignsTitle": "Campagnes restantes",
+      "sourcingTitle": "Recherches sur-mesure",
+      "perMonth": "ce mois",
+      "campaignsAvailable": "Disponible — lancez quand vous voulez",
+      "campaignsExhausted": "Épuisée — renouvellement au prochain cycle",
+      "sourcingAvailable": "Disponible ce mois",
+      "sourcingExhausted": "Quota mensuel utilisé"
+    },
+    "invoices": {
+      "title": "Historique des paiements",
+      "subtitle": "Vos packs et factures Stripe",
+      "empty": "Aucun paiement enregistré pour le moment.",
+      "paid": "Payée",
+      "open": "En attente",
+      "view": "Voir",
+      "period": "Période {{start}} → {{end}}"
+    }
+  },
   "importers": {
     "loadingProtected": "Chargement...",
     "premiumTitle": "Base de données des importateurs et acheteurs",

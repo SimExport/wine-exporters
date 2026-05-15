@@ -208,6 +208,37 @@
       "emptyHint": "Launch your first campaign to see activity here"
     }
   },
+  "billingSummary": {
+    "title": "My subscription & payments",
+    "subtitle": "Track your subscription, credits and purchases",
+    "manage": "Manage subscription",
+    "subscription": {
+      "title": "Subscription",
+      "active": "Active",
+      "inactive": "No subscription",
+      "inactiveHint": "Subscribe to launch your export campaigns",
+      "renewsOn": "Renews on {{date}}",
+      "renewsMonthly": "Auto-renews monthly"
+    },
+    "usage": {
+      "campaignsTitle": "Campaigns remaining",
+      "sourcingTitle": "Bespoke searches",
+      "perMonth": "this month",
+      "campaignsAvailable": "Available — launch anytime",
+      "campaignsExhausted": "Used — resets next cycle",
+      "sourcingAvailable": "Available this month",
+      "sourcingExhausted": "Monthly quota used"
+    },
+    "invoices": {
+      "title": "Payment history",
+      "subtitle": "Your Stripe packs and invoices",
+      "empty": "No payments recorded yet.",
+      "paid": "Paid",
+      "open": "Open",
+      "view": "View",
+      "period": "Period {{start}} → {{end}}"
+    }
+  },
   "importers": {
     "loadingProtected": "Loading...",
     "premiumTitle": "Importers and buyers database",
