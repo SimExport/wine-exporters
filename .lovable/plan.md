@@ -1,40 +1,26 @@
-## Refonte du Dashboard `/dashboard`
+## Bug identifié
 
-Objectif : transformer la page en hub d'action épuré (4 cartes 2×2 + bandeau pipeline), supprimer le reporting et l'upsell.
+Le message d'erreur `campaigns_markets_count_check` vient d'une contrainte SQL sur la table `campaigns` qui limite les marchés ciblés entre **3 et 7**.
 
-### 1. Suppressions sur `/dashboard`
-- Les 3 stat cards "Campagnes envoyées / Importateurs trouvés / Marchés prospectés"
-- Le bloc upsell "Passer Premium" (peu importe le plan)
-- Les anciennes cards "Plan / Campagnes restantes / Domaine"
-- L'ancien header local (logo + email + logout) — déjà couvert par la sidebar
-- Le `BillingSummary` et la liste des campagnes en bas (déplacés ailleurs déjà disponibles via `/campagnes`)
+Or, le wizard "Créer une campagne" (`CreateCampaign.tsx`) autorise **5 à 15 marchés** (`MIN_MARKETS = 5`, `MAX_MARKETS = 15`). Jérôme en a sélectionné **11** → la base rejette l'insertion.
 
-### 2. Nouveau layout
-1. **Greeting** : `Bonjour, {prénom}` (prénom en accent bordeaux)
-2. **Bandeau profil incomplet** (full-width, fond beige doux) — visible uniquement si profil incomplet, avec CTA "Compléter mon profil" → `/profile`. Disparait quand profil complet.
-3. **Grille 2×2 d'action cards** :
-   - **Recherche sur mesure** — icône `Search` — badge `{N} disponible(s)` (depuis `user_credits.search_credits`) — CTA "Lancer une recherche" → `/importers`
-   - **Campagne en cours** — icône `Send` — badge `Active` (vert) si une campagne `status='active'` existe, sinon `Aucune` (gris) — affiche le nom et les marchés de la dernière active — CTA "Voir la campagne" → `/campaigns/{id}` (ou `/campaigns` si aucune)
-   - **Importateurs** — icône `Store` — badge `Base complète` — CTA "Explorer la base" → `/importers`
-   - **Pipeline export** — icône `Kanban` — badge `{N} opportunités` (leads avec `prospect_status` ouvert) — CTA "Voir le pipeline" → `/pipeline`
-4. **Bandeau "État du pipeline"** : 4 colonnes (Contactés / Échantillons / Relances / Négociation) avec compteurs depuis `leads.prospect_status` de l'utilisateur, lien "Voir tout" → `/pipeline`
+C'est une incohérence entre le front et la contrainte DB (probablement un ancien réglage jamais mis à jour quand la limite UI a évolué).
 
-### 3. Sidebar
-- Le pill crédits campagne est déjà présent dans la sidebar pour les utilisateurs payants — le garder tel quel.
-- Supprimer le bloc upgrade "Passer Premium" du dashboard (sidebar reste inchangée).
+## Correction proposée
 
-### Détails techniques
-- Fichier principal modifié : `src/pages/Dashboard.tsx` (réécriture complète)
-- Données déjà disponibles : `profiles`, `campaigns`, `user_credits`, `leads` via Supabase client
-- Conditions "profil complet" : `domain_name`, `location`, `contact_name`, `wine_colors` non vides (ajustable)
-- Mappage statuts pipeline → colonnes :
-  - Contactés : `new`, `contacted`
-  - Échantillons : `sample_sent`
-  - Relances : `follow_up`
-  - Négociation : `negotiation`
-- i18n : ajouter clés FR/EN dans `src/i18n/locales/{fr,en}.json` sous `dashboardPage.*`
-- Pas de modification DB, pas de nouvelle route, pas de changement business
+**1. Migration SQL** — aligner la contrainte DB sur la règle métier actuelle du wizard :
 
-### Hors scope
-- Sidebar et topbar inchangés (sauf suppression header local du Dashboard)
-- Aucune autre page modifiée
+```sql
+ALTER TABLE public.campaigns DROP CONSTRAINT campaigns_markets_count_check;
+ALTER TABLE public.campaigns ADD CONSTRAINT campaigns_markets_count_check
+  CHECK (array_length(target_markets, 1) >= 5 AND array_length(target_markets, 1) <= 15);
+```
+
+**2. Améliorer le message d'erreur côté UI** (`CreateCampaign.tsx`) — afficher un message clair en français au lieu du texte SQL brut quand une contrainte de ce type est violée (filet de sécurité pour les futures incohérences).
+
+## Hors scope
+
+- Pas de changement du wizard `Campaigns.tsx` (l'autre flux de création) tant que la limite DB couvre bien sa plage.
+- Pas de modification du schéma au-delà de cette contrainte.
+
+Une fois validé, Jérôme pourra relancer sa campagne "Campagne mai 2026" avec ses 11 marchés sans changer son brouillon.
