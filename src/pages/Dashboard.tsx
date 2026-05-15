@@ -375,6 +375,9 @@ const Dashboard = () => {
 
         {/* Campaigns list */}
         <div className="mt-8">
+          <div className="mb-8">
+            <BillingSummary />
+          </div>
           <h3 className="text-lg font-semibold text-foreground mb-4">{t('dashboardPage.campaignsList.title')}</h3>
 
           {campaigns.length === 0 ? (
