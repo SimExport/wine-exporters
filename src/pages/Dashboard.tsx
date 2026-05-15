@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { formatDate, formatNumber, formatRelative } from '@/lib/format';
 import { OnboardingResumeBanner } from '@/components/onboarding/OnboardingResumeBanner';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { BillingSummary } from '@/components/dashboard/BillingSummary';
 
 interface Profile {
   id: string;
