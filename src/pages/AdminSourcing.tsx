@@ -29,7 +29,8 @@ interface SourcingRequest {
   validated_at: string | null;
   archived_at: string | null;
   created_at: string;
-  user_settings?: { display_name: string | null } | null;
+  display_name?: string | null;
+  domain_name?: string | null;
 }
 
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
@@ -58,10 +59,31 @@ export default function AdminSourcing() {
     setLoading(true);
     const { data, error } = await supabase
       .from('sourcing_requests')
-      .select('*, user_settings(display_name)')
+      .select('*')
       .order('created_at', { ascending: false });
-    if (error) console.error(error);
-    setRequests((data as any) || []);
+    if (error) {
+      console.error(error);
+      setRequests([]);
+      setLoading(false);
+      return;
+    }
+    const rows = (data as any[]) || [];
+    const userIds = Array.from(new Set(rows.map(r => r.user_id)));
+    let settingsMap: Record<string, string | null> = {};
+    let domainMap: Record<string, string | null> = {};
+    if (userIds.length) {
+      const [{ data: settings }, { data: profiles }] = await Promise.all([
+        supabase.from('user_settings').select('user_id, display_name').in('user_id', userIds),
+        supabase.from('profiles').select('user_id, domain_name').in('user_id', userIds),
+      ]);
+      settingsMap = Object.fromEntries((settings || []).map((s: any) => [s.user_id, s.display_name]));
+      domainMap = Object.fromEntries((profiles || []).map((p: any) => [p.user_id, p.domain_name]));
+    }
+    setRequests(rows.map(r => ({
+      ...r,
+      display_name: settingsMap[r.user_id] ?? null,
+      domain_name: domainMap[r.user_id] ?? null,
+    })));
     setLoading(false);
   }, []);
 
@@ -210,7 +232,7 @@ export default function AdminSourcing() {
                 {filtered.map(req => (
                   <TableRow key={req.id}>
                     <TableCell className="font-medium">
-                      {req.user_settings?.display_name || req.user_id.slice(0, 8) + '...'}
+                      {req.domain_name || req.display_name || req.user_id.slice(0, 8) + '…'}
                     </TableCell>
                     <TableCell>{marketLabel(req.target_market)}</TableCell>
                     <TableCell>
