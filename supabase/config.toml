@@ -31,4 +31,4 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.backfill-resend-contacts]
-verify_jwt = true
+verify_jwt = false
