@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.admin-invite-user]
 verify_jwt = true
+
+[functions.sync-user-to-resend]
+verify_jwt = false
+
+[functions.backfill-resend-contacts]
+verify_jwt = true
