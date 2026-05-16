@@ -823,27 +823,51 @@ export type Database = {
       sourcing_requests: {
         Row: {
           admin_note: string | null
+          archived_at: string | null
           created_at: string
           id: string
+          result_file_format: string | null
+          result_file_name: string | null
+          result_file_size: number | null
+          result_file_url: string | null
           status: string
           target_market: string
+          updated_at: string
           user_id: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           admin_note?: string | null
+          archived_at?: string | null
           created_at?: string
           id?: string
+          result_file_format?: string | null
+          result_file_name?: string | null
+          result_file_size?: number | null
+          result_file_url?: string | null
           status?: string
           target_market: string
+          updated_at?: string
           user_id: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           admin_note?: string | null
+          archived_at?: string | null
           created_at?: string
           id?: string
+          result_file_format?: string | null
+          result_file_name?: string | null
+          result_file_size?: number | null
+          result_file_url?: string | null
           status?: string
           target_market?: string
+          updated_at?: string
           user_id?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: []
       }
