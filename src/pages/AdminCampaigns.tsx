@@ -113,20 +113,41 @@ export default function AdminCampaigns() {
     try {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*, user_settings(display_name)')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
+      const rows = data || [];
+      const userIds = Array.from(new Set(rows.map((c: any) => c.user_id)));
+      let settingsMap: Record<string, string | null> = {};
+      if (userIds.length) {
+        const [{ data: settings }, { data: profiles }] = await Promise.all([
+          supabase.from('user_settings').select('user_id, display_name').in('user_id', userIds),
+          supabase.from('profiles').select('user_id, domain_name').in('user_id', userIds),
+        ]);
+        const domainMap = Object.fromEntries((profiles || []).map((p: any) => [p.user_id, p.domain_name]));
+        settingsMap = Object.fromEntries(
+          (settings || []).map((s: any) => [s.user_id, domainMap[s.user_id] || s.display_name])
+        );
+        for (const uid of userIds) {
+          if (!settingsMap[uid]) settingsMap[uid] = domainMap[uid] || null;
+        }
+      }
+
       // Fetch prospect counts for each campaign
       const campaignsWithCounts = await Promise.all(
-        (data || []).map(async (campaign) => {
+        rows.map(async (campaign: any) => {
           const { count } = await supabase
             .from('leads')
             .select('*', { count: 'exact', head: true })
             .eq('campaign_id', campaign.id);
 
-          return { ...campaign, prospect_count: count || 0 };
+          return {
+            ...campaign,
+            prospect_count: count || 0,
+            user_settings: { display_name: settingsMap[campaign.user_id] || null },
+          };
         })
       );
 
