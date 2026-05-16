@@ -73,7 +73,9 @@
     "settings": "Settings",
     "billing": "Billing",
     "adminCampaigns": "Admin Campaigns",
-    "adminInvitations": "Invitations"
+    "adminInvitations": "Invitations",
+    "adminSourcing": "Admin Searches",
+    "sourcing": "Bespoke Searches"
   },
   "sidebar": {
     "notifications": "Notifications",
