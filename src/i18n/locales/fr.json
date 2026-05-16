@@ -73,7 +73,9 @@
     "settings": "Paramètres",
     "billing": "Facturation",
     "adminCampaigns": "Campagnes Admin",
-    "adminInvitations": "Invitations"
+    "adminInvitations": "Invitations",
+    "adminSourcing": "Recherches Admin",
+    "sourcing": "Recherches sur-mesure"
   },
   "sidebar": {
     "notifications": "Notifications",
@@ -1861,5 +1863,74 @@
     "errorTitle": "Erreur",
     "errorGeneric": "Impossible d'envoyer l'invitation.",
     "invalidEmail": "Email invalide."
+  },
+  "sourcing": {
+    "title": "Mes recherches sur-mesure",
+    "subtitle": "Demandez à notre équipe une sélection d'importateurs ciblés. Une recherche incluse par mois.",
+    "cta": "Lancer une recherche",
+    "monthlyCredit": "Crédit mensuel",
+    "resetOn": "Renouvellement le {{date}}",
+    "history": "Historique de vos recherches",
+    "empty": "Aucune recherche pour le moment. Lancez votre première recherche sur-mesure.",
+    "requestedOn": "Demandée le {{date}}",
+    "waitingMessage": "Notre équipe revient vers vous sous 72h ouvrées.",
+    "download": "Télécharger les résultats",
+    "dialog": {
+      "title": "Recherche sur-mesure",
+      "description": "Choisissez un marché. Notre équipe vous prépare une sélection d'importateurs et d'acheteurs ciblés.",
+      "marketLabel": "Marché ciblé",
+      "marketPlaceholder": "Sélectionnez un pays",
+      "creditRemaining": "Crédit restant ce mois",
+      "submit": "Lancer la recherche"
+    },
+    "status": {
+      "pending": "En attente",
+      "in_progress": "En cours",
+      "validated": "Validée",
+      "archived": "Archivée"
+    },
+    "toast": {
+      "noCredit": "Crédit épuisé",
+      "submittedTitle": "Recherche envoyée",
+      "submittedDesc": "Notre équipe revient vers vous sous 72h ouvrées.",
+      "error": "Impossible d'envoyer la demande.",
+      "downloadError": "Impossible de générer le lien de téléchargement."
+    }
+  },
+  "adminSourcing": {
+    "title": "Recherches sur-mesure",
+    "subtitle": "Gérez les recherches sur-mesure des clients, validez-les et livrez les résultats.",
+    "requests": "Demandes",
+    "empty": "Aucune demande dans cette catégorie.",
+    "invalidFormat": "Format non supporté. Utilisez PDF, DOCX, XLSX ou CSV.",
+    "validatedTitle": "Recherche validée",
+    "validatedDesc": "Le client a été notifié par email.",
+    "filter": { "all": "Toutes" },
+    "col": {
+      "client": "Client",
+      "market": "Marché",
+      "status": "Statut",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "action": {
+      "start": "Démarrer",
+      "validate": "Valider",
+      "download": "Télécharger",
+      "archive": "Archiver",
+      "unarchive": "Désarchiver"
+    },
+    "validateDialog": {
+      "title": "Valider et livrer la recherche",
+      "description": "Uploadez le document contenant la sélection d'importateurs. Le client sera notifié par email.",
+      "file": "Document (PDF, DOCX, XLSX, CSV)",
+      "note": "Note pour le client (optionnel)",
+      "notePlaceholder": "Quelques précisions sur la sélection livrée…",
+      "submit": "Valider et notifier"
+    },
+    "deleteConfirm": {
+      "title": "Supprimer cette recherche ?",
+      "description": "Cette action est définitive. Le document associé sera également supprimé."
+    }
   }
 }

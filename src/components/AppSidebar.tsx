@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -17,6 +17,7 @@ const navigationItems = [
   { key: "profile", url: "/profile", icon: User },
   { key: "importers", url: "/importers", icon: Database },
   { key: "campaigns", url: "/campaigns", icon: Target },
+  { key: "sourcing", url: "/recherches", icon: FileSearch },
   { key: "crmList", url: "/prospects", icon: List },
   { key: "crmKanban", url: "/pipeline", icon: Kanban },
   { key: "roadmap", url: "/roadmap", icon: Rocket },
@@ -113,6 +114,14 @@ export function AppSidebar() {
                     <NavLink to="/admin/campaigns" end className={getNavCls}>
                       <Shield className="h-4 w-4" />
                       <span>{t('nav.adminCampaigns')}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/recherches" end className={getNavCls}>
+                      <FileSearch className="h-4 w-4" />
+                      <span>{t('nav.adminSourcing')}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

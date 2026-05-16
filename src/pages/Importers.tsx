@@ -112,9 +112,11 @@ const Importers = () => {
     }
     setSourcingLoading(true);
     try {
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from('sourcing_requests')
-        .insert({ user_id: user.id, target_market: sourcingMarket });
+        .insert({ user_id: user.id, target_market: sourcingMarket })
+        .select('id')
+        .single();
       if (insertError) throw insertError;
 
       const { ok } = await consumeSearchCredit();
@@ -124,6 +126,19 @@ const Importers = () => {
           description: noCreditsMessage('search'),
           variant: 'destructive',
         });
+      }
+      // Fire admin notification (non-blocking)
+      try {
+        const marketName = COUNTRY_LIST.find(c => c.code === sourcingMarket)?.name || sourcingMarket;
+        await supabase.functions.invoke('notify-sourcing-submission', {
+          body: {
+            requestId: inserted?.id,
+            userEmail: user.email,
+            targetMarket: marketName,
+          },
+        });
+      } catch (e) {
+        console.error('notify-sourcing-submission failed', e);
       }
       setSourcingOpen(false);
       setSourcingMarket('');

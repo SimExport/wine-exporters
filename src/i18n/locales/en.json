@@ -73,7 +73,9 @@
     "settings": "Settings",
     "billing": "Billing",
     "adminCampaigns": "Admin Campaigns",
-    "adminInvitations": "Invitations"
+    "adminInvitations": "Invitations",
+    "adminSourcing": "Admin Searches",
+    "sourcing": "Bespoke Searches"
   },
   "sidebar": {
     "notifications": "Notifications",
@@ -1861,5 +1863,74 @@
     "errorTitle": "Error",
     "errorGeneric": "Couldn't send the invitation.",
     "invalidEmail": "Invalid email."
+  },
+  "sourcing": {
+    "title": "My bespoke searches",
+    "subtitle": "Ask our team for a tailored list of importers. One search included per month.",
+    "cta": "Start a search",
+    "monthlyCredit": "Monthly credit",
+    "resetOn": "Renews on {{date}}",
+    "history": "Your search history",
+    "empty": "No searches yet. Start your first bespoke search.",
+    "requestedOn": "Requested on {{date}}",
+    "waitingMessage": "Our team will get back to you within 72 business hours.",
+    "download": "Download results",
+    "dialog": {
+      "title": "Bespoke search",
+      "description": "Pick a market. Our team will prepare a tailored list of importers and buyers for you.",
+      "marketLabel": "Target market",
+      "marketPlaceholder": "Select a country",
+      "creditRemaining": "Credit remaining this month",
+      "submit": "Start search"
+    },
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In progress",
+      "validated": "Validated",
+      "archived": "Archived"
+    },
+    "toast": {
+      "noCredit": "No credit left",
+      "submittedTitle": "Search submitted",
+      "submittedDesc": "Our team will get back to you within 72 business hours.",
+      "error": "Could not submit the request.",
+      "downloadError": "Could not generate download link."
+    }
+  },
+  "adminSourcing": {
+    "title": "Bespoke searches",
+    "subtitle": "Manage client bespoke searches, validate them and deliver results.",
+    "requests": "Requests",
+    "empty": "No requests in this category.",
+    "invalidFormat": "Unsupported format. Use PDF, DOCX, XLSX or CSV.",
+    "validatedTitle": "Search validated",
+    "validatedDesc": "The client has been notified by email.",
+    "filter": { "all": "All" },
+    "col": {
+      "client": "Client",
+      "market": "Market",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "action": {
+      "start": "Start",
+      "validate": "Validate",
+      "download": "Download",
+      "archive": "Archive",
+      "unarchive": "Unarchive"
+    },
+    "validateDialog": {
+      "title": "Validate and deliver search",
+      "description": "Upload the document with the importer selection. The client will be notified by email.",
+      "file": "Document (PDF, DOCX, XLSX, CSV)",
+      "note": "Note for the client (optional)",
+      "notePlaceholder": "Some context about the delivered selection…",
+      "submit": "Validate and notify"
+    },
+    "deleteConfirm": {
+      "title": "Delete this search?",
+      "description": "This is permanent. The associated document will also be removed."
+    }
   }
 }

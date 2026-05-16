@@ -23,6 +23,8 @@ import ProspectDetail from "./pages/ProspectDetail";
 import Pipeline from "./pages/Pipeline";
 import AdminCampaigns from "./pages/AdminCampaigns";
 import AdminInvitations from "./pages/AdminInvitations";
+import AdminSourcing from "./pages/AdminSourcing";
+import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
 import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
@@ -84,10 +86,18 @@ const App = () => (
             <Route path="/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
             <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
             <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
+            <Route path="/recherches" element={<DashboardLayout><SourcingRequests /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
               <DashboardLayout>
                 <AdminRoute>
                   <AdminCampaigns />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
+            <Route path="/admin/recherches" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminSourcing />
                 </AdminRoute>
               </DashboardLayout>
             } />
