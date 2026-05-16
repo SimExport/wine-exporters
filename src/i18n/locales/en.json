@@ -1,10 +1,25 @@
 {
   "seo": {
-    "landing": { "title": "WineExporters — Export your wines worldwide", "description": "Find qualified importers for your wines. Targeted campaigns, built-in CRM, bespoke sourcing." },
-    "demo": { "title": "Request a demo — WineExporters", "description": "Book a personalized WineExporters demo and learn how to export your wines." },
-    "auth": { "title": "Sign in — WineExporters", "description": "Sign in to your WineExporters workspace to manage export campaigns." },
-    "help": { "title": "Help Center — WineExporters", "description": "Guides, FAQs and resources to get the most out of WineExporters." },
-    "roadmap": { "title": "Roadmap — WineExporters", "description": "Discover upcoming WineExporters features and vote for your favorites." }
+    "landing": {
+      "title": "WineExporters — Export your wines worldwide",
+      "description": "Find qualified importers for your wines. Targeted campaigns, built-in CRM, bespoke sourcing."
+    },
+    "demo": {
+      "title": "Request a demo — WineExporters",
+      "description": "Book a personalized WineExporters demo and learn how to export your wines."
+    },
+    "auth": {
+      "title": "Sign in — WineExporters",
+      "description": "Sign in to your WineExporters workspace to manage export campaigns."
+    },
+    "help": {
+      "title": "Help Center — WineExporters",
+      "description": "Guides, FAQs and resources to get the most out of WineExporters."
+    },
+    "roadmap": {
+      "title": "Roadmap — WineExporters",
+      "description": "Discover upcoming WineExporters features and vote for your favorites."
+    }
   },
   "common": {
     "save": "Save",
@@ -1205,13 +1220,34 @@
         "upcoming": "Coming soon"
       },
       "steps": [
-        { "date": "May 2026", "title": "Platform launch" },
-        { "date": "June 2026", "title": "Importer opportunities" },
-        { "date": "Summer 2026", "title": "Tech Sheet Generator" },
-        { "date": "Summer 2026", "title": "Market Reports" },
-        { "date": "Fall 2026", "title": "Export Guides & Videos" },
-        { "date": "Fall 2026", "title": "Export Price Calculator" },
-        { "date": "End 2026", "title": "Tenders" }
+        {
+          "date": "May 2026",
+          "title": "Platform launch"
+        },
+        {
+          "date": "June 2026",
+          "title": "Importer opportunities"
+        },
+        {
+          "date": "Summer 2026",
+          "title": "Tech Sheet Generator"
+        },
+        {
+          "date": "Summer 2026",
+          "title": "Market Reports"
+        },
+        {
+          "date": "Fall 2026",
+          "title": "Export Guides & Videos"
+        },
+        {
+          "date": "Fall 2026",
+          "title": "Export Price Calculator"
+        },
+        {
+          "date": "End 2026",
+          "title": "Tenders"
+        }
       ]
     },
     "voteSuccess": {
@@ -1905,7 +1941,9 @@
     "invalidFormat": "Unsupported format. Use PDF, DOCX, XLSX or CSV.",
     "validatedTitle": "Search validated",
     "validatedDesc": "The client has been notified by email.",
-    "filter": { "all": "All" },
+    "filter": {
+      "all": "All"
+    },
     "col": {
       "client": "Client",
       "market": "Market",
@@ -1931,6 +1969,23 @@
     "deleteConfirm": {
       "title": "Delete this search?",
       "description": "This is permanent. The associated document will also be removed."
+    }
+  },
+  "support": {
+    "open": "Contact support",
+    "title": "Contact support",
+    "subtitle": "A question, bug or suggestion? Our team replies quickly.",
+    "category": "Category",
+    "subject": "Subject",
+    "message": "Message",
+    "submit": "Send",
+    "error": "Something went wrong. Please retry.",
+    "thanksTitle": "Message sent ✅",
+    "thanksBody": "Your message has been sent. We reply within 24-48h, business days Monday to Friday, 9am-6pm.",
+    "cat": {
+      "question": "Question",
+      "bug": "Bug",
+      "suggestion": "Suggestion"
     }
   }
 }

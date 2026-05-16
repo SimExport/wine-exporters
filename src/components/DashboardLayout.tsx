@@ -5,6 +5,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { SupportWidget } from '@/components/SupportWidget';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -52,6 +53,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           onClose={() => { setWizardOpen(false); onboarding.refresh(); }}
           onComplete={() => { setWizardOpen(false); onboarding.refresh(); }}
         />
+        <SupportWidget />
       </div>
     </SidebarProvider>
   );

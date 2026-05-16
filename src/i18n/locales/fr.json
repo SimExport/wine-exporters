@@ -1,10 +1,25 @@
 {
   "seo": {
-    "landing": { "title": "WineExporters — Exporter ses vins à l'international", "description": "Trouvez des importateurs qualifiés pour vos vins. Campagnes ciblées, CRM intégré, recherche sur-mesure." },
-    "demo": { "title": "Demander une démo — WineExporters", "description": "Réservez une démo personnalisée de WineExporters et découvrez comment exporter vos vins." },
-    "auth": { "title": "Connexion — WineExporters", "description": "Connectez-vous à votre espace WineExporters pour gérer vos campagnes export." },
-    "help": { "title": "Centre d'aide — WineExporters", "description": "Guides, FAQ et ressources pour exploiter WineExporters au maximum." },
-    "roadmap": { "title": "Roadmap — WineExporters", "description": "Découvrez les prochaines fonctionnalités de WineExporters et votez pour vos préférées." }
+    "landing": {
+      "title": "WineExporters — Exporter ses vins à l'international",
+      "description": "Trouvez des importateurs qualifiés pour vos vins. Campagnes ciblées, CRM intégré, recherche sur-mesure."
+    },
+    "demo": {
+      "title": "Demander une démo — WineExporters",
+      "description": "Réservez une démo personnalisée de WineExporters et découvrez comment exporter vos vins."
+    },
+    "auth": {
+      "title": "Connexion — WineExporters",
+      "description": "Connectez-vous à votre espace WineExporters pour gérer vos campagnes export."
+    },
+    "help": {
+      "title": "Centre d'aide — WineExporters",
+      "description": "Guides, FAQ et ressources pour exploiter WineExporters au maximum."
+    },
+    "roadmap": {
+      "title": "Roadmap — WineExporters",
+      "description": "Découvrez les prochaines fonctionnalités de WineExporters et votez pour vos préférées."
+    }
   },
   "common": {
     "save": "Enregistrer",
@@ -1205,13 +1220,34 @@
         "upcoming": "À venir"
       },
       "steps": [
-        { "date": "Mai 2026", "title": "Lancement de la plateforme" },
-        { "date": "Juin 2026", "title": "Opportunités importateurs" },
-        { "date": "Été 2026", "title": "Générateur de Fiches Techniques" },
-        { "date": "Été 2026", "title": "Fiches Marchés" },
-        { "date": "Automne 2026", "title": "Guides & Vidéos Export" },
-        { "date": "Automne 2026", "title": "Calculateur Prix Export" },
-        { "date": "Fin 2026", "title": "Appels d'Offres" }
+        {
+          "date": "Mai 2026",
+          "title": "Lancement de la plateforme"
+        },
+        {
+          "date": "Juin 2026",
+          "title": "Opportunités importateurs"
+        },
+        {
+          "date": "Été 2026",
+          "title": "Générateur de Fiches Techniques"
+        },
+        {
+          "date": "Été 2026",
+          "title": "Fiches Marchés"
+        },
+        {
+          "date": "Automne 2026",
+          "title": "Guides & Vidéos Export"
+        },
+        {
+          "date": "Automne 2026",
+          "title": "Calculateur Prix Export"
+        },
+        {
+          "date": "Fin 2026",
+          "title": "Appels d'Offres"
+        }
       ]
     },
     "voteSuccess": {
@@ -1905,7 +1941,9 @@
     "invalidFormat": "Format non supporté. Utilisez PDF, DOCX, XLSX ou CSV.",
     "validatedTitle": "Recherche validée",
     "validatedDesc": "Le client a été notifié par email.",
-    "filter": { "all": "Toutes" },
+    "filter": {
+      "all": "Toutes"
+    },
     "col": {
       "client": "Client",
       "market": "Marché",
@@ -1931,6 +1969,23 @@
     "deleteConfirm": {
       "title": "Supprimer cette recherche ?",
       "description": "Cette action est définitive. Le document associé sera également supprimé."
+    }
+  },
+  "support": {
+    "open": "Contacter le support",
+    "title": "Contacter le support",
+    "subtitle": "Une question, un bug ou une suggestion ? Notre équipe vous répond rapidement.",
+    "category": "Catégorie",
+    "subject": "Sujet",
+    "message": "Message",
+    "submit": "Envoyer",
+    "error": "Une erreur est survenue. Réessayez.",
+    "thanksTitle": "Message envoyé ✅",
+    "thanksBody": "Votre message a bien été envoyé. Nous répondons sous 24-48h, jours ouvrés du lundi au vendredi, 9h-18h.",
+    "cat": {
+      "question": "Question",
+      "bug": "Bug",
+      "suggestion": "Suggestion"
     }
   }
 }
