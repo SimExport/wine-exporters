@@ -106,7 +106,7 @@ const Dashboard = () => {
       badge: t('dashboardPage.hub.search.available', { count: searchCredits }),
       badgeVariant: 'info' as const,
       cta: t('dashboardPage.hub.search.cta'),
-      to: '/importers',
+      to: '/recherches',
     },
     {
       key: 'campaign',
