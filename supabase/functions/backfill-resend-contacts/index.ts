@@ -35,11 +35,14 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Auth: allow either the service role key or an admin JWT
+    // Auth: admin JWT, service role key, or one-shot backfill secret
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "").trim();
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    let authorized = !!token && token === serviceKey;
+    const backfillSecret = req.headers.get("x-backfill-secret") ?? "";
+    let authorized =
+      (!!token && token === serviceKey) ||
+      backfillSecret === "wineexporters-backfill-2026";
     if (!authorized && token) {
       const { data: userData } = await supabase.auth.getUser(token);
       const callerId = userData?.user?.id;
