@@ -1,0 +1,248 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useCredits } from '@/hooks/useCredits';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch } from 'lucide-react';
+import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
+import { PremiumOnlyState } from '@/components/PremiumOnlyState';
+import { formatDateLong } from '@/lib/format';
+
+interface SourcingRequest {
+  id: string;
+  target_market: string;
+  status: 'pending' | 'in_progress' | 'validated' | 'archived';
+  admin_note: string | null;
+  result_file_url: string | null;
+  result_file_name: string | null;
+  result_file_format: string | null;
+  validated_at: string | null;
+  created_at: string;
+}
+
+const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
+  pending: 'secondary',
+  in_progress: 'outline',
+  validated: 'default',
+  archived: 'secondary',
+};
+
+export default function SourcingRequests() {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const { hasPaidAccess, loading: subLoading } = useSubscription();
+  const { searchCredits, consumeSearchCredit, noCreditsMessage, resetDateLabel } = useCredits();
+  const [requests, setRequests] = useState<SourcingRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [market, setMarket] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const fetchRequests = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('sourcing_requests')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    if (error) console.error(error);
+    setRequests((data as any) || []);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
+
+  const handleSubmit = async () => {
+    if (!user || !market) return;
+    if (searchCredits <= 0) {
+      toast({ title: t('sourcing.toast.noCredit'), description: noCreditsMessage('search'), variant: 'destructive' });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data: inserted, error } = await supabase
+        .from('sourcing_requests')
+        .insert({ user_id: user.id, target_market: market })
+        .select('id')
+        .single();
+      if (error) throw error;
+      await consumeSearchCredit();
+      try {
+        const marketName = COUNTRY_LIST.find(c => c.code === market)?.name || market;
+        await supabase.functions.invoke('notify-sourcing-submission', {
+          body: { requestId: inserted?.id, userEmail: user.email, targetMarket: marketName },
+        });
+      } catch (e) { console.error(e); }
+      setOpen(false);
+      setMarket('');
+      toast({ title: t('sourcing.toast.submittedTitle'), description: t('sourcing.toast.submittedDesc') });
+      fetchRequests();
+    } catch (e) {
+      console.error(e);
+      toast({ title: t('common.error'), description: t('sourcing.toast.error'), variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDownload = async (req: SourcingRequest) => {
+    if (!req.result_file_url) return;
+    setDownloadingId(req.id);
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('sourcing-results')
+        .createSignedUrl(req.result_file_url, 60 * 10);
+      if (error || !data?.signedUrl) throw error;
+      window.open(data.signedUrl, '_blank');
+    } catch (e) {
+      console.error(e);
+      toast({ title: t('common.error'), description: t('sourcing.toast.downloadError'), variant: 'destructive' });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const marketLabel = (code: string) => COUNTRY_LIST.find(c => c.code === code)?.name || code;
+
+  if (subLoading) {
+    return (
+      <div className="container mx-auto max-w-5xl px-4 py-8 flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!hasPaidAccess) {
+    return (
+      <div className="container mx-auto max-w-5xl px-4 py-8">
+        <PremiumOnlyState />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto max-w-5xl px-4 py-6">
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{t('sourcing.title')}</h1>
+          <p className="text-muted-foreground mt-2">{t('sourcing.subtitle')}</p>
+        </div>
+
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Target className="h-4 w-4 mr-2" />
+              {t('sourcing.cta')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t('sourcing.dialog.title')}</DialogTitle>
+              <DialogDescription>{t('sourcing.dialog.description')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">{t('sourcing.dialog.marketLabel')}</label>
+                <Select value={market} onValueChange={setMarket}>
+                  <SelectTrigger><SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} /></SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_LIST.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t('sourcing.dialog.creditRemaining')}</span>
+                <Badge variant={searchCredits > 0 ? 'default' : 'secondary'}>{searchCredits} / 1</Badge>
+              </div>
+              {searchCredits <= 0 && <p className="text-sm text-destructive">{noCreditsMessage('search')}</p>}
+              <Button className="w-full" disabled={!market || searchCredits <= 0 || submitting} onClick={handleSubmit}>
+                {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
+                {t('sourcing.dialog.submit')}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card className="mb-6">
+        <CardContent className="py-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">{t('sourcing.monthlyCredit')}</p>
+            <p className="text-xs text-muted-foreground">{t('sourcing.resetOn', { date: resetDateLabel })}</p>
+          </div>
+          <Badge variant={searchCredits > 0 ? 'default' : 'secondary'} className="text-base px-3 py-1">
+            {searchCredits} / 1
+          </Badge>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t('sourcing.history')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : requests.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <FileSearch className="h-12 w-12 text-muted-foreground/40 mb-3" />
+              <p className="text-sm text-muted-foreground">{t('sourcing.empty')}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {requests.map(req => (
+                <div key={req.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">{marketLabel(req.target_market)}</span>
+                      <Badge variant={STATUS_VARIANTS[req.status]}>
+                        {req.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                        {req.status === 'in_progress' && <Loader2 className="h-3 w-3 mr-1" />}
+                        {req.status === 'validated' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                        {req.status === 'archived' && <Archive className="h-3 w-3 mr-1" />}
+                        {t(`sourcing.status.${req.status}`)}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('sourcing.requestedOn', { date: formatDateLong(req.created_at) })}
+                    </p>
+                    {(req.status === 'pending' || req.status === 'in_progress') && (
+                      <p className="text-xs text-muted-foreground mt-1 italic">{t('sourcing.waitingMessage')}</p>
+                    )}
+                    {req.admin_note && (
+                      <p className="text-xs mt-2 p-2 bg-muted rounded">{req.admin_note}</p>
+                    )}
+                  </div>
+                  {req.status === 'validated' && req.result_file_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(req)}
+                      disabled={downloadingId === req.id}
+                    >
+                      {downloadingId === req.id
+                        ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        : <Download className="h-4 w-4 mr-2" />}
+                      {t('sourcing.download')}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
