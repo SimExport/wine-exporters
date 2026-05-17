@@ -117,11 +117,9 @@ export default function SourcingRequests() {
     return () => { supabase.removeChannel(ch); };
   }, [user, fetchRequests]);
 
-  const selectedCountryDef = COUNTRY_LIST.find(c => c.code === market);
-  const needsStates = selectedCountryDef && STATES_REQUIRED_CODES.has(selectedCountryDef.code);
-  const countryDbNames = selectedCountryDef
-    ? Array.from(new Set([selectedCountryDef.englishName, ...(selectedCountryDef.dbAliases || [])]))
-    : [];
+  const selectedOption = countryOptions.find(c => c.canonical === market);
+  const needsStates = !!selectedOption && STATES_REQUIRED_NAMES.has(selectedOption.canonical.toLowerCase());
+  const countryDbNames = selectedOption ? selectedOption.variants : [];
 
   const handleSubmit = async () => {
     if (!user || !market) return;
@@ -146,9 +144,8 @@ export default function SourcingRequests() {
         .single();
       if (error) throw error;
       try {
-        const marketName = COUNTRY_LIST.find(c => c.code === market)?.name || market;
         await supabase.functions.invoke('notify-sourcing-submission', {
-          body: { requestId: inserted?.id, userEmail: user.email, targetMarket: marketName },
+          body: { requestId: inserted?.id, userEmail: user.email, targetMarket: market },
         });
       } catch (e) { console.error(e); }
       // Trigger AI processing (fire and forget — function decrements credit itself)
