@@ -116,38 +116,38 @@ Deno.serve(async (req) => {
       supabase.from("wines").select("name, color, appellation, grapes, exw_price_eur, organic, is_biodynamic, is_natural, vintages, description").eq("user_id", userId).eq("is_active", true),
     ]);
 
-    // Build buyer_contacts query — country may be stored as english name; try multiple aliases via market code lookup
-    const marketCode: string = reqRow.target_market;
-    // Fetch matching contacts: we filter by country using ilike-equivalent across known names.
-    // Caller passes ISO code; we accept it directly too.
+    // target_market is a country name picked directly from buyer_contacts (already consistent).
+    // We still resolve all DB variants (trailing spaces, case) for the same trimmed/lowercased name.
+    const marketName: string = reqRow.target_market;
+    const marketKey = marketName.trim().toLowerCase();
+
+    const { data: allCountries, error: cListErr } = await supabase
+      .from("buyer_contacts")
+      .select("country")
+      .not("country", "is", null);
+    if (cListErr) throw cListErr;
+
+    const variantSet = new Set<string>();
+    for (const row of (allCountries ?? []) as { country: string }[]) {
+      if (row.country && row.country.trim().toLowerCase() === marketKey) {
+        variantSet.add(row.country);
+      }
+    }
+    const variants = Array.from(variantSet);
+    if (variants.length === 0) variants.push(marketName);
+
     let query = supabase
       .from("buyer_contacts")
       .select("id, country, state, company_name, email, phone, website_url, city, full_address, LinkedIn, Facebook, Instagram")
+      .in("country", variants)
       .limit(500);
-
-    // Try by raw market value first, then we'll fallback to ilike if zero.
-    query = query.eq("country", marketCode);
 
     if (reqRow.states_filter && reqRow.states_filter.length > 0) {
       query = query.in("state", reqRow.states_filter);
     }
 
-    let { data: contacts, error: cErr } = await query;
+    const { data: contacts, error: cErr } = await query;
     if (cErr) throw cErr;
-
-    // Fallback: try ilike if empty
-    if (!contacts || contacts.length === 0) {
-      let q2 = supabase
-        .from("buyer_contacts")
-        .select("id, country, state, company_name, email, phone, website_url, city, full_address, LinkedIn, Facebook, Instagram")
-        .ilike("country", `%${marketCode}%`)
-        .limit(500);
-      if (reqRow.states_filter && reqRow.states_filter.length > 0) {
-        q2 = q2.in("state", reqRow.states_filter);
-      }
-      const r2 = await q2;
-      contacts = r2.data ?? [];
-    }
 
     if (!contacts || contacts.length === 0) {
       throw new Error("Aucun contact disponible pour ce marché");
@@ -234,7 +234,7 @@ Critères de scoring : pertinence du portefeuille produit, complétude des infor
               from: "WineExporters <notifications@wine-exporters.com>",
               to: [toEmail],
               subject: "Votre recherche sur-mesure est prête",
-              html: `<p>Bonjour,</p><p>Votre recherche sur-mesure pour le marché <strong>${marketCode}</strong> est terminée.</p><p>Connectez-vous à votre espace WineExporters pour consulter la shortlist générée.</p><p><a href="https://wine-exporters.com/recherches">Voir les résultats</a></p>`,
+              html: `<p>Bonjour,</p><p>Votre recherche sur-mesure pour le marché <strong>${marketName}</strong> est terminée.</p><p>Connectez-vous à votre espace WineExporters pour consulter la shortlist générée.</p><p><a href="https://wine-exporters.com/recherches">Voir les résultats</a></p>`,
             }),
           });
         }
