@@ -1,89 +1,91 @@
-# Recherches sur-mesure — Feature complète
+# Automatisation des recherches sur-mesure
 
-## Constat
-- La table `sourcing_requests` existe déjà (status `pending`, admin_note, target_market).
-- L'utilisateur peut soumettre une recherche depuis `/importers` → insertion en base **sans aucune notification**.
-- Aucun espace admin, aucun email envoyé, aucun moyen de livrer un document.
+## Note importante sur les statuts existants
 
-## Plan
+La table `sourcing_requests` utilise déjà : `pending | in_progress | validated | archived`.
+Votre plan mentionne `processing` et `completed`. Je propose de **réutiliser les statuts existants** pour éviter de casser l'UI admin et les traductions actuelles :
+- `processing` → `in_progress`
+- `completed` → `validated`
 
-### 1. Base de données (migration)
-Étendre `sourcing_requests` avec:
-- `status` enum élargi: `pending` | `in_progress` | `validated` | `archived` (DELETE déjà couvert par admin)
-- `result_file_url`, `result_file_name`, `result_file_size`, `result_file_format` (pdf/docx)
-- `validated_at`, `validated_by`, `archived_at`
-- `admin_note` existe déjà ✅
+Si vous préférez ajouter `processing`/`completed` comme nouveaux statuts en parallèle, dites-le.
 
-Politiques RLS additionnelles:
-- Admins: UPDATE + DELETE complets
-- Users: SELECT élargi (déjà OK), peuvent voir leur document quand validé
+## Étape 1 — Migration SQL
 
-Storage:
-- Créer bucket privé `sourcing-results`
-- RLS: admins peuvent upload/delete partout; users peuvent download uniquement les fichiers liés à leur user_id (chemin `{user_id}/{request_id}.{ext}`)
+Ajouter à `sourcing_requests` :
+- `result_json` jsonb
+- `result_summary` text
+- `states_filter` text[]
+- `processing_started_at` timestamptz
+- `processing_completed_at` timestamptz
+- `error_message` text
 
-### 2. Edge Function `notify-sourcing-submission`
-- Déclenchée côté client après insertion réussie dans `sourcing_requests`
-- Envoie un email via Resend à `simon@exportvins.fr`
-- Contenu: email utilisateur, nom du domaine, marché demandé, lien admin
-- Pattern identique à `notify-campaign-submission`
+## Étape 2 — Formulaire utilisateur `/recherches`
 
-### 3. Edge Function `notify-sourcing-validated`
-- Déclenchée quand l'admin valide une recherche
-- Envoie email à l'utilisateur avec lien vers `/recherches/{id}` pour télécharger le document
+Dans `src/pages/SourcingRequests.tsx`, dans le `Dialog` de création :
+- Après sélection du pays, si `market ∈ { US, GB, DE, AU, CA, CN }` (codes ISO via `COUNTRY_LIST`), afficher un multi-select **États / Régions** (obligatoire, max 3).
+- Options chargées via `supabase.from('buyer_contacts').select('state').eq('country', countryName).not('state','is',null)` puis dédup côté client.
+  - ⚠️ `buyer_contacts.country` stocke le **nom** (ex: "United States"), pas le code ISO. On mappera via `COUNTRY_LIST.find(c => c.code === market)?.name`.
+- Composant : réutiliser le pattern de `CountryMultiSelect` (badges + popover + search) ; nouveau composant léger `StatesMultiSelect`.
+- À la soumission : insérer `states_filter` dans `sourcing_requests`, puis invoquer la nouvelle Edge Function `process-sourcing-request` au lieu (ou en plus) de `notify-sourcing-submission`.
 
-### 4. Page Admin `/admin/recherches` (`AdminSourcing.tsx`)
-Route protégée par `AdminRoute`, ajoutée au sidebar admin.
-Inspirée de `AdminCampaigns`:
-- Tableau: email user / domaine / marché / date / statut / actions
-- Filtres par statut (pending/in_progress/validated/archived)
-- Actions par ligne:
-  - **Valider**: upload document (pdf/docx) obligatoire → upload Storage → update status `validated` + URL → déclenche email user
-  - **Marquer en cours**: status `in_progress`
-  - **Archiver / Désarchiver**
-  - **Supprimer** (avec confirm)
-  - **Modifier note admin**
-- Affichage des emails utilisateurs via jointure profiles + auth (utiliser `display_name` ou récupérer email depuis `profiles.domain_name` + RPC admin si besoin pour email)
+## Étape 3 — Edge Function `process-sourcing-request`
 
-### 5. Page utilisateur `/recherches` (`SourcingRequests.tsx`)
-Nouvelle entrée sidebar (sous Importateurs ou Campagnes).
-Contenu:
-- En-tête avec compteur crédit mensuel + date prochain reset
-- Bouton "Lancer ma recherche mensuelle" (réutilise le même flow modal que `/importers`)
-- Liste chronologique des recherches passées:
-  - Marché, date, statut (badge), note admin si présente
-  - Si `validated`: bouton **Télécharger / Visualiser le document** (signed URL Storage)
-  - Si `pending`/`in_progress`: message "L'équipe revient sous 72h ouvrés"
+Nouveau fichier `supabase/functions/process-sourcing-request/index.ts`, `verify_jwt = false` dans `config.toml`, secret requis : **`ANTHROPIC_API_KEY`** (à ajouter via le tool secrets avant déploiement).
 
-### 6. `/importers` — conserver le bouton existant
-- Garder le modal actuel
-- Après insertion réussie: appeler `notify-sourcing-submission` (en plus du toast déjà présent)
+Flux (avec service role key) :
+1. Parse `{ sourcing_request_id }`, charge la demande.
+2. Vérifie `user_credits.search_credits >= 1` pour `user_id` → sinon 402 + status `pending` conservé, écrit `error_message`.
+3. UPDATE : `status='in_progress'`, `processing_started_at=now()`, décrément `search_credits` (RPC `consume_search_credit` n'est pas utilisable hors session user → on fait un UPDATE direct côté service role).
+4. Récupère `buyer_contacts` filtrés par `country = nom_du_pays` (+ `state = ANY(states_filter)` si non vide). Limite raisonnable (ex. 500) pour rester dans le contexte du LLM.
+5. Récupère `profiles` + `wines` de l'utilisateur.
+6. Appel API Anthropic `claude-sonnet-4-5` (endpoint `https://api.anthropic.com/v1/messages`) avec prompt système FR demandant un JSON strict :
+   ```json
+   { "shortlist": [ { "company_name", "email", "phone", "website_url", "score", "reason" } ], "summary_markdown": "..." }
+   ```
+   Forcer JSON via instruction + parser robuste.
+7. UPDATE : `result_json`, `result_summary`, `status='validated'`, `processing_completed_at`, `validated_at`.
+8. Appel Resend (via `RESEND_API_KEY` déjà présent) — email "Votre recherche est prête".
+9. En cas d'erreur LLM/parsing : status repasse à `pending`, `error_message` rempli, crédit **remboursé**.
 
-### 7. Notifications in-app (bonus)
-- Ajouter événement dans `useNotifications` lorsqu'une recherche utilisateur passe `validated` (realtime sur `sourcing_requests` filtré par user_id)
+## Étape 4 — Vue utilisateur (résultats)
 
-### 8. i18n
-- Ajouter clés FR/EN: `sourcing.page.*`, `admin.sourcing.*`, emails
+Dans `SourcingRequests.tsx`, pour chaque ligne :
+- `in_progress` → spinner + texte "Recherche en cours…".
+- `validated` + `result_json` non null → bouton **"Voir les résultats"** ouvrant un Dialog plein écran :
+  - Onglet **Synthèse** : `result_summary` rendu en markdown (`react-markdown` — à ajouter si absent).
+  - Onglet **Contacts** : table triable (nom, email, téléphone, site, score badge, raison).
+  - Bouton "Export CSV" côté client.
+- Si `result_file_url` existe (ancien flux manuel) → garder le bouton Download en fallback.
+
+## Étape 5 — Vue admin `/admin/recherches`
+
+Dans `AdminSourcing.tsx` :
+- Bouton **Démarrer** : appelle `supabase.functions.invoke('process-sourcing-request', { body: { sourcing_request_id: req.id } })` au lieu d'un simple `updateStatus('in_progress')`. Toast pendant l'exécution.
+- Ligne en `in_progress` : icône `Loader2` animée dans le badge + désactivation des actions.
+- Ligne en `validated` avec `result_json` : nouveau bouton **"Voir les résultats"** (même Dialog que côté user) ; le bouton Valider manuel reste disponible en fallback pour upload de fichier.
+- Realtime optionnel : `supabase.channel` sur `sourcing_requests` pour rafraîchir auto quand l'edge function termine.
+
+## Étape 6 — i18n
+
+Ajouter clés FR + EN dans `src/i18n/locales/{fr,en}.json` :
+- `sourcing.states.label`, `sourcing.states.placeholder`, `sourcing.states.max`
+- `sourcing.results.title`, `sourcing.results.viewBtn`, `sourcing.results.summaryTab`, `sourcing.results.contactsTab`, `sourcing.results.score`, `sourcing.results.exportCsv`
+- `sourcing.processing.label`
+- `adminSourcing.action.viewResults`, `adminSourcing.toast.processingStarted`, `adminSourcing.toast.processingError`
 
 ## Détails techniques
 
-**Format chemin Storage:** `{user_id}/{request_id}.{ext}` pour RLS simple.
+- **Secret à ajouter** : `ANTHROPIC_API_KEY` (le user devra le fournir via le formulaire sécurisé).
+- **Dépendance npm** : `react-markdown` (+ `remark-gfm`) pour le rendu de la synthèse.
+- **Sécurité** : la fonction utilise `SUPABASE_SERVICE_ROLE_KEY` côté serveur uniquement. Aucun appel direct à Anthropic depuis le client.
+- **Idempotence** : si la fonction est rappelée sur une demande déjà `in_progress` depuis < 5 min, retourner 409.
+- **Quota LLM** : tronquer la liste de contacts à 500 max + n'envoyer que les colonnes utiles pour limiter les tokens.
 
-**Statuts:** garder `text` plutôt qu'enum pour éviter migration lourde, avec CHECK constraint.
+## Ordre d'exécution une fois approuvé
 
-**Email admin:** `simon@exportvins.fr` en dur dans l'edge function (cohérent avec patterns existants).
-
-**Lien admin dans email:** `https://wine-exporters.com/admin/recherches`.
-
-**Lien utilisateur dans email validation:** `https://wine-exporters.com/recherches`.
-
-## Fichiers créés/modifiés
-- Migration SQL (table + RLS + bucket + policies)
-- `supabase/functions/notify-sourcing-submission/index.ts` (nouveau)
-- `supabase/functions/notify-sourcing-validated/index.ts` (nouveau)
-- `src/pages/AdminSourcing.tsx` (nouveau)
-- `src/pages/SourcingRequests.tsx` (nouveau)
-- `src/pages/Importers.tsx` (ajout appel notify)
-- `src/App.tsx` (routes)
-- `src/components/AppSidebar.tsx` (entrées menu)
-- `src/i18n/locales/{fr,en}.json`
+1. Demander l'ajout du secret `ANTHROPIC_API_KEY`.
+2. Migration SQL.
+3. Edge Function `process-sourcing-request` + entrée dans `config.toml`.
+4. UI utilisateur (formulaire états + viewer résultats).
+5. UI admin (bouton Démarrer asynchrone + viewer).
+6. i18n FR/EN.
