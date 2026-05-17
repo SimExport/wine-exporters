@@ -252,23 +252,66 @@ export default function SourcingRequests() {
             <div className="space-y-4 pt-2">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">{t('sourcing.dialog.marketLabel')}</label>
-                <Select value={market} onValueChange={(v) => { setMarket(v); setStates([]); }}>
-                  <SelectTrigger><SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} /></SelectTrigger>
-                  <SelectContent>
-                    {[...countryOptions]
-                      .sort((a, b) =>
-                        translateCountry(a.canonical, i18n.language).localeCompare(
-                          translateCountry(b.canonical, i18n.language),
-                          i18n.language
-                        )
-                      )
-                      .map(c => (
-                        <SelectItem key={c.canonical} value={c.canonical}>
-                          {translateCountry(c.canonical, i18n.language)}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={marketOpen} onOpenChange={setMarketOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={marketOpen}
+                      className="w-full justify-between font-normal"
+                    >
+                      <span className={cn(!market && 'text-muted-foreground')}>
+                        {market
+                          ? translateCountry(market, i18n.language)
+                          : t('sourcing.dialog.marketPlaceholder')}
+                      </span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command
+                      filter={(value, search) =>
+                        value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+                      }
+                    >
+                      <CommandInput placeholder={t('sourcing.dialog.marketPlaceholder')} />
+                      <CommandList className="max-h-72">
+                        <CommandEmpty>{t('common.noResults', 'Aucun résultat')}</CommandEmpty>
+                        <CommandGroup>
+                          {[...countryOptions]
+                            .sort((a, b) =>
+                              translateCountry(a.canonical, i18n.language).localeCompare(
+                                translateCountry(b.canonical, i18n.language),
+                                i18n.language
+                              )
+                            )
+                            .map(c => {
+                              const label = translateCountry(c.canonical, i18n.language);
+                              return (
+                                <CommandItem
+                                  key={c.canonical}
+                                  value={`${label} ${c.canonical}`}
+                                  onSelect={() => {
+                                    setMarket(c.canonical);
+                                    setStates([]);
+                                    setMarketOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      market === c.canonical ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {label}
+                                </CommandItem>
+                              );
+                            })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               {needsStates && (
                 <div>
