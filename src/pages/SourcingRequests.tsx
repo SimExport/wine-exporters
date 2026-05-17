@@ -252,7 +252,7 @@ export default function SourcingRequests() {
                   <SelectTrigger>
                     <SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[280px] overflow-y-auto">
                     {[...countryOptions]
                       .sort((a, b) =>
                         translateCountry(a.canonical, i18n.language).localeCompare(
