@@ -251,9 +251,18 @@ export default function SourcingRequests() {
                 <Select value={market} onValueChange={(v) => { setMarket(v); setStates([]); }}>
                   <SelectTrigger><SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} /></SelectTrigger>
                   <SelectContent>
-                    {countryOptions.map(c => (
-                      <SelectItem key={c.canonical} value={c.canonical}>{c.canonical}</SelectItem>
-                    ))}
+                    {[...countryOptions]
+                      .sort((a, b) =>
+                        translateCountry(a.canonical, i18n.language).localeCompare(
+                          translateCountry(b.canonical, i18n.language),
+                          i18n.language
+                        )
+                      )
+                      .map(c => (
+                        <SelectItem key={c.canonical} value={c.canonical}>
+                          {translateCountry(c.canonical, i18n.language)}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
