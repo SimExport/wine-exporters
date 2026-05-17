@@ -89,21 +89,33 @@ export default function SourcingRequests() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from('buyer_contacts')
-        .select('country')
-        .not('country', 'is', null);
-      if (cancelled || error || !data) return;
+      // PostgREST caps responses at 1000 rows by default; paginate to fetch all countries
+      const PAGE_SIZE = 1000;
       const groups = new Map<string, { canonical: string; variants: Set<string> }>();
-      for (const row of data as { country: string }[]) {
-        const raw = row.country;
-        if (!raw) continue;
-        const trimmed = raw.trim();
-        if (!trimmed) continue;
-        const key = trimmed.toLowerCase();
-        if (!groups.has(key)) groups.set(key, { canonical: trimmed, variants: new Set() });
-        groups.get(key)!.variants.add(raw);
+      let from = 0;
+      // Hard safety cap to avoid infinite loops
+      for (let i = 0; i < 200; i++) {
+        const { data, error } = await supabase
+          .from('buyer_contacts')
+          .select('country')
+          .not('country', 'is', null)
+          .order('country', { ascending: true })
+          .range(from, from + PAGE_SIZE - 1);
+        if (cancelled) return;
+        if (error || !data) break;
+        for (const row of data as { country: string }[]) {
+          const raw = row.country;
+          if (!raw) continue;
+          const trimmed = raw.trim();
+          if (!trimmed) continue;
+          const key = trimmed.toLowerCase();
+          if (!groups.has(key)) groups.set(key, { canonical: trimmed, variants: new Set() });
+          groups.get(key)!.variants.add(raw);
+        }
+        if (data.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
       }
+      if (cancelled) return;
       const list = Array.from(groups.values())
         .map(g => ({ canonical: g.canonical, variants: Array.from(g.variants) }))
         .sort((a, b) => a.canonical.localeCompare(b.canonical));
