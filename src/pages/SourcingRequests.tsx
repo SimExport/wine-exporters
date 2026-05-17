@@ -15,6 +15,28 @@ import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 import { formatDateLong } from '@/lib/format';
+import { COUNTRIES } from '@/components/importers/country-data';
+
+// Build a lookup: lowercased DB country name/alias -> { fr, en } display label
+const COUNTRY_LABELS: Record<string, { fr: string; en: string }> = (() => {
+  const map: Record<string, { fr: string; en: string }> = {};
+  for (const c of COUNTRIES) {
+    const labels = { fr: c.name, en: c.englishName };
+    const keys = new Set<string>([c.name, c.englishName, ...(c.dbAliases || [])]);
+    for (const k of keys) {
+      if (!k) continue;
+      map[k.trim().toLowerCase()] = labels;
+    }
+  }
+  return map;
+})();
+
+function translateCountry(raw: string, lang: string): string {
+  if (!raw) return raw;
+  const entry = COUNTRY_LABELS[raw.trim().toLowerCase()];
+  if (!entry) return raw;
+  return lang.startsWith('en') ? entry.en : entry.fr;
+}
 
 interface SourcingRequest {
   id: string;
