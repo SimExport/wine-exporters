@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { resolveCountryVariants } from "./country-variants.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -119,7 +120,6 @@ Deno.serve(async (req) => {
     // target_market is a country name picked directly from buyer_contacts (already consistent).
     // We still resolve all DB variants (trailing spaces, case) for the same trimmed/lowercased name.
     const marketName: string = reqRow.target_market;
-    const marketKey = marketName.trim().toLowerCase();
 
     const { data: allCountries, error: cListErr } = await supabase
       .from("buyer_contacts")
@@ -127,14 +127,7 @@ Deno.serve(async (req) => {
       .not("country", "is", null);
     if (cListErr) throw cListErr;
 
-    const variantSet = new Set<string>();
-    for (const row of (allCountries ?? []) as { country: string }[]) {
-      if (row.country && row.country.trim().toLowerCase() === marketKey) {
-        variantSet.add(row.country);
-      }
-    }
-    const variants = Array.from(variantSet);
-    if (variants.length === 0) variants.push(marketName);
+    const variants = resolveCountryVariants(marketName, (allCountries ?? []) as { country: string | null }[]);
 
     let query = supabase
       .from("buyer_contacts")
