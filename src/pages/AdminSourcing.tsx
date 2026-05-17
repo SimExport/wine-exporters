@@ -12,10 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Loader2, CheckCircle2, Archive, Trash2, Upload, Download, PlayCircle, RotateCcw, FileSearch } from 'lucide-react';
+import { Loader2, CheckCircle2, Archive, Trash2, Upload, Download, PlayCircle, RotateCcw, FileSearch, Eye } from 'lucide-react';
 import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
-import { Eye } from 'lucide-react';
 import { formatDateLong } from '@/lib/format';
 
 interface SourcingRequest {
