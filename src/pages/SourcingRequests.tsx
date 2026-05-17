@@ -185,7 +185,7 @@ export default function SourcingRequests() {
     }
   };
 
-  const marketLabel = (code: string) => COUNTRY_LIST.find(c => c.code === code)?.name || code;
+  const marketLabel = (value: string) => value;
 
   if (subLoading) {
     return (
@@ -226,10 +226,12 @@ export default function SourcingRequests() {
             <div className="space-y-4 pt-2">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">{t('sourcing.dialog.marketLabel')}</label>
-                <Select value={market} onValueChange={setMarket}>
+                <Select value={market} onValueChange={(v) => { setMarket(v); setStates([]); }}>
                   <SelectTrigger><SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} /></SelectTrigger>
                   <SelectContent>
-                    {COUNTRY_LIST.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                    {countryOptions.map(c => (
+                      <SelectItem key={c.canonical} value={c.canonical}>{c.canonical}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
