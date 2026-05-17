@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch, Eye } from 'lucide-react';
-import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
 import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
@@ -33,7 +32,12 @@ interface SourcingRequest {
   error_message: string | null;
 }
 
-const STATES_REQUIRED_CODES = new Set(['US', 'GB', 'DE', 'AU', 'CA', 'CN']);
+// Country names (as stored in buyer_contacts, lowercased) that require a state filter
+const STATES_REQUIRED_NAMES = new Set([
+  'united states', 'usa',
+  'united kingdom', 'england (uk)', 'scotland (uk)', 'wales (uk)', 'northern ireland (uk)',
+  'germany', 'australia', 'canada', 'china',
+]);
 
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
   pending: 'secondary',
@@ -57,6 +61,34 @@ export default function SourcingRequests() {
   const [states, setStates] = useState<string[]>([]);
   const [resultsOpen, setResultsOpen] = useState(false);
   const [activeReq, setActiveReq] = useState<SourcingRequest | null>(null);
+  const [countryOptions, setCountryOptions] = useState<{ canonical: string; variants: string[] }[]>([]);
+
+  // Load distinct countries directly from buyer_contacts to guarantee consistency
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('buyer_contacts')
+        .select('country')
+        .not('country', 'is', null);
+      if (cancelled || error || !data) return;
+      const groups = new Map<string, { canonical: string; variants: Set<string> }>();
+      for (const row of data as { country: string }[]) {
+        const raw = row.country;
+        if (!raw) continue;
+        const trimmed = raw.trim();
+        if (!trimmed) continue;
+        const key = trimmed.toLowerCase();
+        if (!groups.has(key)) groups.set(key, { canonical: trimmed, variants: new Set() });
+        groups.get(key)!.variants.add(raw);
+      }
+      const list = Array.from(groups.values())
+        .map(g => ({ canonical: g.canonical, variants: Array.from(g.variants) }))
+        .sort((a, b) => a.canonical.localeCompare(b.canonical));
+      setCountryOptions(list);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const fetchRequests = useCallback(async () => {
     if (!user) return;
