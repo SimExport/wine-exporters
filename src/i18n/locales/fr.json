@@ -1928,9 +1928,34 @@
     "toast": {
       "noCredit": "Crédit épuisé",
       "submittedTitle": "Recherche envoyée",
-      "submittedDesc": "Notre équipe revient vers vous sous 72h ouvrées.",
+      "submittedDesc": "Votre recherche est en cours d'analyse, vous serez notifié·e par email.",
       "error": "Impossible d'envoyer la demande.",
       "downloadError": "Impossible de générer le lien de téléchargement."
+    },
+    "states": {
+      "label": "États / Régions",
+      "placeholder": "Sélectionnez jusqu'à 3 États",
+      "search": "Rechercher…",
+      "empty": "Aucun État disponible pour ce marché.",
+      "max": "Maximum {{max}} sélections.",
+      "selected": "{{count}} / {{max}} sélectionnés",
+      "required": "Sélectionnez au moins un État pour ce marché."
+    },
+    "processing": {
+      "label": "Recherche en cours…"
+    },
+    "results": {
+      "title": "Résultats — {{market}}",
+      "viewBtn": "Voir les résultats",
+      "summaryTab": "Synthèse",
+      "contactsTab": "Contacts",
+      "score": "Score",
+      "exportCsv": "Export CSV",
+      "col": {
+        "company": "Société",
+        "contact": "Contact",
+        "reason": "Pertinence"
+      }
     }
   },
   "adminSourcing": {
@@ -1956,7 +1981,13 @@
       "validate": "Valider",
       "download": "Télécharger",
       "archive": "Archiver",
-      "unarchive": "Désarchiver"
+      "unarchive": "Désarchiver",
+      "viewResults": "Voir les résultats"
+    },
+    "toast": {
+      "processingStarted": "Analyse IA lancée…",
+      "processingDone": "Recherche complétée",
+      "processingError": "Échec du traitement IA"
     },
     "validateDialog": {
       "title": "Valider et livrer la recherche",

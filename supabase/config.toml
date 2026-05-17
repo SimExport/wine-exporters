@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.backfill-resend-contacts]
 verify_jwt = false
+
+[functions.process-sourcing-request]
+verify_jwt = false
