@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch } from 'lucide-react';
+import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch, Eye } from 'lucide-react';
 import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
+import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
+import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 import { formatDateLong } from '@/lib/format';
 
@@ -25,7 +27,13 @@ interface SourcingRequest {
   result_file_format: string | null;
   validated_at: string | null;
   created_at: string;
+  result_json: any | null;
+  result_summary: string | null;
+  states_filter: string[] | null;
+  error_message: string | null;
 }
+
+const STATES_REQUIRED_CODES = new Set(['US', 'GB', 'DE', 'AU', 'CA', 'CN']);
 
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
   pending: 'secondary',
@@ -46,6 +54,9 @@ export default function SourcingRequests() {
   const [market, setMarket] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [states, setStates] = useState<string[]>([]);
+  const [resultsOpen, setResultsOpen] = useState(false);
+  const [activeReq, setActiveReq] = useState<SourcingRequest | null>(null);
 
   const fetchRequests = useCallback(async () => {
     if (!user) return;
@@ -62,8 +73,30 @@ export default function SourcingRequests() {
 
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
+  // Realtime refresh on status changes
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel(`sourcing-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sourcing_requests', filter: `user_id=eq.${user.id}` }, () => {
+        fetchRequests();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, fetchRequests]);
+
+  const selectedCountryDef = COUNTRY_LIST.find(c => c.code === market);
+  const needsStates = selectedCountryDef && STATES_REQUIRED_CODES.has(selectedCountryDef.code);
+  const countryDbNames = selectedCountryDef
+    ? Array.from(new Set([selectedCountryDef.englishName, ...(selectedCountryDef.dbAliases || [])]))
+    : [];
+
   const handleSubmit = async () => {
     if (!user || !market) return;
+    if (needsStates && states.length === 0) {
+      toast({ title: t('common.error'), description: t('sourcing.states.required'), variant: 'destructive' });
+      return;
+    }
     if (searchCredits <= 0) {
       toast({ title: t('sourcing.toast.noCredit'), description: noCreditsMessage('search'), variant: 'destructive' });
       return;
@@ -72,19 +105,29 @@ export default function SourcingRequests() {
     try {
       const { data: inserted, error } = await supabase
         .from('sourcing_requests')
-        .insert({ user_id: user.id, target_market: market })
+        .insert({
+          user_id: user.id,
+          target_market: market,
+          states_filter: needsStates ? states : null,
+        })
         .select('id')
         .single();
       if (error) throw error;
-      await consumeSearchCredit();
       try {
         const marketName = COUNTRY_LIST.find(c => c.code === market)?.name || market;
         await supabase.functions.invoke('notify-sourcing-submission', {
           body: { requestId: inserted?.id, userEmail: user.email, targetMarket: marketName },
         });
       } catch (e) { console.error(e); }
+      // Trigger AI processing (fire and forget — function decrements credit itself)
+      try {
+        supabase.functions.invoke('process-sourcing-request', {
+          body: { sourcing_request_id: inserted?.id },
+        });
+      } catch (e) { console.error(e); }
       setOpen(false);
       setMarket('');
+      setStates([]);
       toast({ title: t('sourcing.toast.submittedTitle'), description: t('sourcing.toast.submittedDesc') });
       fetchRequests();
     } catch (e) {
@@ -161,12 +204,25 @@ export default function SourcingRequests() {
                   </SelectContent>
                 </Select>
               </div>
+              {needsStates && (
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">
+                    {t('sourcing.states.label')} <span className="text-destructive">*</span>
+                  </label>
+                  <StatesMultiSelect
+                    countryNames={countryDbNames}
+                    value={states}
+                    onChange={setStates}
+                    max={3}
+                  />
+                </div>
+              )}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t('sourcing.dialog.creditRemaining')}</span>
                 <Badge variant={searchCredits > 0 ? 'default' : 'secondary'}>{searchCredits} / 1</Badge>
               </div>
               {searchCredits <= 0 && <p className="text-sm text-destructive">{noCreditsMessage('search')}</p>}
-              <Button className="w-full" disabled={!market || searchCredits <= 0 || submitting} onClick={handleSubmit}>
+              <Button className="w-full" disabled={!market || searchCredits <= 0 || submitting || (needsStates && states.length === 0)} onClick={handleSubmit}>
                 {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
                 {t('sourcing.dialog.submit')}
               </Button>
@@ -206,9 +262,14 @@ export default function SourcingRequests() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">{marketLabel(req.target_market)}</span>
+                      {req.states_filter && req.states_filter.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          ({req.states_filter.join(', ')})
+                        </span>
+                      )}
                       <Badge variant={STATUS_VARIANTS[req.status]}>
                         {req.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                        {req.status === 'in_progress' && <Loader2 className="h-3 w-3 mr-1" />}
+                        {req.status === 'in_progress' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
                         {req.status === 'validated' && <CheckCircle2 className="h-3 w-3 mr-1" />}
                         {req.status === 'archived' && <Archive className="h-3 w-3 mr-1" />}
                         {t(`sourcing.status.${req.status}`)}
@@ -217,14 +278,29 @@ export default function SourcingRequests() {
                     <p className="text-xs text-muted-foreground mt-1">
                       {t('sourcing.requestedOn', { date: formatDateLong(req.created_at) })}
                     </p>
-                    {(req.status === 'pending' || req.status === 'in_progress') && (
+                    {req.status === 'pending' && (
                       <p className="text-xs text-muted-foreground mt-1 italic">{t('sourcing.waitingMessage')}</p>
+                    )}
+                    {req.status === 'in_progress' && (
+                      <p className="text-xs text-muted-foreground mt-1 italic">{t('sourcing.processing.label')}</p>
+                    )}
+                    {req.error_message && (
+                      <p className="text-xs text-destructive mt-1">{req.error_message}</p>
                     )}
                     {req.admin_note && (
                       <p className="text-xs mt-2 p-2 bg-muted rounded">{req.admin_note}</p>
                     )}
                   </div>
-                  {req.status === 'validated' && req.result_file_url && (
+                  {req.status === 'validated' && req.result_json && (
+                    <Button
+                      size="sm"
+                      onClick={() => { setActiveReq(req); setResultsOpen(true); }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      {t('sourcing.results.viewBtn')}
+                    </Button>
+                  )}
+                  {req.status === 'validated' && req.result_file_url && !req.result_json && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -243,6 +319,14 @@ export default function SourcingRequests() {
           )}
         </CardContent>
       </Card>
+
+      <SourcingResultsDialog
+        open={resultsOpen}
+        onOpenChange={setResultsOpen}
+        summary={activeReq?.result_summary ?? null}
+        resultJson={activeReq?.result_json ?? null}
+        marketLabel={activeReq ? marketLabel(activeReq.target_market) : ''}
+      />
     </div>
   );
 }
