@@ -69,7 +69,7 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
 };
 
 export default function SourcingRequests() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const { hasPaidAccess, loading: subLoading } = useSubscription();
@@ -207,7 +207,7 @@ export default function SourcingRequests() {
     }
   };
 
-  const marketLabel = (value: string) => value;
+  const marketLabel = (value: string) => translateCountry(value, i18n.language);
 
   if (subLoading) {
     return (
