@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Loader2, CheckCircle2, Archive, Trash2, Upload, Download, PlayCircle, RotateCcw, FileSearch } from 'lucide-react';
 import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
+import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
+import { Eye } from 'lucide-react';
 import { formatDateLong } from '@/lib/format';
 
 interface SourcingRequest {
@@ -31,6 +33,9 @@ interface SourcingRequest {
   created_at: string;
   display_name?: string | null;
   domain_name?: string | null;
+  result_json?: any | null;
+  result_summary?: string | null;
+  states_filter?: string[] | null;
 }
 
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
@@ -54,6 +59,8 @@ export default function AdminSourcing() {
   const [submitting, setSubmitting] = useState(false);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [resultsOpen, setResultsOpen] = useState(false);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
@@ -162,6 +169,25 @@ export default function AdminSourcing() {
     fetchRequests();
   };
 
+  const startProcessing = async (req: SourcingRequest) => {
+    setProcessingId(req.id);
+    toast({ title: t('adminSourcing.toast.processingStarted') });
+    try {
+      const { data, error } = await supabase.functions.invoke('process-sourcing-request', {
+        body: { sourcing_request_id: req.id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: t('adminSourcing.toast.processingDone') });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: t('common.error'), description: e.message || t('adminSourcing.toast.processingError'), variant: 'destructive' });
+    } finally {
+      setProcessingId(null);
+      fetchRequests();
+    }
+  };
+
   const handleDelete = async () => {
     if (!activeRequest) return;
     if (activeRequest.result_file_url) {
@@ -242,8 +268,27 @@ export default function AdminSourcing() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1 flex-wrap">
                         {req.status === 'pending' && (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(req, 'in_progress')}>
-                            <PlayCircle className="h-4 w-4 mr-1" />{t('adminSourcing.action.start')}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => startProcessing(req)}
+                            disabled={processingId === req.id}
+                          >
+                            {processingId === req.id
+                              ? <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              : <PlayCircle className="h-4 w-4 mr-1" />}
+                            {t('adminSourcing.action.start')}
+                          </Button>
+                        )}
+                        {req.status === 'in_progress' && (
+                          <Badge variant="outline" className="gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            {t('sourcing.processing.label')}
+                          </Badge>
+                        )}
+                        {req.status === 'validated' && req.result_json && (
+                          <Button size="sm" onClick={() => { setActiveRequest(req); setResultsOpen(true); }}>
+                            <Eye className="h-4 w-4 mr-1" />{t('adminSourcing.action.viewResults')}
                           </Button>
                         )}
                         {req.status !== 'validated' && req.status !== 'archived' && (
@@ -337,6 +382,14 @@ export default function AdminSourcing() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SourcingResultsDialog
+        open={resultsOpen}
+        onOpenChange={setResultsOpen}
+        summary={activeRequest?.result_summary ?? null}
+        resultJson={activeRequest?.result_json ?? null}
+        marketLabel={activeRequest ? marketLabel(activeRequest.target_market) : ''}
+      />
     </div>
   );
 }
