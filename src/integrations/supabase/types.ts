@@ -825,11 +825,17 @@ export type Database = {
           admin_note: string | null
           archived_at: string | null
           created_at: string
+          error_message: string | null
           id: string
+          processing_completed_at: string | null
+          processing_started_at: string | null
           result_file_format: string | null
           result_file_name: string | null
           result_file_size: number | null
           result_file_url: string | null
+          result_json: Json | null
+          result_summary: string | null
+          states_filter: string[] | null
           status: string
           target_market: string
           updated_at: string
@@ -841,11 +847,17 @@ export type Database = {
           admin_note?: string | null
           archived_at?: string | null
           created_at?: string
+          error_message?: string | null
           id?: string
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
           result_file_format?: string | null
           result_file_name?: string | null
           result_file_size?: number | null
           result_file_url?: string | null
+          result_json?: Json | null
+          result_summary?: string | null
+          states_filter?: string[] | null
           status?: string
           target_market: string
           updated_at?: string
@@ -857,11 +869,17 @@ export type Database = {
           admin_note?: string | null
           archived_at?: string | null
           created_at?: string
+          error_message?: string | null
           id?: string
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
           result_file_format?: string | null
           result_file_name?: string | null
           result_file_size?: number | null
           result_file_url?: string | null
+          result_json?: Json | null
+          result_summary?: string | null
+          states_filter?: string[] | null
           status?: string
           target_market?: string
           updated_at?: string
