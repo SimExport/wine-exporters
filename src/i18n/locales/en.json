@@ -1928,9 +1928,34 @@
     "toast": {
       "noCredit": "No credit left",
       "submittedTitle": "Search submitted",
-      "submittedDesc": "Our team will get back to you within 72 business hours.",
+      "submittedDesc": "Your search is being analyzed, you'll be notified by email.",
       "error": "Could not submit the request.",
       "downloadError": "Could not generate download link."
+    },
+    "states": {
+      "label": "States / Regions",
+      "placeholder": "Select up to 3 states",
+      "search": "Search…",
+      "empty": "No state available for this market.",
+      "max": "Maximum {{max}} selections.",
+      "selected": "{{count}} / {{max}} selected",
+      "required": "Select at least one state for this market."
+    },
+    "processing": {
+      "label": "Search in progress…"
+    },
+    "results": {
+      "title": "Results — {{market}}",
+      "viewBtn": "View results",
+      "summaryTab": "Summary",
+      "contactsTab": "Contacts",
+      "score": "Score",
+      "exportCsv": "Export CSV",
+      "col": {
+        "company": "Company",
+        "contact": "Contact",
+        "reason": "Match"
+      }
     }
   },
   "adminSourcing": {
@@ -1956,7 +1981,13 @@
       "validate": "Validate",
       "download": "Download",
       "archive": "Archive",
-      "unarchive": "Unarchive"
+      "unarchive": "Unarchive",
+      "viewResults": "View results"
+    },
+    "toast": {
+      "processingStarted": "AI analysis started…",
+      "processingDone": "Search completed",
+      "processingError": "AI processing failed"
     },
     "validateDialog": {
       "title": "Validate and deliver search",
