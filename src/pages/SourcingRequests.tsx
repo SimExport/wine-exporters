@@ -10,10 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch, Eye, ChevronsUpDown, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch, Eye } from 'lucide-react';
 import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
@@ -81,7 +78,6 @@ export default function SourcingRequests() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [market, setMarket] = useState('');
-  const [marketOpen, setMarketOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [states, setStates] = useState<string[]>([]);
@@ -252,66 +248,25 @@ export default function SourcingRequests() {
             <div className="space-y-4 pt-2">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">{t('sourcing.dialog.marketLabel')}</label>
-                <Popover open={marketOpen} onOpenChange={setMarketOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={marketOpen}
-                      className="w-full justify-between font-normal"
-                    >
-                      <span className={cn(!market && 'text-muted-foreground')}>
-                        {market
-                          ? translateCountry(market, i18n.language)
-                          : t('sourcing.dialog.marketPlaceholder')}
-                      </span>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                    <Command
-                      filter={(value, search) =>
-                        value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
-                      }
-                    >
-                      <CommandInput placeholder={t('sourcing.dialog.marketPlaceholder')} />
-                      <CommandList className="max-h-72">
-                        <CommandEmpty>{t('common.noResults', 'Aucun résultat')}</CommandEmpty>
-                        <CommandGroup>
-                          {[...countryOptions]
-                            .sort((a, b) =>
-                              translateCountry(a.canonical, i18n.language).localeCompare(
-                                translateCountry(b.canonical, i18n.language),
-                                i18n.language
-                              )
-                            )
-                            .map(c => {
-                              const label = translateCountry(c.canonical, i18n.language);
-                              return (
-                                <CommandItem
-                                  key={c.canonical}
-                                  value={`${label} ${c.canonical}`}
-                                  onSelect={() => {
-                                    setMarket(c.canonical);
-                                    setStates([]);
-                                    setMarketOpen(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      'mr-2 h-4 w-4',
-                                      market === c.canonical ? 'opacity-100' : 'opacity-0'
-                                    )}
-                                  />
-                                  {label}
-                                </CommandItem>
-                              );
-                            })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <Select value={market} onValueChange={(v) => { setMarket(v); setStates([]); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...countryOptions]
+                      .sort((a, b) =>
+                        translateCountry(a.canonical, i18n.language).localeCompare(
+                          translateCountry(b.canonical, i18n.language),
+                          i18n.language
+                        )
+                      )
+                      .map(c => (
+                        <SelectItem key={c.canonical} value={c.canonical}>
+                          {translateCountry(c.canonical, i18n.language)}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
               {needsStates && (
                 <div>
