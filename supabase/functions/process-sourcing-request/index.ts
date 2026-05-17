@@ -120,7 +120,6 @@ Deno.serve(async (req) => {
     // target_market is a country name picked directly from buyer_contacts (already consistent).
     // We still resolve all DB variants (trailing spaces, case) for the same trimmed/lowercased name.
     const marketName: string = reqRow.target_market;
-    const marketKey = marketName.trim().toLowerCase();
 
     const { data: allCountries, error: cListErr } = await supabase
       .from("buyer_contacts")
