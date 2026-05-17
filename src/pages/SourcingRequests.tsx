@@ -15,6 +15,28 @@ import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 import { formatDateLong } from '@/lib/format';
+import { COUNTRIES } from '@/components/importers/country-data';
+
+// Build a lookup: lowercased DB country name/alias -> { fr, en } display label
+const COUNTRY_LABELS: Record<string, { fr: string; en: string }> = (() => {
+  const map: Record<string, { fr: string; en: string }> = {};
+  for (const c of COUNTRIES) {
+    const labels = { fr: c.name, en: c.englishName };
+    const keys = new Set<string>([c.name, c.englishName, ...(c.dbAliases || [])]);
+    for (const k of keys) {
+      if (!k) continue;
+      map[k.trim().toLowerCase()] = labels;
+    }
+  }
+  return map;
+})();
+
+function translateCountry(raw: string, lang: string): string {
+  if (!raw) return raw;
+  const entry = COUNTRY_LABELS[raw.trim().toLowerCase()];
+  if (!entry) return raw;
+  return lang.startsWith('en') ? entry.en : entry.fr;
+}
 
 interface SourcingRequest {
   id: string;
@@ -47,7 +69,7 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
 };
 
 export default function SourcingRequests() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const { hasPaidAccess, loading: subLoading } = useSubscription();
@@ -185,7 +207,7 @@ export default function SourcingRequests() {
     }
   };
 
-  const marketLabel = (value: string) => value;
+  const marketLabel = (value: string) => translateCountry(value, i18n.language);
 
   if (subLoading) {
     return (
@@ -229,9 +251,18 @@ export default function SourcingRequests() {
                 <Select value={market} onValueChange={(v) => { setMarket(v); setStates([]); }}>
                   <SelectTrigger><SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} /></SelectTrigger>
                   <SelectContent>
-                    {countryOptions.map(c => (
-                      <SelectItem key={c.canonical} value={c.canonical}>{c.canonical}</SelectItem>
-                    ))}
+                    {[...countryOptions]
+                      .sort((a, b) =>
+                        translateCountry(a.canonical, i18n.language).localeCompare(
+                          translateCountry(b.canonical, i18n.language),
+                          i18n.language
+                        )
+                      )
+                      .map(c => (
+                        <SelectItem key={c.canonical} value={c.canonical}>
+                          {translateCountry(c.canonical, i18n.language)}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
