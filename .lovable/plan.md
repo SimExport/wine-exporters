@@ -1,21 +1,27 @@
-## Diagnostic
+## Contexte
 
-Le bug ne vient probablement pas du rendu du dropdown : la base contient bien 155 pays distincts, mais le composant ne charge les pays avec `supabase.from('buyer_contacts').select('country')` sans pagination. Avec Supabase/PostgREST, une requête côté client sans range retourne seulement les 1000 premières lignes par défaut. Comme les contacts sont vraisemblablement ordonnés de façon stable par pays, ces 1000 premières lignes ne couvrent que les pays de `Albania` à `Austria`, d'où la liste tronquée.
+L'Edge Function `notify-sourcing-validated` existe déjà et est bien appelée par `AdminSourcing.tsx` au moment où un admin valide une recherche et uploade le résultat (ligne 143). Elle envoie un mail via Resend au client avec un lien vers `/recherches`.
 
-## Plan de correction
+Le seul ajustement nécessaire : refaire le template HTML aux couleurs WineExporters (#59191F bordeaux) au lieu du violet `#7c3aed` actuel.
 
-1. Remplacer le chargement naïf des pays dans `src/pages/SourcingRequests.tsx` par une récupération paginée de `buyer_contacts.country`.
-2. Parcourir les résultats par lots jusqu'à épuisement des lignes, puis construire `countryOptions` à partir de tous les pays reçus.
-3. Garder la logique actuelle :
-   - `value={c.canonical}` reste la valeur brute BDD envoyée à `sourcing_requests.target_market`.
-   - Le texte affiché reste traduit via `translateCountry`.
-   - Aucun changement Edge Function ni logique métier.
-4. Ignorer correctement les valeurs vides ou composées uniquement d'espaces, pour éviter une option vide en tête de liste.
-5. Vérifier que des pays en fin d’alphabet comme `United States`, `Vietnam` ou `Zimbabwe` sont bien présents dans les options après chargement.
+## Modification
 
-## Détail technique
+**Fichier :** `supabase/functions/notify-sourcing-validated/index.ts`
 
-- Ajouter une constante de taille de page, par exemple `const COUNTRY_FETCH_PAGE_SIZE = 1000`.
-- Dans le `useEffect`, boucler avec `.range(from, to)` sur `buyer_contacts` jusqu'à recevoir moins que la taille de page.
-- Construire les groupes après chaque lot ou à la fin, en conservant les variantes brutes BDD pour les filtres d’États.
-- Supprimer/éviter l’option vide actuellement visible dans les données (`country = ''`).
+Refonte du HTML de l'email :
+- Header avec fond bordeaux `#59191F`, logo/wordmark "WineExporters" en blanc, sous-titre "by ExportVins"
+- Titre principal "Votre recherche sur-mesure est prête" en `#59191F`
+- Corps en gris foncé `#333`, fond blanc, container centré max 600px, ombre douce
+- Mention du marché ciblé en gras bordeaux
+- Bouton CTA "Voir mes résultats" → `https://wine-exporters.com/recherches`, fond `#59191F`, texte blanc, padding 14px 28px, border-radius 6px
+- Footer discret "— L'équipe WineExporters" en gris clair
+- Expéditeur : `WineExporters <notifications@resend.dev>` (inchangé tant qu'aucun domaine vérifié Resend n'est configuré)
+- Sujet : `Votre recherche sur-mesure (${marché}) est prête sur WineExporters`
+
+Aucun autre changement : le flux d'appel, la récupération du user_email via `admin.auth.admin.getUserById`, et le déclenchement depuis `AdminSourcing` restent identiques.
+
+## Hors scope
+
+- Pas de changement de provider ni de domaine d'envoi (Resend conservé, expéditeur par défaut `notifications@resend.dev`).
+- Pas de modification du flux de validation côté admin.
+- Pas de logo image distant (texte stylé, plus robuste en email).

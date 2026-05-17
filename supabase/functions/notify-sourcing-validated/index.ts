@@ -41,23 +41,38 @@ const handler = async (req: Request): Promise<Response> => {
     const appUrl = `https://wine-exporters.com/recherches`;
 
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #7c3aed;">✅ Votre recherche sur-mesure est prête</h1>
-        <p>Bonne nouvelle ! Notre équipe a finalisé votre recherche d'importateurs pour le marché <strong>${request.target_market}</strong>.</p>
-        <p>Vous pouvez dès maintenant consulter et télécharger la liste des contacts identifiés depuis votre espace.</p>
-        <p style="margin-top: 24px;">
-          <a href="${appUrl}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Voir mes résultats
-          </a>
-        </p>
-        <p style="color: #666; font-size: 12px; margin-top: 30px;">— L'équipe ExportVins</p>
+      <div style="font-family: Arial, sans-serif; background-color: #f5f1ee; padding: 32px 16px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(89,25,31,0.08);">
+          <div style="background-color: #59191F; padding: 24px 32px; text-align: center;">
+            <div style="color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;">WineExporters</div>
+            <div style="color: #e8d4d6; font-size: 12px; margin-top: 4px;">by ExportVins</div>
+          </div>
+          <div style="padding: 32px;">
+            <h1 style="color: #59191F; font-size: 22px; margin: 0 0 16px;">Votre recherche sur-mesure est prête</h1>
+            <p style="color: #333333; font-size: 15px; line-height: 1.6; margin: 0 0 16px;">
+              Bonne nouvelle ! Notre équipe a finalisé votre recherche d'importateurs pour le marché
+              <strong style="color: #59191F;">${request.target_market}</strong>.
+            </p>
+            <p style="color: #333333; font-size: 15px; line-height: 1.6; margin: 0 0 28px;">
+              Vous pouvez dès maintenant consulter et télécharger la liste des contacts identifiés depuis votre espace.
+            </p>
+            <p style="margin: 0 0 32px; text-align: center;">
+              <a href="${appUrl}" style="background-color: #59191F; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 15px;">
+                Voir mes résultats
+              </a>
+            </p>
+            <p style="color: #888888; font-size: 12px; margin: 0; border-top: 1px solid #eeeeee; padding-top: 20px;">
+              — L'équipe WineExporters
+            </p>
+          </div>
+        </div>
       </div>
     `;
 
     await resend.emails.send({
-      from: "ExportVins <notifications@resend.dev>",
+      from: "WineExporters <notifications@resend.dev>",
       to: [userEmail],
-      subject: `✅ Votre recherche sur-mesure (${request.target_market}) est prête`,
+      subject: `Votre recherche sur-mesure (${request.target_market}) est prête sur WineExporters`,
       html,
     });
 
