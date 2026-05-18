@@ -1909,7 +1909,7 @@
     "history": "Historique de vos recherches",
     "empty": "Aucune recherche pour le moment. Lancez votre première recherche sur-mesure.",
     "requestedOn": "Demandée le {{date}}",
-    "waitingMessage": "Notre équipe revient vers vous sous 72h ouvrées.",
+    "waitingMessage": "Résultats disponibles en quelques minutes.",
     "download": "Télécharger les résultats",
     "dialog": {
       "title": "Recherche sur-mesure",
