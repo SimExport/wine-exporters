@@ -211,29 +211,15 @@ Critères de scoring : pertinence du portefeuille produit, complétude des infor
       validated_at: now,
     }).eq("id", sourcing_request_id);
 
-    // Resend email (best-effort)
-    if (RESEND_API_KEY) {
-      try {
-        const { data: userInfo } = await supabase.auth.admin.getUserById(userId);
-        const toEmail = userInfo?.user?.email;
-        if (toEmail) {
-          await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${RESEND_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              from: "WineExporters <notifications@wine-exporters.com>",
-              to: [toEmail],
-              subject: "Votre recherche sur-mesure est prête",
-              html: `<p>Bonjour,</p><p>Votre recherche sur-mesure pour le marché <strong>${marketName}</strong> est terminée.</p><p>Connectez-vous à votre espace WineExporters pour consulter la shortlist générée.</p><p><a href="https://wine-exporters.com/recherches">Voir les résultats</a></p>`,
-            }),
-          });
-        }
-      } catch (e) {
-        console.error("Resend error", e);
-      }
+    // Trigger branded notification email (best-effort, never block the flow)
+    try {
+      const { error: notifyErr } = await supabase.functions.invoke(
+        "notify-sourcing-validated",
+        { body: { requestId: sourcing_request_id } },
+      );
+      if (notifyErr) console.error("notify-sourcing-validated invoke error", notifyErr);
+    } catch (e) {
+      console.error("notify-sourcing-validated invoke threw", e);
     }
 
     return json({ ok: true, shortlist_count: parsed.shortlist.length });
