@@ -1909,7 +1909,7 @@
     "history": "Your search history",
     "empty": "No searches yet. Start your first bespoke search.",
     "requestedOn": "Requested on {{date}}",
-    "waitingMessage": "Our team will get back to you within 72 business hours.",
+    "waitingMessage": "Results available in a few minutes.",
     "download": "Download results",
     "dialog": {
       "title": "Bespoke search",
