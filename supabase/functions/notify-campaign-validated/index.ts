@@ -94,15 +94,19 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    await resend.emails.send({
+    const sendResult = await resend.emails.send({
       from: "WineExporters <notifications@resend.dev>",
       to: [userEmail],
       bcc: ["simon@exportvins.fr"],
       subject: t.subject,
       html,
     });
+    console.log("notify-campaign-validated resend result:", JSON.stringify(sendResult));
+    if ((sendResult as any)?.error) {
+      throw new Error(`Resend error: ${JSON.stringify((sendResult as any).error)}`);
+    }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, sendResult }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
