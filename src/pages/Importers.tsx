@@ -114,7 +114,11 @@ const Importers = () => {
     try {
       const { data: inserted, error: insertError } = await supabase
         .from('sourcing_requests')
-        .insert({ user_id: user.id, target_market: sourcingMarket })
+        .insert({
+          user_id: user.id,
+          target_market:
+            COUNTRY_LIST.find((c) => c.code === sourcingMarket)?.name || sourcingMarket,
+        })
         .select('id')
         .single();
       if (insertError) throw insertError;

@@ -1,0 +1,1 @@
+UPDATE public.user_credits SET search_credits = search_credits + 1, updated_at = now() WHERE user_id = '55a6277e-6672-4f56-99c8-5ade4457ab6b';
