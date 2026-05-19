@@ -119,14 +119,6 @@ const Importers = () => {
         .single();
       if (insertError) throw insertError;
 
-      const { ok } = await consumeSearchCredit();
-      if (!ok) {
-        toast({
-          title: t('importers.sourcing.creditExhaustedShort'),
-          description: noCreditsMessage('search'),
-          variant: 'destructive',
-        });
-      }
       // Fire admin notification (non-blocking)
       try {
         const marketName = COUNTRY_LIST.find(c => c.code === sourcingMarket)?.name || sourcingMarket;
@@ -140,6 +132,10 @@ const Importers = () => {
       } catch (e) {
         console.error('notify-sourcing-submission failed', e);
       }
+      // Trigger automatic processing (non-blocking — function decrements credit itself)
+      supabase.functions.invoke('process-sourcing-request', {
+        body: { sourcing_request_id: inserted?.id },
+      }).catch((e) => console.error('process-sourcing-request failed', e));
       setSourcingOpen(false);
       setSourcingMarket('');
       toast({ title: t('importers.sourcing.successTitle'), description: t('importers.sourcing.successDescription') });
