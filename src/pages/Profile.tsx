@@ -847,47 +847,9 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <Label>
-                      {t('profile.general.certifications')}
-                      <FieldHint text={t('profile.general.certificationsHint')} />
-                    </Label>
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
-                      {certificationOptions.map(certification => <div key={certification} className="flex items-center space-x-2">
-                          <Checkbox id={certification} checked={formData.certifications.includes(certification)} onCheckedChange={checked => handleCertificationChange(certification, checked as boolean)} />
-                          <Label htmlFor={certification} className="text-sm font-normal">
-                            {t(`profile.general.certificationOptions.${certification}`, certification)}
-                          </Label>
-                        </div>)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t('profile.general.certificationsHelp')}
-                    </p>
-                  </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('profile.general.strengthsTitle')}</CardTitle>
-                  <CardDescription>{t('profile.general.strengthsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[0, 1, 2].map(i => (
-                    <div key={i} className="space-y-1">
-                      <Label htmlFor={`strength-${i}`}>{t('profile.general.strengthsLabel', { n: i + 1 })}</Label>
-                      <Input
-                        id={`strength-${i}`}
-                        value={formData.strengths[i] || ''}
-                        onChange={e => handleStrengthChange(i, e.target.value)}
-                        maxLength={80}
-                        placeholder={t(`profile.general.strengthsPlaceholder${i + 1}`)}
-                      />
-                    </div>
-                  ))}
-                  <p className="text-xs text-muted-foreground">{t('profile.general.strengthsHelp')}</p>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="markets" className="space-y-6">
