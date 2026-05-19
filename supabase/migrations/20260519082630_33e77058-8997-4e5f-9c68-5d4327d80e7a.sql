@@ -1,0 +1,1 @@
+UPDATE public.sourcing_requests SET target_market = 'Italy', status = 'pending', error_message = NULL, updated_at = now() WHERE id = '9f555fab-6312-40bc-b5d4-f8bec0b5a100';
