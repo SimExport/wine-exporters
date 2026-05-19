@@ -380,9 +380,9 @@
         "location": "Localisation",
         "aoc": "AOC / Appellations",
         "bottles_per_year": "Volume annuel",
-        "wine_types": "Types de vins",
-        "grape_varieties": "Cépages cultivés",
-        "cuvees": "Cuvées",
+        "certifications": "Certifications",
+        "strengths": "Points forts du domaine",
+        "wines": "Au moins une cuvée",
         "priority_markets": "Marchés prioritaires",
         "current_markets": "Marchés actuels",
         "target_buyer_description": "Description acheteurs cibles",
@@ -415,15 +415,6 @@
       "surfaceHint": "La superficie de votre domaine nous aide à estimer votre capacité de production et à vous matcher avec des importateurs dont les volumes commandés sont adaptés à votre taille.",
       "bottles": "Volume annuel (nb de bouteilles)",
       "bottlesHint": "Ce chiffre est déterminant pour cibler les bons importateurs. Un petit domaine (< 50 000 bt) n'a pas les mêmes besoins qu'une structure de 500 000 bt. Nous adaptons nos recommandations en fonction.",
-      "wineTypes": "Types de vins produits",
-      "wineTypeOptions": {
-        "Rouge": "Rouge",
-        "Blanc": "Blanc",
-        "Rosé": "Rosé",
-        "Pétillant": "Pétillant",
-        "Orange": "Orange",
-        "Nature": "Nature"
-      },
       "certifications": "Certifications",
       "certificationsHint": "Les certifications bio, biodynamique ou HVE sont des critères de filtrage très utilisés par les importateurs spécialisés. Les préciser augmente significativement vos chances d'être sélectionné sur des campagnes ciblées.",
       "certificationsHelp": "Sélectionnez toutes les certifications applicables.",
@@ -433,11 +424,13 @@
         "Biodynamique": "Biodynamique",
         "HVE3": "HVE3"
       },
-      "grapes": "Cépages cultivés",
-      "grapesHint": "Les cépages sont un critère clé pour les importateurs spécialisés. Certains recherchent spécifiquement des cépages rares ou autochtones pour se différencier.",
-      "grapesPlaceholder": "Ajouter un cépage",
-      "cuvees": "Cuvées",
-      "cuveesPlaceholder": "Ajouter une cuvée"
+      "strengthsTitle": "Points forts du domaine",
+      "strengthsDescription": "Mettez en avant 3 atouts qui différencient votre domaine (3 max, 80 caractères chacun).",
+      "strengthsLabel": "Point fort #{{n}}",
+      "strengthsPlaceholder1": "Ex : Vendanges 100 % manuelles",
+      "strengthsPlaceholder2": "Ex : Vinification parcellaire",
+      "strengthsPlaceholder3": "Ex : Domaine familial depuis 1850",
+      "strengthsHelp": "Ces points forts sont utilisés dans vos campagnes pour convaincre les importateurs."
     },
     "markets": {
       "cardTitle": "Préférences de prospection",
@@ -467,7 +460,9 @@
       "label": "URL du site web",
       "placeholder": "https://www.mondomaine.fr",
       "test": "Tester",
-      "invalid": "L'URL doit être valide et commencer par https://"
+      "invalid": "L'URL doit être valide et commencer par https://",
+      "socialTitle": "Réseaux sociaux (optionnel)",
+      "socialHelp": "Ajoutez les liens de vos comptes pour renforcer votre crédibilité auprès des importateurs."
     },
     "documents": {
       "presentationTitle": "Présentation du domaine",
