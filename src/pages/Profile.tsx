@@ -989,6 +989,29 @@ const Profile = () => {
                         {t('profile.website.invalid')}
                       </div>}
                   </div>
+                  <div className="pt-4 border-t space-y-3">
+                    <Label>{t('profile.website.socialTitle')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('profile.website.socialHelp')}</p>
+                    {([
+                      { key: 'instagram', icon: Instagram, placeholder: 'https://instagram.com/...' },
+                      { key: 'facebook', icon: Facebook, placeholder: 'https://facebook.com/...' },
+                      { key: 'linkedin', icon: Linkedin, placeholder: 'https://linkedin.com/company/...' },
+                      { key: 'twitter', icon: Twitter, placeholder: 'https://x.com/...' },
+                    ] as const).map(({ key, icon: Icon, placeholder }) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <Input
+                          type="url"
+                          value={formData.social_media[key]}
+                          onChange={e => setFormData(prev => ({
+                            ...prev,
+                            social_media: { ...prev.social_media, [key]: e.target.value }
+                          }))}
+                          placeholder={placeholder}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
