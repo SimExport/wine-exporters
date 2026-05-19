@@ -846,18 +846,6 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>{t('profile.general.wineTypes')}</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {wineTypeOptions.map(type => <div key={type} className="flex items-center space-x-2">
-                          <Checkbox id={type} checked={formData.wine_types.includes(type)} onCheckedChange={checked => handleWineTypeChange(type, checked as boolean)} />
-                          <Label htmlFor={type} className="text-sm font-normal">
-                            {t(`profile.general.wineTypeOptions.${type}`, type)}
-                          </Label>
-                        </div>)}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
                     <Label>
                       {t('profile.general.certifications')}
                       <FieldHint text={t('profile.general.certificationsHint')} />
@@ -874,98 +862,28 @@ const Profile = () => {
                       {t('profile.general.certificationsHelp')}
                     </p>
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>
-                        {t('profile.general.grapes')}
-                        <FieldHint text={t('profile.general.grapesHint')} />
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.grape_varieties.map((variety, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {variety}
-                            <X className="h-3 w-3 cursor-pointer" onClick={() => removeGrapeVariety(index)} />
-                          </Badge>)}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder={t('profile.general.grapesPlaceholder')} onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addGrapeVariety(e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }} />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>{t('profile.general.cuvees')}</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.cuvees.map((cuvee, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {cuvee}
-                            <X className="h-3 w-3 cursor-pointer" onClick={() => removeCuvee(index)} />
-                          </Badge>)}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder={t('profile.general.cuveesPlaceholder')} onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addCuvee(e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }} />
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <KeyRound className="h-5 w-5" />
-                    {isFr ? 'Changer mon mot de passe' : 'Change my password'}
-                  </CardTitle>
-                  <CardDescription>
-                    {isFr
-                      ? 'Définissez un nouveau mot de passe pour votre compte.'
-                      : 'Set a new password for your account.'}
-                  </CardDescription>
+                  <CardTitle>{t('profile.general.strengthsTitle')}</CardTitle>
+                  <CardDescription>{t('profile.general.strengthsDescription')}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">
-                        {isFr ? 'Nouveau mot de passe' : 'New password'}
-                      </Label>
+                <CardContent className="space-y-3">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="space-y-1">
+                      <Label htmlFor={`strength-${i}`}>{t('profile.general.strengthsLabel', { n: i + 1 })}</Label>
                       <Input
-                        id="new-password"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        minLength={8}
-                        autoComplete="new-password"
+                        id={`strength-${i}`}
+                        value={formData.strengths[i] || ''}
+                        onChange={e => handleStrengthChange(i, e.target.value)}
+                        maxLength={80}
+                        placeholder={t(`profile.general.strengthsPlaceholder${i + 1}`)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">
-                        {isFr ? 'Confirmer le mot de passe' : 'Confirm password'}
-                      </Label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        minLength={8}
-                        autoComplete="new-password"
-                      />
-                    </div>
-                    <Button type="submit" disabled={changingPassword || !newPassword || !confirmPassword}>
-                      {changingPassword
-                        ? (isFr ? 'Enregistrement…' : 'Saving…')
-                        : (isFr ? 'Mettre à jour le mot de passe' : 'Update password')}
-                    </Button>
-                  </form>
+                  ))}
+                  <p className="text-xs text-muted-foreground">{t('profile.general.strengthsHelp')}</p>
                 </CardContent>
               </Card>
             </TabsContent>
