@@ -1,27 +1,31 @@
-## Contexte
+## Problème
 
-L'Edge Function `notify-sourcing-validated` existe déjà et est bien appelée par `AdminSourcing.tsx` au moment où un admin valide une recherche et uploade le résultat (ligne 143). Elle envoie un mail via Resend au client avec un lien vers `/recherches`.
+Dans `AdminCampaigns.tsx`, valider/rejeter une campagne fait un `UPDATE` direct sur la table `campaigns`. Mais la seule policy RLS UPDATE est :
 
-Le seul ajustement nécessaire : refaire le template HTML aux couleurs WineExporters (#59191F bordeaux) au lieu du violet `#7c3aed` actuel.
+```
+Users can update their own campaigns
+USING (auth.uid() = user_id)
+```
 
-## Modification
+Il n'existe **aucune policy admin** pour UPDATE sur `campaigns`. Quand un admin valide une campagne d'un autre utilisateur (ex. Château Paquette), PostgREST filtre la ligne via RLS, retourne 0 ligne modifiée **sans erreur**, le toast "Campagne validée" s'affiche, mais en base le statut reste `pending_validation`.
 
-**Fichier :** `supabase/functions/notify-sourcing-validated/index.ts`
+C'est ce qu'on voit sur ta capture Supabase : `Campagne mai 2026` (user `dbe2aec5…`) est restée `pending_validation` alors que ton compte admin a cliqué Valider.
 
-Refonte du HTML de l'email :
-- Header avec fond bordeaux `#59191F`, logo/wordmark "WineExporters" en blanc, sous-titre "by ExportVins"
-- Titre principal "Votre recherche sur-mesure est prête" en `#59191F`
-- Corps en gris foncé `#333`, fond blanc, container centré max 600px, ombre douce
-- Mention du marché ciblé en gras bordeaux
-- Bouton CTA "Voir mes résultats" → `https://wine-exporters.com/recherches`, fond `#59191F`, texte blanc, padding 14px 28px, border-radius 6px
-- Footer discret "— L'équipe WineExporters" en gris clair
-- Expéditeur : `WineExporters <notifications@resend.dev>` (inchangé tant qu'aucun domaine vérifié Resend n'est configuré)
-- Sujet : `Votre recherche sur-mesure (${marché}) est prête sur WineExporters`
+## Correctif
 
-Aucun autre changement : le flux d'appel, la récupération du user_email via `admin.auth.admin.getUserById`, et le déclenchement depuis `AdminSourcing` restent identiques.
+Ajouter une policy RLS admin sur `campaigns` pour UPDATE (et DELETE pour cohérence avec le reste de l'admin) :
 
-## Hors scope
+```sql
+CREATE POLICY "Admins can update any campaign"
+ON public.campaigns
+FOR UPDATE
+USING (public.has_role(auth.uid(), 'admin'));
+```
 
-- Pas de changement de provider ni de domaine d'envoi (Resend conservé, expéditeur par défaut `notifications@resend.dev`).
-- Pas de modification du flux de validation côté admin.
-- Pas de logo image distant (texte stylé, plus robuste en email).
+Aucun changement de code applicatif requis — `validateCampaign` et `rejectCampaign` fonctionneront immédiatement.
+
+## Vérification post-fix
+
+1. Re-valider la campagne Château Paquette depuis `/admin/campaigns`.
+2. Confirmer dans Supabase que `status = 'active'` et `validated_at` est rempli.
+3. Tester aussi le rejet (passage en `failed` + `client_note`).
