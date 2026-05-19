@@ -662,13 +662,12 @@ const Profile = () => {
     { key: 'location', done: !!formData.location, tab: 'general' },
     { key: 'aoc', done: formData.aoc.length > 0, tab: 'general' },
     { key: 'bottles_per_year', done: !!formData.bottles_per_year, tab: 'general' },
-    { key: 'certifications', done: formData.certifications.length > 0, tab: 'general' },
-    { key: 'strengths', done: formData.strengths.some(s => s && s.trim().length > 0), tab: 'general' },
     { key: 'wines', done: winesCount > 0, tab: 'wines' },
     { key: 'priority_markets', done: formData.priority_markets.length > 0, tab: 'markets' },
     { key: 'current_markets', done: formData.current_markets.length > 0, tab: 'markets' },
     { key: 'target_buyer_description', done: !!formData.target_buyer_description, tab: 'markets' },
     { key: 'description', done: formData.description.length >= 300, tab: 'description' },
+    { key: 'strengths', done: formData.strengths.some(s => s && s.trim().length > 0), tab: 'description' },
     { key: 'website', done: !!formData.website && isValidUrl(formData.website), tab: 'website' },
   ];
   const completedCount = completionFields.filter(f => f.done).length;
@@ -847,47 +846,9 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <Label>
-                      {t('profile.general.certifications')}
-                      <FieldHint text={t('profile.general.certificationsHint')} />
-                    </Label>
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
-                      {certificationOptions.map(certification => <div key={certification} className="flex items-center space-x-2">
-                          <Checkbox id={certification} checked={formData.certifications.includes(certification)} onCheckedChange={checked => handleCertificationChange(certification, checked as boolean)} />
-                          <Label htmlFor={certification} className="text-sm font-normal">
-                            {t(`profile.general.certificationOptions.${certification}`, certification)}
-                          </Label>
-                        </div>)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {t('profile.general.certificationsHelp')}
-                    </p>
-                  </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('profile.general.strengthsTitle')}</CardTitle>
-                  <CardDescription>{t('profile.general.strengthsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[0, 1, 2].map(i => (
-                    <div key={i} className="space-y-1">
-                      <Label htmlFor={`strength-${i}`}>{t('profile.general.strengthsLabel', { n: i + 1 })}</Label>
-                      <Input
-                        id={`strength-${i}`}
-                        value={formData.strengths[i] || ''}
-                        onChange={e => handleStrengthChange(i, e.target.value)}
-                        maxLength={80}
-                        placeholder={t(`profile.general.strengthsPlaceholder${i + 1}`)}
-                      />
-                    </div>
-                  ))}
-                  <p className="text-xs text-muted-foreground">{t('profile.general.strengthsHelp')}</p>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="markets" className="space-y-6">
@@ -963,6 +924,28 @@ const Profile = () => {
                         </span>}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('profile.general.strengthsTitle')}</CardTitle>
+                  <CardDescription>{t('profile.general.strengthsDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="space-y-1">
+                      <Label htmlFor={`strength-${i}`}>{t('profile.general.strengthsLabel', { n: i + 1 })}</Label>
+                      <Input
+                        id={`strength-${i}`}
+                        value={formData.strengths[i] || ''}
+                        onChange={e => handleStrengthChange(i, e.target.value)}
+                        maxLength={80}
+                        placeholder={t(`profile.general.strengthsPlaceholder${i + 1}`)}
+                      />
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">{t('profile.general.strengthsHelp')}</p>
                 </CardContent>
               </Card>
             </TabsContent>
