@@ -170,6 +170,7 @@ const Profile = () => {
         priority_markets: formData.priority_markets.join(', '),
         current_markets: formData.current_markets.join(', '),
         avoid_markets: formData.avoid_markets.join(', '),
+        social_media: formData.social_media as any,
       };
       const {
         error
@@ -314,6 +315,7 @@ const Profile = () => {
         priority_markets: formData.priority_markets.join(', '),
         current_markets: formData.current_markets.join(', '),
         avoid_markets: formData.avoid_markets.join(', '),
+        social_media: formData.social_media as any,
       };
       const {
         error
@@ -660,9 +662,9 @@ const Profile = () => {
     { key: 'location', done: !!formData.location, tab: 'general' },
     { key: 'aoc', done: formData.aoc.length > 0, tab: 'general' },
     { key: 'bottles_per_year', done: !!formData.bottles_per_year, tab: 'general' },
-    { key: 'wine_types', done: formData.wine_types.length > 0, tab: 'general' },
-    { key: 'grape_varieties', done: formData.grape_varieties.length > 0, tab: 'general' },
-    { key: 'cuvees', done: formData.cuvees.length > 0, tab: 'general' },
+    { key: 'certifications', done: formData.certifications.length > 0, tab: 'general' },
+    { key: 'strengths', done: formData.strengths.some(s => s && s.trim().length > 0), tab: 'general' },
+    { key: 'wines', done: winesCount > 0, tab: 'wines' },
     { key: 'priority_markets', done: formData.priority_markets.length > 0, tab: 'markets' },
     { key: 'current_markets', done: formData.current_markets.length > 0, tab: 'markets' },
     { key: 'target_buyer_description', done: !!formData.target_buyer_description, tab: 'markets' },
