@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Plus, Download, Search, Kanban, SearchX, Users, AlertTriangle, Clock } from 'lucide-react'
+import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
 import { subDays, isAfter, differenceInDays } from 'date-fns'
@@ -435,12 +435,6 @@ export default function Prospects() {
             <Button onClick={handleExportCSV} variant="outline">
               <Download className="w-4 h-4 mr-2" />
               {t('prospects.exportCSV')}
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/pipeline">
-                <Kanban className="w-4 h-4 mr-2" />
-                {t('prospects.kanbanView')}
-              </Link>
             </Button>
           </div>
           

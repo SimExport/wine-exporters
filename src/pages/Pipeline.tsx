@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
@@ -322,10 +321,6 @@ export default function Pipeline() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/prospects">{t('pipeline.listView')}</Link>
-            </Button>
-            
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
               <DialogTrigger asChild>
                 <Button>
