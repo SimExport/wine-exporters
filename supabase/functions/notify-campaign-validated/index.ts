@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const sendResult = await resend.emails.send({
-      from: "WineExporters <notifications@resend.dev>",
+      from: "WineExporters <notifications@exportvins.fr>",
       to: [userEmail],
       bcc: ["simon@exportvins.fr"],
       subject: t.subject,
