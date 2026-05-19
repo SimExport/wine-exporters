@@ -927,6 +927,28 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('profile.general.strengthsTitle')}</CardTitle>
+                  <CardDescription>{t('profile.general.strengthsDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="space-y-1">
+                      <Label htmlFor={`strength-${i}`}>{t('profile.general.strengthsLabel', { n: i + 1 })}</Label>
+                      <Input
+                        id={`strength-${i}`}
+                        value={formData.strengths[i] || ''}
+                        onChange={e => handleStrengthChange(i, e.target.value)}
+                        maxLength={80}
+                        placeholder={t(`profile.general.strengthsPlaceholder${i + 1}`)}
+                      />
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">{t('profile.general.strengthsHelp')}</p>
+                </CardContent>
+              </Card>
             </TabsContent>
 
 
