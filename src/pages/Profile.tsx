@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle, KeyRound } from 'lucide-react';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle, Instagram, Facebook, Linkedin, Twitter } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
@@ -65,6 +65,7 @@ interface ProfileData {
   current_markets: string[];
   avoid_markets: string[];
   target_buyer_description: string;
+  social_media: { instagram: string; facebook: string; linkedin: string; twitter: string };
 }
 interface Document {
   id: string;
@@ -101,48 +102,8 @@ const Profile = () => {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [uploading, setUploading] = useState(false);
-
-  // Password change state
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [changingPassword, setChangingPassword] = useState(false);
   const isFr = i18n.language?.startsWith('fr');
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 8) {
-      toast({
-        title: isFr ? 'Mot de passe trop court' : 'Password too short',
-        description: isFr ? '8 caractères minimum.' : '8 characters minimum.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: isFr ? 'Les mots de passe ne correspondent pas' : 'Passwords do not match',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setChangingPassword(false);
-    if (error) {
-      toast({
-        title: isFr ? 'Erreur' : 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return;
-    }
-    setNewPassword('');
-    setConfirmPassword('');
-    toast({
-      title: isFr ? 'Mot de passe mis à jour' : 'Password updated',
-      description: isFr ? 'Votre mot de passe a été modifié avec succès.' : 'Your password has been changed successfully.',
-    });
-  };
+  const [winesCount, setWinesCount] = useState(0);
 
   // Refs for file inputs
   const presentationInputRef = useRef<HTMLInputElement>(null);
@@ -173,7 +134,8 @@ const Profile = () => {
     priority_markets: [],
     current_markets: [],
     avoid_markets: [],
-    target_buyer_description: ''
+    target_buyer_description: '',
+    social_media: { instagram: '', facebook: '', linkedin: '', twitter: '' }
   });
   const [documents, setDocuments] = useState<Document[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
@@ -229,6 +191,7 @@ const Profile = () => {
       loadProfile();
       loadDocuments();
       loadMedia();
+      loadWinesCount();
     } else {
       setInitialLoading(false);
     }
@@ -291,7 +254,13 @@ const Profile = () => {
           priority_markets: parseMarketString(data.priority_markets || ''),
           current_markets: parseMarketString(data.current_markets || ''),
           avoid_markets: parseMarketString(data.avoid_markets || ''),
-          target_buyer_description: data.target_buyer_description || ''
+          target_buyer_description: data.target_buyer_description || '',
+          social_media: {
+            instagram: (data.social_media as any)?.instagram || '',
+            facebook: (data.social_media as any)?.facebook || '',
+            linkedin: (data.social_media as any)?.linkedin || '',
+            twitter: (data.social_media as any)?.twitter || '',
+          }
         });
       }
     } catch (error) {
@@ -304,6 +273,11 @@ const Profile = () => {
     } finally {
       setInitialLoading(false);
     }
+  };
+  const loadWinesCount = async () => {
+    if (!user) return;
+    const { count } = await supabase.from('wines').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
+    setWinesCount(count || 0);
   };
   const loadDocuments = async () => {
     try {
