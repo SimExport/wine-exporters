@@ -140,6 +140,10 @@ const Importers = () => {
       } catch (e) {
         console.error('notify-sourcing-submission failed', e);
       }
+      // Trigger automatic processing (non-blocking)
+      supabase.functions.invoke('process-sourcing-request', {
+        body: { requestId: inserted?.id },
+      }).catch((e) => console.error('process-sourcing-request failed', e));
       setSourcingOpen(false);
       setSourcingMarket('');
       toast({ title: t('importers.sourcing.successTitle'), description: t('importers.sourcing.successDescription') });

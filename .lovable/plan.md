@@ -1,40 +1,25 @@
-## Constat
+## Diagnostic
 
-1. **Aucune autre campagne en attente.** Requête en base : 0 campagne `pending_validation` hors `simon@exportvins.fr` / `simon@frenchwinesexport.com`. Tout est traité.
+La recherche sur-mesure de `vin@maison-kieffer.com` (id `9f555fab-6312-40bc-b5d4-f8bec0b5a100`, marché IT, créée le 19/05) est restée en `pending` car elle a été soumise depuis la page **Importateurs** (`src/pages/Importers.tsx`), et ce flux **n'appelle pas** la fonction `process-sourcing-request` après l'insert — contrairement au flux de `src/pages/SourcingRequests.tsx` (ligne 187) qui, lui, déclenche bien le traitement automatique.
 
-2. **Aucun email de validation n'est envoyé à l'utilisateur.** `notify-campaign-submission` notifie uniquement l'admin lors d'une nouvelle soumission. Quand l'admin clique "Valider" dans `/admin/campaigns`, le code fait juste un `UPDATE campaigns SET status='active'` — pas de mail au domaine viticole.
+Résultat : insert OK + email admin OK, mais aucun traitement automatique.
 
 ## Plan
 
-### 1. Nouvelle Edge Function `notify-campaign-validated`
+1. **Corriger `src/pages/Importers.tsx`** (`handleSourcingSubmit`)
+   - Après l'insert et la notification admin, ajouter un appel non-bloquant :
+     ```ts
+     supabase.functions.invoke('process-sourcing-request', {
+       body: { requestId: inserted?.id },
+     }).catch((e) => console.error('process-sourcing-request failed', e));
+     ```
+   - Aligne le comportement sur celui de `SourcingRequests.tsx`.
 
-Modèle calqué sur `notify-sourcing-validated` (qui marche déjà avec le branding WineExporters) :
+2. **Relancer manuellement la demande en attente** pour Maison Kieffer
+   - Appel direct de l'edge function `process-sourcing-request` avec `requestId = 9f555fab-6312-40bc-b5d4-f8bec0b5a100` pour qu'elle passe en traitement maintenant.
 
-- Reçoit `{ campaignId }`
-- Récupère la campagne, le `user_id`, l'email auth, `display_name`, `target_markets`
-- Envoie via Resend (`RESEND_API_KEY` déjà présent), `from: "WineExporters <notifications@wine-exporters.com>"` (même from que les autres mails)
-- Sujet : `✅ Votre campagne "{name}" est validée et en cours d'envoi`
-- Corps HTML brandé **#59191F** (header bordeaux, logo grappe, typo, bouton CTA)
-- Contenu :
-  - "Bonne nouvelle, votre campagne **{name}** vient d'être validée par notre équipe."
-  - "Elle est désormais en cours d'envoi sur les marchés : {markets}."
-  - **"⏱ Les premiers résultats (ouvertures, réponses, prospects) apparaîtront sous 7 à 10 jours en moyenne."**
-  - CTA : **"Suivre ma campagne"** → `https://wine-exporters.com/campaigns/{campaignId}`
-  - Footer "WineExporters by ExportVins"
-- Bilingue FR/EN selon `user_settings.ui_language`
+3. **Vérification**
+   - Lire les logs de `process-sourcing-request` pour confirmer l'exécution.
+   - Re-query `sourcing_requests` pour s'assurer du changement de statut.
 
-### 2. Déclenchement automatique
-
-Dans `src/pages/AdminCampaigns.tsx`, après l'UPDATE réussi dans `validateCampaign`, ajouter :
-
-```ts
-supabase.functions.invoke("notify-campaign-validated", { body: { campaignId } });
-```
-
-Best-effort (n'interrompt pas le flow admin si le mail échoue, comme le pattern actuel pour sourcing).
-
-### 3. Vérification
-
-- Re-valider une campagne test depuis `/admin/campaigns`
-- Vérifier les logs `notify-campaign-validated`
-- Confirmer réception de l'email avec branding 59191F + bouton fonctionnel
+Aucun changement de schéma ou de RLS nécessaire.
