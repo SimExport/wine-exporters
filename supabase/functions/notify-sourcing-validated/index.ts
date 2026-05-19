@@ -72,6 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
     await resend.emails.send({
       from: "WineExporters <notifications@resend.dev>",
       to: [userEmail],
+      bcc: ["simon@exportvins.fr"],
       subject: `Votre recherche sur-mesure (${request.target_market}) est prête sur WineExporters`,
       html,
     });
