@@ -97,6 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
     await resend.emails.send({
       from: "WineExporters <notifications@resend.dev>",
       to: [userEmail],
+      bcc: ["simon@exportvins.fr"],
       subject: t.subject,
       html,
     });
