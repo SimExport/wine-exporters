@@ -18,9 +18,8 @@ import CreateCampaign from "./pages/CreateCampaign";
 import CampaignDetail from "./pages/CampaignDetail";
 import Importers from "./pages/Importers";
 import Settings from "./pages/Settings";
-import Prospects from "./pages/Prospects";
 import ProspectDetail from "./pages/ProspectDetail";
-import Pipeline from "./pages/Pipeline";
+import CRM from "./pages/CRM";
 import AdminCampaigns from "./pages/AdminCampaigns";
 import AdminInvitations from "./pages/AdminInvitations";
 import AdminSourcing from "./pages/AdminSourcing";
@@ -80,9 +79,10 @@ const App = () => (
             <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
             <Route path="/importers" element={<DashboardLayout><Importers /></DashboardLayout>} />
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
-            <Route path="/prospects" element={<DashboardLayout><Prospects /></DashboardLayout>} />
+            <Route path="/prospects" element={<Navigate to="/pipeline" replace />} />
             <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
-            <Route path="/pipeline" element={<DashboardLayout><Pipeline /></DashboardLayout>} />
+            <Route path="/pipeline" element={<DashboardLayout><CRM /></DashboardLayout>} />
+            <Route path="/crm" element={<Navigate to="/pipeline" replace />} />
             <Route path="/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
             <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
             <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
