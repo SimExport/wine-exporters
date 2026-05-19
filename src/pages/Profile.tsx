@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle, KeyRound } from 'lucide-react';
+import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon, Play, HelpCircle, Instagram, Facebook, Linkedin, Twitter } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
@@ -65,6 +65,7 @@ interface ProfileData {
   current_markets: string[];
   avoid_markets: string[];
   target_buyer_description: string;
+  social_media: { instagram: string; facebook: string; linkedin: string; twitter: string };
 }
 interface Document {
   id: string;
@@ -101,48 +102,8 @@ const Profile = () => {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [uploading, setUploading] = useState(false);
-
-  // Password change state
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [changingPassword, setChangingPassword] = useState(false);
   const isFr = i18n.language?.startsWith('fr');
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 8) {
-      toast({
-        title: isFr ? 'Mot de passe trop court' : 'Password too short',
-        description: isFr ? '8 caractères minimum.' : '8 characters minimum.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: isFr ? 'Les mots de passe ne correspondent pas' : 'Passwords do not match',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setChangingPassword(false);
-    if (error) {
-      toast({
-        title: isFr ? 'Erreur' : 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return;
-    }
-    setNewPassword('');
-    setConfirmPassword('');
-    toast({
-      title: isFr ? 'Mot de passe mis à jour' : 'Password updated',
-      description: isFr ? 'Votre mot de passe a été modifié avec succès.' : 'Your password has been changed successfully.',
-    });
-  };
+  const [winesCount, setWinesCount] = useState(0);
 
   // Refs for file inputs
   const presentationInputRef = useRef<HTMLInputElement>(null);
@@ -173,7 +134,8 @@ const Profile = () => {
     priority_markets: [],
     current_markets: [],
     avoid_markets: [],
-    target_buyer_description: ''
+    target_buyer_description: '',
+    social_media: { instagram: '', facebook: '', linkedin: '', twitter: '' }
   });
   const [documents, setDocuments] = useState<Document[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
@@ -208,6 +170,7 @@ const Profile = () => {
         priority_markets: formData.priority_markets.join(', '),
         current_markets: formData.current_markets.join(', '),
         avoid_markets: formData.avoid_markets.join(', '),
+        social_media: formData.social_media as any,
       };
       const {
         error
@@ -229,6 +192,7 @@ const Profile = () => {
       loadProfile();
       loadDocuments();
       loadMedia();
+      loadWinesCount();
     } else {
       setInitialLoading(false);
     }
@@ -291,7 +255,13 @@ const Profile = () => {
           priority_markets: parseMarketString(data.priority_markets || ''),
           current_markets: parseMarketString(data.current_markets || ''),
           avoid_markets: parseMarketString(data.avoid_markets || ''),
-          target_buyer_description: data.target_buyer_description || ''
+          target_buyer_description: data.target_buyer_description || '',
+          social_media: {
+            instagram: (data.social_media as any)?.instagram || '',
+            facebook: (data.social_media as any)?.facebook || '',
+            linkedin: (data.social_media as any)?.linkedin || '',
+            twitter: (data.social_media as any)?.twitter || '',
+          }
         });
       }
     } catch (error) {
@@ -304,6 +274,11 @@ const Profile = () => {
     } finally {
       setInitialLoading(false);
     }
+  };
+  const loadWinesCount = async () => {
+    if (!user) return;
+    const { count } = await supabase.from('wines').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
+    setWinesCount(count || 0);
   };
   const loadDocuments = async () => {
     try {
@@ -340,6 +315,7 @@ const Profile = () => {
         priority_markets: formData.priority_markets.join(', '),
         current_markets: formData.current_markets.join(', '),
         avoid_markets: formData.avoid_markets.join(', '),
+        social_media: formData.social_media as any,
       };
       const {
         error
@@ -686,9 +662,9 @@ const Profile = () => {
     { key: 'location', done: !!formData.location, tab: 'general' },
     { key: 'aoc', done: formData.aoc.length > 0, tab: 'general' },
     { key: 'bottles_per_year', done: !!formData.bottles_per_year, tab: 'general' },
-    { key: 'wine_types', done: formData.wine_types.length > 0, tab: 'general' },
-    { key: 'grape_varieties', done: formData.grape_varieties.length > 0, tab: 'general' },
-    { key: 'cuvees', done: formData.cuvees.length > 0, tab: 'general' },
+    { key: 'certifications', done: formData.certifications.length > 0, tab: 'general' },
+    { key: 'strengths', done: formData.strengths.some(s => s && s.trim().length > 0), tab: 'general' },
+    { key: 'wines', done: winesCount > 0, tab: 'wines' },
     { key: 'priority_markets', done: formData.priority_markets.length > 0, tab: 'markets' },
     { key: 'current_markets', done: formData.current_markets.length > 0, tab: 'markets' },
     { key: 'target_buyer_description', done: !!formData.target_buyer_description, tab: 'markets' },
@@ -872,18 +848,6 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>{t('profile.general.wineTypes')}</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {wineTypeOptions.map(type => <div key={type} className="flex items-center space-x-2">
-                          <Checkbox id={type} checked={formData.wine_types.includes(type)} onCheckedChange={checked => handleWineTypeChange(type, checked as boolean)} />
-                          <Label htmlFor={type} className="text-sm font-normal">
-                            {t(`profile.general.wineTypeOptions.${type}`, type)}
-                          </Label>
-                        </div>)}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
                     <Label>
                       {t('profile.general.certifications')}
                       <FieldHint text={t('profile.general.certificationsHint')} />
@@ -900,98 +864,28 @@ const Profile = () => {
                       {t('profile.general.certificationsHelp')}
                     </p>
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>
-                        {t('profile.general.grapes')}
-                        <FieldHint text={t('profile.general.grapesHint')} />
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.grape_varieties.map((variety, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {variety}
-                            <X className="h-3 w-3 cursor-pointer" onClick={() => removeGrapeVariety(index)} />
-                          </Badge>)}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder={t('profile.general.grapesPlaceholder')} onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addGrapeVariety(e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }} />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>{t('profile.general.cuvees')}</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.cuvees.map((cuvee, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {cuvee}
-                            <X className="h-3 w-3 cursor-pointer" onClick={() => removeCuvee(index)} />
-                          </Badge>)}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder={t('profile.general.cuveesPlaceholder')} onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addCuvee(e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }} />
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <KeyRound className="h-5 w-5" />
-                    {isFr ? 'Changer mon mot de passe' : 'Change my password'}
-                  </CardTitle>
-                  <CardDescription>
-                    {isFr
-                      ? 'Définissez un nouveau mot de passe pour votre compte.'
-                      : 'Set a new password for your account.'}
-                  </CardDescription>
+                  <CardTitle>{t('profile.general.strengthsTitle')}</CardTitle>
+                  <CardDescription>{t('profile.general.strengthsDescription')}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">
-                        {isFr ? 'Nouveau mot de passe' : 'New password'}
-                      </Label>
+                <CardContent className="space-y-3">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="space-y-1">
+                      <Label htmlFor={`strength-${i}`}>{t('profile.general.strengthsLabel', { n: i + 1 })}</Label>
                       <Input
-                        id="new-password"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        minLength={8}
-                        autoComplete="new-password"
+                        id={`strength-${i}`}
+                        value={formData.strengths[i] || ''}
+                        onChange={e => handleStrengthChange(i, e.target.value)}
+                        maxLength={80}
+                        placeholder={t(`profile.general.strengthsPlaceholder${i + 1}`)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">
-                        {isFr ? 'Confirmer le mot de passe' : 'Confirm password'}
-                      </Label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        minLength={8}
-                        autoComplete="new-password"
-                      />
-                    </div>
-                    <Button type="submit" disabled={changingPassword || !newPassword || !confirmPassword}>
-                      {changingPassword
-                        ? (isFr ? 'Enregistrement…' : 'Saving…')
-                        : (isFr ? 'Mettre à jour le mot de passe' : 'Update password')}
-                    </Button>
-                  </form>
+                  ))}
+                  <p className="text-xs text-muted-foreground">{t('profile.general.strengthsHelp')}</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1096,6 +990,29 @@ const Profile = () => {
                     {!isValidUrl(formData.website) && formData.website && <div className="text-destructive text-sm">
                         {t('profile.website.invalid')}
                       </div>}
+                  </div>
+                  <div className="pt-4 border-t space-y-3">
+                    <Label>{t('profile.website.socialTitle')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('profile.website.socialHelp')}</p>
+                    {([
+                      { key: 'instagram', icon: Instagram, placeholder: 'https://instagram.com/...' },
+                      { key: 'facebook', icon: Facebook, placeholder: 'https://facebook.com/...' },
+                      { key: 'linkedin', icon: Linkedin, placeholder: 'https://linkedin.com/company/...' },
+                      { key: 'twitter', icon: Twitter, placeholder: 'https://x.com/...' },
+                    ] as const).map(({ key, icon: Icon, placeholder }) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <Input
+                          type="url"
+                          value={formData.social_media[key]}
+                          onChange={e => setFormData(prev => ({
+                            ...prev,
+                            social_media: { ...prev.social_media, [key]: e.target.value }
+                          }))}
+                          placeholder={placeholder}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

@@ -380,9 +380,9 @@
         "location": "Location",
         "aoc": "AOC / Appellations",
         "bottles_per_year": "Annual volume",
-        "wine_types": "Wine types",
-        "grape_varieties": "Grape varieties",
-        "cuvees": "Cuvées",
+        "certifications": "Certifications",
+        "strengths": "Estate strengths",
+        "wines": "At least one cuvée",
         "priority_markets": "Priority markets",
         "current_markets": "Current markets",
         "target_buyer_description": "Target buyer description",
@@ -415,15 +415,6 @@
       "surfaceHint": "Your estate's size helps us estimate your production capacity and match you with importers whose order volumes fit your scale.",
       "bottles": "Annual volume (number of bottles)",
       "bottlesHint": "This figure is decisive in targeting the right importers. A small estate (< 50,000 bt) doesn't have the same needs as a 500,000 bt operation. We tailor our recommendations accordingly.",
-      "wineTypes": "Wine types produced",
-      "wineTypeOptions": {
-        "Rouge": "Red",
-        "Blanc": "White",
-        "Rosé": "Rosé",
-        "Pétillant": "Sparkling",
-        "Orange": "Orange",
-        "Nature": "Natural"
-      },
       "certifications": "Certifications",
       "certificationsHint": "Organic, biodynamic and HVE certifications are widely-used filters by specialty importers. Listing them significantly boosts your chances of being selected for targeted campaigns.",
       "certificationsHelp": "Select all applicable certifications.",
@@ -433,11 +424,13 @@
         "Biodynamique": "Biodynamic",
         "HVE3": "HVE3"
       },
-      "grapes": "Grape varieties",
-      "grapesHint": "Grape varieties are a key criterion for specialty importers. Some specifically look for rare or native varieties to differentiate themselves.",
-      "grapesPlaceholder": "Add a grape variety",
-      "cuvees": "Cuvées",
-      "cuveesPlaceholder": "Add a cuvée"
+      "strengthsTitle": "Estate strengths",
+      "strengthsDescription": "Highlight 3 differentiators of your estate (max 3, 80 characters each).",
+      "strengthsLabel": "Strength #{{n}}",
+      "strengthsPlaceholder1": "e.g. 100% hand-harvested",
+      "strengthsPlaceholder2": "e.g. Plot-by-plot vinification",
+      "strengthsPlaceholder3": "e.g. Family estate since 1850",
+      "strengthsHelp": "These strengths are used in your campaigns to convince importers."
     },
     "markets": {
       "cardTitle": "Prospecting preferences",
@@ -467,7 +460,9 @@
       "label": "Website URL",
       "placeholder": "https://www.myestate.com",
       "test": "Test",
-      "invalid": "URL must be valid and start with https://"
+      "invalid": "URL must be valid and start with https://",
+      "socialTitle": "Social media (optional)",
+      "socialHelp": "Add your account links to strengthen your credibility with importers."
     },
     "documents": {
       "presentationTitle": "Estate presentation",
