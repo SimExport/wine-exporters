@@ -1,31 +1,40 @@
-## Problème
+## Constat
 
-Dans `AdminCampaigns.tsx`, valider/rejeter une campagne fait un `UPDATE` direct sur la table `campaigns`. Mais la seule policy RLS UPDATE est :
+1. **Aucune autre campagne en attente.** Requête en base : 0 campagne `pending_validation` hors `simon@exportvins.fr` / `simon@frenchwinesexport.com`. Tout est traité.
 
+2. **Aucun email de validation n'est envoyé à l'utilisateur.** `notify-campaign-submission` notifie uniquement l'admin lors d'une nouvelle soumission. Quand l'admin clique "Valider" dans `/admin/campaigns`, le code fait juste un `UPDATE campaigns SET status='active'` — pas de mail au domaine viticole.
+
+## Plan
+
+### 1. Nouvelle Edge Function `notify-campaign-validated`
+
+Modèle calqué sur `notify-sourcing-validated` (qui marche déjà avec le branding WineExporters) :
+
+- Reçoit `{ campaignId }`
+- Récupère la campagne, le `user_id`, l'email auth, `display_name`, `target_markets`
+- Envoie via Resend (`RESEND_API_KEY` déjà présent), `from: "WineExporters <notifications@wine-exporters.com>"` (même from que les autres mails)
+- Sujet : `✅ Votre campagne "{name}" est validée et en cours d'envoi`
+- Corps HTML brandé **#59191F** (header bordeaux, logo grappe, typo, bouton CTA)
+- Contenu :
+  - "Bonne nouvelle, votre campagne **{name}** vient d'être validée par notre équipe."
+  - "Elle est désormais en cours d'envoi sur les marchés : {markets}."
+  - **"⏱ Les premiers résultats (ouvertures, réponses, prospects) apparaîtront sous 7 à 10 jours en moyenne."**
+  - CTA : **"Suivre ma campagne"** → `https://wine-exporters.com/campaigns/{campaignId}`
+  - Footer "WineExporters by ExportVins"
+- Bilingue FR/EN selon `user_settings.ui_language`
+
+### 2. Déclenchement automatique
+
+Dans `src/pages/AdminCampaigns.tsx`, après l'UPDATE réussi dans `validateCampaign`, ajouter :
+
+```ts
+supabase.functions.invoke("notify-campaign-validated", { body: { campaignId } });
 ```
-Users can update their own campaigns
-USING (auth.uid() = user_id)
-```
 
-Il n'existe **aucune policy admin** pour UPDATE sur `campaigns`. Quand un admin valide une campagne d'un autre utilisateur (ex. Château Paquette), PostgREST filtre la ligne via RLS, retourne 0 ligne modifiée **sans erreur**, le toast "Campagne validée" s'affiche, mais en base le statut reste `pending_validation`.
+Best-effort (n'interrompt pas le flow admin si le mail échoue, comme le pattern actuel pour sourcing).
 
-C'est ce qu'on voit sur ta capture Supabase : `Campagne mai 2026` (user `dbe2aec5…`) est restée `pending_validation` alors que ton compte admin a cliqué Valider.
+### 3. Vérification
 
-## Correctif
-
-Ajouter une policy RLS admin sur `campaigns` pour UPDATE (et DELETE pour cohérence avec le reste de l'admin) :
-
-```sql
-CREATE POLICY "Admins can update any campaign"
-ON public.campaigns
-FOR UPDATE
-USING (public.has_role(auth.uid(), 'admin'));
-```
-
-Aucun changement de code applicatif requis — `validateCampaign` et `rejectCampaign` fonctionneront immédiatement.
-
-## Vérification post-fix
-
-1. Re-valider la campagne Château Paquette depuis `/admin/campaigns`.
-2. Confirmer dans Supabase que `status = 'active'` et `validated_at` est rempli.
-3. Tester aussi le rejet (passage en `failed` + `client_note`).
+- Re-valider une campagne test depuis `/admin/campaigns`
+- Vérifier les logs `notify-campaign-validated`
+- Confirmer réception de l'email avec branding 59191F + bouton fonctionnel

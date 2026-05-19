@@ -248,6 +248,11 @@ export default function AdminCampaigns() {
       // Remove from local state immediately (optimistic update)
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
 
+      // Best-effort: notify user that their campaign is validated
+      supabase.functions
+        .invoke('notify-campaign-validated', { body: { campaignId } })
+        .catch((e) => console.error('notify-campaign-validated failed:', e));
+
       toast({
         title: t('adminCampaigns.validatedTitle'),
         description: t('adminCampaigns.validatedDesc', { name: campaignName }),
