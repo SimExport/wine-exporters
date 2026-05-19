@@ -81,8 +81,7 @@
     "profile": "Profil",
     "importers": "Importateurs",
     "campaigns": "Campagnes",
-    "crmList": "CRM - Liste",
-    "crmKanban": "CRM - Kanban",
+    "crm": "CRM",
     "roadmap": "À venir",
     "help": "Aide",
     "settings": "Paramètres",
@@ -929,6 +928,8 @@
     }
   },
   "crm": {
+    "viewKanban": "Kanban",
+    "viewList": "Liste",
     "tags": {
       "hot": "Chaud",
       "warm": "Tiède",

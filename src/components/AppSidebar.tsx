@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, List, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -18,8 +18,7 @@ const navigationItems = [
   { key: "importers", url: "/importers", icon: Database },
   { key: "campaigns", url: "/campaigns", icon: Target },
   { key: "sourcing", url: "/recherches", icon: FileSearch },
-  { key: "crmList", url: "/prospects", icon: List },
-  { key: "crmKanban", url: "/pipeline", icon: Kanban },
+  { key: "crm", url: "/pipeline", icon: Kanban },
   { key: "roadmap", url: "/roadmap", icon: Rocket },
   { key: "help", url: "/help", icon: HelpCircle },
 ] as const;

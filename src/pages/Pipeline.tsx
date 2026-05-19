@@ -322,10 +322,6 @@ export default function Pipeline() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/prospects">{t('pipeline.listView')}</Link>
-            </Button>
-            
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
               <DialogTrigger asChild>
                 <Button>
