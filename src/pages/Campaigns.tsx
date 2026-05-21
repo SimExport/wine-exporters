@@ -184,7 +184,8 @@ const Campaigns = () => {
       const {
         data,
         error
-      } = await supabase.from('campaigns').select('*').eq('user_id', user?.id).neq('status', 'archived') // Exclude archived campaigns
+      } = await supabase.from('campaigns').select('*').eq('user_id', user?.id)
+      .not('status', 'in', '("archived","manual")') // Exclude archived + manual container
       .order('created_at', {
         ascending: false
       });
