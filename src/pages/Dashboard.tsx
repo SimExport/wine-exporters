@@ -25,7 +25,7 @@ interface Campaign {
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { searchCredits } = useCredits();
+  const { searchCredits, campaignCredits } = useCredits();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
   const [pipelineCounts, setPipelineCounts] = useState({
@@ -115,8 +115,12 @@ const Dashboard = () => {
       desc: activeCampaign
         ? `${activeCampaign.name} — ${(activeCampaign.target_markets ?? []).join(', ')}`
         : t('dashboardPage.hub.campaign.emptyDesc'),
-      badge: activeCampaign ? t('dashboardPage.hub.campaign.active') : t('dashboardPage.hub.campaign.none'),
-      badgeVariant: activeCampaign ? ('success' as const) : ('muted' as const),
+      badge: activeCampaign
+        ? t('dashboardPage.hub.campaign.active')
+        : campaignCredits > 0
+          ? t('dashboardPage.hub.search.available', { count: campaignCredits })
+          : t('dashboardPage.hub.campaign.none'),
+      badgeVariant: activeCampaign ? ('success' as const) : campaignCredits > 0 ? ('info' as const) : ('muted' as const),
       cta: activeCampaign ? t('dashboardPage.hub.campaign.ctaView') : t('dashboardPage.hub.campaign.ctaCreate'),
       to: activeCampaign ? '/campaigns' : '/create-campaign',
     },
