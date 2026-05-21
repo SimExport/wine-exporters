@@ -15,7 +15,7 @@ import { Stepper } from '@/components/ui/stepper';
 import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive, MousePointer, Reply } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive, MousePointer, Reply, Pencil } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
@@ -184,7 +184,8 @@ const Campaigns = () => {
       const {
         data,
         error
-      } = await supabase.from('campaigns').select('*').eq('user_id', user?.id).neq('status', 'archived') // Exclude archived campaigns
+      } = await supabase.from('campaigns').select('*').eq('user_id', user?.id)
+      .not('status', 'in', '("archived","manual")') // Exclude archived + manual container
       .order('created_at', {
         ascending: false
       });
@@ -273,6 +274,61 @@ const Campaigns = () => {
     }
   };
 
+  const resumeDraft = async (campaignId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('id', campaignId)
+        .single();
+      if (error) throw error;
+      if (!data) return;
+      setCampaignData({
+        id: data.id,
+        name: data.name || '',
+        markets: data.target_markets || [],
+        channels: data.channels || [],
+        segments: data.segments || [],
+        volumeBand: data.volume_band || '',
+        priceMin: data.price_min,
+        priceMax: data.price_max,
+        language: data.language || 'FR',
+        excludeRecentDays: data.exclude_recent_days ?? 90,
+        blacklistBuyerIds: data.blacklist_buyer_ids || [],
+        audienceEstimate: data.audience_estimate ?? 0,
+        cuvees: data.cuvees || [],
+        selectedWines: data.selected_wines || [],
+        presentationDocId: data.doc_presentation,
+        pricelistDocId: data.doc_pricelist,
+        techDocsIds: data.doc_techs || [],
+        techsLink: data.techs_link || '',
+        sendAsName: data.send_as_name || '',
+        replyTo: data.reply_to || '',
+        subjectVariants: data.subject_variants || [],
+        subjectSelected: data.subject_selected || '',
+        messageHtml: data.message_html || '',
+        messageText: data.message_text || '',
+        sequenceEnabled: data.sequence_enabled ?? true,
+        seq2DelayDays: data.seq2_delay_days ?? 3,
+        seq3DelayDays: data.seq3_delay_days ?? 10,
+        scheduleAt: data.schedule_at ? new Date(data.schedule_at) : null,
+        sendNow: data.send_now ?? true,
+        dailyCap: data.daily_cap ?? 200,
+        managedByBo: data.managed_by_bo ?? false,
+        status: data.status || 'draft',
+      });
+      setCurrentStep(0);
+      setShowCreateForm(true);
+    } catch (error) {
+      console.error('Error loading draft:', error);
+      toast({
+        title: t('common.error'),
+        description: t('campaigns.toasts.loadError'),
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Auto-save functionality
   const triggerAutoSave = useCallback(() => {
     if (autoSaveTimer) {
@@ -309,13 +365,14 @@ const Campaigns = () => {
       if (error) throw error;
       if (data) {
         setAvailableCuvees(data.cuvees || []);
-        updateCampaignData({
-          sendAsName: data.domain_name || '',
-          name: `${i18n.language.startsWith('en') ? 'Campaign' : 'Campagne'} - ${new Date().toLocaleDateString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
+        setCampaignData(prev => ({
+          ...prev,
+          sendAsName: prev.sendAsName || data.domain_name || '',
+          name: prev.name || `${i18n.language.startsWith('en') ? 'Campaign' : 'Campagne'} - ${new Date().toLocaleDateString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
             month: 'long',
             year: 'numeric',
-          })}`
-        });
+          })}`,
+        }));
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -1005,10 +1062,17 @@ ${campaignData.sendAsName}`} />
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
-                            <Eye className="h-4 w-4 mr-1" />
-                            {t('campaigns.list.table.viewProspects')}
-                          </Button>
+                          {campaign.status === 'draft' ? (
+                            <Button size="sm" onClick={() => resumeDraft(campaign.id)}>
+                              <Pencil className="h-4 w-4 mr-1" />
+                              {t('campaigns.list.table.resume', { defaultValue: 'Reprendre' })}
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              {t('campaigns.list.table.viewProspects')}
+                            </Button>
+                          )}
                           <Button size="sm" variant="outline" onClick={() => archiveCampaign(campaign.id, campaign.name)}>
                             <Archive className="h-4 w-4 mr-1" />
                             {t('campaigns.list.table.archive')}

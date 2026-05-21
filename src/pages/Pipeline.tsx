@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { getOrCreateManualCampaign, MANUAL_CAMPAIGN_NAME } from '@/lib/manual-campaign'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -130,7 +131,15 @@ export default function Pipeline() {
         .order('created_at', { ascending: false })
 
       if (campaignsData) {
-        setCampaigns(campaignsData)
+        try {
+          const manualId = await getOrCreateManualCampaign(user!.id)
+          const hasManual = campaignsData.some(c => c.id === manualId)
+          setCampaigns(hasManual
+            ? campaignsData
+            : [{ id: manualId, name: MANUAL_CAMPAIGN_NAME } as any, ...campaignsData])
+        } catch {
+          setCampaigns(campaignsData)
+        }
       }
 
       const { data: prospectsData, error } = await supabase

@@ -549,8 +549,15 @@ const Profile = () => {
       });
       return;
     }
-    const allowedTypes = type === 'image' ? ['image/jpeg', 'image/jpg', 'image/png'] : ['video/mp4'];
-    if (!allowedTypes.includes(file.type)) {
+    const allowedTypes = type === 'image'
+      ? ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      : ['video/mp4', 'video/quicktime', 'video/webm'];
+    // Some browsers (Safari) report empty file.type for .mov — fall back to extension check.
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const extOk = type === 'image'
+      ? ['jpg', 'jpeg', 'png', 'webp'].includes(ext)
+      : ['mp4', 'mov', 'webm'].includes(ext);
+    if (!allowedTypes.includes(file.type) && !extOk) {
       toast({
         title: t('profile.media.wrongType'),
         description: t('profile.media.wrongTypeDesc'),
@@ -561,9 +568,12 @@ const Profile = () => {
     setUploading(true);
     try {
       const filePath = `${user.id}/${type}/${Date.now()}_${sanitizeStorageKey(file.name)}`;
-      const {
-        error: uploadError
-      } = await supabase.storage.from('media').upload(filePath, file);
+      const contentType = file.type || (type === 'video'
+        ? `video/${ext === 'mov' ? 'quicktime' : ext}`
+        : `image/${ext === 'jpg' ? 'jpeg' : ext}`);
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file, { contentType, upsert: false, cacheControl: '3600' });
       if (uploadError) throw uploadError;
       const {
         data: {
