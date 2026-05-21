@@ -280,18 +280,6 @@ const Importers = () => {
       </div>;
   }
 
-  // Show premium-only state for free users
-  if (!hasPaidAccess) {
-    return <div className="container mx-auto max-w-7xl px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">{t('importers.premiumTitle')}</h1>
-          <p className="text-muted-foreground mt-2">
-            {t('importers.premiumDescription')}
-          </p>
-        </div>
-        <PremiumOnlyState title={t('importers.premiumGate.title')} description={t('importers.premiumGate.description')} />
-      </div>;
-  }
   return <div className="container mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
