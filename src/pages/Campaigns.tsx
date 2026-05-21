@@ -15,7 +15,7 @@ import { Stepper } from '@/components/ui/stepper';
 import { CampaignSidebar } from '@/components/campaign-wizard/CampaignSidebar';
 import { PreflightBar } from '@/components/campaign-wizard/PreflightBar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive, MousePointer, Reply } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive, MousePointer, Reply, Pencil } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
 import { toast } from '@/hooks/use-toast';
