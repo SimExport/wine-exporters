@@ -225,21 +225,6 @@ export function AppSidebar() {
           </Popover>
         </div>
 
-        {/* Credits indicator */}
-        {hasPaidAccess && !subscriptionLoading && <div className="px-3 py-2">
-            <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent/50 px-3 py-2">
-              <Zap className="h-4 w-4 text-primary-foreground" />
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-sidebar-foreground">
-                  {t('sidebar.campaignCredits')}
-                </span>
-                <span className="text-sm font-bold text-primary-foreground">
-                  {campaignsRemaining} {campaignsRemaining !== 1 ? t('sidebar.remainingPlural') : t('sidebar.remaining')}
-                </span>
-              </div>
-            </div>
-          </div>}
-        
         {!hasPaidAccess && !subscriptionLoading && <div className="px-3 py-2">
             <NavLink to="/billing">
               <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 hover:bg-primary/20 transition-colors cursor-pointer">
