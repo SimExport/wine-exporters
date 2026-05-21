@@ -1060,10 +1060,17 @@ ${campaignData.sendAsName}`} />
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
-                            <Eye className="h-4 w-4 mr-1" />
-                            {t('campaigns.list.table.viewProspects')}
-                          </Button>
+                          {campaign.status === 'draft' ? (
+                            <Button size="sm" onClick={() => resumeDraft(campaign.id)}>
+                              <Pencil className="h-4 w-4 mr-1" />
+                              {t('campaigns.list.table.resume', { defaultValue: 'Reprendre' })}
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              {t('campaigns.list.table.viewProspects')}
+                            </Button>
+                          )}
                           <Button size="sm" variant="outline" onClick={() => archiveCampaign(campaign.id, campaign.name)}>
                             <Archive className="h-4 w-4 mr-1" />
                             {t('campaigns.list.table.archive')}
