@@ -568,16 +568,12 @@ const Profile = () => {
     setUploading(true);
     try {
       const filePath = `${user.id}/${type}/${Date.now()}_${sanitizeStorageKey(file.name)}`;
-      // Videos may exceed the 50MB single-request limit — use resumable upload (TUS).
-      const useResumable = type === 'video' && file.size > 6 * 1024 * 1024;
-      const contentType = file.type || (type === 'video' ? `video/${ext === 'mov' ? 'quicktime' : ext}` : undefined);
+      const contentType = file.type || (type === 'video'
+        ? `video/${ext === 'mov' ? 'quicktime' : ext}`
+        : `image/${ext === 'jpg' ? 'jpeg' : ext}`);
       const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(filePath, file, {
-          contentType,
-          upsert: false,
-          ...(useResumable ? { duplex: 'half' } : {}),
-        } as any);
+        .upload(filePath, file, { contentType, upsert: false, cacheControl: '3600' });
       if (uploadError) throw uploadError;
       const {
         data: {
