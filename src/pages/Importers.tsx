@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
-import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 import { useTranslation } from 'react-i18next';
 const CopyButton = ({ value }: { value: string }) => {
   const { t } = useTranslation();
@@ -281,18 +280,6 @@ const Importers = () => {
       </div>;
   }
 
-  // Show premium-only state for free users
-  if (!hasPaidAccess) {
-    return <div className="container mx-auto max-w-7xl px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">{t('importers.premiumTitle')}</h1>
-          <p className="text-muted-foreground mt-2">
-            {t('importers.premiumDescription')}
-          </p>
-        </div>
-        <PremiumOnlyState title={t('importers.premiumGate.title')} description={t('importers.premiumGate.description')} />
-      </div>;
-  }
   return <div className="container mx-auto max-w-7xl px-4 py-6">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
@@ -305,8 +292,7 @@ const Importers = () => {
           </p>
         </div>
 
-        {hasPaidAccess && (
-          <Dialog open={sourcingOpen} onOpenChange={setSourcingOpen}>
+        <Dialog open={sourcingOpen} onOpenChange={setSourcingOpen}>
             <DialogTrigger asChild>
               <Button variant="default" className="shrink-0">
                 <Target className="h-4 w-4 mr-2" />
@@ -354,7 +340,6 @@ const Importers = () => {
               </div>
             </DialogContent>
           </Dialog>
-        )}
       </div>
 
       {/* Country Selector - Map + Continent List */}
