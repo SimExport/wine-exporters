@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { getOrCreateManualCampaign, MANUAL_CAMPAIGN_NAME } from '@/lib/manual-campaign'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -140,7 +141,17 @@ export default function Prospects() {
         .limit(10)
       
       if (campaignsData) {
-        setCampaigns(campaignsData)
+        // Ensure the "manual" container is selectable even before any campaign exists.
+        try {
+          const manualId = await getOrCreateManualCampaign(user!.id)
+          const hasManual = campaignsData.some(c => c.id === manualId)
+          const enriched = hasManual
+            ? campaignsData
+            : [{ id: manualId, name: MANUAL_CAMPAIGN_NAME, status: 'manual', launched_at: undefined } as any, ...campaignsData]
+          setCampaigns(enriched)
+        } catch {
+          setCampaigns(campaignsData)
+        }
         
         // Check for SLA banner
         const recentCampaign = campaignsData.find(c => 
