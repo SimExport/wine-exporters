@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
-import { PremiumOnlyState } from '@/components/PremiumOnlyState';
 import { useTranslation } from 'react-i18next';
 const CopyButton = ({ value }: { value: string }) => {
   const { t } = useTranslation();
