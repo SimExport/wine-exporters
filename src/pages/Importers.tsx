@@ -292,8 +292,7 @@ const Importers = () => {
           </p>
         </div>
 
-        {hasPaidAccess && (
-          <Dialog open={sourcingOpen} onOpenChange={setSourcingOpen}>
+        <Dialog open={sourcingOpen} onOpenChange={setSourcingOpen}>
             <DialogTrigger asChild>
               <Button variant="default" className="shrink-0">
                 <Target className="h-4 w-4 mr-2" />
