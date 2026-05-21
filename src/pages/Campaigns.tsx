@@ -364,13 +364,14 @@ const Campaigns = () => {
       if (error) throw error;
       if (data) {
         setAvailableCuvees(data.cuvees || []);
-        updateCampaignData({
-          sendAsName: data.domain_name || '',
-          name: `${i18n.language.startsWith('en') ? 'Campaign' : 'Campagne'} - ${new Date().toLocaleDateString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
+        setCampaignData(prev => ({
+          ...prev,
+          sendAsName: prev.sendAsName || data.domain_name || '',
+          name: prev.name || `${i18n.language.startsWith('en') ? 'Campaign' : 'Campagne'} - ${new Date().toLocaleDateString(i18n.language.startsWith('en') ? 'en-US' : 'fr-FR', {
             month: 'long',
             year: 'numeric',
-          })}`
-        });
+          })}`,
+        }));
       }
     } catch (error) {
       console.error('Error loading profile:', error);
