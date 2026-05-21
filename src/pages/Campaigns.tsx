@@ -273,6 +273,61 @@ const Campaigns = () => {
     }
   };
 
+  const resumeDraft = async (campaignId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('id', campaignId)
+        .single();
+      if (error) throw error;
+      if (!data) return;
+      setCampaignData({
+        id: data.id,
+        name: data.name || '',
+        markets: data.target_markets || [],
+        channels: data.channels || [],
+        segments: data.segments || [],
+        volumeBand: data.volume_band || '',
+        priceMin: data.price_min,
+        priceMax: data.price_max,
+        language: data.language || 'FR',
+        excludeRecentDays: data.exclude_recent_days ?? 90,
+        blacklistBuyerIds: data.blacklist_buyer_ids || [],
+        audienceEstimate: data.audience_estimate ?? 0,
+        cuvees: data.cuvees || [],
+        selectedWines: data.selected_wines || [],
+        presentationDocId: data.doc_presentation,
+        pricelistDocId: data.doc_pricelist,
+        techDocsIds: data.doc_techs || [],
+        techsLink: data.techs_link || '',
+        sendAsName: data.send_as_name || '',
+        replyTo: data.reply_to || '',
+        subjectVariants: data.subject_variants || [],
+        subjectSelected: data.subject_selected || '',
+        messageHtml: data.message_html || '',
+        messageText: data.message_text || '',
+        sequenceEnabled: data.sequence_enabled ?? true,
+        seq2DelayDays: data.seq2_delay_days ?? 3,
+        seq3DelayDays: data.seq3_delay_days ?? 10,
+        scheduleAt: data.schedule_at ? new Date(data.schedule_at) : null,
+        sendNow: data.send_now ?? true,
+        dailyCap: data.daily_cap ?? 200,
+        managedByBo: data.managed_by_bo ?? false,
+        status: data.status || 'draft',
+      });
+      setCurrentStep(0);
+      setShowCreateForm(true);
+    } catch (error) {
+      console.error('Error loading draft:', error);
+      toast({
+        title: t('common.error'),
+        description: t('campaigns.toasts.loadError'),
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Auto-save functionality
   const triggerAutoSave = useCallback(() => {
     if (autoSaveTimer) {
