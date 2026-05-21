@@ -1,0 +1,1 @@
+UPDATE storage.buckets SET public = true, file_size_limit = 209715200, allowed_mime_types = ARRAY['image/jpeg','image/jpg','image/png','image/webp','video/mp4','video/quicktime','video/webm'] WHERE id = 'media';
