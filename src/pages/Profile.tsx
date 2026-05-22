@@ -15,6 +15,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
 import { useTranslation } from 'react-i18next';
+import { Progress } from '@/components/ui/progress';
+import { resumableUpload } from '@/lib/resumable-upload';
 
 const sanitizeStorageKey = (name: string) => {
   const dot = name.lastIndexOf('.');
@@ -102,6 +104,7 @@ const Profile = () => {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
   const isFr = i18n.language?.startsWith('fr');
   const [winesCount, setWinesCount] = useState(0);
 
