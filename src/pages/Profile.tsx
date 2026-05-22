@@ -574,10 +574,23 @@ const Profile = () => {
       const contentType = file.type || (type === 'video'
         ? `video/${ext === 'mov' ? 'quicktime' : ext}`
         : `image/${ext === 'jpg' ? 'jpeg' : ext}`);
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file, { contentType, upsert: false, cacheControl: '3600' });
-      if (uploadError) throw uploadError;
+      if (type === 'video') {
+        setVideoUploadProgress(0);
+        await resumableUpload({
+          bucket: 'media',
+          objectPath: filePath,
+          file,
+          contentType,
+          cacheControl: '3600',
+          upsert: false,
+          onProgress: (p) => setVideoUploadProgress(p),
+        });
+      } else {
+        const { error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(filePath, file, { contentType, upsert: false, cacheControl: '3600' });
+        if (uploadError) throw uploadError;
+      }
       const {
         data: {
           publicUrl
@@ -599,13 +612,21 @@ const Profile = () => {
       });
     } catch (error: any) {
       console.error('Upload error:', error);
+      const msg: string = error?.message || error?.originalResponse?.getBody?.() || String(error);
+      let description = msg;
+      if (/exceeded the maximum allowed size|413|payload too large/i.test(msg)) {
+        description = t('profile.media.uploadTooLarge');
+      } else if (/network|failed to fetch|timeout/i.test(msg)) {
+        description = t('profile.media.uploadNetworkError');
+      }
       toast({
         title: t('profile.documents.uploadErrorTitle'),
-        description: error.message,
+        description,
         variant: "destructive"
       });
     } finally {
       setUploading(false);
+      setVideoUploadProgress(null);
     }
   };
 
