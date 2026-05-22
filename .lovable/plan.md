@@ -1,79 +1,77 @@
+## Problème
 
-## Objectif
+L'upload d'une vidéo de 150 Mo échoue avec `The object exceeded the maximum allowed size` alors que le bucket `media` autorise bien 200 Mo. Deux causes :
 
-Traiter 4 feedbacks utilisateurs dans un seul lot.
+1. **Limite globale Storage du projet Supabase** (séparée de la limite bucket) : par défaut **50 Mo**, c'est elle qui bloque.
+2. **Méthode d'upload non adaptée** : `supabase.storage.upload()` envoie tout en un seul POST. Au-delà de ~50 Mo c'est instable (timeouts, RAM navigateur, pas de reprise). Supabase recommande **TUS / resumable** au-delà de 6 Mo.
 
----
+## Action 1 — Relever la limite globale Storage (manuel, côté user)
 
-### 1. Upload vidéo dans Profil > Média (vidéo < 200 Mo échoue)
+À faire dans le dashboard Supabase (non scriptable) :
 
-**Causes identifiées dans `src/pages/Profile.tsx` (`handleMediaUpload`) :**
-- Seul `video/mp4` est accepté → `.mov`, `.webm`, `.quicktime` rejetés.
-- Le bucket `media` est **privé** mais le code utilise `getPublicUrl()` → URL non lisible côté frontend (les vidéos ne s'affichent pas même après upload).
-- L'upload standard `supabase.storage.upload()` échoue souvent au-dessus de ~50 Mo (timeout / payload). Pour les fichiers > 6 Mo, il faut l'upload **resumable (TUS)** : `supabase.storage.from('media').uploadToSignedUrl()` n'est pas adapté ici → on utilisera `upload(..., { upsert:false })` avec l'option resumable via le client JS (déjà supporté nativement).
+- Project Settings → Storage → **Upload file size limit** → passer à **200 MB**
 
-**Correctifs :**
-- Élargir les types acceptés : `video/mp4`, `video/quicktime` (`.mov`), `video/webm`.
-- Passer le bucket `media` en **public** (migration SQL) → cohérent avec `getPublicUrl` déjà utilisé pour les images.
-- Pour les vidéos, utiliser l'upload resumable du SDK Supabase (chunked) afin de tenir les 200 Mo sans timeout.
-- Ajouter un état de progression (`%`) pendant l'upload vidéo + message d'erreur explicite si refus du bucket (taille > limite serveur).
-- Vérifier la limite de taille du bucket `media` côté Supabase et la passer à 200 Mo si nécessaire (migration).
+Je l'indiquerai clairement dans le chat avec un lien direct vers la page Settings. Tant que cette valeur reste à 50 Mo, **aucun upload > 50 Mo ne fonctionnera**, quel que soit le code.
 
----
+## Action 2 — Passer l'upload vidéo en resumable (TUS) côté code
 
-### 2. Campagne en brouillon impossible à rouvrir / modifier / lancer
+Installer `tus-js-client` et créer un helper `src/lib/resumable-upload.ts` qui :
 
-**Constat dans `src/pages/Campaigns.tsx` (ligne ~1016) :**
-La ligne d'une campagne en `draft` n'affiche que **Voir prospects / Archiver / Supprimer** — aucun bouton "Reprendre / Modifier" pour rouvrir le wizard et la lancer.
+- Récupère la session Supabase (`access_token`)
+- Pousse vers `https://<project>.supabase.co/storage/v1/upload/resumable`
+- Headers : `Authorization: Bearer <token>`, `x-upsert: false`
+- Métadonnées TUS : `bucketName: 'media'`, `objectName: <filePath>`, `contentType`, `cacheControl`
+- Chunk size 6 Mo
+- Expose `onProgress(percent)` et résout/rejette à la fin
 
-**Correctifs :**
-- Ajouter un bouton **"Reprendre"** (icône `Pencil` / `Play`) visible uniquement quand `campaign.status === 'draft'`, qui ouvre le wizard de création pré-rempli avec la campagne (via un état `editingDraftId` déjà partiellement présent, ou via `navigate` + paramètre).
-- Vérifier que `saveDraft` / `launchCampaign` mettent à jour la campagne existante (pas de doublon) en présence d'un `editingDraftId`.
-- S'assurer que **"Voir prospects"** est masqué pour un brouillon (aucun prospect attaché) et remplacé par le bouton Reprendre.
+Modifier `src/pages/Profile.tsx > handleMediaUpload` :
 
----
+- Pour `type === 'video'` (ou `file.size > 6 * 1024 * 1024`) → utiliser le helper TUS
+- Pour les images → garder `supabase.storage.upload()` actuel
+- Ajouter un state `uploadProgress` (0–100) affiché sous le dropzone Vidéos pendant l'upload (barre de progression + libellé `%`)
+- Messages d'erreur plus explicites : distinguer "trop volumineux" / "réseau" / "format non supporté"
 
-### 3. CRM : permettre l'ajout manuel d'un prospect (sans campagne)
+## Action 3 — Traductions
 
-**Contrainte DB :** `leads.campaign_id` est `NOT NULL`. Pour éviter une migration risquée, on crée **une campagne "système" par user** appelée `"Prospects manuels"` (status `manual`, jamais envoyée) qui sert de conteneur aux leads ajoutés à la main.
+Ajouter dans `src/i18n/locales/fr.json` et `en.json` sous `profile.media` :
 
-**Correctifs :**
-- Bouton **"Ajouter un prospect"** dans le header de `CRM.tsx` (visible en vue Kanban et Liste).
-- Modal `AddManualLeadDialog` avec champs : nom société, contact (prénom/nom), email, téléphone, site web, pays, ville, statut initial (`new`), note.
-- À la soumission :
-  - Trouver ou créer la campagne `"Prospects manuels"` du user (helper `getOrCreateManualCampaign`).
-  - Insérer le lead avec `campaign_id` = cette campagne, `created_by` = user.
-- Filtre "campagne" dans `Prospects.tsx` : ajouter une option dédiée `"Manuels / hors campagne"`.
-
----
-
-### 4. Ajouter au CRM depuis le résultat d'une Recherche sur-mesure
-
-**Constat dans `src/components/sourcing/SourcingResultsDialog.tsx` :**
-La table `shortlist` affiche les contacts sans action possible.
-
-**Correctifs :**
-- Ajouter une colonne **"Action"** avec un bouton **"+ Ajouter au CRM"** par ligne.
-- Au clic : créer un lead dans la campagne `"Prospects manuels"` (même helper qu'au point 3), avec les champs : `company_name`, `email`, `phone`, `website_url`, `market = marketLabel`, `message_snippet = reason`, `owner_notes = "Issu de Recherche sur-mesure"`.
-- État visuel : bouton qui passe à "✓ Ajouté" et se désactive après succès.
-- Option bonus : bouton **"Tout ajouter au CRM"** en haut de la table.
-
----
+- `uploading` : "Upload en cours…" / "Uploading…"
+- `uploadProgress` : "{{percent}} %"
+- `uploadNetworkError` / `uploadTooLarge`
 
 ## Détails techniques
 
-**Migrations SQL :**
-```sql
--- Rendre le bucket media public (cohérent avec getPublicUrl)
-update storage.buckets set public = true, file_size_limit = 209715200 where id = 'media';
+```text
+Browser → tus-js-client → POST /storage/v1/upload/resumable
+                          (chunks 6 MB, reprise auto si coupure)
+                          Authorization: Bearer <user JWT>
+                          Upload-Metadata: bucketName=media,objectName=...,contentType=...
 ```
-(pas de changement de schéma pour `leads` ; on réutilise la table `campaigns`)
 
-**Nouveaux fichiers / composants :**
-- `src/lib/manual-campaign.ts` → helper `getOrCreateManualCampaign(userId)`.
-- `src/components/crm/AddManualLeadDialog.tsx` → formulaire d'ajout manuel.
-- Modifs : `Profile.tsx`, `Campaigns.tsx`, `CRM.tsx`, `Prospects.tsx`, `Pipeline.tsx`, `SourcingResultsDialog.tsx`.
+`tus-js-client` API utilisée :
 
-**i18n :** ajouter les clés FR/EN pour les nouveaux libellés (boutons, modal, toasts).
+```ts
+new tus.Upload(file, {
+  endpoint: `${SUPABASE_URL}/storage/v1/upload/resumable`,
+  headers: { authorization: `Bearer ${token}`, 'x-upsert': 'false' },
+  chunkSize: 6 * 1024 * 1024,
+  metadata: { bucketName, objectName, contentType, cacheControl: '3600' },
+  onProgress: (sent, total) => setProgress(Math.round(sent/total*100)),
+  onSuccess: () => resolve(),
+  onError: reject,
+})
+```
 
-**Hors scope :** refonte du wizard de campagne, automatisation d'enrichissement, déduplication avancée des leads.
+## Fichiers touchés
+
+- nouveau : `src/lib/resumable-upload.ts`
+- modifié : `src/pages/Profile.tsx` (handleMediaUpload + UI progress sous dropzone vidéos)
+- modifié : `src/i18n/locales/{fr,en}.json` (clés upload progress)
+- `package.json` : `+ tus-js-client`
+
+## Hors scope
+
+- Conversion / compression vidéo côté client
+- Transcoding serveur
+- Affichage progress pour images (taille toujours < 10 Mo)
+- Migration des autres uploads (documents) — restent en standard upload, max 50 Mo OK

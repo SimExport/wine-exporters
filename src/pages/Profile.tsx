@@ -15,6 +15,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
 import { useTranslation } from 'react-i18next';
+import { Progress } from '@/components/ui/progress';
+import { resumableUpload } from '@/lib/resumable-upload';
 
 const sanitizeStorageKey = (name: string) => {
   const dot = name.lastIndexOf('.');
@@ -102,6 +104,7 @@ const Profile = () => {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
   const isFr = i18n.language?.startsWith('fr');
   const [winesCount, setWinesCount] = useState(0);
 
@@ -571,10 +574,23 @@ const Profile = () => {
       const contentType = file.type || (type === 'video'
         ? `video/${ext === 'mov' ? 'quicktime' : ext}`
         : `image/${ext === 'jpg' ? 'jpeg' : ext}`);
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file, { contentType, upsert: false, cacheControl: '3600' });
-      if (uploadError) throw uploadError;
+      if (type === 'video') {
+        setVideoUploadProgress(0);
+        await resumableUpload({
+          bucket: 'media',
+          objectPath: filePath,
+          file,
+          contentType,
+          cacheControl: '3600',
+          upsert: false,
+          onProgress: (p) => setVideoUploadProgress(p),
+        });
+      } else {
+        const { error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(filePath, file, { contentType, upsert: false, cacheControl: '3600' });
+        if (uploadError) throw uploadError;
+      }
       const {
         data: {
           publicUrl
@@ -596,13 +612,21 @@ const Profile = () => {
       });
     } catch (error: any) {
       console.error('Upload error:', error);
+      const msg: string = error?.message || error?.originalResponse?.getBody?.() || String(error);
+      let description = msg;
+      if (/exceeded the maximum allowed size|413|payload too large/i.test(msg)) {
+        description = t('profile.media.uploadTooLarge');
+      } else if (/network|failed to fetch|timeout/i.test(msg)) {
+        description = t('profile.media.uploadNetworkError');
+      }
       toast({
         title: t('profile.documents.uploadErrorTitle'),
-        description: error.message,
+        description,
         variant: "destructive"
       });
     } finally {
       setUploading(false);
+      setVideoUploadProgress(null);
     }
   };
 
@@ -1324,7 +1348,7 @@ const Profile = () => {
                     <CardDescription>{t('profile.media.videosDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={videosInputRef} type="file" accept=".mp4" multiple className="hidden" onChange={e => {
+                    <input ref={videosInputRef} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" multiple className="hidden" onChange={e => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleMediaUpload(files, 'video');
@@ -1351,6 +1375,15 @@ const Profile = () => {
                         {t('profile.media.addVideos')}
                       </Button>
                     </div>
+                    {videoUploadProgress !== null && (
+                      <div className="mb-4 space-y-2">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <span>{t('profile.media.uploading')}</span>
+                          <span>{videoUploadProgress}%</span>
+                        </div>
+                        <Progress value={videoUploadProgress} />
+                      </div>
+                    )}
 
                     {media.filter(m => m.type === 'video').length > 0 && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {media.filter(m => m.type === 'video').map(item => <div key={item.id} className="relative group">

@@ -530,7 +530,10 @@
       "fileTooLargeDescVideo": "La taille maximale est de 200 Mo",
       "wrongType": "Type de fichier non accepté",
       "wrongTypeDesc": "Veuillez sélectionner un fichier au bon format",
-      "updateError": "Impossible de mettre à jour le média."
+      "updateError": "Impossible de mettre à jour le média.",
+      "uploading": "Upload en cours…",
+      "uploadTooLarge": "Fichier trop volumineux pour le serveur. Contactez le support pour relever la limite Storage du projet.",
+      "uploadNetworkError": "Erreur réseau pendant l'upload. Vérifiez votre connexion et réessayez."
     }
   },
   "countryMultiSelect": {
