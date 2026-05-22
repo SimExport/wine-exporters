@@ -1348,7 +1348,7 @@ const Profile = () => {
                     <CardDescription>{t('profile.media.videosDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={videosInputRef} type="file" accept=".mp4" multiple className="hidden" onChange={e => {
+                    <input ref={videosInputRef} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" multiple className="hidden" onChange={e => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleMediaUpload(files, 'video');
@@ -1375,6 +1375,15 @@ const Profile = () => {
                         {t('profile.media.addVideos')}
                       </Button>
                     </div>
+                    {videoUploadProgress !== null && (
+                      <div className="mb-4 space-y-2">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <span>{t('profile.media.uploading')}</span>
+                          <span>{videoUploadProgress}%</span>
+                        </div>
+                        <Progress value={videoUploadProgress} />
+                      </div>
+                    )}
 
                     {media.filter(m => m.type === 'video').length > 0 && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {media.filter(m => m.type === 'video').map(item => <div key={item.id} className="relative group">
