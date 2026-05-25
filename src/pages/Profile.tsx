@@ -1351,7 +1351,7 @@ const Profile = () => {
                     <CardDescription>{t('profile.media.videosDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <input ref={videosInputRef} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" multiple className="hidden" onChange={e => {
+                    <input ref={videosInputRef} type="file" accept=".mp4,.mov,.avi,video/mp4,video/quicktime,video/x-msvideo,video/avi" multiple className="hidden" onChange={e => {
                     const files = e.target.files;
                     if (files && files.length > 0) {
                       handleMultipleMediaUpload(files, 'video');
@@ -1378,6 +1378,9 @@ const Profile = () => {
                         {t('profile.media.addVideos')}
                       </Button>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      {t('profile.media.videoFormatsHelp')}
+                    </p>
                     {videoUploadProgress !== null && (
                       <div className="mb-4 space-y-2">
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -1410,6 +1413,50 @@ const Profile = () => {
                             </div>
                           </div>)}
                       </div>}
+
+                    <div className="mt-8 pt-6 border-t space-y-3">
+                      <div>
+                        <h3 className="text-base font-semibold">{t('profile.media.onlineVideoTitle')}</h3>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="online-video-url">{t('profile.media.onlineVideoLabel')}</Label>
+                        <Input
+                          id="online-video-url"
+                          type="url"
+                          value={formData.online_video_url}
+                          placeholder={t('profile.media.onlineVideoPlaceholder')}
+                          onChange={e => setFormData(prev => ({ ...prev, online_video_url: e.target.value }))}
+                        />
+                        <p className="text-xs text-muted-foreground">{t('profile.media.onlineVideoHelp')}</p>
+                      </div>
+                      {formData.online_video_url && (() => {
+                        const url = formData.online_video_url.trim();
+                        const embed = getEmbedUrl(url);
+                        if (embed) {
+                          return (
+                            <div className="aspect-video w-full max-w-2xl rounded-lg overflow-hidden border bg-muted">
+                              <iframe
+                                src={embed}
+                                title="Online video preview"
+                                className="w-full h-full"
+                                frameBorder={0}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                          );
+                        }
+                        if (isValidUrl(url)) {
+                          return (
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all">
+                              <Play className="h-4 w-4" />
+                              {url}
+                            </a>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
