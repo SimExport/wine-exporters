@@ -633,6 +633,7 @@ export type Database = {
           location: string | null
           onboarding_completed: boolean
           onboarding_dismissed_at: string | null
+          online_video_url: string | null
           organic_body: string | null
           organic_conversion: boolean | null
           organic_year: number | null
@@ -668,6 +669,7 @@ export type Database = {
           location?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
+          online_video_url?: string | null
           organic_body?: string | null
           organic_conversion?: boolean | null
           organic_year?: number | null
@@ -703,6 +705,7 @@ export type Database = {
           location?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
+          online_video_url?: string | null
           organic_body?: string | null
           organic_conversion?: boolean | null
           organic_year?: number | null
