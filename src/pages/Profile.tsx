@@ -156,6 +156,36 @@ const Profile = () => {
     }
   };
 
+  const getEmbedUrl = (raw: string): string | null => {
+    try {
+      const u = new URL(raw.trim());
+      const host = u.hostname.replace(/^www\./, '');
+      // YouTube: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/shorts/ID, youtube.com/embed/ID
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+        const v = u.searchParams.get('v');
+        if (v) return `https://www.youtube.com/embed/${v}`;
+        const parts = u.pathname.split('/').filter(Boolean);
+        if (parts[0] === 'embed' && parts[1]) return `https://www.youtube.com/embed/${parts[1]}`;
+        if (parts[0] === 'shorts' && parts[1]) return `https://www.youtube.com/embed/${parts[1]}`;
+      }
+      if (host === 'youtu.be') {
+        const id = u.pathname.split('/').filter(Boolean)[0];
+        if (id) return `https://www.youtube.com/embed/${id}`;
+      }
+      // Vimeo: vimeo.com/ID or player.vimeo.com/video/ID
+      if (host === 'vimeo.com') {
+        const id = u.pathname.split('/').filter(Boolean)[0];
+        if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+      }
+      if (host === 'player.vimeo.com') {
+        return u.toString();
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
   // Auto-save functionality
   const triggerAutoSave = () => {
     if (autoSaveTimer) {
