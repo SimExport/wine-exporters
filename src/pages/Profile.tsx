@@ -546,7 +546,7 @@ const Profile = () => {
   };
   const handleMediaUpload = async (file: File, type: 'image' | 'video') => {
     if (!user) return;
-    const maxSize = type === 'image' ? 10 * 1024 * 1024 : 200 * 1024 * 1024;
+    const maxSize = type === 'image' ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
     if (file.size > maxSize) {
       toast({
         title: t('profile.media.fileTooLarge'),
@@ -557,12 +557,12 @@ const Profile = () => {
     }
     const allowedTypes = type === 'image'
       ? ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-      : ['video/mp4', 'video/quicktime', 'video/webm'];
+      : ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/avi'];
     // Some browsers (Safari) report empty file.type for .mov — fall back to extension check.
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
     const extOk = type === 'image'
       ? ['jpg', 'jpeg', 'png', 'webp'].includes(ext)
-      : ['mp4', 'mov', 'webm'].includes(ext);
+      : ['mp4', 'mov', 'avi'].includes(ext);
     if (!allowedTypes.includes(file.type) && !extOk) {
       toast({
         title: t('profile.media.wrongType'),
