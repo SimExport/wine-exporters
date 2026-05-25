@@ -68,6 +68,7 @@ interface ProfileData {
   avoid_markets: string[];
   target_buyer_description: string;
   social_media: { instagram: string; facebook: string; linkedin: string; twitter: string };
+  online_video_url: string;
 }
 interface Document {
   id: string;
