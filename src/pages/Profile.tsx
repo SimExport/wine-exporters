@@ -139,7 +139,8 @@ const Profile = () => {
     current_markets: [],
     avoid_markets: [],
     target_buyer_description: '',
-    social_media: { instagram: '', facebook: '', linkedin: '', twitter: '' }
+    social_media: { instagram: '', facebook: '', linkedin: '', twitter: '' },
+    online_video_url: ''
   });
   const [documents, setDocuments] = useState<Document[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
@@ -265,7 +266,8 @@ const Profile = () => {
             facebook: (data.social_media as any)?.facebook || '',
             linkedin: (data.social_media as any)?.linkedin || '',
             twitter: (data.social_media as any)?.twitter || '',
-          }
+          },
+          online_video_url: (data as any).online_video_url || ''
         });
       }
     } catch (error) {
