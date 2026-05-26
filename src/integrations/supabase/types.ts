@@ -145,6 +145,45 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_email_logs: {
+        Row: {
+          bcc: string | null
+          campaign_id: string | null
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          recipient: string
+          resend_id: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          bcc?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          recipient: string
+          resend_id?: string | null
+          status: string
+          subject?: string | null
+        }
+        Update: {
+          bcc?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          recipient?: string
+          resend_id?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       campaign_events: {
         Row: {
           campaign_id: string
