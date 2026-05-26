@@ -111,11 +111,9 @@ serve(async (req) => {
         .maybeSingle();
 
       if (existingRole?.role !== 'admin' && existingRole?.role !== 'paid') {
-        if (existingRole) {
-          await supabaseClient.from('user_roles').update({ role: 'paid' }).eq('user_id', user.id);
-        } else {
-          await supabaseClient.from('user_roles').insert({ user_id: user.id, role: 'paid' });
-        }
+        await supabaseClient
+          .from('user_roles')
+          .upsert({ user_id: user.id, role: 'paid' }, { onConflict: 'user_id' });
       }
     } else {
       logStep("No active subscription found");
