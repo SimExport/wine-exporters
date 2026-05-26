@@ -102,7 +102,18 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
     console.log("notify-campaign-validated resend result:", JSON.stringify(sendResult));
-    if ((sendResult as any)?.error) {
+    const sendErr = (sendResult as any)?.error;
+    await admin.from("campaign_email_logs").insert({
+      campaign_id: campaignId,
+      event_type: "campaign_validated",
+      recipient: userEmail,
+      bcc: "simon@exportvins.fr",
+      subject: t.subject,
+      status: sendErr ? "failed" : "sent",
+      error_message: sendErr ? JSON.stringify(sendErr) : null,
+      resend_id: (sendResult as any)?.data?.id ?? null,
+    });
+    if (sendErr) {
       throw new Error(`Resend error: ${JSON.stringify((sendResult as any).error)}`);
     }
 
