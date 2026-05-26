@@ -157,33 +157,56 @@ const Profile = () => {
   };
 
   const getEmbedUrl = (raw: string): string | null => {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    // Allow users to paste without scheme
+    const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    let u: URL;
     try {
-      const u = new URL(raw.trim());
-      const host = u.hostname.replace(/^www\./, '');
-      // YouTube: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/shorts/ID, youtube.com/embed/ID
-      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
-        const v = u.searchParams.get('v');
-        if (v) return `https://www.youtube.com/embed/${v}`;
-        const parts = u.pathname.split('/').filter(Boolean);
-        if (parts[0] === 'embed' && parts[1]) return `https://www.youtube.com/embed/${parts[1]}`;
-        if (parts[0] === 'shorts' && parts[1]) return `https://www.youtube.com/embed/${parts[1]}`;
-      }
-      if (host === 'youtu.be') {
-        const id = u.pathname.split('/').filter(Boolean)[0];
-        if (id) return `https://www.youtube.com/embed/${id}`;
-      }
-      // Vimeo: vimeo.com/ID or player.vimeo.com/video/ID
-      if (host === 'vimeo.com') {
-        const id = u.pathname.split('/').filter(Boolean)[0];
-        if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
-      }
-      if (host === 'player.vimeo.com') {
-        return u.toString();
-      }
-      return null;
+      u = new URL(withScheme);
     } catch {
       return null;
     }
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+    const ytIdRe = /^[A-Za-z0-9_-]{11}$/;
+
+    // YouTube
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com' || host === 'youtube-nocookie.com') {
+      const v = u.searchParams.get('v');
+      if (v && ytIdRe.test(v)) return `https://www.youtube.com/embed/${v}`;
+      const parts = u.pathname.split('/').filter(Boolean);
+      const [first, second] = parts;
+      if (['embed', 'shorts', 'live', 'v', 'e'].includes(first) && second && ytIdRe.test(second)) {
+        return `https://www.youtube.com/embed/${second}`;
+      }
+    }
+    if (host === 'youtu.be') {
+      const id = u.pathname.split('/').filter(Boolean)[0];
+      if (id && ytIdRe.test(id)) return `https://www.youtube.com/embed/${id}`;
+    }
+
+    // Vimeo: vimeo.com/ID, vimeo.com/ID/HASH (unlisted), player.vimeo.com/video/ID
+    if (host === 'vimeo.com') {
+      const parts = u.pathname.split('/').filter(Boolean);
+      const id = parts[0];
+      if (id && /^\d+$/.test(id)) {
+        const hash = parts[1] && /^[A-Za-z0-9]+$/.test(parts[1]) ? parts[1] : null;
+        return hash
+          ? `https://player.vimeo.com/video/${id}?h=${hash}`
+          : `https://player.vimeo.com/video/${id}`;
+      }
+    }
+    if (host === 'player.vimeo.com') {
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (parts[0] === 'video' && parts[1] && /^\d+$/.test(parts[1])) {
+        const hash = u.searchParams.get('h');
+        return hash
+          ? `https://player.vimeo.com/video/${parts[1]}?h=${hash}`
+          : `https://player.vimeo.com/video/${parts[1]}`;
+      }
+    }
+    return null;
   };
 
   // Auto-save functionality
@@ -1456,6 +1479,17 @@ const Profile = () => {
                           value={formData.online_video_url}
                           placeholder={t('profile.media.onlineVideoPlaceholder')}
                           onChange={e => setFormData(prev => ({ ...prev, online_video_url: e.target.value }))}
+                          onBlur={e => {
+                            const raw = e.target.value.trim();
+                            if (!raw) {
+                              setFormData(prev => ({ ...prev, online_video_url: '' }));
+                              return;
+                            }
+                            const embed = getEmbedUrl(raw);
+                            if (embed) {
+                              setFormData(prev => ({ ...prev, online_video_url: embed }));
+                            }
+                          }}
                         />
                         <p className="text-xs text-muted-foreground">{t('profile.media.onlineVideoHelp')}</p>
                       </div>
@@ -1476,15 +1510,11 @@ const Profile = () => {
                             </div>
                           );
                         }
-                        if (isValidUrl(url)) {
-                          return (
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all">
-                              <Play className="h-4 w-4" />
-                              {url}
-                            </a>
-                          );
-                        }
-                        return null;
+                        return (
+                          <p className="text-sm text-destructive">
+                            {t('profile.media.onlineVideoInvalid')}
+                          </p>
+                        );
                       })()}
                     </div>
                   </CardContent>
