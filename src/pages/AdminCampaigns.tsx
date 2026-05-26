@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2 } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { formatDate } from '@/lib/format';
@@ -66,6 +66,8 @@ export default function AdminCampaigns() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [wines, setWines] = useState<Wine[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [emailLogs, setEmailLogs] = useState<any[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
   const { toast } = useToast();
 
   // Filters
