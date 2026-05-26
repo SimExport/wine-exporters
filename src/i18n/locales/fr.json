@@ -1754,7 +1754,8 @@
       "validate": "Valider",
       "reject": "Refuser",
       "addProspect": "Ajouter prospect",
-      "viewProspects": "Voir prospects"
+      "viewProspects": "Voir prospects",
+      "allMarkets": "Marchés sélectionnés"
     },
     "drawer": {
       "title": "Ajouter un prospect à \"{{name}}\"",
