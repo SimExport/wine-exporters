@@ -1479,6 +1479,17 @@ const Profile = () => {
                           value={formData.online_video_url}
                           placeholder={t('profile.media.onlineVideoPlaceholder')}
                           onChange={e => setFormData(prev => ({ ...prev, online_video_url: e.target.value }))}
+                          onBlur={e => {
+                            const raw = e.target.value.trim();
+                            if (!raw) {
+                              setFormData(prev => ({ ...prev, online_video_url: '' }));
+                              return;
+                            }
+                            const embed = getEmbedUrl(raw);
+                            if (embed) {
+                              setFormData(prev => ({ ...prev, online_video_url: embed }));
+                            }
+                          }}
                         />
                         <p className="text-xs text-muted-foreground">{t('profile.media.onlineVideoHelp')}</p>
                       </div>
@@ -1499,15 +1510,11 @@ const Profile = () => {
                             </div>
                           );
                         }
-                        if (isValidUrl(url)) {
-                          return (
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all">
-                              <Play className="h-4 w-4" />
-                              {url}
-                            </a>
-                          );
-                        }
-                        return null;
+                        return (
+                          <p className="text-sm text-destructive">
+                            {t('profile.media.onlineVideoInvalid')}
+                          </p>
+                        );
                       })()}
                     </div>
                   </CardContent>
