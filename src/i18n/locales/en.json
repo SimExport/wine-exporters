@@ -1754,7 +1754,8 @@
       "validate": "Validate",
       "reject": "Reject",
       "addProspect": "Add prospect",
-      "viewProspects": "View prospects"
+      "viewProspects": "View prospects",
+      "allMarkets": "Selected markets"
     },
     "drawer": {
       "title": "Add a prospect to \"{{name}}\"",

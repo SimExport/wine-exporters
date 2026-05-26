@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -467,7 +468,7 @@ export default function AdminCampaigns() {
     if (!markets || markets.length === 0) return '-';
     
     const displayMarkets = markets.slice(0, 3);
-    const remaining = markets.length - 3;
+    const remainingMarkets = markets.slice(3);
     
     return (
       <div className="flex flex-wrap gap-1">
@@ -476,10 +477,29 @@ export default function AdminCampaigns() {
             {market}
           </Badge>
         ))}
-        {remaining > 0 && (
-          <Badge variant="outline" className="text-xs">
-            +{remaining}
-          </Badge>
+        {remainingMarkets.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Badge
+                variant="outline"
+                className="text-xs cursor-pointer hover:bg-muted"
+              >
+                +{remainingMarkets.length}
+              </Badge>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto max-w-xs p-3" align="start">
+              <p className="text-xs font-medium text-muted-foreground mb-2">
+                {t('adminCampaigns.table.allMarkets')}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {markets.map(market => (
+                  <Badge key={market} variant="outline" className="text-xs">
+                    {market}
+                  </Badge>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         )}
       </div>
     );
