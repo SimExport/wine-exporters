@@ -106,11 +106,39 @@ export default function AdminCampaigns() {
 
   useEffect(() => {
     fetchCampaigns();
+    fetchEmailLogs();
   }, []);
 
   useEffect(() => {
     applyFilters();
   }, [campaigns, filters]);
+
+  const fetchEmailLogs = async () => {
+    try {
+      setLogsLoading(true);
+      const { data, error } = await supabase
+        .from('campaign_email_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      const logs = data || [];
+      const campaignIds = Array.from(new Set(logs.map((l: any) => l.campaign_id).filter(Boolean)));
+      let nameMap: Record<string, string> = {};
+      if (campaignIds.length) {
+        const { data: camps } = await supabase
+          .from('campaigns')
+          .select('id, name')
+          .in('id', campaignIds);
+        nameMap = Object.fromEntries((camps || []).map((c: any) => [c.id, c.name]));
+      }
+      setEmailLogs(logs.map((l: any) => ({ ...l, campaign_name: nameMap[l.campaign_id] || '—' })));
+    } catch (e) {
+      console.error('Error fetching email logs:', e);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
 
   const fetchCampaigns = async () => {
     try {
