@@ -22,9 +22,9 @@ export const useRole = () => {
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (error) {
+        if (error || !data) {
           // User has no role assigned, default to 'user'
           setRole('user');
         } else {

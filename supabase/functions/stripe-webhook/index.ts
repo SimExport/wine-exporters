@@ -73,39 +73,15 @@ serve(async (req) => {
           logStep("Profile updated successfully", { userId });
         }
 
-        // Update user_roles: set role to 'paid'
-        // First check if user has a role entry
-        const { data: existingRole, error: roleCheckError } = await supabaseAdmin
+        // Upsert user_roles: ensure role is 'paid' (one row per user)
+        const { error: roleUpsertError } = await supabaseAdmin
           .from("user_roles")
-          .select("id, role")
-          .eq("user_id", userId)
-          .maybeSingle();
+          .upsert({ user_id: userId, role: "paid" }, { onConflict: "user_id" });
 
-        if (roleCheckError) {
-          logStep("ERROR checking user_roles", { error: roleCheckError.message });
-        } else if (existingRole) {
-          // Update existing role to 'paid'
-          const { error: roleUpdateError } = await supabaseAdmin
-            .from("user_roles")
-            .update({ role: "paid" })
-            .eq("user_id", userId);
-
-          if (roleUpdateError) {
-            logStep("ERROR updating user_roles", { error: roleUpdateError.message });
-          } else {
-            logStep("User role updated to paid", { userId });
-          }
+        if (roleUpsertError) {
+          logStep("ERROR upserting user_roles", { error: roleUpsertError.message });
         } else {
-          // Insert new role as 'paid'
-          const { error: roleInsertError } = await supabaseAdmin
-            .from("user_roles")
-            .insert({ user_id: userId, role: "paid" });
-
-          if (roleInsertError) {
-            logStep("ERROR inserting user_roles", { error: roleInsertError.message });
-          } else {
-            logStep("User role created as paid", { userId });
-          }
+          logStep("User role set to paid", { userId });
         }
 
         break;
