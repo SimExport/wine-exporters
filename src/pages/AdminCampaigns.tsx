@@ -770,6 +770,81 @@ export default function AdminCampaigns() {
         </CardContent>
       </Card>
 
+      {/* Email Logs */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Logs des emails envoyés
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={fetchEmailLogs} disabled={logsLoading}>
+              <RotateCcw className={`h-4 w-4 ${logsLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {logsLoading ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : emailLogs.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">
+              Aucun email envoyé pour le moment.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Événement</TableHead>
+                  <TableHead>Campagne</TableHead>
+                  <TableHead>Destinataire</TableHead>
+                  <TableHead>Sujet</TableHead>
+                  <TableHead>Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {emailLogs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {formatDate(log.created_at)}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <Badge variant="outline">{log.event_type}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">{log.campaign_name}</TableCell>
+                    <TableCell className="text-sm">
+                      <div>{log.recipient}</div>
+                      {log.bcc && (
+                        <div className="text-xs text-muted-foreground">Cci : {log.bcc}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs max-w-[260px] truncate" title={log.subject || ''}>
+                      {log.subject || '—'}
+                    </TableCell>
+                    <TableCell>
+                      {log.status === 'sent' ? (
+                        <Badge className="bg-green-600 hover:bg-green-700">Envoyé</Badge>
+                      ) : (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Badge variant="destructive" className="cursor-pointer">Échec</Badge>
+                          </PopoverTrigger>
+                          <PopoverContent className="max-w-sm text-xs break-words">
+                            {log.error_message || 'Erreur inconnue'}
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Add Prospect Drawer */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerContent className="max-h-[90vh] overflow-y-auto">
