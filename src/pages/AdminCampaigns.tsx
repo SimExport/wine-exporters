@@ -480,12 +480,12 @@ export default function AdminCampaigns() {
         {remainingMarkets.length > 0 && (
           <Popover>
             <PopoverTrigger asChild>
-              <Badge
-                variant="outline"
-                className="text-xs cursor-pointer hover:bg-muted"
+              <button
+                type="button"
+                className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 +{remainingMarkets.length}
-              </Badge>
+              </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto max-w-xs p-3" align="start">
               <p className="text-xs font-medium text-muted-foreground mb-2">
