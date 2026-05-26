@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
@@ -60,6 +61,26 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email sent successfully:", emailResponse);
+
+    try {
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const sendErr = (emailResponse as any)?.error;
+      await admin.from("campaign_email_logs").insert({
+        campaign_id: campaignId,
+        event_type: "campaign_submission",
+        recipient: "simon@exportvins.fr",
+        bcc: null,
+        subject: `🚀 Nouvelle campagne soumise : ${campaignName}`,
+        status: sendErr ? "failed" : "sent",
+        error_message: sendErr ? JSON.stringify(sendErr) : null,
+        resend_id: (emailResponse as any)?.data?.id ?? null,
+      });
+    } catch (logErr) {
+      console.error("Failed to log email:", logErr);
+    }
 
     // Send Slack notification
     if (slackWebhookUrl) {
