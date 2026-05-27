@@ -36,6 +36,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        if (event === 'PASSWORD_RECOVERY') {
+          if (window.location.pathname !== '/reset-password') {
+            window.location.replace('/reset-password');
+          }
+        }
       }
     );
 

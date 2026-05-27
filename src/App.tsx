@@ -25,6 +25,7 @@ import AdminInvitations from "./pages/AdminInvitations";
 import AdminSourcing from "./pages/AdminSourcing";
 import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/" element={<AuthenticatedApp />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/set-password" element={<SetPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
             <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
