@@ -7,7 +7,7 @@ export type SubscriptionTier = 'free' | 'paid';
 
 export const useSubscription = () => {
   const { user } = useAuth();
-  const { isAdmin, loading: roleLoading } = useRole();
+  const { isAdmin, role, loading: roleLoading } = useRole();
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [campaignsRemaining, setCampaignsRemaining] = useState<number>(0);
   const [sourcingRequestsRemaining, setSourcingRequestsRemaining] = useState<number>(0);
@@ -63,11 +63,11 @@ export const useSubscription = () => {
   const tier: SubscriptionTier = 
     subscriptionPlan && subscriptionPlan !== 'none' ? 'paid' : 'free';
 
-  // Check if user has paid access (paid subscription OR admin)
-  const hasPaidAccess = isAdmin || tier === 'paid';
+  // Check if user has paid access (paid subscription OR admin OR invited user with 'paid' role)
+  const hasPaidAccess = isAdmin || role === 'paid' || tier === 'paid';
 
-  // Check if user is free tier (not admin and no subscription)
-  const isFreeUser = !isAdmin && tier === 'free';
+  // Check if user is free tier (not admin, no paid role, no subscription)
+  const isFreeUser = !isAdmin && role !== 'paid' && tier === 'free';
 
   // Check if user can launch a campaign (has campaigns remaining or is admin)
   const canLaunchCampaign = isAdmin || (hasPaidAccess && campaignsRemaining > 0);
