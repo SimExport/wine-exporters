@@ -23,6 +23,7 @@ import CRM from "./pages/CRM";
 import AdminCampaigns from "./pages/AdminCampaigns";
 import AdminInvitations from "./pages/AdminInvitations";
 import AdminSourcing from "./pages/AdminSourcing";
+import AdminUsers from "./pages/AdminUsers";
 import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -107,6 +108,13 @@ const App = () => (
               <DashboardLayout>
                 <AdminRoute>
                   <AdminInvitations />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
+            <Route path="/admin/users" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminUsers />
                 </AdminRoute>
               </DashboardLayout>
             } />
