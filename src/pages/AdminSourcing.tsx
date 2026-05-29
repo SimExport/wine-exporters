@@ -5,9 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -156,14 +153,14 @@ export default function AdminSourcing() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">{t('adminSourcing.requests')}</CardTitle>
           <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={periodFilter} onValueChange={(v) => setPeriodFilter(v as typeof periodFilter)}>
               <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('adminSourcing.filter.all')}</SelectItem>
-                <SelectItem value="pending">{t('sourcing.status.pending')}</SelectItem>
-                <SelectItem value="in_progress">{t('sourcing.status.in_progress')}</SelectItem>
-                <SelectItem value="validated">{t('sourcing.status.validated')}</SelectItem>
-                <SelectItem value="archived">{t('sourcing.status.archived')}</SelectItem>
+                <SelectItem value="24h">{t('adminSourcing.filter.period.24h')}</SelectItem>
+                <SelectItem value="7d">{t('adminSourcing.filter.period.7d')}</SelectItem>
+                <SelectItem value="30d">{t('adminSourcing.filter.period.30d')}</SelectItem>
+                <SelectItem value="90d">{t('adminSourcing.filter.period.90d')}</SelectItem>
+                <SelectItem value="all">{t('adminSourcing.filter.period.all')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -229,25 +226,6 @@ export default function AdminSourcing() {
                             <Eye className="h-4 w-4 mr-1" />{t('adminSourcing.action.viewResults')}
                           </Button>
                         )}
-                        {req.status !== 'validated' && req.status !== 'archived' && (
-                          <Button size="sm" onClick={() => openValidate(req)}>
-                            <CheckCircle2 className="h-4 w-4 mr-1" />{t('adminSourcing.action.validate')}
-                          </Button>
-                        )}
-                        {req.status === 'validated' && req.result_file_url && (
-                          <Button size="sm" variant="outline" onClick={() => downloadFile(req)}>
-                            <Download className="h-4 w-4 mr-1" />{t('adminSourcing.action.download')}
-                          </Button>
-                        )}
-                        {req.status !== 'archived' ? (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(req, 'archived')}>
-                            <Archive className="h-4 w-4 mr-1" />{t('adminSourcing.action.archive')}
-                          </Button>
-                        ) : (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(req, 'pending')}>
-                            <RotateCcw className="h-4 w-4 mr-1" />{t('adminSourcing.action.unarchive')}
-                          </Button>
-                        )}
                         <Button size="sm" variant="ghost" onClick={() => { setActiveRequest(req); setDeleteOpen(true); }}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -260,50 +238,6 @@ export default function AdminSourcing() {
           )}
         </CardContent>
       </Card>
-
-      {/* Validate dialog */}
-      <Dialog open={validateOpen} onOpenChange={setValidateOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t('adminSourcing.validateDialog.title')}</DialogTitle>
-            <DialogDescription>{t('adminSourcing.validateDialog.description')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div>
-              <Label>{t('adminSourcing.validateDialog.file')}</Label>
-              <Input
-                type="file"
-                accept=".pdf,.docx,.doc,.xlsx,.csv"
-                onChange={e => setUploadFile(e.target.files?.[0] || null)}
-                className="mt-1.5"
-              />
-              {uploadFile && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {uploadFile.name} · {(uploadFile.size / 1024).toFixed(1)} KB
-                </p>
-              )}
-            </div>
-            <div>
-              <Label>{t('adminSourcing.validateDialog.note')}</Label>
-              <Textarea
-                value={adminNote}
-                onChange={e => setAdminNote(e.target.value)}
-                rows={3}
-                placeholder={t('adminSourcing.validateDialog.notePlaceholder')}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setValidateOpen(false)} disabled={submitting}>
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleValidate} disabled={!uploadFile || submitting}>
-              {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
-              {t('adminSourcing.validateDialog.submit')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete confirm */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
