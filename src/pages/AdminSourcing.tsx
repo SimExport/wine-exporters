@@ -10,9 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Loader2, CheckCircle2, Archive, Trash2, Upload, Download, PlayCircle, RotateCcw, FileSearch, Eye } from 'lucide-react';
+import { Loader2, Trash2, PlayCircle, FileSearch, Eye } from 'lucide-react';
 import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { formatDateLong } from '@/lib/format';
@@ -53,14 +52,9 @@ export default function AdminSourcing() {
   const { toast } = useToast();
   const [requests, setRequests] = useState<SourcingRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [periodFilter, setPeriodFilter] = useState<'24h' | '7d' | '30d' | '90d' | 'all'>('7d');
 
-  const [validateOpen, setValidateOpen] = useState(false);
   const [activeRequest, setActiveRequest] = useState<SourcingRequest | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [adminNote, setAdminNote] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resultsOpen, setResultsOpen] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -100,77 +94,13 @@ export default function AdminSourcing() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = useMemo(() => {
-    if (statusFilter === 'all') return requests;
-    return requests.filter(r => r.status === statusFilter);
-  }, [requests, statusFilter]);
+    if (periodFilter === 'all') return requests;
+    const hours = periodFilter === '24h' ? 24 : periodFilter === '7d' ? 24 * 7 : periodFilter === '30d' ? 24 * 30 : 24 * 90;
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return requests.filter(r => new Date(r.created_at).getTime() >= cutoff);
+  }, [requests, periodFilter]);
 
   const marketLabel = (code: string) => COUNTRY_LIST.find(c => c.code === code)?.name || code;
-
-  const openValidate = (req: SourcingRequest) => {
-    setActiveRequest(req);
-    setUploadFile(null);
-    setAdminNote(req.admin_note || '');
-    setValidateOpen(true);
-  };
-
-  const handleValidate = async () => {
-    if (!activeRequest || !uploadFile) return;
-    setSubmitting(true);
-    try {
-      const ext = uploadFile.name.split('.').pop()?.toLowerCase() || 'pdf';
-      if (!['pdf', 'docx', 'doc', 'xlsx', 'csv'].includes(ext)) {
-        toast({ title: t('common.error'), description: t('adminSourcing.invalidFormat'), variant: 'destructive' });
-        setSubmitting(false);
-        return;
-      }
-      const path = `${activeRequest.user_id}/${activeRequest.id}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from('sourcing-results')
-        .upload(path, uploadFile, { upsert: true, contentType: uploadFile.type });
-      if (upErr) throw upErr;
-
-      const { error: updErr } = await supabase
-        .from('sourcing_requests')
-        .update({
-          status: 'validated',
-          result_file_url: path,
-          result_file_name: uploadFile.name,
-          result_file_size: uploadFile.size,
-          result_file_format: ext,
-          admin_note: adminNote || null,
-          validated_at: new Date().toISOString(),
-        })
-        .eq('id', activeRequest.id);
-      if (updErr) throw updErr;
-
-      try {
-        await supabase.functions.invoke('notify-sourcing-validated', {
-          body: { requestId: activeRequest.id },
-        });
-      } catch (e) { console.error(e); }
-
-      toast({ title: t('adminSourcing.validatedTitle'), description: t('adminSourcing.validatedDesc') });
-      setValidateOpen(false);
-      fetchRequests();
-    } catch (e: any) {
-      console.error(e);
-      toast({ title: t('common.error'), description: e.message, variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const updateStatus = async (req: SourcingRequest, status: SourcingRequest['status']) => {
-    const patch: any = { status };
-    if (status === 'archived') patch.archived_at = new Date().toISOString();
-    if (status !== 'archived') patch.archived_at = null;
-    const { error } = await supabase.from('sourcing_requests').update(patch).eq('id', req.id);
-    if (error) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
-      return;
-    }
-    fetchRequests();
-  };
 
   const startProcessing = async (req: SourcingRequest) => {
     setProcessingId(req.id);
