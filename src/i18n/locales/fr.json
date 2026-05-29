@@ -1966,14 +1966,21 @@
   },
   "adminSourcing": {
     "title": "Recherches sur-mesure",
-    "subtitle": "Gérez les recherches sur-mesure des clients, validez-les et livrez les résultats.",
-    "requests": "Demandes",
-    "empty": "Aucune demande dans cette catégorie.",
+    "subtitle": "Historique des recherches sur-mesure lancées par les utilisateurs.",
+    "requests": "Historique",
+    "empty": "Aucune recherche sur cette période.",
     "invalidFormat": "Format non supporté. Utilisez PDF, DOCX, XLSX ou CSV.",
     "validatedTitle": "Recherche validée",
     "validatedDesc": "Le client a été notifié par email.",
     "filter": {
-      "all": "Toutes"
+      "all": "Toutes",
+      "period": {
+        "24h": "24 heures",
+        "7d": "7 jours",
+        "30d": "30 jours",
+        "90d": "90 jours",
+        "all": "Tout"
+      }
     },
     "col": {
       "client": "Client",

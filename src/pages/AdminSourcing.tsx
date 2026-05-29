@@ -5,14 +5,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Loader2, CheckCircle2, Archive, Trash2, Upload, Download, PlayCircle, RotateCcw, FileSearch, Eye } from 'lucide-react';
+import { Loader2, Trash2, PlayCircle, FileSearch, Eye } from 'lucide-react';
 import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { formatDateLong } from '@/lib/format';
@@ -53,14 +49,9 @@ export default function AdminSourcing() {
   const { toast } = useToast();
   const [requests, setRequests] = useState<SourcingRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [periodFilter, setPeriodFilter] = useState<'24h' | '7d' | '30d' | '90d' | 'all'>('7d');
 
-  const [validateOpen, setValidateOpen] = useState(false);
   const [activeRequest, setActiveRequest] = useState<SourcingRequest | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [adminNote, setAdminNote] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [resultsOpen, setResultsOpen] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -100,77 +91,13 @@ export default function AdminSourcing() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const filtered = useMemo(() => {
-    if (statusFilter === 'all') return requests;
-    return requests.filter(r => r.status === statusFilter);
-  }, [requests, statusFilter]);
+    if (periodFilter === 'all') return requests;
+    const hours = periodFilter === '24h' ? 24 : periodFilter === '7d' ? 24 * 7 : periodFilter === '30d' ? 24 * 30 : 24 * 90;
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return requests.filter(r => new Date(r.created_at).getTime() >= cutoff);
+  }, [requests, periodFilter]);
 
   const marketLabel = (code: string) => COUNTRY_LIST.find(c => c.code === code)?.name || code;
-
-  const openValidate = (req: SourcingRequest) => {
-    setActiveRequest(req);
-    setUploadFile(null);
-    setAdminNote(req.admin_note || '');
-    setValidateOpen(true);
-  };
-
-  const handleValidate = async () => {
-    if (!activeRequest || !uploadFile) return;
-    setSubmitting(true);
-    try {
-      const ext = uploadFile.name.split('.').pop()?.toLowerCase() || 'pdf';
-      if (!['pdf', 'docx', 'doc', 'xlsx', 'csv'].includes(ext)) {
-        toast({ title: t('common.error'), description: t('adminSourcing.invalidFormat'), variant: 'destructive' });
-        setSubmitting(false);
-        return;
-      }
-      const path = `${activeRequest.user_id}/${activeRequest.id}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from('sourcing-results')
-        .upload(path, uploadFile, { upsert: true, contentType: uploadFile.type });
-      if (upErr) throw upErr;
-
-      const { error: updErr } = await supabase
-        .from('sourcing_requests')
-        .update({
-          status: 'validated',
-          result_file_url: path,
-          result_file_name: uploadFile.name,
-          result_file_size: uploadFile.size,
-          result_file_format: ext,
-          admin_note: adminNote || null,
-          validated_at: new Date().toISOString(),
-        })
-        .eq('id', activeRequest.id);
-      if (updErr) throw updErr;
-
-      try {
-        await supabase.functions.invoke('notify-sourcing-validated', {
-          body: { requestId: activeRequest.id },
-        });
-      } catch (e) { console.error(e); }
-
-      toast({ title: t('adminSourcing.validatedTitle'), description: t('adminSourcing.validatedDesc') });
-      setValidateOpen(false);
-      fetchRequests();
-    } catch (e: any) {
-      console.error(e);
-      toast({ title: t('common.error'), description: e.message, variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const updateStatus = async (req: SourcingRequest, status: SourcingRequest['status']) => {
-    const patch: any = { status };
-    if (status === 'archived') patch.archived_at = new Date().toISOString();
-    if (status !== 'archived') patch.archived_at = null;
-    const { error } = await supabase.from('sourcing_requests').update(patch).eq('id', req.id);
-    if (error) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
-      return;
-    }
-    fetchRequests();
-  };
 
   const startProcessing = async (req: SourcingRequest) => {
     setProcessingId(req.id);
@@ -205,16 +132,6 @@ export default function AdminSourcing() {
     fetchRequests();
   };
 
-  const downloadFile = async (req: SourcingRequest) => {
-    if (!req.result_file_url) return;
-    const { data, error } = await supabase.storage.from('sourcing-results').createSignedUrl(req.result_file_url, 600);
-    if (error || !data?.signedUrl) {
-      toast({ title: t('common.error'), description: error?.message || 'download error', variant: 'destructive' });
-      return;
-    }
-    window.open(data.signedUrl, '_blank');
-  };
-
   return (
     <div className="container mx-auto max-w-7xl px-4 py-6">
       <div className="mb-6">
@@ -226,14 +143,14 @@ export default function AdminSourcing() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">{t('adminSourcing.requests')}</CardTitle>
           <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={periodFilter} onValueChange={(v) => setPeriodFilter(v as typeof periodFilter)}>
               <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('adminSourcing.filter.all')}</SelectItem>
-                <SelectItem value="pending">{t('sourcing.status.pending')}</SelectItem>
-                <SelectItem value="in_progress">{t('sourcing.status.in_progress')}</SelectItem>
-                <SelectItem value="validated">{t('sourcing.status.validated')}</SelectItem>
-                <SelectItem value="archived">{t('sourcing.status.archived')}</SelectItem>
+                <SelectItem value="24h">{t('adminSourcing.filter.period.24h')}</SelectItem>
+                <SelectItem value="7d">{t('adminSourcing.filter.period.7d')}</SelectItem>
+                <SelectItem value="30d">{t('adminSourcing.filter.period.30d')}</SelectItem>
+                <SelectItem value="90d">{t('adminSourcing.filter.period.90d')}</SelectItem>
+                <SelectItem value="all">{t('adminSourcing.filter.period.all')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -299,25 +216,6 @@ export default function AdminSourcing() {
                             <Eye className="h-4 w-4 mr-1" />{t('adminSourcing.action.viewResults')}
                           </Button>
                         )}
-                        {req.status !== 'validated' && req.status !== 'archived' && (
-                          <Button size="sm" onClick={() => openValidate(req)}>
-                            <CheckCircle2 className="h-4 w-4 mr-1" />{t('adminSourcing.action.validate')}
-                          </Button>
-                        )}
-                        {req.status === 'validated' && req.result_file_url && (
-                          <Button size="sm" variant="outline" onClick={() => downloadFile(req)}>
-                            <Download className="h-4 w-4 mr-1" />{t('adminSourcing.action.download')}
-                          </Button>
-                        )}
-                        {req.status !== 'archived' ? (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(req, 'archived')}>
-                            <Archive className="h-4 w-4 mr-1" />{t('adminSourcing.action.archive')}
-                          </Button>
-                        ) : (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(req, 'pending')}>
-                            <RotateCcw className="h-4 w-4 mr-1" />{t('adminSourcing.action.unarchive')}
-                          </Button>
-                        )}
                         <Button size="sm" variant="ghost" onClick={() => { setActiveRequest(req); setDeleteOpen(true); }}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -330,50 +228,6 @@ export default function AdminSourcing() {
           )}
         </CardContent>
       </Card>
-
-      {/* Validate dialog */}
-      <Dialog open={validateOpen} onOpenChange={setValidateOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t('adminSourcing.validateDialog.title')}</DialogTitle>
-            <DialogDescription>{t('adminSourcing.validateDialog.description')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div>
-              <Label>{t('adminSourcing.validateDialog.file')}</Label>
-              <Input
-                type="file"
-                accept=".pdf,.docx,.doc,.xlsx,.csv"
-                onChange={e => setUploadFile(e.target.files?.[0] || null)}
-                className="mt-1.5"
-              />
-              {uploadFile && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {uploadFile.name} · {(uploadFile.size / 1024).toFixed(1)} KB
-                </p>
-              )}
-            </div>
-            <div>
-              <Label>{t('adminSourcing.validateDialog.note')}</Label>
-              <Textarea
-                value={adminNote}
-                onChange={e => setAdminNote(e.target.value)}
-                rows={3}
-                placeholder={t('adminSourcing.validateDialog.notePlaceholder')}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setValidateOpen(false)} disabled={submitting}>
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleValidate} disabled={!uploadFile || submitting}>
-              {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
-              {t('adminSourcing.validateDialog.submit')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete confirm */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
