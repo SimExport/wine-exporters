@@ -1966,14 +1966,21 @@
   },
   "adminSourcing": {
     "title": "Bespoke searches",
-    "subtitle": "Manage client bespoke searches, validate them and deliver results.",
-    "requests": "Requests",
-    "empty": "No requests in this category.",
+    "subtitle": "History of bespoke searches launched by users.",
+    "requests": "History",
+    "empty": "No searches for this period.",
     "invalidFormat": "Unsupported format. Use PDF, DOCX, XLSX or CSV.",
     "validatedTitle": "Search validated",
     "validatedDesc": "The client has been notified by email.",
     "filter": {
-      "all": "All"
+      "all": "All",
+      "period": {
+        "24h": "24 hours",
+        "7d": "7 days",
+        "30d": "30 days",
+        "90d": "90 days",
+        "all": "All time"
+      }
     },
     "col": {
       "client": "Client",
