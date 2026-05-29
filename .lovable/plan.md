@@ -1,28 +1,31 @@
-## Problème
+## Diagnostic
 
-Les utilisateurs invités (ex. Pierre Manceau, Bernhard Backhaus) ont bien `user_roles.role = 'paid'` (mis par le trigger `handle_new_user_role`), mais leur `profiles.subscription_plan` reste à `'none'`.
+La recherche bloquée appartient à l'utilisateur `1c668db4-…` (request `8fb91241`, marché États-Unis).
 
-Or le hook `useSubscription` (qui détermine `hasPaidAccess` utilisé pour /importers, recherches sur‑mesure, etc.) se base **uniquement** sur `profiles.subscription_plan`, jamais sur `user_roles.role`. Résultat : 14 utilisateurs actuellement bloqués alors qu'ils devraient avoir accès.
+**Pourquoi elle ne s'est pas lancée automatiquement :**
+Le même utilisateur avait déjà lancé une recherche **2 minutes avant** (`3b4196ba`, Suisse) qui a consommé son seul crédit mensuel (`search_credits = 1` au plan « paid »). Quand il a soumis la 2ᵉ requête, la fonction `process-sourcing-request` a vérifié `user_credits.search_credits` → 0 → s'est arrêtée immédiatement avec `error_message = "Crédit de recherche insuffisant"`. C'est exactement le comportement attendu côté code, mais il n'est pas visible dans l'admin (pas d'alerte rouge dédiée).
 
-## Correctifs
+**Pourquoi tu ne peux pas la valider :**
+Le bouton « Valider » ouvre une modale qui exige **un fichier de résultat à uploader** (`disabled={!uploadFile}`). Comme la recherche n'a jamais tourné, il n'y a rien à valider — ni résumé IA, ni fichier. Le flux normal attend que `process-sourcing-request` produise un résultat avant que l'admin puisse valider.
 
-### 1. Frontend — `src/hooks/useSubscription.tsx`
-- Lire aussi le rôle via `useRole` (déjà importé) et considérer `role === 'paid'` comme accès payant.
-- `hasPaidAccess = isAdmin || role === 'paid' || tier === 'paid'`
-- `isFreeUser` ajusté en conséquence.
-- `canLaunchCampaign` inchangé hormis la nouvelle source de `hasPaidAccess`.
+## Plan d'intervention
 
-### 2. Frontend — `src/hooks/useRole.tsx`
-- Étendre le type `AppRole` à `'admin' | 'user' | 'free' | 'paid'` pour refléter l'enum DB réel.
-- Pas d'autre changement de logique.
+### 1. Débloquer cette requête (action immédiate)
+Restaurer `search_credits = 1` pour l'utilisateur `1c668db4-…` puis utiliser le bouton « Relancer » existant dans `/admin/recherches` pour lancer le traitement IA. Une fois le résultat généré, la validation sera possible normalement.
 
-### 3. Backend — migration SQL
-- Backfill : pour tous les `user_roles.role = 'paid'` dont le profil a `subscription_plan` NULL ou `'none'`, mettre `subscription_plan = 'paid'` (cohérence + permet à `has_paid_access` SQL de fonctionner aussi).
-- Mettre à jour le trigger `handle_new_user_role` : quand l'utilisateur est invité, en plus d'insérer le rôle `'paid'`, mettre à jour `profiles.subscription_plan = 'paid'` pour ce user_id (UPSERT après le trigger `handle_new_user` qui crée déjà la ligne profile).
+### 2. Améliorer l'admin pour éviter le blocage silencieux (UI)
+Dans `src/pages/AdminSourcing.tsx` :
+- Afficher clairement `error_message` (badge rouge) à côté du statut quand la requête est `pending` avec une erreur — aujourd'hui ce champ n'est lu nulle part dans la table admin.
+- Ajouter un bouton **« Relancer (admin override) »** visible uniquement quand `error_message` contient « crédit » : il appelle `process-sourcing-request` avec un flag `force=true`.
 
-### 4. Vérification
-- Recharger l'app en tant qu'un des utilisateurs concernés (ou requête SQL) pour confirmer que `hasPaidAccess` renvoie true et que /importers + sourcing sont accessibles.
+### 3. Backend — bypass crédit pour admin
+Dans `supabase/functions/process-sourcing-request/index.ts` :
+- Accepter un paramètre `force: boolean` dans le body.
+- Quand `force === true`, vérifier via le JWT que l'appelant a `role = 'admin'` (via `has_role`) et sauter la vérification + décrément de crédit (ou décrémenter à 0 sans bloquer).
+- Sans `force`, comportement actuel inchangé pour les appels utilisateur.
 
-## Hors scope
-- Aucun changement Stripe / webhook / facturation.
-- Aucun changement UI à part le déblocage automatique.
+### Détails techniques
+
+- Le `verify_jwt = false` actuel sur `process-sourcing-request` reste, mais en mode `force` on récupère explicitement `Authorization` header → `supabase.auth.getUser(token)` → on contrôle `user_roles.role = 'admin'` avant de bypasser.
+- Aucun changement de schéma DB requis.
+- La modale de validation reste inchangée : elle s'utilisera après que le résultat IA aura été généré par la relance.
