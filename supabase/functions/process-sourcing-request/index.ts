@@ -56,11 +56,29 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   let sourcing_request_id: string | undefined;
+  let force = false;
   try {
     const body = await req.json();
     sourcing_request_id = body?.sourcing_request_id;
+    force = body?.force === true;
   } catch (_) {}
   if (!sourcing_request_id) return json({ error: "sourcing_request_id required" }, 400);
+
+  // If force is requested, verify the caller is an admin via their JWT
+  if (force) {
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) return json({ error: "auth required for force" }, 401);
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userData?.user) return json({ error: "invalid token" }, 401);
+    const { data: roleRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) return json({ error: "admin only" }, 403);
+  }
 
   // Load request
   const { data: reqRow, error: reqErr } = await supabase
@@ -86,17 +104,21 @@ Deno.serve(async (req) => {
     .select("search_credits")
     .eq("user_id", userId)
     .maybeSingle();
-  if (!credits || (credits.search_credits ?? 0) < 1) {
+  const hasCredit = credits && (credits.search_credits ?? 0) >= 1;
+  if (!hasCredit && !force) {
     await supabase.from("sourcing_requests").update({
       error_message: "Crédit de recherche insuffisant",
     }).eq("id", sourcing_request_id);
     return json({ error: "no_credits" }, 402);
   }
 
-  // Decrement credit + mark in_progress
-  await supabase.from("user_credits")
-    .update({ search_credits: credits.search_credits - 1, updated_at: new Date().toISOString() })
-    .eq("user_id", userId);
+  // Decrement credit (only if available) + mark in_progress
+  const previousCredits = credits?.search_credits ?? 0;
+  if (hasCredit) {
+    await supabase.from("user_credits")
+      .update({ search_credits: previousCredits - 1, updated_at: new Date().toISOString() })
+      .eq("user_id", userId);
+  }
 
   await supabase.from("sourcing_requests").update({
     status: "in_progress",
@@ -105,8 +127,9 @@ Deno.serve(async (req) => {
   }).eq("id", sourcing_request_id);
 
   const refundCredit = async () => {
+    if (!hasCredit) return;
     await supabase.from("user_credits")
-      .update({ search_credits: credits.search_credits, updated_at: new Date().toISOString() })
+      .update({ search_credits: previousCredits, updated_at: new Date().toISOString() })
       .eq("user_id", userId);
   };
 
