@@ -37,6 +37,10 @@ interface SourcingRequest {
   states_filter?: string[] | null;
 }
 
+interface SourcingRequestWithError extends SourcingRequest {
+  error_message?: string | null;
+}
+
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
   pending: 'secondary',
   in_progress: 'outline',
@@ -173,7 +177,7 @@ export default function AdminSourcing() {
     toast({ title: t('adminSourcing.toast.processingStarted') });
     try {
       const { data, error } = await supabase.functions.invoke('process-sourcing-request', {
-        body: { sourcing_request_id: req.id },
+        body: { sourcing_request_id: req.id, force: true },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -262,6 +266,11 @@ export default function AdminSourcing() {
                     <TableCell>{marketLabel(req.target_market)}</TableCell>
                     <TableCell>
                       <Badge variant={STATUS_VARIANTS[req.status]}>{t(`sourcing.status.${req.status}`)}</Badge>
+                      {(req as any).error_message && req.status === 'pending' && (
+                        <div className="mt-1 text-xs text-destructive max-w-[220px] truncate" title={(req as any).error_message}>
+                          {(req as any).error_message}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{formatDateLong(req.created_at)}</TableCell>
                     <TableCell className="text-right">
