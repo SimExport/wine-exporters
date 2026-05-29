@@ -132,16 +132,6 @@ export default function AdminSourcing() {
     fetchRequests();
   };
 
-  const downloadFile = async (req: SourcingRequest) => {
-    if (!req.result_file_url) return;
-    const { data, error } = await supabase.storage.from('sourcing-results').createSignedUrl(req.result_file_url, 600);
-    if (error || !data?.signedUrl) {
-      toast({ title: t('common.error'), description: error?.message || 'download error', variant: 'destructive' });
-      return;
-    }
-    window.open(data.signedUrl, '_blank');
-  };
-
   return (
     <div className="container mx-auto max-w-7xl px-4 py-6">
       <div className="mb-6">
