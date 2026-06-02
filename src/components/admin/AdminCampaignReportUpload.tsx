@@ -75,17 +75,34 @@ export function AdminCampaignReportUpload() {
       const { data: pub } = supabase.storage.from('campaign-reports').getPublicUrl(path);
       const fileUrl = pub.publicUrl;
 
-      const { error: insErr } = await supabase.from('campaign_reports').insert({
-        user_id: userId,
-        campaign_name: campaignName.trim(),
-        file_url: fileUrl,
-        file_name: file.name,
-        file_size: file.size,
-        file_format: ext,
-      });
+      const { data: inserted, error: insErr } = await supabase
+        .from('campaign_reports')
+        .insert({
+          user_id: userId,
+          campaign_name: campaignName.trim(),
+          file_url: fileUrl,
+          file_name: file.name,
+          file_size: file.size,
+          file_format: ext,
+        })
+        .select()
+        .single();
       if (insErr) throw insErr;
 
-      toast({ title: t('adminCampaigns.upload.successTitle'), description: t('adminCampaigns.upload.successDesc') });
+      const { error: notifyErr } = await supabase.functions.invoke('notify-campaign-report', {
+        body: { record: inserted },
+      });
+
+      if (notifyErr) {
+        console.error('notify-campaign-report failed', notifyErr);
+        toast({
+          title: t('adminCampaigns.upload.successTitle'),
+          description: 'Rapport uploadé, mais l\'envoi de la notification a échoué.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({ title: t('adminCampaigns.upload.successTitle'), description: t('adminCampaigns.upload.successDesc') });
+      }
       reset();
     } catch (e: any) {
       console.error('Upload error', e);
