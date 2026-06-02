@@ -821,6 +821,13 @@
       "ready": "Tout est prêt. Vous pouvez lancer votre campagne.",
       "errorsCount": "{{count}} erreur(s) bloquante(s):",
       "fix": "Corriger"
+    },
+    "report": {
+      "sectionTitle": "Rapport de campagne",
+      "badge": "Rapport disponible",
+      "availableSince": "Disponible depuis le {{date}}",
+      "view": "Voir le rapport",
+      "download": "Télécharger"
     }
   },
   "createCampaign": {
@@ -1785,6 +1792,21 @@
       "remove": "Supprimer",
       "cancel": "Annuler",
       "save": "Enregistrer"
+    },
+    "upload": {
+      "title": "Envoyer un rapport de campagne",
+      "client": "Client",
+      "selectClient": "Sélectionner un client",
+      "campaignName": "Nom de la campagne",
+      "campaignPlaceholder": "Ex : Campagne USA Q1",
+      "file": "Fichier (HTML ou PDF)",
+      "submit": "Envoyer le rapport",
+      "fillAll": "Tous les champs sont requis",
+      "invalidFormat": "Format non supporté. Seuls .html et .pdf sont acceptés.",
+      "tooLarge": "Fichier trop volumineux (max 25 Mo).",
+      "successTitle": "Rapport envoyé",
+      "successDesc": "Le client sera notifié par email.",
+      "error": "Erreur lors de l'envoi du rapport"
     }
   },
   "parseAddresses": {

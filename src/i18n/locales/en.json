@@ -821,6 +821,13 @@
       "ready": "Everything is ready. You can launch your campaign.",
       "errorsCount": "{{count}} blocking error(s):",
       "fix": "Fix"
+    },
+    "report": {
+      "sectionTitle": "Campaign report",
+      "badge": "Report available",
+      "availableSince": "Available since {{date}}",
+      "view": "View report",
+      "download": "Download"
     }
   },
   "createCampaign": {
@@ -1785,6 +1792,21 @@
       "remove": "Remove",
       "cancel": "Cancel",
       "save": "Save"
+    },
+    "upload": {
+      "title": "Send a campaign report",
+      "client": "Client",
+      "selectClient": "Select a client",
+      "campaignName": "Campaign name",
+      "campaignPlaceholder": "e.g. USA Campaign Q1",
+      "file": "File (HTML or PDF)",
+      "submit": "Send report",
+      "fillAll": "All fields are required",
+      "invalidFormat": "Unsupported format. Only .html and .pdf are accepted.",
+      "tooLarge": "File too large (max 25 MB).",
+      "successTitle": "Report sent",
+      "successDesc": "The client will be notified by email.",
+      "error": "Error while sending the report"
     }
   },
   "parseAddresses": {
