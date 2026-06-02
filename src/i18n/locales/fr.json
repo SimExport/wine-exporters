@@ -628,6 +628,16 @@
   "campaigns": {
     "list": {
       "title": "Campagnes",
+      "_": ""
+    },
+    "report": {
+      "sectionTitle": "Rapport de campagne",
+      "badge": "Rapport disponible",
+      "availableSince": "Disponible depuis le {{date}}",
+      "view": "Voir le rapport",
+      "download": "Télécharger"
+    },
+    "_dup_list": {
       "subtitle": "Gérez vos campagnes de prospection",
       "newCampaign": "Nouvelle campagne",
       "yoursCount": "Vos campagnes ({{count}})",
