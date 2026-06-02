@@ -216,6 +216,42 @@ export type Database = {
           },
         ]
       }
+      campaign_reports: {
+        Row: {
+          campaign_name: string
+          created_at: string
+          file_format: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string
+          id: string
+          notified_at: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_name: string
+          created_at?: string
+          file_format?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url: string
+          id?: string
+          notified_at?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_name?: string
+          created_at?: string
+          file_format?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          notified_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           admin_reviewer: string | null
