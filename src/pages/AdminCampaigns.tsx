@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
+import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { formatDate } from '@/lib/format';
 
 interface Campaign {
@@ -555,6 +556,9 @@ export default function AdminCampaigns() {
         </div>
         <ParseAddressesButton />
       </div>
+
+      {/* Upload campaign report */}
+      <AdminCampaignReportUpload />
 
       {/* Filters */}
       <Card>
