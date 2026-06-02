@@ -1,14 +1,27 @@
 ## Problème
 
-L'upload échoue avec "Bucket not found" car le bucket Supabase Storage `campaign-reports` n'a jamais été créé. La migration SQL initiale tentait un `INSERT INTO storage.buckets`, ce qui est interdit — il faut passer par l'outil dédié `supabase--storage_create_bucket`.
+L’upload échoue avec `Bucket not found`, donc l’application appelle bien Supabase Storage, mais le bucket `campaign-reports` n’est pas présent dans le projet Supabase connecté.
 
-## Correction
+## Ce qu’il faut faire
 
-1. **Créer le bucket** `campaign-reports` (public, pour permettre la lecture des rapports via URL publique) via `supabase--storage_create_bucket`.
-2. **Vérifier les RLS policies** sur `storage.objects` :
-   - SELECT public (lecture rapport via lien)
-   - INSERT/UPDATE/DELETE réservés aux admins (`has_role(auth.uid(), 'admin')`)
-   Si elles n'existent plus suite à la migration rejetée, les recréer.
-3. **Retester l'upload** depuis `/admin/campaigns`.
+1. Créer le bucket Storage `campaign-reports` dans Supabase.
+2. Le rendre public pour que les rapports puissent être consultés via une URL.
+3. Ajouter les policies RLS sur `storage.objects` :
+   - lecture publique des fichiers du bucket ;
+   - upload/modification/suppression réservés aux admins.
+4. Retester l’upload depuis `/admin/campaigns`.
 
-Aucun changement de code applicatif n'est nécessaire — le hook d'upload pointe déjà vers le bon bucket.
+## De ton côté
+
+Tu n’as normalement rien à faire manuellement si tu me laisses l’implémenter : j’utiliserai les outils Supabase du projet pour créer le bucket et les policies.
+
+Si tu veux le faire à la main dans Supabase :
+
+1. Va dans Supabase → Storage → New bucket.
+2. Nom exact : `campaign-reports`.
+3. Coche Public bucket.
+4. Ajoute ensuite des policies sur `storage.objects` pour autoriser l’admin à uploader.
+
+## Point important
+
+La migration SQL précédente n’a visiblement pas créé le bucket, probablement parce que les buckets Storage doivent être créés via l’API Storage native, pas via une migration SQL sur `storage.buckets`. Je corrigerai donc ça en utilisant la bonne méthode.
