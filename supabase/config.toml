@@ -38,6 +38,3 @@ verify_jwt = false
 
 [functions.notify-campaign-report]
 verify_jwt = false
-
-[functions.setup-campaign-reports-storage]
-verify_jwt = false
