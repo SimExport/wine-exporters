@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, ArrowRight, Save, Rocket, ExternalLink, FileText, Plus, X, Clock, CheckCircle, Eye, Target, Trash2, Archive, MousePointer, Reply, Pencil } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
+import { CampaignReportsSection } from '@/components/CampaignReportsSection';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { formatDate, formatCurrency, formatTime } from '@/lib/format';
@@ -962,6 +963,8 @@ ${campaignData.sendAsName}`} />
             {t('campaigns.list.newCampaign')}
           </Button>
         </div>
+
+        <CampaignReportsSection />
 
         {campaigns.length === 0 ? <Card>
             <CardContent>
