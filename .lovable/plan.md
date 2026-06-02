@@ -1,31 +1,85 @@
-## Refonte de la page /admin/recherches
+## Objectif
 
-Les recherches sur-mesure se lancent désormais automatiquement, donc la liste de validation manuelle n'a plus de sens. On la remplace par un historique consultable des recherches demandées par les utilisateurs.
+Permettre à l'admin d'uploader un rapport de campagne pour un client. Le client le voit dans `/campaigns` et reçoit un email automatique.
 
-### Changements `src/pages/AdminSourcing.tsx`
+## 1. Base de données
 
-1. **Supprimer le filtre par statut** (`pending`, `in_progress`, `validated`, `archived`) qui n'a plus de sens.
-2. **Ajouter un filtre par période** sur `created_at` :
-   - 24 heures
-   - 7 jours
-   - 30 jours
-   - 90 jours
-   - Tout
-   - Défaut : 7 jours
-3. **Simplifier le tableau** — colonnes :
-   - Utilisateur (domaine ou display_name)
-   - Pays (`target_market` traduit)
-   - Date de la recherche (`created_at`, format long)
-   - Statut (badge compact : en cours, terminée, erreur)
-   - Actions (voir résultats si dispo, supprimer)
-4. **Conserver** : dialog de résultats (`SourcingResultsDialog`), action de suppression, action "Relancer" si une recherche est en erreur (cas edge), affichage d'`error_message` discret.
-5. **Retirer** : bouton "Valider" + dialog d'upload de fichier, bouton "Archiver/Désarchiver", bouton "Lancer" manuel (puisque automatique).
-6. **Tri** : par date décroissante (plus récent en haut).
+Nouvelle table `campaign_reports` :
+- `user_id` (référence le client)
+- `campaign_name` (nom affiché)
+- `file_url` (URL publique du fichier)
+- `file_name`, `file_size`, `file_format` (html/pdf) pour l'affichage
+- `notified_at` (horodatage de l'envoi email)
 
-### i18n
-Ajouter dans `src/i18n/locales/fr.json` et `en.json` :
-- `adminSourcing.filter.period.24h` / `.7d` / `.30d` / `.90d` / `.all`
-- `adminSourcing.subtitle` mis à jour ("Historique des recherches sur-mesure lancées par les utilisateurs")
+RLS :
+- Client : lecture de ses propres rapports
+- Admin : insert + select + delete
+- GRANTs aux rôles `authenticated` et `service_role`
 
-### Hors périmètre
-Pas de changement DB, pas de changement edge functions, pas de changement du flow utilisateur côté `/sourcing`.
+## 2. Storage
+
+Nouveau bucket public `campaign-reports`. Path : `{user_id}/{timestamp}-{filename}`. Policies storage :
+- Lecture publique
+- Upload réservé aux admins (via `has_role`)
+
+## 3. Edge Function `notify-campaign-report`
+
+Déclenchée par un Database Webhook sur INSERT dans `campaign_reports`.
+
+- Récupère l'email via `auth.admin.getUserById`
+- Récupère le nom via `profiles.contact_name` (champ existant dans ce projet, pas `first_name`)
+- Envoie l'email via Resend (clé `RESEND_API_KEY` déjà configurée)
+- Expéditeur : `simon@exportvins.fr` — sujet et template HTML bilingue FR, bouton "Consulter mon rapport" pointant vers `https://wine-exporters.com/campaigns`
+- Met à jour `notified_at`
+- `verify_jwt = false` dans `config.toml` (appelé par webhook)
+- CORS standard
+
+Le webhook DB doit être configuré manuellement par l'utilisateur dans le dashboard Supabase (Database → Webhooks). Je fournirai l'URL et les étapes.
+
+## 4. UI client — `/campaigns`
+
+Nouveau hook `useCampaignReports` (fetch + realtime optionnel).
+
+Nouvelle section "Rapport de campagne" insérée **au-dessus** de la liste des campagnes, visible uniquement si au moins un rapport existe (sinon rien affiché, pas d'empty state).
+
+Pour chaque rapport, une carte avec :
+- Icône `FileText` + badge vert "Rapport disponible"
+- Titre : `campaign_name`
+- Date : "Disponible depuis le JJ/MM/YYYY" (format FR via `date-fns` locale fr)
+- Boutons :
+  - **Voir le rapport** → modal fullscreen (`Dialog` shadcn) avec `<iframe src={file_url}>` pour HTML, ou viewer PDF (iframe fonctionne aussi pour PDF dans la plupart des navigateurs)
+  - **Télécharger** → `<a href={file_url} download>`
+
+Traductions FR/EN ajoutées dans `src/i18n/locales/{fr,en}.json` sous `campaigns.report.*`.
+
+## 5. UI admin — `/admin/campaigns`
+
+Ajout d'un bloc "Envoyer un rapport de campagne" en haut de la page existante :
+
+- `Select` utilisateur cible : liste depuis `profiles` (`contact_name` + `domain_name`), recherche incluse
+- Input texte : nom de campagne
+- Input file : accepte `.html,.pdf` uniquement, validation côté client (taille max raisonnable, ex 25 Mo)
+- Bouton "Envoyer le rapport"
+
+Workflow soumission :
+1. Upload dans `campaign-reports` au path `{user_id}/{Date.now()}-{filename}`
+2. `getPublicUrl` pour obtenir l'URL
+3. `INSERT` dans `campaign_reports` (déclenche le webhook → email automatique)
+4. Toast : "Rapport envoyé, le client sera notifié par email"
+5. Reset du formulaire
+
+## Détails techniques
+
+- Bucket public en lecture : si le workspace bloque les buckets publics, le bucket sera créé puis l'utilisateur devra autoriser dans Settings → Privacy.
+- L'app utilise `profiles.contact_name` (pas `first_name`/`last_name`). Le code Edge Function et le Select admin sont adaptés.
+- Le champ `campaigns_remaining` et la table `campaigns` existante ne sont pas modifiés — `campaign_reports` est une table séparée et autonome (l'admin saisit librement le `campaign_name`, pas de FK vers `campaigns`).
+- i18n : nouvelles clés `campaigns.report.title`, `availableSince`, `view`, `download`, `badge`, et `adminCampaigns.upload.*`.
+
+## Action manuelle requise
+
+Après déploiement, l'utilisateur devra créer le Database Webhook dans le dashboard Supabase :
+- Table : `campaign_reports`, événement : `INSERT`
+- URL : `https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/notify-campaign-report`
+- Headers : `Authorization: Bearer <SUPABASE_ANON_KEY>` (ou laissé vide car `verify_jwt = false`)
+
+Je fournirai un lien direct vers la page Webhooks à la fin.
