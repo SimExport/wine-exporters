@@ -40,4 +40,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.setup-campaign-reports-storage]
-verify_jwt = true
+verify_jwt = false
