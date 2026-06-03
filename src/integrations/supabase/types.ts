@@ -1165,6 +1165,13 @@ export type Database = {
       consume_search_credit: { Args: never; Returns: number }
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { uid: string }; Returns: string }
+      get_users_emails_for_admin: {
+        Args: never
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       has_paid_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
