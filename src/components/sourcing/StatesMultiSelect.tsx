@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Check, ChevronsUpDown, Loader2, X } from 'lucide-react';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
-import { US_STATES, normalizeUsState } from '@/lib/us-states';
+import { US_STATES } from '@/lib/us-states';
+import { useState } from 'react';
 
 interface Props {
   countryNames: string[]; // possible DB names for the country
@@ -19,39 +18,11 @@ interface Props {
 export function StatesMultiSelect({ countryNames, value, onChange, max = 3 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      if (!countryNames.length) { setOptions([]); return; }
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('buyer_contacts')
-        .select('state')
-        .in('country', countryNames)
-        .not('state', 'is', null);
-      if (cancelled) return;
-      if (error) {
-        console.error(error);
-        setOptions([]);
-      } else {
-        // Normalize raw states to canonical US state names; only keep
-        // canonical states that actually have at least one contact.
-        const available = new Set<string>();
-        for (const r of (data || []) as { state: string | null }[]) {
-          const canon = normalizeUsState(r.state);
-          if (canon) available.add(canon);
-        }
-        const ordered = US_STATES.filter((s) => available.has(s));
-        setOptions(ordered);
-      }
-      setLoading(false);
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [countryNames.join('|')]);
+  // We always show the full canonical list of 50 US federal states + DC.
+  // The edge function expands each selection into all raw sub-region
+  // variants present in `buyer_contacts` (counties, townships, etc.) at
+  // search time, so we don't need to pre-filter the list against the DB.
+  const options = US_STATES;
 
   const toggle = (s: string) => {
     if (value.includes(s)) onChange(value.filter(v => v !== s));
@@ -68,7 +39,7 @@ export function StatesMultiSelect({ countryNames, value, onChange, max = 3 }: Pr
                 ? t('sourcing.states.placeholder')
                 : t('sourcing.states.selected', { count: value.length, max })}
             </span>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsUpDown className="h-4 w-4 opacity-50" />}
+            <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
