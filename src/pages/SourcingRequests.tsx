@@ -31,6 +31,22 @@ const COUNTRY_LABELS: Record<string, { fr: string; en: string }> = (() => {
   return map;
 })();
 
+// Build a lookup: lowercased DB country name/alias -> canonical group key.
+// Used to merge DB rows that point to the same real-world country (e.g.
+// "United States" + "USA" → one "États-Unis" entry).
+const COUNTRY_GROUP_KEY: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const c of COUNTRIES) {
+    const group = (c.englishName || c.name).trim();
+    const keys = new Set<string>([c.name, c.englishName, ...(c.dbAliases || [])]);
+    for (const k of keys) {
+      if (!k) continue;
+      map[k.trim().toLowerCase()] = group;
+    }
+  }
+  return map;
+})();
+
 function translateCountry(raw: string, lang: string): string {
   if (!raw) return raw;
   const entry = COUNTRY_LABELS[raw.trim().toLowerCase()];
@@ -108,9 +124,18 @@ export default function SourcingRequests() {
           if (!raw) continue;
           const trimmed = raw.trim();
           if (!trimmed) continue;
-          const key = trimmed.toLowerCase();
-          if (!groups.has(key)) groups.set(key, { canonical: trimmed, variants: new Set() });
-          groups.get(key)!.variants.add(raw);
+          // Merge variants that point to the same canonical country via
+          // COUNTRIES.dbAliases (e.g. "United States" + "USA"). Fallback to
+          // the trimmed value when the country is unknown to our list.
+          const lower = trimmed.toLowerCase();
+          const groupKey = (COUNTRY_GROUP_KEY[lower] ?? trimmed).toLowerCase();
+          if (!groups.has(groupKey)) {
+            groups.set(groupKey, {
+              canonical: COUNTRY_GROUP_KEY[lower] ?? trimmed,
+              variants: new Set(),
+            });
+          }
+          groups.get(groupKey)!.variants.add(raw);
         }
         if (data.length < PAGE_SIZE) break;
         from += PAGE_SIZE;
