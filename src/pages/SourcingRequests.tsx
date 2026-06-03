@@ -54,11 +54,11 @@ interface SourcingRequest {
   error_message: string | null;
 }
 
-// Country names (as stored in buyer_contacts, lowercased) that require a state filter
+// Country names (as stored in buyer_contacts, lowercased) that require a state filter.
+// Only the United States are split by state — every other market is searched at the
+// country level.
 const STATES_REQUIRED_NAMES = new Set([
   'united states', 'usa',
-  'united kingdom', 'england (uk)', 'scotland (uk)', 'wales (uk)', 'northern ireland (uk)',
-  'germany', 'australia', 'canada', 'china',
 ]);
 
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline'> = {
