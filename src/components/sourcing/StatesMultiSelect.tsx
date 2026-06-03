@@ -7,6 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Check, ChevronsUpDown, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { US_STATES, normalizeUsState } from '@/lib/us-states';
 
 interface Props {
   countryNames: string[]; // possible DB names for the country
@@ -36,8 +37,15 @@ export function StatesMultiSelect({ countryNames, value, onChange, max = 3 }: Pr
         console.error(error);
         setOptions([]);
       } else {
-        const unique = Array.from(new Set((data || []).map((r: any) => r.state).filter(Boolean))).sort();
-        setOptions(unique as string[]);
+        // Normalize raw states to canonical US state names; only keep
+        // canonical states that actually have at least one contact.
+        const available = new Set<string>();
+        for (const r of (data || []) as { state: string | null }[]) {
+          const canon = normalizeUsState(r.state);
+          if (canon) available.add(canon);
+        }
+        const ordered = US_STATES.filter((s) => available.has(s));
+        setOptions(ordered);
       }
       setLoading(false);
     };
