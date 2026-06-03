@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { resolveCountryVariants } from "./country-variants.ts";
+import { expandUsStateVariants, isUsMarket } from "./us-states.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -158,8 +159,28 @@ Deno.serve(async (req) => {
       .in("country", variants)
       .limit(500);
 
-    if (reqRow.states_filter && reqRow.states_filter.length > 0) {
-      query = query.in("state", reqRow.states_filter);
+    // Only apply state filter for the US market. The selector exposes 50 federal
+    // states + DC; in the DB, raw `state` values aggregate counties/townships
+    // (e.g. "California, Napa County"), so we expand each selected canonical
+    // state into all matching raw variants before filtering.
+    if (
+      isUsMarket(marketName) &&
+      reqRow.states_filter &&
+      reqRow.states_filter.length > 0
+    ) {
+      const { data: rawStateRows, error: sErr } = await supabase
+        .from("buyer_contacts")
+        .select("state")
+        .in("country", variants)
+        .not("state", "is", null);
+      if (sErr) throw sErr;
+      const expanded = expandUsStateVariants(
+        (rawStateRows ?? []).map((r: { state: string | null }) => r.state),
+        reqRow.states_filter as string[],
+      );
+      if (expanded.length > 0) {
+        query = query.in("state", expanded);
+      }
     }
 
     const { data: contacts, error: cErr } = await query;
