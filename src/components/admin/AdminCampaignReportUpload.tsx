@@ -13,6 +13,7 @@ interface UserOption {
   user_id: string;
   contact_name: string | null;
   domain_name: string | null;
+  email: string | null;
 }
 
 const MAX_SIZE = 25 * 1024 * 1024;
@@ -28,11 +29,24 @@ export function AdminCampaignReportUpload() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('user_id, contact_name, domain_name')
-        .order('domain_name', { ascending: true });
-      if (data) setUsers(data as UserOption[]);
+      const [profilesRes, emailsRes] = await Promise.all([
+        supabase.from('profiles').select('user_id, contact_name, domain_name'),
+        supabase.rpc('get_users_emails_for_admin'),
+      ]);
+      const emailMap = new Map<string, string>();
+      ((emailsRes.data as Array<{ user_id: string; email: string }> | null) ?? []).forEach((r) => {
+        emailMap.set(r.user_id, r.email);
+      });
+      const merged: UserOption[] = ((profilesRes.data as Array<Omit<UserOption, 'email'>> | null) ?? []).map((p) => ({
+        ...p,
+        email: emailMap.get(p.user_id) ?? null,
+      }));
+      merged.sort((a, b) =>
+        (a.domain_name ?? a.contact_name ?? a.email ?? '').localeCompare(
+          b.domain_name ?? b.contact_name ?? b.email ?? '',
+        ),
+      );
+      setUsers(merged);
     })();
   }, []);
 
@@ -131,8 +145,15 @@ export function AdminCampaignReportUpload() {
               <SelectContent className="max-h-80">
                 {users.map((u) => (
                   <SelectItem key={u.user_id} value={u.user_id}>
-                    {u.domain_name || u.contact_name || u.user_id.slice(0, 8)}
-                    {u.contact_name && u.domain_name ? ` — ${u.contact_name}` : ''}
+                    <div className="flex flex-col">
+                      <span>
+                        {u.domain_name || u.contact_name || u.user_id.slice(0, 8)}
+                        {u.contact_name && u.domain_name ? ` — ${u.contact_name}` : ''}
+                      </span>
+                      {u.email && (
+                        <span className="text-xs text-muted-foreground">{u.email}</span>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
