@@ -1706,6 +1706,10 @@
     "createSuccess": "Prospect added successfully",
     "createError": "Unable to create prospect",
     "successTitle": "Success",
+    "markCompletedConfirm": "Mark campaign \"{{name}}\" as completed?",
+    "completedTitle": "Campaign completed",
+    "completedDesc": "Campaign \"{{name}}\" is now marked as completed",
+    "markCompletedError": "Unable to mark campaign as completed",
     "statuses": {
       "draft": "Draft",
       "pending_validation": "Pending",
@@ -1761,6 +1765,7 @@
       "actions": "Actions",
       "validate": "Validate",
       "reject": "Reject",
+      "markCompleted": "Mark completed",
       "addProspect": "Add prospect",
       "viewProspects": "View prospects",
       "allMarkets": "Selected markets"

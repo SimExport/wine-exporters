@@ -1706,6 +1706,10 @@
     "createSuccess": "Prospect ajouté avec succès",
     "createError": "Impossible de créer le prospect",
     "successTitle": "Succès",
+    "markCompletedConfirm": "Marquer la campagne \"{{name}}\" comme terminée ?",
+    "completedTitle": "Campagne terminée",
+    "completedDesc": "La campagne \"{{name}}\" est maintenant marquée comme terminée",
+    "markCompletedError": "Impossible de marquer la campagne comme terminée",
     "statuses": {
       "draft": "Brouillon",
       "pending_validation": "En attente",
@@ -1761,6 +1765,7 @@
       "actions": "Actions",
       "validate": "Valider",
       "reject": "Refuser",
+      "markCompleted": "Marquer terminée",
       "addProspect": "Ajouter prospect",
       "viewProspects": "Voir prospects",
       "allMarkets": "Marchés sélectionnés"
