@@ -332,6 +332,35 @@ export default function AdminCampaigns() {
     }
   };
 
+  const markCampaignCompleted = async (campaignId: string, campaignName: string) => {
+    if (!confirm(t('adminCampaigns.markCompletedConfirm', { name: campaignName }))) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ status: 'results' })
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: 'results' } : c));
+
+      toast({
+        title: t('adminCampaigns.completedTitle'),
+        description: t('adminCampaigns.completedDesc', { name: campaignName }),
+      });
+    } catch (error) {
+      console.error('Error marking campaign as completed:', error);
+      toast({
+        title: t('adminCampaigns.errorTitle'),
+        description: t('adminCampaigns.markCompletedError'),
+        variant: "destructive"
+      });
+    }
+  };
+
   const openProspectDrawer = async (campaign: Campaign) => {
     setSelectedCampaign(campaign);
     setProspectForm(prev => ({ ...prev, campaign_id: campaign.id }));
@@ -747,6 +776,16 @@ export default function AdminCampaigns() {
                                {t('adminCampaigns.table.reject')}
                              </Button>
                            </>
+                         )}
+                         {(campaign.status === 'active' || campaign.status === 'approved' || campaign.status === 'sending') && (
+                           <Button
+                             size="sm"
+                             variant="outline"
+                             onClick={() => markCampaignCompleted(campaign.id, campaign.name)}
+                           >
+                             <CheckCircle className="h-4 w-4 mr-1" />
+                             {t('adminCampaigns.table.markCompleted')}
+                           </Button>
                          )}
                          <Button
                            size="sm"
