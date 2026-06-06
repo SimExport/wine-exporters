@@ -111,12 +111,16 @@ const Importers = () => {
     }
     setSourcingLoading(true);
     try {
+      const selected = COUNTRY_LIST.find((c) => c.code === sourcingMarket);
+      // Always store the English canonical name so it matches buyer_contacts.country
+      // (which is in English). Display layer translates back to FR if needed.
+      const canonicalMarket =
+        selected?.englishName || selected?.name || sourcingMarket;
       const { data: inserted, error: insertError } = await supabase
         .from('sourcing_requests')
         .insert({
           user_id: user.id,
-          target_market:
-            COUNTRY_LIST.find((c) => c.code === sourcingMarket)?.name || sourcingMarket,
+          target_market: canonicalMarket,
         })
         .select('id')
         .single();
@@ -124,12 +128,11 @@ const Importers = () => {
 
       // Fire admin notification (non-blocking)
       try {
-        const marketName = COUNTRY_LIST.find(c => c.code === sourcingMarket)?.name || sourcingMarket;
         await supabase.functions.invoke('notify-sourcing-submission', {
           body: {
             requestId: inserted?.id,
             userEmail: user.email,
-            targetMarket: marketName,
+            targetMarket: canonicalMarket,
           },
         });
       } catch (e) {
