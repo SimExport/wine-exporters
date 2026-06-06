@@ -24,11 +24,20 @@ Deno.test("collects all casing/whitespace variants present in the DB", () => {
   assertEquals(new Set(v), new Set(["Croatia", "croatia", "Croatia "]));
 });
 
-Deno.test("does not match French translation against English DB value", () => {
+Deno.test("FR→EN fallback resolves French label to English DB variant", () => {
   const all = [{ country: "Croatia" }, { country: "Italy" }];
-  // If the frontend mistakenly sent the FR label, no variant should resolve;
-  // we fall back to the literal value so the query returns 0 rows (caught upstream).
-  assertEquals(resolveCountryVariants("Croatie", all), ["Croatie"]);
+  assertEquals(resolveCountryVariants("Croatie", all), ["Croatia"]);
+});
+
+Deno.test("FR→EN fallback works for Thaïlande / Suède / Allemagne", () => {
+  const all = [
+    { country: "Thailand" },
+    { country: "Sweden" },
+    { country: "Germany" },
+  ];
+  assertEquals(resolveCountryVariants("Thaïlande", all), ["Thailand"]);
+  assertEquals(resolveCountryVariants("Suède", all), ["Sweden"]);
+  assertEquals(resolveCountryVariants("Allemagne", all), ["Germany"]);
 });
 
 Deno.test("ignores unrelated countries", () => {
