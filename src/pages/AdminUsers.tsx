@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Users, Search, Copy } from 'lucide-react';
+import { AlertTriangle, Users, Search, Copy, Pencil } from 'lucide-react';
+import { ChangeUserEmailDialog } from '@/components/admin/ChangeUserEmailDialog';
 
 type AppRole = 'admin' | 'user' | 'free' | 'paid';
 
@@ -15,6 +16,7 @@ interface UserRow {
   user_id: string;
   display_name: string | null;
   domain_name: string | null;
+  email: string | null;
   role: AppRole | null;
   subscription_plan: string | null;
   stripe_customer_id: string | null;
@@ -38,16 +40,18 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'inconsistent'>('all');
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [emailDialog, setEmailDialog] = useState<UserRow | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes, settingsRes] = await Promise.all([
+    const [profilesRes, rolesRes, settingsRes, emailsRes] = await Promise.all([
       supabase
         .from('profiles')
         .select('user_id, domain_name, subscription_plan, stripe_customer_id, created_at')
         .order('created_at', { ascending: false }),
       supabase.from('user_roles').select('user_id, role'),
       supabase.from('user_settings').select('user_id, display_name'),
+      supabase.rpc('get_users_emails_for_admin'),
     ]);
 
     if (profilesRes.error) {
@@ -60,6 +64,8 @@ export default function AdminUsers() {
     (rolesRes.data || []).forEach((r: any) => rolesMap.set(r.user_id, r.role));
     const settingsMap = new Map<string, string | null>();
     (settingsRes.data || []).forEach((s: any) => settingsMap.set(s.user_id, s.display_name));
+    const emailsMap = new Map<string, string | null>();
+    (emailsRes.data || []).forEach((e: any) => emailsMap.set(e.user_id, e.email));
 
     const merged: UserRow[] = (profilesRes.data || []).map((p: any) => ({
       user_id: p.user_id,
@@ -69,6 +75,7 @@ export default function AdminUsers() {
       created_at: p.created_at,
       role: rolesMap.get(p.user_id) ?? null,
       display_name: settingsMap.get(p.user_id) ?? null,
+      email: emailsMap.get(p.user_id) ?? null,
     }));
 
     setRows(merged);
@@ -88,6 +95,7 @@ export default function AdminUsers() {
       return (
         (r.display_name || '').toLowerCase().includes(q) ||
         (r.domain_name || '').toLowerCase().includes(q) ||
+        (r.email || '').toLowerCase().includes(q) ||
         r.user_id.toLowerCase().includes(q)
       );
     });
@@ -169,7 +177,7 @@ export default function AdminUsers() {
           <div className="relative flex-1 min-w-[240px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Nom, domaine ou user_id…"
+              placeholder="Nom, email, domaine ou user_id…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -202,6 +210,7 @@ export default function AdminUsers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Utilisateur</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>Domaine</TableHead>
                     <TableHead>Rôle</TableHead>
                     <TableHead>Plan</TableHead>
@@ -227,6 +236,20 @@ export default function AdminUsers() {
                             >
                               {row.user_id.slice(0, 8)}…
                               <Copy className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100" />
+                            </button>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 group">
+                            <span className="text-sm truncate max-w-[220px]" title={row.email ?? ''}>
+                              {row.email ?? '—'}
+                            </span>
+                            <button
+                              onClick={() => setEmailDialog(row)}
+                              className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"
+                              title="Changer l'email"
+                            >
+                              <Pencil className="h-3 w-3" />
                             </button>
                           </div>
                         </TableCell>
@@ -288,6 +311,21 @@ export default function AdminUsers() {
           )}
         </CardContent>
       </Card>
+
+      {emailDialog && (
+        <ChangeUserEmailDialog
+          open={!!emailDialog}
+          onOpenChange={(o) => !o && setEmailDialog(null)}
+          userId={emailDialog.user_id}
+          currentEmail={emailDialog.email}
+          displayName={emailDialog.display_name}
+          onChanged={(newEmail) => {
+            setRows((prev) =>
+              prev.map((r) => (r.user_id === emailDialog.user_id ? { ...r, email: newEmail } : r)),
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
