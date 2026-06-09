@@ -1,51 +1,84 @@
-## Cause racine
+# Changement d'email d'un user par l'admin
 
-Il y a **deux entrées** pour lancer une "Recherche sur-mesure" :
+## Objectif
 
-1. **Page `/recherches`** (`SourcingRequests.tsx`) → envoie le nom **anglais canonique** (`englishName`) → fonctionne ✅
-2. **Page `/importateurs`** (`Importers.tsx`, ligne 119) → envoie le nom **français** (`c.name`) → ne matche jamais `buyer_contacts.country` qui stocke uniquement en anglais → erreur "Aucun contact disponible pour ce marché" ❌
+Permettre à un admin de modifier l'adresse email d'un utilisateur existant **sans recréer le compte**. Le user conserve son `user_id`, son mot de passe, ses campagnes, leads, crédits, abonnement Stripe et tout son historique.
 
-Les 3 recherches en erreur de ta capture (Thaïlande / Suède / Allemagne) ont toutes été lancées depuis la page Importateurs.
+Cas immédiat : `Erlande8@hotmail.com` → `contact@champagnecordeuil-perefille.com`.
 
-Vérifié en BDD :
-- `Germany` = 2 044 contacts, `Sweden` = 502, `Thailand` = 221
-- 0 contact avec libellé FR (`Thaïlande`, `Suède`, `Allemagne`)
+## Ce qui sera construit
 
-## Ce qui change
+### 1. Edge Function `admin-change-user-email`
 
-### 1. `src/pages/Importers.tsx`
-Remplacer le nom français par le nom anglais à l'insertion, comme le fait déjà `SourcingRequests.tsx` :
+Nouvelle fonction sécurisée qui :
+- Vérifie que l'appelant est bien admin (via `user_roles`)
+- Valide le format de la nouvelle adresse
+- Vérifie qu'aucun autre user n'utilise déjà cette adresse
+- Appelle `supabase.auth.admin.updateUserById(userId, { email, email_confirm: true })` → changement immédiat, sans email de confirmation envoyé au user
+- Met à jour en parallèle l'email du customer Stripe (si `stripe_customer_id` présent sur le profil) pour que les factures partent à la bonne adresse
+- Met à jour le contact dans l'audience Resend (suppression de l'ancien email, ajout du nouveau)
+- Journalise l'opération dans `admin_invitations` ou un log similaire pour traçabilité
 
-```ts
-target_market:
-  COUNTRY_LIST.find(c => c.code === sourcingMarket)?.englishName ||
-  COUNTRY_LIST.find(c => c.code === sourcingMarket)?.name ||
-  sourcingMarket,
+### 2. UI dans `/admin/users`
+
+Sur chaque ligne du tableau utilisateurs, ajout d'un bouton discret (icône crayon à côté du nom) qui ouvre un dialog :
+
+```text
+┌─────────────────────────────────────────┐
+│ Changer l'email de John Doe             │
+├─────────────────────────────────────────┤
+│ Email actuel : erlande8@hotmail.com     │
+│                                         │
+│ Nouvel email :                          │
+│ ┌─────────────────────────────────────┐ │
+│ │ contact@champagne...                │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ ⚠ Le user pourra immédiatement se      │
+│ connecter avec la nouvelle adresse.     │
+│ Son mot de passe reste inchangé.        │
+│                                         │
+│         [Annuler]    [Confirmer]        │
+└─────────────────────────────────────────┘
 ```
 
-Idem pour le `marketName` envoyé à `notify-sourcing-submission` (cohérence dans les emails admin).
+Le tableau affichera désormais aussi l'email actuel (récupéré via la fonction RPC existante `get_users_emails_for_admin`) — aujourd'hui seul le `display_name` est visible, ce qui complique l'identification.
 
-### 2. `supabase/functions/process-sourcing-request/country-variants.ts` — filet de sécurité
-Ajouter un mapping FR→EN minimal embarqué dans la fonction. Si `resolveCountryVariants` ne trouve aucune ligne avec le nom tel quel, retenter avec la traduction anglaise. Cela protège :
-- les futures recherches si une autre page envoyait par erreur un libellé FR
-- les anciennes lignes `sourcing_requests` déjà créées (Thaïlande, Suède, Allemagne) si l'admin les relance
+### 3. Exécution immédiate pour Erlande8
 
-Le mapping sera dérivé de `country-data.ts` (copié dans `supabase/functions/process-sourcing-request/` puisque les edge functions ne peuvent pas importer depuis `src/`). Pour rester léger, on n'embarque qu'un objet `{ "thaïlande": "Thailand", "suède": "Sweden", "allemagne": "Germany", … }` regénéré à partir de la liste FR/EN existante.
+Une fois la fonction déployée et l'UI en place, tu pourras :
+- aller dans `/admin/users`
+- rechercher `Erlande8`
+- cliquer sur le bouton crayon, taper `contact@champagnecordeuil-perefille.com`, confirmer
 
-Mettre à jour `country-variants.test.ts` avec un test FR→EN.
+Résultat immédiat : connexion possible avec la nouvelle adresse, ancien lien Stripe préservé, factures envoyées au bon endroit.
 
-### 3. Backfill manuel des 3 lignes en erreur
-Migration SQL one-shot :
-```sql
-UPDATE sourcing_requests SET target_market = 'Thailand',
-  status = 'pending', error_message = NULL
-  WHERE target_market = 'Thaïlande' AND status = 'pending';
--- idem Suède→Sweden, Allemagne→Germany
-```
-Puis l'admin pourra cliquer "Démarrer" sur ces 3 lignes pour relancer la recherche.
+## Détails techniques
+
+**Fichiers créés / modifiés :**
+- `supabase/functions/admin-change-user-email/index.ts` (nouveau)
+- `src/pages/AdminUsers.tsx` (ajout colonne email + bouton + dialog)
+- `src/components/admin/ChangeUserEmailDialog.tsx` (nouveau)
+- `src/i18n/locales/fr.json` + `en.json` (libellés admin)
+
+**Sécurité :**
+- Edge function vérifie `has_role(auth.uid(), 'admin')` avant toute action
+- Vérification anti-doublon sur l'email cible avant `updateUserById`
+- Aucun secret côté front : la clé service_role reste dans l'edge function
+
+**Side-effects gérés :**
+- Stripe customer email (uniquement si `stripe_customer_id` existe)
+- Resend audience : `DELETE /audiences/{id}/contacts/{old_email}` + `POST` du nouveau
+- Pas de changement nécessaire dans `profiles`, `user_settings`, `user_roles`, `campaigns`, `leads`, etc. — tous joints par `user_id` qui ne bouge pas
+
+**Ce qui ne change pas :**
+- Mot de passe utilisateur
+- `user_id`
+- Toutes les données métier (campagnes, leads, crédits, sourcing, CRM…)
+- Abonnement Stripe actif
 
 ## Hors scope
 
-- Pas de refonte du sélecteur de pays sur Importers (déjà fonctionnel côté UX)
-- Pas de modification de `buyer_contacts` (la BDD reste en anglais, c'est la convention)
-- Pas d'auto-relance des recherches échouées (l'admin déclenche manuellement)
+- Pas d'historique des changements d'email (peut être ajouté plus tard)
+- Pas de notification email au user pour l'informer du changement (à demander si souhaité)
+- Pas d'UI self-service côté user dans `/settings` (Option 2 du message précédent, non retenue)
