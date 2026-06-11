@@ -531,33 +531,60 @@ const CreateCampaign = () => {
 
                   {/* Tech docs */}
                   <div>
-                    <Label>{t('createCampaign.step1.techDocsLabel')}</Label>
-                    <Select value={techDocs.length > 0 ? techDocs[0] : ''} onValueChange={value => {
-                  if (value && !techDocs.includes(value)) {
-                    setTechDocs(prev => [...prev, value]);
-                  }
-                }}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('createCampaign.step1.techDocsPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {documents.filter(doc => doc.category === 'tech_sheet').map(doc => <SelectItem key={doc.id} value={doc.id}>
-                            {doc.title}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    {techDocs.length > 0 && <div className="flex flex-wrap gap-2 mt-2">
-                        {techDocs.map(docId => {
-                    const doc = documents.find(d => d.id === docId);
-                    return doc ? <div key={docId} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm">
-                              <FileText className="h-3 w-3" />
-                              {doc.title}
-                              <button type="button" onClick={() => setTechDocs(prev => prev.filter(id => id !== docId))} className="ml-1 text-muted-foreground hover:text-foreground">
-                                ×
-                              </button>
-                            </div> : null;
-                  })}
-                      </div>}
+                    <div className="flex items-center justify-between">
+                      <Label>{t('createCampaign.step1.techDocsLabel')}</Label>
+                      {techDocs.length > 0 && (
+                        <span className="text-sm font-medium text-primary">
+                          {techDocs.length} sélectionnée{techDocs.length > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                    {(() => {
+                      const techSheets = documents.filter(doc => doc.category === 'tech_sheet');
+                      if (techSheets.length === 0) {
+                        return (
+                          <Alert className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              Aucune fiche technique disponible. Ajoutez-en depuis votre profil.
+                            </AlertDescription>
+                          </Alert>
+                        );
+                      }
+                      return (
+                        <div className="space-y-2 mt-2 max-h-72 overflow-y-auto pr-1">
+                          {techSheets.map(doc => {
+                            const isSelected = techDocs.includes(doc.id);
+                            return (
+                              <div
+                                key={doc.id}
+                                onClick={() => handleTechDocToggle(doc.id)}
+                                className={cn(
+                                  "flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors",
+                                  isSelected
+                                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                    : "hover:border-muted-foreground/40"
+                                )}
+                              >
+                                <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={() => handleTechDocToggle(doc.id)}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{doc.title}</p>
+                                  {doc.file_name && doc.file_name !== doc.title && (
+                                    <p className="text-xs text-muted-foreground truncate">{doc.file_name}</p>
+                                  )}
+                                </div>
+                                {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Client note */}
