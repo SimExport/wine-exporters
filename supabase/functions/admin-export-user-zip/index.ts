@@ -9,11 +9,35 @@ function safe(name: string) {
   return name.replace(/[\\/:*?"<>|]+/g, "_").slice(0, 180) || "file";
 }
 
+function extractPath(url: string, bucket: string): string | null {
+  if (!url) return null;
+  const marker = `/${bucket}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(url.slice(idx + marker.length).split("?")[0]);
+}
+
 async function fetchBytes(url: string): Promise<Uint8Array | null> {
   try {
     const r = await fetch(url);
     if (!r.ok) return null;
     return new Uint8Array(await r.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
+async function downloadFromBucket(
+  supabase: any,
+  bucket: string,
+  url: string,
+): Promise<Uint8Array | null> {
+  const path = extractPath(url, bucket);
+  if (!path) return null;
+  try {
+    const { data, error } = await supabase.storage.from(bucket).download(path);
+    if (error || !data) return null;
+    return new Uint8Array(await data.arrayBuffer());
   } catch {
     return null;
   }
@@ -62,9 +86,7 @@ Deno.serve(async (req) => {
     const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
 
     const seen = new Set<string>();
-    const addEntry = async (folder: string, baseName: string, url: string) => {
-      if (!url) return;
-      const bytes = await fetchBytes(url);
+    const addEntry = async (folder: string, baseName: string, bytes: Uint8Array | null) => {
       if (!bytes) return;
       let path = `${folder}/${safe(baseName)}`;
       let i = 1;
@@ -81,12 +103,14 @@ Deno.serve(async (req) => {
 
     for (const d of (docsRes.data || [])) {
       const sub = d.category ? `documents/${safe(d.category)}` : "documents";
-      await addEntry(sub, d.file_name || d.file_url.split("/").pop() || "doc", d.file_url);
+      const bytes = await downloadFromBucket(supabase, "documents", d.file_url);
+      await addEntry(sub, d.file_name || d.file_url.split("/").pop() || "doc", bytes);
     }
     for (const m of (mediaRes.data || [])) {
       const sub = m.type ? `media/${safe(m.type)}` : "media";
       const fname = (m.title ? `${m.title}` : (m.file_url.split("/").pop() || "media"));
-      await addEntry(sub, fname, m.file_url);
+      const bytes = (await downloadFromBucket(supabase, "media", m.file_url)) || (await fetchBytes(m.file_url));
+      await addEntry(sub, fname, bytes);
     }
 
     const blob = await zipWriter.close();
