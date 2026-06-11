@@ -368,16 +368,10 @@ export default function AdminUserProfile() {
                           {new Date(d.created_at).toLocaleDateString('fr-FR')}
                         </TableCell>
                         <TableCell className="text-right space-x-1">
-                          <Button size="sm" variant="ghost" asChild>
-                            <a href={d.file_url} target="_blank" rel="noreferrer" download={d.file_name}>
-                              <Download className="h-3.5 w-3.5" />
-                            </a>
+                          <Button size="sm" variant="ghost" onClick={() => handleDocDownload(d.file_url)} title="Télécharger">
+                            <Download className="h-3.5 w-3.5" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => { navigator.clipboard.writeText(d.file_url); toast({ title: 'Lien copié' }); }}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => handleDocCopy(d.file_url)} title="Copier le lien (1h)">
                             <Copy className="h-3.5 w-3.5" />
                           </Button>
                         </TableCell>
