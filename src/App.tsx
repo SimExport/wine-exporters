@@ -24,6 +24,7 @@ import AdminCampaigns from "./pages/AdminCampaigns";
 import AdminInvitations from "./pages/AdminInvitations";
 import AdminSourcing from "./pages/AdminSourcing";
 import AdminUsers from "./pages/AdminUsers";
+import AdminUserProfile from "./pages/AdminUserProfile";
 import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -115,6 +116,13 @@ const App = () => (
               <DashboardLayout>
                 <AdminRoute>
                   <AdminUsers />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
+            <Route path="/admin/users/:userId" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminUserProfile />
                 </AdminRoute>
               </DashboardLayout>
             } />
