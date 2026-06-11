@@ -453,15 +453,33 @@ const CreateCampaign = () => {
 
                 {/* Wines */}
                 <div>
-                  <Label>{t('createCampaign.step1.winesLabel')}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>{t('createCampaign.step1.winesLabel')}</Label>
+                    {selectedWines.length > 0 && (
+                      <span className="text-sm font-medium text-primary">
+                        {selectedWines.length} sélectionnée{selectedWines.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
                   {wines.length === 0 ? <Alert className="mt-2">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
                         {t('createCampaign.step1.noWines')}
                       </AlertDescription>
                     </Alert> : <div className="space-y-2 mt-2">
-                      {wines.map(wine => <div key={wine.id} className="flex items-center space-x-2 p-3 border rounded-lg">
-                          <Checkbox id={wine.id} checked={selectedWines.includes(wine.id)} onCheckedChange={() => handleWineToggle(wine.id)} />
+                      {wines.map(wine => {
+                        const isSelected = selectedWines.includes(wine.id);
+                        return <div
+                          key={wine.id}
+                          onClick={() => handleWineToggle(wine.id)}
+                          className={cn(
+                            "flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors",
+                            isSelected
+                              ? "border-primary bg-primary/5 ring-1 ring-primary"
+                              : "hover:border-muted-foreground/40"
+                          )}
+                        >
+                          <Checkbox id={wine.id} checked={isSelected} onCheckedChange={() => handleWineToggle(wine.id)} onClick={(e) => e.stopPropagation()} />
                           <Wine className="h-4 w-4 text-muted-foreground" />
                           <div className="flex-1">
                             <Label htmlFor={wine.id} className="font-medium">
@@ -471,7 +489,9 @@ const CreateCampaign = () => {
                               {t('createCampaign.step1.wineDetails', { color: wine.color, appellation: wine.appellation, price: wine.exw_price_eur })}
                             </p>
                           </div>
-                        </div>)}
+                          {isSelected && <Check className="h-4 w-4 text-primary" />}
+                        </div>;
+                      })}
                     </div>}
                 </div>
 
