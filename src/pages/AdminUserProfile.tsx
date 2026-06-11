@@ -162,6 +162,41 @@ export default function AdminUserProfile() {
     );
   }
 
+  const extractDocPath = (fileUrl: string): string | null => {
+    if (!fileUrl) return null;
+    const marker = '/documents/';
+    const idx = fileUrl.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(fileUrl.slice(idx + marker.length).split('?')[0]);
+  };
+
+  const getSignedDocUrl = async (fileUrl: string): Promise<string | null> => {
+    const path = extractDocPath(fileUrl);
+    if (!path) return null;
+    const { data, error } = await supabase.storage.from('documents').createSignedUrl(path, 3600);
+    if (error || !data?.signedUrl) return null;
+    return data.signedUrl;
+  };
+
+  const handleDocDownload = async (fileUrl: string) => {
+    const signed = await getSignedDocUrl(fileUrl);
+    if (!signed) {
+      toast({ title: 'Erreur', description: 'Impossible de générer le lien', variant: 'destructive' });
+      return;
+    }
+    window.open(signed, '_blank', 'noopener');
+  };
+
+  const handleDocCopy = async (fileUrl: string) => {
+    const signed = await getSignedDocUrl(fileUrl);
+    if (!signed) {
+      toast({ title: 'Erreur', description: 'Impossible de générer le lien', variant: 'destructive' });
+      return;
+    }
+    await navigator.clipboard.writeText(signed);
+    toast({ title: 'Lien copié', description: 'Valide 1h' });
+  };
+
   const fmtBytes = (n?: number | null) => {
     if (!n) return '—';
     if (n < 1024) return `${n} B`;
