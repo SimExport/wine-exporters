@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Users, Search, Copy, Pencil } from 'lucide-react';
+import { AlertTriangle, Users, Search, Copy, Pencil, Eye } from 'lucide-react';
 import { ChangeUserEmailDialog } from '@/components/admin/ChangeUserEmailDialog';
+import { useNavigate } from 'react-router-dom';
 
 type AppRole = 'admin' | 'user' | 'free' | 'paid';
 
@@ -35,6 +36,7 @@ function isInconsistent(role: AppRole | null, plan: string | null): boolean {
 
 export default function AdminUsers() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -216,6 +218,7 @@ export default function AdminUsers() {
                     <TableHead>Plan</TableHead>
                     <TableHead>Stripe</TableHead>
                     <TableHead>Inscrit</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -301,6 +304,17 @@ export default function AdminUsers() {
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(row.created_at).toLocaleDateString('fr-FR')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/admin/users/${row.user_id}`)}
+                            className="h-8"
+                          >
+                            <Eye className="h-3.5 w-3.5 mr-1.5" />
+                            Voir profil
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
