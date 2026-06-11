@@ -107,7 +107,7 @@ const CreateCampaign = () => {
       const {
         data,
         error
-      } = await supabase.from('wines').select('*').eq('user_id', user?.id).eq('is_active', true).order('name');
+      } = await supabase.from('wines').select('*').eq('user_id', user?.id).order('name');
       if (error) throw error;
       setWines(data || []);
     } catch (error) {

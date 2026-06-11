@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Copy, Eye, EyeOff, Search, Loader2 } from 'lucide-react';
+import { Plus, Edit, Copy, Search, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/format';
 
@@ -169,26 +169,6 @@ const WineManagement = () => {
     });
     setEditingWine(null);
     setModalOpen(true);
-  };
-
-  const handleToggleActive = async (wine: Wine) => {
-    try {
-      const { error } = await supabase
-        .from('wines')
-        .update({ is_active: !wine.is_active })
-        .eq('id', wine.id);
-
-      if (error) throw error;
-      toast({ title: t('common.success'), description: t('wines.statusUpdated') });
-      loadWines();
-    } catch (error) {
-      console.error('Error updating wine status:', error);
-      toast({
-        title: t('common.error'),
-        description: t('wines.statusError'),
-        variant: "destructive"
-      });
-    }
   };
 
   const resetForm = () => {
@@ -517,7 +497,7 @@ const WineManagement = () => {
                 </TableHeader>
                 <TableBody>
                   {paginatedWines.map((wine) => (
-                    <TableRow key={wine.id} className={!wine.is_active ? 'opacity-50' : ''}>
+                    <TableRow key={wine.id}>
                       <TableCell className="font-medium">{wine.name}</TableCell>
                       <TableCell>{wine.appellation || '-'}</TableCell>
                       <TableCell>
@@ -542,9 +522,6 @@ const WineManagement = () => {
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDuplicate(wine)}>
                             <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleToggleActive(wine)}>
-                            {wine.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </Button>
                         </div>
                       </TableCell>
