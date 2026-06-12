@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Upload, Trash2, Loader2 } from 'lucide-react';
@@ -77,6 +78,9 @@ export function TallyCsvImporter() {
     setRows(prev => prev.map(r => (r.id === id ? { ...r, selected: checked } : r)));
 
   const removeRow = (id: string) => setRows(prev => prev.filter(r => r.id !== id));
+
+  const updateRequirements = (id: string, value: string) =>
+    setRows(prev => prev.map(r => (r.id === id ? { ...r, requirements: value } : r)));
 
   const handleImport = async () => {
     const selected = rows.filter(r => r.selected);
@@ -163,6 +167,7 @@ export function TallyCsvImporter() {
                     <TableHead>Email</TableHead>
                     <TableHead>Styles</TableHead>
                     <TableHead>Volume</TableHead>
+                    <TableHead className="min-w-[240px]">Message</TableHead>
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -178,6 +183,15 @@ export function TallyCsvImporter() {
                       <TableCell className="text-xs">{r.email}</TableCell>
                       <TableCell className="text-xs">{r.wine_styles}</TableCell>
                       <TableCell className="text-xs">{r.volume}</TableCell>
+                      <TableCell>
+                        <Textarea
+                          value={r.requirements}
+                          onChange={(e) => updateRequirements(r.id, e.target.value)}
+                          rows={2}
+                          className="text-xs min-h-[48px] min-w-[240px]"
+                          placeholder="(vide)"
+                        />
+                      </TableCell>
                       <TableCell>
                         <Button size="icon" variant="ghost" onClick={() => removeRow(r.id)}>
                           <Trash2 className="h-4 w-4" />
