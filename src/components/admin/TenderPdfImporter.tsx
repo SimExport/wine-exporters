@@ -34,6 +34,16 @@ interface ExtractedRef {
   style_profile: string;
   requirements: string | null;
   agent_id: string | null;
+  category_fr: string;
+  category_en: string;
+  designation_origin_fr: string;
+  designation_origin_en: string;
+  available_volume_fr: string;
+  available_volume_en: string;
+  style_profile_fr: string;
+  style_profile_en: string;
+  requirements_fr: string;
+  requirements_en: string;
 }
 
 export function TenderPdfImporter() {
@@ -90,9 +100,48 @@ export function TenderPdfImporter() {
         style_profile: r.style_profile ?? '',
         requirements: r.requirements ?? null,
         agent_id: null,
+        category_fr: '', category_en: '',
+        designation_origin_fr: '', designation_origin_en: '',
+        available_volume_fr: '', available_volume_en: '',
+        style_profile_fr: '', style_profile_en: '',
+        requirements_fr: '', requirements_en: '',
       }));
       setRows(extracted);
       toast({ title: 'PDF analysé', description: `${extracted.length} référence(s) extraite(s)` });
+
+      // Auto-translate
+      try {
+        const { data: tdata } = await supabase.functions.invoke('translate-opportunity-fields', {
+          body: {
+            entries: extracted.map(r => ({
+              id: r.id,
+              fields: {
+                category: r.category,
+                designation_origin: r.designation_origin,
+                available_volume: r.available_volume,
+                style_profile: r.style_profile,
+                requirements: r.requirements ?? '',
+              },
+            })),
+          },
+        });
+        const byId = new Map<string, any>();
+        for (const res of (tdata?.results ?? [])) byId.set(res.id, res.translations);
+        setRows(prev => prev.map(r => {
+          const t = byId.get(r.id);
+          if (!t) return r;
+          return {
+            ...r,
+            category_fr: t.category?.fr ?? r.category, category_en: t.category?.en ?? r.category,
+            designation_origin_fr: t.designation_origin?.fr ?? r.designation_origin, designation_origin_en: t.designation_origin?.en ?? r.designation_origin,
+            available_volume_fr: t.available_volume?.fr ?? r.available_volume, available_volume_en: t.available_volume?.en ?? r.available_volume,
+            style_profile_fr: t.style_profile?.fr ?? r.style_profile, style_profile_en: t.style_profile?.en ?? r.style_profile,
+            requirements_fr: t.requirements?.fr ?? (r.requirements ?? ''), requirements_en: t.requirements?.en ?? (r.requirements ?? ''),
+          };
+        }));
+      } catch (e) {
+        console.warn('Translation failed (fallback to raw)', e);
+      }
     } catch (e: any) {
       toast({ title: 'Erreur extraction', description: e.message, variant: 'destructive' });
     } finally {
@@ -163,6 +212,16 @@ export function TenderPdfImporter() {
         requirements: r.requirements,
         agent_id: r.agent_id,
         status: 'published',
+        category_fr: r.category_fr || r.category || null,
+        category_en: r.category_en || r.category || null,
+        designation_origin_fr: r.designation_origin_fr || r.designation_origin || null,
+        designation_origin_en: r.designation_origin_en || r.designation_origin || null,
+        available_volume_fr: r.available_volume_fr || r.available_volume || null,
+        available_volume_en: r.available_volume_en || r.available_volume || null,
+        style_profile_fr: r.style_profile_fr || r.style_profile || null,
+        style_profile_en: r.style_profile_en || r.style_profile || null,
+        requirements_fr: r.requirements_fr || r.requirements || null,
+        requirements_en: r.requirements_en || r.requirements || null,
       }));
       const { error } = await supabase.from('tender_requests').insert(payload);
       if (error) throw error;

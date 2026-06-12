@@ -71,6 +71,14 @@ interface ImporterRequest {
   volume: string | null;
   requirements: string | null;
   submitted_at: string | null;
+  wine_styles_fr: string | null;
+  wine_styles_en: string | null;
+  origins_fr: string | null;
+  origins_en: string | null;
+  volume_fr: string | null;
+  volume_en: string | null;
+  requirements_fr: string | null;
+  requirements_en: string | null;
 }
 
 interface TenderRequest {
@@ -86,6 +94,16 @@ interface TenderRequest {
   deadline_sample: string | null;
   style_profile: string | null;
   requirements: string | null;
+  category_fr: string | null;
+  category_en: string | null;
+  designation_origin_fr: string | null;
+  designation_origin_en: string | null;
+  available_volume_fr: string | null;
+  available_volume_en: string | null;
+  style_profile_fr: string | null;
+  style_profile_en: string | null;
+  requirements_fr: string | null;
+  requirements_en: string | null;
   agent: {
     name: string;
     company: string;
@@ -204,6 +222,10 @@ export default function Opportunities() {
   };
 
   const dateLocale = i18n.language === 'en' ? enUS : fr;
+  const lang = i18n.language?.startsWith('en') ? 'en' : 'fr';
+  const pick = (row: any, base: string): string | null => {
+    return row?.[`${base}_${lang}`] ?? row?.[base] ?? null;
+  };
 
   const labelCol = "text-[10px] uppercase tracking-wide text-muted-foreground";
 
@@ -236,9 +258,10 @@ export default function Opportunities() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {importers.map(r => {
                 const added = addedRefs.has(r.id);
-                const req = r.requirements?.trim();
-                const styles = splitMulti(r.wine_styles);
-                const origins = splitMulti(r.origins);
+                const req = (pick(r, 'requirements') ?? '').trim();
+                const styles = splitMulti(pick(r, 'wine_styles'));
+                const origins = splitMulti(pick(r, 'origins'));
+                const volumeDisplay = pick(r, 'volume');
                 return (
                   <Card key={r.id} className="flex flex-col">
                     <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-3">
@@ -279,7 +302,7 @@ export default function Opportunities() {
                       {r.volume && (
                         <div>
                           <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.volume')}</div>
-                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium inline-block">{r.volume}</span>
+                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium inline-block">{volumeDisplay}</span>
                         </div>
                       )}
                       {req && (
@@ -308,8 +331,11 @@ export default function Opportunities() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tenders.map(t => {
                 const added = addedRefs.has(t.id);
-                const styleProfile = t.style_profile?.trim();
-                const tReq = t.requirements?.trim();
+                const styleProfile = (pick(t, 'style_profile') ?? '').trim();
+                const tReq = (pick(t, 'requirements') ?? '').trim();
+                const tCategory = pick(t, 'category');
+                const tDesignation = pick(t, 'designation_origin');
+                const tVolume = pick(t, 'available_volume');
                 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                   <div className="flex items-baseline gap-2">
                     <span className={`${labelCol} w-28 shrink-0`}>{label}</span>
@@ -331,12 +357,12 @@ export default function Opportunities() {
                       </div>
                       {t.category && (
                         <Row label={tr('opportunitiesPage.labels.category')}>
-                          <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs">{t.category}</span>
+                          <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs">{tCategory}</span>
                         </Row>
                       )}
                       {t.designation_origin && (
                         <Row label={tr('opportunitiesPage.labels.originDesignation')}>
-                          <span className="bg-muted text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs">{t.designation_origin}</span>
+                          <span className="bg-muted text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs">{tDesignation}</span>
                         </Row>
                       )}
                       {t.price && (
@@ -346,7 +372,7 @@ export default function Opportunities() {
                       )}
                       {t.available_volume && (
                         <Row label={tr('opportunitiesPage.labels.availableVolume')}>
-                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">{t.available_volume}</span>
+                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">{tVolume}</span>
                         </Row>
                       )}
                       {t.vintage && (

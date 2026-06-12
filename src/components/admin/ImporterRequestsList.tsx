@@ -5,9 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pencil } from 'lucide-react';
+import { Pencil, Languages, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ImporterRequestEditDialog, ImporterRequestRow } from './ImporterRequestEditDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const PAGE = 10;
 
@@ -17,6 +18,8 @@ export function ImporterRequestsList() {
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<ImporterRequestRow | null>(null);
   const [open, setOpen] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const { toast } = useToast();
 
   const load = async () => {
     let q = supabase.from('importer_requests').select('*').order('created_at', { ascending: false });
@@ -28,6 +31,47 @@ export function ImporterRequestsList() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [statusFilter]);
 
+  const translateMissing = async () => {
+    const missing = rows.filter(r =>
+      !r.wine_styles_fr || !r.wine_styles_en || !r.origins_fr || !r.origins_en || !r.volume_fr || !r.volume_en
+    );
+    if (missing.length === 0) { toast({ title: 'Tout est déjà traduit' }); return; }
+    setTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-opportunity-fields', {
+        body: {
+          entries: missing.map(r => ({
+            id: r.id,
+            fields: {
+              wine_styles: r.wine_styles ?? '',
+              origins: r.origins ?? '',
+              volume: r.volume ?? '',
+              requirements: r.requirements ?? '',
+            },
+          })),
+        },
+      });
+      if (error) throw error;
+      for (const res of (data?.results ?? [])) {
+        const t = res.translations ?? {};
+        await supabase.from('importer_requests').update({
+          wine_styles_fr: t.wine_styles?.fr ?? null,
+          wine_styles_en: t.wine_styles?.en ?? null,
+          origins_fr: t.origins?.fr ?? null,
+          origins_en: t.origins?.en ?? null,
+          volume_fr: t.volume?.fr ?? null,
+          volume_en: t.volume?.en ?? null,
+          requirements_fr: t.requirements?.fr ?? null,
+          requirements_en: t.requirements?.en ?? null,
+        }).eq('id', res.id);
+      }
+      toast({ title: 'Traduction terminée', description: `${missing.length} ligne(s) mises à jour` });
+      load();
+    } catch (e: any) {
+      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+    } finally { setTranslating(false); }
+  };
+
   const pageRows = rows.slice(page * PAGE, page * PAGE + PAGE);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE));
 
@@ -36,6 +80,11 @@ export function ImporterRequestsList() {
       <CardContent className="pt-6 space-y-3">
         <div className="flex items-center justify-between">
           <div className="text-sm font-medium">Entrées publiées ({rows.length})</div>
+          <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={translateMissing} disabled={translating}>
+            {translating ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Languages className="h-3.5 w-3.5 mr-1" />}
+            Traduire les entrées manquantes
+          </Button>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-44 h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -45,6 +94,7 @@ export function ImporterRequestsList() {
               <SelectItem value="archived">Archivé</SelectItem>
             </SelectContent>
           </Select>
+          </div>
         </div>
         <div className="border rounded-md overflow-x-auto">
           <Table>
