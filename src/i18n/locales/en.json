@@ -259,6 +259,13 @@
         "opportunities": "{{count}} opportunity",
         "opportunities_other": "{{count}} opportunities"
       },
+      "opportunities": {
+        "title": "Opportunities",
+        "desc": "Importers and official tenders are actively looking for wines like yours.",
+        "cta": "Explore opportunities",
+        "available": "{{count}} opportunity available",
+        "available_other": "{{count}} opportunities available"
+      },
       "pipelineStrip": {
         "title": "Pipeline status",
         "viewAll": "View all",
