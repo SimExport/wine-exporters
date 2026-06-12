@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,8 @@ import { Mail, Phone, MapPin, Plus, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 import { differenceInDays, format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 
@@ -54,6 +54,11 @@ function countryFlag(input: string | null | undefined): string {
   return '🌍';
 }
 
+function splitMulti(s: string | null | undefined): string[] {
+  if (!s) return [];
+  return s.split(/[,/]| - | – /).map(x => x.trim()).filter(Boolean);
+}
+
 interface ImporterRequest {
   id: string;
   full_name: string;
@@ -91,9 +96,9 @@ interface TenderRequest {
 }
 
 export default function Opportunities() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [importers, setImporters] = useState<ImporterRequest[]>([]);
   const [tenders, setTenders] = useState<TenderRequest[]>([]);
   const [addedRefs, setAddedRefs] = useState<Set<string>>(new Set());
@@ -153,9 +158,9 @@ export default function Opportunities() {
       } as any);
       if (error) throw error;
       setAddedRefs(prev => new Set(prev).add(r.id));
-      toast({ title: 'Ajouté au CRM', description: r.company_name });
+      toast({ title: t('opportunitiesPage.toast.added'), description: r.company_name });
     } catch (e: any) {
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+      toast({ title: t('opportunitiesPage.toast.error'), description: e.message, variant: 'destructive' });
     }
   };
 
@@ -182,19 +187,20 @@ export default function Opportunities() {
       } as any);
       if (error) throw error;
       setAddedRefs(prev => new Set(prev).add(t.id));
-      toast({ title: 'Ajouté au CRM', description: `${t.reference} — ${t.agent.company}` });
+      toast({ title: tt('opportunitiesPage.toast.added'), description: `${t.reference} — ${t.agent.company}` });
     } catch (e: any) {
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+      toast({ title: tt('opportunitiesPage.toast.error'), description: e.message, variant: 'destructive' });
     }
   };
 
   const deadlineBadge = (date: string | null) => {
     if (!date) return null;
     const days = differenceInDays(new Date(date), new Date());
-    if (days < 0) return <Badge variant="outline">Clôturé</Badge>;
-    if (days < 30) return <Badge variant="destructive">{days}j restants</Badge>;
-    if (days < 60) return <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-transparent">{days}j restants</Badge>;
-    return <Badge variant="secondary">{days}j restants</Badge>;
+    if (days < 0) return <Badge variant="outline">{t('opportunitiesPage.states.closed')}</Badge>;
+    const lbl = t('opportunitiesPage.states.daysLeft', { count: days });
+    if (days < 30) return <Badge variant="destructive">{lbl}</Badge>;
+    if (days < 60) return <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-transparent">{lbl}</Badge>;
+    return <Badge variant="secondary">{lbl}</Badge>;
   };
 
   return (
