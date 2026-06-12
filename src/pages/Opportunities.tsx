@@ -96,7 +96,7 @@ interface TenderRequest {
 }
 
 export default function Opportunities() {
-  const { t, i18n } = useTranslation();
+  const { t: tr, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [importers, setImporters] = useState<ImporterRequest[]>([]);
