@@ -1,6 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TallyCsvImporter } from '@/components/admin/TallyCsvImporter';
 import { TenderPdfImporter } from '@/components/admin/TenderPdfImporter';
+import { ImporterRequestsList } from '@/components/admin/ImporterRequestsList';
+import { TenderRequestsList } from '@/components/admin/TenderRequestsList';
 import { SEO } from '@/components/SEO';
 
 export default function AdminOpportunities() {
@@ -16,11 +18,13 @@ export default function AdminOpportunities() {
           <TabsTrigger value="tally">Demandes directes (Tally)</TabsTrigger>
           <TabsTrigger value="tender">Appels d'offres (PDF)</TabsTrigger>
         </TabsList>
-        <TabsContent value="tally" className="mt-4">
+        <TabsContent value="tally" className="mt-4 space-y-6">
           <TallyCsvImporter />
+          <ImporterRequestsList />
         </TabsContent>
-        <TabsContent value="tender" className="mt-4">
+        <TabsContent value="tender" className="mt-4 space-y-6">
           <TenderPdfImporter />
+          <TenderRequestsList />
         </TabsContent>
       </Tabs>
     </div>
