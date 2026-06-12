@@ -259,6 +259,13 @@
         "opportunities": "{{count}} opportunité",
         "opportunities_other": "{{count}} opportunités"
       },
+      "opportunities": {
+        "title": "Opportunités",
+        "desc": "Des importateurs et des appels d'offres officiels recherchent activement des vins comme les vôtres.",
+        "cta": "Explorer les opportunités",
+        "available": "{{count}} opportunité disponible",
+        "available_other": "{{count}} opportunités disponibles"
+      },
       "pipelineStrip": {
         "title": "État du pipeline",
         "viewAll": "Voir tout",
