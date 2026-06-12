@@ -2061,5 +2061,54 @@
       "bug": "Bug",
       "suggestion": "Suggestion"
     }
+  },
+  "opportunitiesPage": {
+    "pageTitle": "Importateurs en recherche active",
+    "pageSubtitle": "Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur. Découvrez aussi les appels d'offres officiels en cours sur les marchés monopoles.",
+    "seoTitle": "Importateurs en recherche active — WineExporters",
+    "seoDescription": "Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur, et les appels d'offres officiels en cours.",
+    "tabs": {
+      "direct": "Demandes directes",
+      "tender": "Appels d'offres"
+    },
+    "labels": {
+      "search": "Recherche",
+      "origin": "Origine souhaitée",
+      "volume": "Volume",
+      "reference": "Référence",
+      "market": "Marché",
+      "category": "Catégorie",
+      "originDesignation": "Origine",
+      "price": "Prix",
+      "availableVolume": "Volume disponible",
+      "vintage": "Millésime",
+      "sampleDeadline": "Échantillon attendu",
+      "answerDeadline": "Deadline réponse",
+      "styleProfile": "Profil recherché",
+      "requirements": "Exigences"
+    },
+    "actions": {
+      "reply": "Répondre",
+      "addToCrm": "Ajouter au CRM",
+      "added": "Ajouté",
+      "viewContact": "Voir les coordonnées",
+      "viewAgent": "Voir l'agent"
+    },
+    "states": {
+      "emptyDirect": "Aucune demande directe pour le moment.",
+      "emptyTender": "Aucun appel d'offres pour le moment.",
+      "closed": "Clôturé",
+      "daysLeft": "{{count}}j restants"
+    },
+    "commissionNotice": "WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.",
+    "dialog": {
+      "directDescription": "Contactez directement {{name}}. Vous pouvez aussi ajouter cette demande à votre CRM pour la suivre.",
+      "tenderTitle": "Agent à contacter",
+      "tenderDescription": "Adressez votre offre à l'agent en charge de cet appel d'offres ({{reference}})."
+    },
+    "toast": {
+      "added": "Ajouté au CRM",
+      "error": "Erreur"
+    }
   }
 }
