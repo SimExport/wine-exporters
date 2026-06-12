@@ -2061,5 +2061,54 @@
       "bug": "Bug",
       "suggestion": "Suggestion"
     }
+  },
+  "opportunitiesPage": {
+    "pageTitle": "Importers actively sourcing",
+    "pageSubtitle": "Buyers have left their contact details to find their next supplier. Also browse official tenders currently open on monopoly markets.",
+    "seoTitle": "Importers actively sourcing — WineExporters",
+    "seoDescription": "Buyers have left their contact details to find their next supplier, plus current official tenders.",
+    "tabs": {
+      "direct": "Direct requests",
+      "tender": "Tenders"
+    },
+    "labels": {
+      "search": "Looking for",
+      "origin": "Preferred origin",
+      "volume": "Volume",
+      "reference": "Reference",
+      "market": "Market",
+      "category": "Category",
+      "originDesignation": "Origin",
+      "price": "Price",
+      "availableVolume": "Available volume",
+      "vintage": "Vintage",
+      "sampleDeadline": "Sample deadline",
+      "answerDeadline": "Response deadline",
+      "styleProfile": "Style profile",
+      "requirements": "Requirements"
+    },
+    "actions": {
+      "reply": "Reply",
+      "addToCrm": "Add to CRM",
+      "added": "Added",
+      "viewContact": "View contacts",
+      "viewAgent": "View agent"
+    },
+    "states": {
+      "emptyDirect": "No direct requests yet.",
+      "emptyTender": "No tenders yet.",
+      "closed": "Closed",
+      "daysLeft": "{{count}}d left"
+    },
+    "commissionNotice": "WineExporters takes no commission on direct requests or tenders. Importer and agent contact details are shared directly with you — the relationship is yours to manage.",
+    "dialog": {
+      "directDescription": "Contact {{name}} directly. You can also add this request to your CRM to track it.",
+      "tenderTitle": "Agent to contact",
+      "tenderDescription": "Send your offer to the agent in charge of this tender ({{reference}})."
+    },
+    "toast": {
+      "added": "Added to CRM",
+      "error": "Error"
+    }
   }
 }

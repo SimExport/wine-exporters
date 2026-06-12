@@ -1,77 +1,123 @@
-## 1. Admin `/admin/opportunites` — colonne "Message" éditable
+## 1. Admin `/admin/opportunites` — liste + édition
 
-Dans `src/components/admin/TallyCsvImporter.tsx`, ajouter une colonne **Message** dans le tableau preview :
+Ajouter dans chaque onglet (sous l'importeur existant) une **section "Entrées publiées"** listant toutes les lignes de la table correspondante.
 
-- `<TableCell>` contenant un `<Textarea>` shadcn (rows=2, taille compacte, `min-w-[200px]`) toujours visible, lié à `r.requirements` via `onChange` → met à jour la ligne dans `rows`.
-- L'admin peut éditer, vider complètement, ou reformuler avant import.
-- La valeur (string vide → `null`) est celle insérée dans `importer_requests.requirements` au moment du bulk INSERT (logique existante inchangée).
-- Pas de validation : texte libre.
+### Onglet "Demandes directes"
+- Nouveau composant `src/components/admin/ImporterRequestsList.tsx` :
+  - `useEffect` → `supabase.from('importer_requests').select('*').order('created_at desc')`.
+  - Table compacte (10 lignes / page, pagination simple) : société, pays, email, status, date, bouton **Modifier**.
+  - Filtre status (all/published/archived/draft).
+- Nouveau composant `src/components/admin/ImporterRequestEditDialog.tsx` :
+  - `Dialog` shadcn avec formulaire (react-hook-form + zod existants dans le repo).
+  - Champs éditables : `full_name`, `company_name`, `country`, `email`, `phone`, `wine_styles`, `origins`, `volume`, `requirements` (Textarea), `status` (Select : published / draft / archived).
+  - Bouton **Enregistrer** → `supabase.from('importer_requests').update(...).eq('id', id)` + toast + refresh callback.
+  - Bouton **Supprimer** (avec confirmation simple `window.confirm` pour rester léger).
 
-Aucune autre modification de la logique CSV/parsing/import.
+### Onglet "Appels d'offres"
+- Nouveau composant `src/components/admin/TenderRequestsList.tsx` : table (référence, marché, designation, agent.company, deadline_answer, status, Modifier).
+- Nouveau composant `src/components/admin/TenderRequestEditDialog.tsx` :
+  - Charge la liste `tender_agents` au montage pour alimenter un `Select` (avec option "Créer un nouvel agent" qui ouvre le Dialog agent inline déjà présent dans `TenderPdfImporter`, à extraire dans `src/components/admin/TenderAgentDialog.tsx` réutilisable).
+  - Champs : `reference`, `market`, `category`, `designation_origin`, `price`, `available_volume`, `vintage`, `deadline_answer` (input date), `deadline_sample` (input date), `style_profile` (Textarea), `requirements` (Textarea), `agent_id` (Select), `status` (Select).
+  - **Enregistrer** → update.
+  - **Supprimer** avec confirmation.
 
-## 2. Page utilisateur `/opportunites` — refonte visuelle
+### Intégration dans `AdminOpportunities.tsx`
+Sous chaque `<TallyCsvImporter/>` / `<TenderPdfImporter/>`, ajouter un séparateur visuel + section "Entrées publiées" avec le nouveau composant. Pas de refactor du flux d'import.
 
-Fichier : `src/pages/Opportunities.tsx`.
+## 2. Page utilisateur `/opportunites` — cartes labellisées
 
-### 2.1 Header
-- Titre : **« Importateurs en recherche active »** (Georgia, conservé).
-- Sous-titre : **« Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur. Découvrez aussi les appels d'offres officiels en cours sur les marchés monopoles. »**
-- Clés i18n `opportunities.title` / `opportunities.subtitle` mises à jour (FR + EN).
+Restructurer `src/pages/Opportunities.tsx`.
 
-### 2.2 Drapeaux pays (emoji)
-- Helper `countryFlag(name: string): string` placé en haut du fichier : mapping nom de pays (FR + EN, lowercased, trimmed) → emoji drapeau (Suède 🇸🇪, France 🇫🇷, Belgique 🇧🇪, Allemagne 🇩🇪, Royaume-Uni 🇬🇧, États-Unis 🇺🇸, Canada 🇨🇦, Suisse 🇨🇭, Pays-Bas 🇳🇱, Italie 🇮🇹, Espagne 🇪🇸, Norvège 🇳🇴, Finlande 🇫🇮, Danemark 🇩🇰, Japon 🇯🇵, Chine 🇨🇳, etc.). Fallback : 🌍.
-- Carte demande directe : remplace `<Globe />` + nom pays par `<span className="text-2xl">{flag}</span><span>{country}</span>`.
-- Carte appel d'offres : même traitement sur `market` (Systembolaget Suède → 🇸🇪 etc., détection par mot-clé pays dans la string market).
+### Carte "Demande directe" — lignes labellisées
+Layout `space-y-3`, chaque ligne = `<div>` avec label `text-xs uppercase tracking-wide text-muted-foreground` + badges en `flex flex-wrap gap-1.5`.
 
-### 2.3 Hiérarchie & pills colorées
-Tokens existants (`--primary` bordeaux, ajout d'un token doré). Ajouter dans `src/index.css` :
+1. **Header** : drapeau + pays (titre) ⟷ date.
+2. **Société** : nom (text-sm font-medium).
+3. **Recherche :** un badge par valeur de `wine_styles` (split sur `,` et `/`), pill bordeaux (`bg-primary text-primary-foreground`).
+4. **Origine souhaitée :** un badge par valeur de `origins` (split sur `,` et `/`), pill `bg-muted text-primary border border-primary/20`.
+5. **Volume :** badge unique, pill `bg-gold text-gold-foreground`.
+6. **Message** (si non vide après trim) : `<p className="text-xs italic text-muted-foreground/80">`.
 
-```css
---gold: 42 55% 60%;          /* doré #c9a96e */
---gold-foreground: 345 50% 15%;
+Helper local `splitMulti(s) => s.split(/[,/]/).map(x=>x.trim()).filter(Boolean)`.
+
+### Carte "Appel d'offres" — lignes labellisées
+1. **Header** : drapeau + market ⟷ deadline badge (urgence inchangée).
+2. **Référence :** valeur mono, **Catégorie :** badge bordeaux.
+3. **Origine :** designation_origin en pill `bg-muted text-primary border border-primary/20`.
+4. **Prix :** texte simple, **Volume disponible :** pill doré.
+5. **Millésime :** pill outline (si présent).
+6. **Échantillon attendu :** date (si présent).
+7. **Profil / Exigences** (si non vides) : paragraphes secondaires.
+
+Layout en deux colonnes pour les labels courts (label gauche fixe `w-28 text-xs uppercase muted`, contenu droit `flex-1`) — fallback colonne unique sur mobile.
+
+## 3. i18n FR/EN
+
+Ajouter dans `src/i18n/locales/fr.json` et `en.json` un namespace `opportunities` :
+
+```json
+"opportunities": {
+  "pageTitle": "Importateurs en recherche active",
+  "pageSubtitle": "Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur. Découvrez aussi les appels d'offres officiels en cours sur les marchés monopoles.",
+  "tabs": { "direct": "Demandes directes", "tender": "Appels d'offres" },
+  "labels": {
+    "search": "Recherche",
+    "origin": "Origine souhaitée",
+    "volume": "Volume",
+    "reference": "Référence",
+    "market": "Marché",
+    "category": "Catégorie",
+    "originDesignation": "Origine",
+    "price": "Prix",
+    "availableVolume": "Volume disponible",
+    "vintage": "Millésime",
+    "sampleDeadline": "Échantillon attendu",
+    "answerDeadline": "Deadline réponse",
+    "styleProfile": "Profil recherché",
+    "requirements": "Exigences"
+  },
+  "actions": {
+    "reply": "Répondre",
+    "addToCrm": "Ajouter au CRM",
+    "added": "Ajouté",
+    "viewContact": "Voir les coordonnées",
+    "viewAgent": "Voir l'agent"
+  },
+  "states": {
+    "emptyDirect": "Aucune demande directe pour le moment.",
+    "emptyTender": "Aucun appel d'offres pour le moment.",
+    "closed": "Clôturé",
+    "daysLeft": "{{count}}j restants"
+  },
+  "commissionNotice": "WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.",
+  "dialog": {
+    "directTitle": "{{company}}",
+    "directDescription": "Contactez directement {{name}}. Vous pouvez aussi ajouter cette demande à votre CRM pour la suivre.",
+    "tenderTitle": "Agent à contacter",
+    "tenderDescription": "Adressez votre offre à l'agent en charge de cet appel d'offres ({{reference}})."
+  }
+}
 ```
 
-Et dans `tailwind.config.ts > colors`, ajouter :
+Traductions EN équivalentes ("Looking for", "Preferred origin", "Volume", "Reference", "Market", "Category", "Origin", "Price", "Available volume", "Vintage", "Sample deadline", "Response deadline", "Style profile", "Requirements", "Reply", "Add to CRM", "Added", "View contacts", "View agent", "No direct requests yet.", "No tenders yet.", "Closed", "{{count}}d left", commissionNotice EN).
 
-```ts
-gold: { DEFAULT: 'hsl(var(--gold))', foreground: 'hsl(var(--gold-foreground))' },
-```
+Brancher via `useTranslation()` dans `Opportunities.tsx` (les composants admin restent en FR car back-office).
 
-Carte demande directe — nouveau layout (espacements `space-y-4`, padding `pt-6 px-5 pb-5`) :
+## 4. Hors scope
+- Pas de modification des tables `importer_requests` / `tender_requests` / `tender_agents`.
+- Pas de modification de la logique d'import CSV/PDF (les composants `TallyCsvImporter` / `TenderPdfImporter` ne changent pas).
+- Pas d'autres pages touchées.
 
-1. Ligne 1 : drapeau + pays (text-base font-semibold) ⟷ date (text-xs muted).
-2. Ligne 2 : nom société (text-sm font-medium).
-3. Ligne 3 (pills wrap, `flex flex-wrap gap-2`) :
-   - `wine_styles` → pill bordeaux (`bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs`).
-   - `volume` → pill doré (`bg-gold text-gold-foreground rounded-full px-3 py-1 text-xs`).
-   - `origins` → pill outline (`border border-primary/30 text-primary rounded-full px-3 py-1 text-xs`).
-4. `requirements` : seulement si non vide après trim → `<p className="text-xs text-muted-foreground/80 leading-relaxed mt-1">{requirements}</p>` (pas de bordure / italique). Si vide → pas de bloc.
+## Fichiers
+**Nouveaux**
+- `src/components/admin/ImporterRequestsList.tsx`
+- `src/components/admin/ImporterRequestEditDialog.tsx`
+- `src/components/admin/TenderRequestsList.tsx`
+- `src/components/admin/TenderRequestEditDialog.tsx`
+- `src/components/admin/TenderAgentDialog.tsx` (extrait du flow inline existant pour réutilisation)
 
-Carte appel d'offres — même esprit :
-- En-tête : drapeau + market (font-semibold) / référence (mono xs muted) — deadline badge à droite.
-- `designation_origin` en titre (text-base font-medium).
-- Pills : `category` (bordeaux), `available_volume` (doré), `vintage` (outline), `price` (doré outline).
-- `style_profile` et `requirements` en `text-xs text-muted-foreground/80`, conditionnels.
-
-### 2.4 Footer commission (bandeau)
-Sous les `<Tabs>` (donc toujours visible) :
-
-```tsx
-<div className="mt-8 rounded-md bg-muted/40 border border-border/50 px-4 py-3 text-center text-xs text-muted-foreground">
-  WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.
-</div>
-```
-
-Clé i18n `opportunities.commissionNotice` (FR + EN).
-
-## 3. Hors scope
-- Pas de modification des tables, RLS, edge function, logique CRM, boutons "Répondre" / "Ajouter au CRM".
-- Pas de touche aux autres pages.
-- Pas de refactor en sous-composants (tout reste dans `Opportunities.tsx`) pour limiter les fichiers touchés.
-
-## Fichiers modifiés
-- `src/components/admin/TallyCsvImporter.tsx` — colonne Message éditable.
-- `src/pages/Opportunities.tsx` — refonte cartes, drapeaux, header, footer.
-- `src/index.css` — token `--gold`.
-- `tailwind.config.ts` — couleur `gold`.
-- `src/i18n/locales/fr.json` + `en.json` — title, subtitle, commissionNotice.
+**Modifiés**
+- `src/pages/AdminOpportunities.tsx` — ajout des deux listes sous les importeurs.
+- `src/components/admin/TenderPdfImporter.tsx` — utilise `TenderAgentDialog` extrait (refactor mineur, pas de changement fonctionnel).
+- `src/pages/Opportunities.tsx` — restructuration cartes + `useTranslation`.
+- `src/i18n/locales/fr.json` + `en.json` — namespace `opportunities` complet.

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,8 @@ import { Mail, Phone, MapPin, Plus, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 import { differenceInDays, format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 
@@ -54,6 +54,11 @@ function countryFlag(input: string | null | undefined): string {
   return '🌍';
 }
 
+function splitMulti(s: string | null | undefined): string[] {
+  if (!s) return [];
+  return s.split(/[,/]| - | – /).map(x => x.trim()).filter(Boolean);
+}
+
 interface ImporterRequest {
   id: string;
   full_name: string;
@@ -91,9 +96,9 @@ interface TenderRequest {
 }
 
 export default function Opportunities() {
+  const { t: tr, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [importers, setImporters] = useState<ImporterRequest[]>([]);
   const [tenders, setTenders] = useState<TenderRequest[]>([]);
   const [addedRefs, setAddedRefs] = useState<Set<string>>(new Set());
@@ -153,9 +158,9 @@ export default function Opportunities() {
       } as any);
       if (error) throw error;
       setAddedRefs(prev => new Set(prev).add(r.id));
-      toast({ title: 'Ajouté au CRM', description: r.company_name });
+      toast({ title: tr('opportunitiesPage.toast.added'), description: r.company_name });
     } catch (e: any) {
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+      toast({ title: tr('opportunitiesPage.toast.error'), description: e.message, variant: 'destructive' });
     }
   };
 
@@ -182,54 +187,61 @@ export default function Opportunities() {
       } as any);
       if (error) throw error;
       setAddedRefs(prev => new Set(prev).add(t.id));
-      toast({ title: 'Ajouté au CRM', description: `${t.reference} — ${t.agent.company}` });
+      toast({ title: tr('opportunitiesPage.toast.added'), description: `${t.reference} — ${t.agent.company}` });
     } catch (e: any) {
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+      toast({ title: tr('opportunitiesPage.toast.error'), description: e.message, variant: 'destructive' });
     }
   };
 
   const deadlineBadge = (date: string | null) => {
     if (!date) return null;
     const days = differenceInDays(new Date(date), new Date());
-    if (days < 0) return <Badge variant="outline">Clôturé</Badge>;
-    if (days < 30) return <Badge variant="destructive">{days}j restants</Badge>;
-    if (days < 60) return <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-transparent">{days}j restants</Badge>;
-    return <Badge variant="secondary">{days}j restants</Badge>;
+    if (days < 0) return <Badge variant="outline">{tr('opportunitiesPage.states.closed')}</Badge>;
+    const lbl = tr('opportunitiesPage.states.daysLeft', { count: days });
+    if (days < 30) return <Badge variant="destructive">{lbl}</Badge>;
+    if (days < 60) return <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-transparent">{lbl}</Badge>;
+    return <Badge variant="secondary">{lbl}</Badge>;
   };
+
+  const dateLocale = i18n.language === 'en' ? enUS : fr;
+
+  const labelCol = "text-[10px] uppercase tracking-wide text-muted-foreground";
 
   return (
     <div className="container mx-auto py-6 px-4 space-y-6">
       <SEO
-        title="Importateurs en recherche active — WineExporters"
-        description="Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur, et les appels d'offres officiels en cours."
+        title={tr('opportunitiesPage.seoTitle')}
+        description={tr('opportunitiesPage.seoDescription')}
         path="/opportunites"
       />
       <header>
         <h1 className="text-3xl font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
-          Importateurs en recherche active
+          {tr('opportunitiesPage.pageTitle')}
         </h1>
         <p className="text-muted-foreground mt-2 max-w-2xl">
-          Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur. Découvrez aussi les appels d'offres officiels en cours sur les marchés monopoles.
+          {tr('opportunitiesPage.pageSubtitle')}
         </p>
       </header>
 
       <Tabs defaultValue="direct" className="w-full">
         <TabsList>
-          <TabsTrigger value="direct">Demandes directes ({importers.length})</TabsTrigger>
-          <TabsTrigger value="tender">Appels d'offres ({tenders.length})</TabsTrigger>
+          <TabsTrigger value="direct">{tr('opportunitiesPage.tabs.direct')} ({importers.length})</TabsTrigger>
+          <TabsTrigger value="tender">{tr('opportunitiesPage.tabs.tender')} ({tenders.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="direct" className="mt-6">
           {importers.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">Aucune demande directe pour le moment.</CardContent></Card>
+            <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyDirect')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {importers.map(r => {
                 const added = addedRefs.has(r.id);
                 const req = r.requirements?.trim();
+                const styles = splitMulti(r.wine_styles);
+                const origins = splitMulti(r.origins);
                 return (
                   <Card key={r.id} className="flex flex-col">
-                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-4">
+                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2 font-semibold">
                           <span className="text-2xl leading-none">{countryFlag(r.country)}</span>
@@ -237,44 +249,49 @@ export default function Opportunities() {
                         </div>
                         {r.submitted_at && (
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(r.submitted_at), 'd MMM yyyy', { locale: fr })}
+                            {format(new Date(r.submitted_at), 'd MMM yyyy', { locale: dateLocale })}
                           </span>
                         )}
                       </div>
                       {r.company_name && (
                         <div className="text-sm font-medium">{r.company_name}</div>
                       )}
-                      {(r.wine_styles || r.volume || r.origins) && (
-                        <div className="flex flex-wrap gap-2">
-                          {r.wine_styles && (
-                            <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs">
-                              {r.wine_styles}
-                            </span>
-                          )}
-                          {r.volume && (
-                            <span className="bg-gold text-gold-foreground rounded-full px-3 py-1 text-xs font-medium">
-                              {r.volume}
-                            </span>
-                          )}
-                          {r.origins && (
-                            <span className="border border-primary/30 text-primary rounded-full px-3 py-1 text-xs">
-                              {r.origins}
-                            </span>
-                          )}
+                      {styles.length > 0 && (
+                        <div>
+                          <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.search')}</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {styles.map((s, i) => (
+                              <span key={i} className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs">{s}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {origins.length > 0 && (
+                        <div>
+                          <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.origin')}</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {origins.map((s, i) => (
+                              <span key={i} className="bg-muted text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs">{s}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {r.volume && (
+                        <div>
+                          <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.volume')}</div>
+                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium inline-block">{r.volume}</span>
                         </div>
                       )}
                       {req && (
-                        <p className="text-xs text-muted-foreground/80 leading-relaxed">
-                          {req}
-                        </p>
+                        <p className="text-xs italic text-muted-foreground/80 leading-relaxed">{req}</p>
                       )}
                     </CardContent>
                     <div className="px-5 pb-5 flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => setContactDialog({ kind: 'importer', data: r })}>
-                        Répondre
+                        {tr('opportunitiesPage.actions.reply')}
                       </Button>
                       <Button size="sm" className="flex-1" disabled={added} onClick={() => addImporterToCrm(r)}>
-                        {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />Ajouté</> : <><Plus className="h-4 w-4 mr-1" />CRM</>}
+                        {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
                       </Button>
                     </div>
                   </Card>
@@ -286,16 +303,22 @@ export default function Opportunities() {
 
         <TabsContent value="tender" className="mt-6">
           {tenders.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">Aucun appel d'offres pour le moment.</CardContent></Card>
+            <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyTender')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tenders.map(t => {
                 const added = addedRefs.has(t.id);
                 const styleProfile = t.style_profile?.trim();
                 const tReq = t.requirements?.trim();
+                const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+                  <div className="flex items-baseline gap-2">
+                    <span className={`${labelCol} w-28 shrink-0`}>{label}</span>
+                    <div className="flex-1 min-w-0">{children}</div>
+                  </div>
+                );
                 return (
                   <Card key={t.id} className="flex flex-col border-primary/20">
-                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-4">
+                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2 font-semibold">
                           <span className="text-2xl leading-none">{countryFlag(t.market)}</span>
@@ -306,40 +329,38 @@ export default function Opportunities() {
                         </div>
                         {deadlineBadge(t.deadline_answer)}
                       </div>
-                      {t.designation_origin && (
-                        <div className="text-base font-medium">{t.designation_origin}</div>
+                      {t.category && (
+                        <Row label={tr('opportunitiesPage.labels.category')}>
+                          <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs">{t.category}</span>
+                        </Row>
                       )}
-                      {(t.category || t.available_volume || t.vintage || t.price) && (
-                        <div className="flex flex-wrap gap-2">
-                          {t.category && (
-                            <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs">
-                              {t.category}
-                            </span>
-                          )}
-                          {t.available_volume && (
-                            <span className="bg-gold text-gold-foreground rounded-full px-3 py-1 text-xs font-medium">
-                              {t.available_volume}
-                            </span>
-                          )}
-                          {t.price && (
-                            <span className="border border-gold/60 text-gold-foreground/80 bg-gold/10 rounded-full px-3 py-1 text-xs">
-                              {t.price}
-                            </span>
-                          )}
-                          {t.vintage && (
-                            <span className="border border-primary/30 text-primary rounded-full px-3 py-1 text-xs">
-                              {t.vintage}
-                            </span>
-                          )}
-                        </div>
+                      {t.designation_origin && (
+                        <Row label={tr('opportunitiesPage.labels.originDesignation')}>
+                          <span className="bg-muted text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs">{t.designation_origin}</span>
+                        </Row>
+                      )}
+                      {t.price && (
+                        <Row label={tr('opportunitiesPage.labels.price')}>
+                          <span className="text-xs font-medium">{t.price}</span>
+                        </Row>
+                      )}
+                      {t.available_volume && (
+                        <Row label={tr('opportunitiesPage.labels.availableVolume')}>
+                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">{t.available_volume}</span>
+                        </Row>
+                      )}
+                      {t.vintage && (
+                        <Row label={tr('opportunitiesPage.labels.vintage')}>
+                          <span className="border border-primary/30 text-primary rounded-full px-2.5 py-0.5 text-xs">{t.vintage}</span>
+                        </Row>
                       )}
                       {t.deadline_sample && (
-                        <div className="text-xs text-muted-foreground">
-                          Échantillon attendu : {t.deadline_sample}
-                        </div>
+                        <Row label={tr('opportunitiesPage.labels.sampleDeadline')}>
+                          <span className="text-xs text-muted-foreground">{t.deadline_sample}</span>
+                        </Row>
                       )}
                       {styleProfile && (
-                        <p className="text-xs text-muted-foreground/80 leading-relaxed">{styleProfile}</p>
+                        <p className="text-xs italic text-muted-foreground/80 leading-relaxed">{styleProfile}</p>
                       )}
                       {tReq && (
                         <p className="text-xs text-muted-foreground/80 leading-relaxed">{tReq}</p>
@@ -347,10 +368,10 @@ export default function Opportunities() {
                     </CardContent>
                     <div className="px-5 pb-5 flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => setContactDialog({ kind: 'tender', data: t })}>
-                        Répondre
+                        {tr('opportunitiesPage.actions.reply')}
                       </Button>
                       <Button size="sm" className="flex-1" disabled={added || !t.agent} onClick={() => addTenderToCrm(t)}>
-                        {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />Ajouté</> : <><Plus className="h-4 w-4 mr-1" />CRM</>}
+                        {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
                       </Button>
                     </div>
                   </Card>
@@ -362,7 +383,7 @@ export default function Opportunities() {
       </Tabs>
 
       <div className="mt-8 rounded-md bg-muted/40 border border-border/50 px-4 py-3 text-center text-xs text-muted-foreground">
-        WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.
+        {tr('opportunitiesPage.commissionNotice')}
       </div>
 
       <Dialog open={!!contactDialog} onOpenChange={(o) => !o && setContactDialog(null)}>
@@ -372,7 +393,7 @@ export default function Opportunities() {
               <DialogHeader>
                 <DialogTitle>{contactDialog.data.company_name}</DialogTitle>
                 <DialogDescription>
-                  Contactez directement {contactDialog.data.full_name}. Vous pouvez aussi ajouter cette demande à votre CRM pour la suivre.
+                  {tr('opportunitiesPage.dialog.directDescription', { name: contactDialog.data.full_name })}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2 text-sm">
@@ -386,9 +407,9 @@ export default function Opportunities() {
           {contactDialog?.kind === 'tender' && contactDialog.data.agent && (
             <>
               <DialogHeader>
-                <DialogTitle>Agent à contacter</DialogTitle>
+                <DialogTitle>{tr('opportunitiesPage.dialog.tenderTitle')}</DialogTitle>
                 <DialogDescription>
-                  Adressez votre offre à l'agent en charge de cet appel d'offres ({contactDialog.data.reference}).
+                  {tr('opportunitiesPage.dialog.tenderDescription', { reference: contactDialog.data.reference })}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2 text-sm">
