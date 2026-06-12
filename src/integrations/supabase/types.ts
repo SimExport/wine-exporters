@@ -520,13 +520,61 @@ export type Database = {
         }
         Relationships: []
       }
+      importer_requests: {
+        Row: {
+          company_name: string
+          country: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          origins: string | null
+          phone: string | null
+          requirements: string | null
+          status: string
+          submitted_at: string | null
+          volume: string | null
+          wine_styles: string | null
+        }
+        Insert: {
+          company_name: string
+          country?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          origins?: string | null
+          phone?: string | null
+          requirements?: string | null
+          status?: string
+          submitted_at?: string | null
+          volume?: string | null
+          wine_styles?: string | null
+        }
+        Update: {
+          company_name?: string
+          country?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          origins?: string | null
+          phone?: string | null
+          requirements?: string | null
+          status?: string
+          submitted_at?: string | null
+          volume?: string | null
+          wine_styles?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           address_line1: string | null
           address_line2: string | null
           buyer_contact_id: string | null
           buyer_id: string
-          campaign_id: string
+          campaign_id: string | null
           city: string | null
           company_name: string | null
           country: string | null
@@ -551,6 +599,8 @@ export type Database = {
             | Database["public"]["Enums"]["requested_action"][]
             | null
           requested_other: string | null
+          source: string
+          source_ref: string | null
           status: string | null
           tally_response_id: string | null
           tally_response_url: string | null
@@ -562,7 +612,7 @@ export type Database = {
           address_line2?: string | null
           buyer_contact_id?: string | null
           buyer_id: string
-          campaign_id: string
+          campaign_id?: string | null
           city?: string | null
           company_name?: string | null
           country?: string | null
@@ -589,6 +639,8 @@ export type Database = {
             | Database["public"]["Enums"]["requested_action"][]
             | null
           requested_other?: string | null
+          source?: string
+          source_ref?: string | null
           status?: string | null
           tally_response_id?: string | null
           tally_response_url?: string | null
@@ -600,7 +652,7 @@ export type Database = {
           address_line2?: string | null
           buyer_contact_id?: string | null
           buyer_id?: string
-          campaign_id?: string
+          campaign_id?: string | null
           city?: string | null
           company_name?: string | null
           country?: string | null
@@ -627,6 +679,8 @@ export type Database = {
             | Database["public"]["Enums"]["requested_action"][]
             | null
           requested_other?: string | null
+          source?: string
+          source_ref?: string | null
           status?: string | null
           tally_response_id?: string | null
           tally_response_url?: string | null
@@ -999,6 +1053,101 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tender_agents: {
+        Row: {
+          address: string | null
+          company: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tender_requests: {
+        Row: {
+          agent_id: string | null
+          available_volume: string | null
+          category: string | null
+          created_at: string
+          deadline_answer: string | null
+          deadline_sample: string | null
+          designation_origin: string | null
+          id: string
+          market: string
+          price: string | null
+          reference: string
+          requirements: string | null
+          status: string
+          style_profile: string | null
+          vintage: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          available_volume?: string | null
+          category?: string | null
+          created_at?: string
+          deadline_answer?: string | null
+          deadline_sample?: string | null
+          designation_origin?: string | null
+          id?: string
+          market: string
+          price?: string | null
+          reference: string
+          requirements?: string | null
+          status?: string
+          style_profile?: string | null
+          vintage?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          available_volume?: string | null
+          category?: string | null
+          created_at?: string
+          deadline_answer?: string | null
+          deadline_sample?: string | null
+          designation_origin?: string | null
+          id?: string
+          market?: string
+          price?: string | null
+          reference?: string
+          requirements?: string | null
+          status?: string
+          style_profile?: string | null
+          vintage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tender_requests_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "tender_agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_credits: {
         Row: {
