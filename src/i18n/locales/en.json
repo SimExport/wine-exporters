@@ -90,7 +90,9 @@
     "adminInvitations": "Invitations",
     "adminSourcing": "Admin Searches",
     "adminUsers": "Users",
-    "sourcing": "Bespoke Searches"
+    "sourcing": "Bespoke Searches",
+    "opportunities": "Opportunities",
+    "adminOpportunities": "Admin Opportunities"
   },
   "sidebar": {
     "notifications": "Notifications",
