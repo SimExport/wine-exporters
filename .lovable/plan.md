@@ -1,84 +1,66 @@
 ## Objectif
+Ajouter une carte pleine largeur "Opportunités" sur `/dashboard`, positionnée entre la grille 2x2 existante et le bloc "État du pipeline". La carte affiche un compteur réel des opportunités publiées (importer_requests + tender_requests, status = 'published') et un lien vers `/opportunites`.
 
-Stocker les champs structurés (`wine_styles`, `volume`, `origins`, `requirements`, et équivalents tender) en deux versions `_fr` et `_en` au moment de l'import, pour que l'affichage `/opportunites` respecte la langue active du toggle i18n.
+## Fichiers concernés
 
-## 1. Migration DB
+### 1. `src/pages/Dashboard.tsx`
+- **Données** : ajouter un état `opportunitiesCount: number` initialisé à `0`.
+- **Requête** : dans le `useEffect` existant, ajouter en parallèle aux requêtes `profiles` et `campaigns` deux appels `count` sur `importer_requests` et `tender_requests`, filtrés sur `status = 'published'`, puis sommer les résultats.
+- **Carte** : insérer une nouvelle carte en pleine largeur (`col-span-1 md:col-span-2` ou `w-full` selon le layout) entre la grille 2x2 (`</div>`) et le bloc pipeline strip.
+- **Style** : identique aux 4 cartes existantes (bordure `border-border`, fond `bg-card`, padding `p-5`, hover `hover:shadow-md transition-shadow`).
+- **Icône** : `Sparkles` de `lucide-react` (cohérent avec la sidebar).
+- **Badge** : en haut à droite, format `"{{count}} opportunités disponibles"` / `"{{count}} opportunities available"`, avec la classe `bg-blue-50 text-blue-700 border-blue-200` (info).
+- **Description** : "Des importateurs et des appels d'offres officiels recherchent activement des vins comme les vôtres."
+- **CTA** : "Explorer les opportunités →" / "Explore opportunities →", lien vers `/opportunites`.
 
-Ajouter sur `importer_requests` :
-- `wine_styles_fr`, `wine_styles_en` (text)
-- `volume_fr`, `volume_en` (text)
-- `origins_fr`, `origins_en` (text)
-- `requirements_fr`, `requirements_en` (text, nullable)
+### 2. `src/i18n/locales/fr.json`
+Ajouter sous `dashboardPage.hub` :
+```json
+"opportunities": {
+  "title": "Opportunités",
+  "desc": "Des importateurs et des appels d'offres officiels recherchent activement des vins comme les vôtres.",
+  "cta": "Explorer les opportunités",
+  "available": "{{count}} opportunité disponible",
+  "available_other": "{{count}} opportunités disponibles"
+}
+```
 
-Ajouter sur `tender_requests` :
-- `category_fr`, `category_en`
-- `available_volume_fr`, `available_volume_en`
-- `designation_origin_fr`, `designation_origin_en`
-- `style_profile_fr`, `style_profile_en`
-- `requirements_fr`, `requirements_en`
+### 3. `src/i18n/locales/en.json`
+Ajouter sous `dashboardPage.hub` :
+```json
+"opportunities": {
+  "title": "Opportunities",
+  "desc": "Importers and official tenders are actively looking for wines like yours.",
+  "cta": "Explore opportunities",
+  "available": "{{count}} opportunity available",
+  "available_other": "{{count}} opportunities available"
+}
+```
 
-Les colonnes brutes existantes restent inchangées (debug/admin). Pas de backfill SQL : les lignes existantes seront retraitées via un bouton admin (voir §5).
+## Implémentation détaillée
 
-## 2. Edge Function `translate-opportunity-fields`
+### Requête de comptage (Dashboard.tsx)
+```typescript
+const [opportunitiesCount, setOpportunitiesCount] = useState(0);
 
-Nouvelle fonction Deno, `verify_jwt = false` côté config mais validation JWT + rôle admin en code (utilise `SUPABASE_JWKS`).
+// Dans le useEffect, après les Promise.all existants :
+const [importerCountRes, tenderCountRes] = await Promise.all([
+  supabase.from('importer_requests').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+  supabase.from('tender_requests').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+]);
+const total = (importerCountRes.count ?? 0) + (tenderCountRes.count ?? 0);
+setOpportunitiesCount(total);
+```
 
-- Input : `{ entries: Array<{ id?: string; fields: Record<string,string> }> }` (batch jusqu'à 20 entrées).
-- Appelle Anthropic Claude (`ANTHROPIC_API_KEY` déjà configurée) avec un prompt système qui :
-  - Précise que les valeurs sources viennent d'un formulaire Tally en anglais.
-  - Fournit le glossaire métier vin : `White→Blanc`, `Red→Rouge`, `Rosé→Rosé`, `Sparkling→Effervescent`, `Sweet→Doux`, `Fortified→Muté`, ranges de bouteilles avec espaces fines insécables, noms de pays/régions (`Sweden→Suède`, `Other Europe→Autre Europe`, `New World→Nouveau Monde`, etc.).
-  - Renvoie un JSON strict via `response_format`/tool-call structuré : pour chaque champ, `{ fr, en }`. `en` = normalisation légère (trim, casse cohérente). `fr` = traduction.
-- Output : `{ results: Array<{ id?: string; translations: Record<string, { fr: string; en: string }> }> }`.
-- Fallback en cas d'erreur Anthropic : `{ fr: raw, en: raw }` par champ, jamais d'échec dur côté client.
+### Structure de la carte
+La carte suit exactement le pattern des 4 cartes existantes dans le tableau `cards` : icône dans un rond `bg-secondary/60`, badge en haut à droite, titre, description, lien CTA avec flèche. Elle est insérée comme un élément individuel en pleine largeur entre la grille et le pipeline strip, ou comme 5ème élément de la grille avec `md:col-span-2`.
 
-## 3. Import CSV Tally — preview enrichie
+## Vérification
+- Recharger `/dashboard` : le badge doit afficher le total réel d'entrées publiées.
+- Cliquer sur le CTA doit naviguer vers `/opportunites`.
+- Le switch FR/EN doit traduire titre, description, CTA et badge.
 
-Dans `TallyCsvImporter.tsx` :
-- Après parsing CSV, ajouter un bouton **"Traduire la sélection"** qui appelle l'Edge Function pour les lignes cochées et hydrate l'état local avec `wine_styles_fr/en`, `volume_fr/en`, `origins_fr/en`, `requirements_fr/en`.
-- Le tableau de preview gagne, sous chaque cellule structurée concernée, deux mini-textareas `FR` / `EN` éditables (compactes, `text-xs`). La colonne brute reste visible en lecture seule au-dessus pour référence.
-- Le bouton **"Importer la sélection"** est désactivé tant que les versions `_fr`/`_en` ne sont pas remplies pour les lignes sélectionnées (sinon import direct avec fallback = valeur brute, au choix UX — par défaut on auto-déclenche la traduction si manquante).
-- L'insert dans `importer_requests` inclut maintenant les 8 colonnes `_fr`/`_en`.
-
-## 4. Import PDF Tender
-
-Dans `TenderPdfImporter.tsx` :
-- Après extraction PDF, appel automatique à `translate-opportunity-fields` pour `category`, `available_volume`, `designation_origin`, `style_profile`, `requirements`.
-- Champs éditables FR/EN dans le formulaire de preview avant insert.
-
-## 5. Édition admin (entrées déjà publiées)
-
-Dans `ImporterRequestEditDialog.tsx` et `TenderRequestEditDialog.tsx` :
-- Remplacer les champs uniques `Types de vin`, `Volume`, `Origines`, `Message` (resp. `Catégorie`, `Volume disponible`, etc.) par des paires d'inputs `FR` / `EN` côte à côte.
-- La colonne brute reste éditable dans une section repliée "Valeur brute (debug)".
-- Ajouter en haut du dialog un bouton **"Re-traduire automatiquement"** qui réinvoque l'Edge Function pour cette entrée et pré-remplit les paires FR/EN.
-
-Dans `ImporterRequestsList.tsx` et `TenderRequestsList.tsx` :
-- Ajouter un bouton global **"Traduire les entrées manquantes"** qui parcourt en batch les lignes dont au moins un `_fr` ou `_en` est `NULL`, appelle l'Edge Function et `UPDATE` les colonnes. Sert au backfill des 10 lignes Tally + 1 tender déjà en base.
-
-## 6. Affichage `/opportunites`
-
-Dans `Opportunities.tsx` :
-- Récupérer la langue active via `i18n.language` (`fr` ou `en`).
-- Helper `pickLang(row, base) = row[`${base}_${lang}`] ?? row[base]` (fallback sur brut si `_fr`/`_en` vide, utile en transition).
-- Remplacer tous les usages de `wine_styles`, `volume`, `origins`, `requirements` (et équivalents tender) par `pickLang(row, 'wine_styles')` etc.
-- `splitMulti()` continue de fonctionner sur les chaînes traduites.
-- `countryFlag()` reste appelée sur la valeur EN (mapping plus stable) : utiliser explicitement `row.origins_en` pour la résolution drapeau, et `pickLang(...)` pour le texte affiché.
-
-## 7. Types Supabase
-
-Après l'approbation de la migration, `src/integrations/supabase/types.ts` sera régénéré automatiquement, débloquant l'accès typé aux nouvelles colonnes pour tous les composants ci-dessus.
-
-## Détails techniques
-
-- **Endpoint Anthropic** : `https://api.anthropic.com/v1/messages`, modèle `claude-haiku-4-5` (rapide + suffisant pour de la traduction courte), `max_tokens: 1024`, sortie JSON strict via prompt + parse.
-- **Coût** : traduction faite une seule fois à l'import, donc négligeable.
-- **Sécurité** : l'Edge Function vérifie `has_role(auth.uid(), 'admin')` avant tout appel Anthropic, pour éviter qu'un user non-admin déclenche des coûts.
-- **Glossaire** : injecté dans le system prompt comme `<glossary>…</glossary>` pour cohérence inter-appels.
-- **Performance preview admin** : batch de 20 entrées par appel, parallélisé côté front si > 20 lignes.
-
-## Hors-scope
-
-- Pas de table `translations` séparée (colonnes inline = plus simple à éditer + filtrer).
-- Pas de traduction live côté frontend (coûteux et instable).
-- Pas de changement aux libellés UI déjà gérés par i18next.
-- Pas de changement aux autres pages.
+## Hors scope
+- Pas de modification de la grille 2x2 existante ni des autres cartes.
+- Pas de modification du bloc pipeline strip.
+- Pas de modification de la sidebar.

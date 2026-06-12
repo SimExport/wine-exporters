@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Grape, Search, Send, Store, Kanban, ArrowRight, AlertCircle } from 'lucide-react';
+import { Grape, Search, Send, Store, Kanban, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
 import { useCredits } from '@/hooks/useCredits';
 
 interface Profile {
@@ -35,17 +35,21 @@ const Dashboard = () => {
     negotiation: 0,
     openOpportunities: 0,
   });
+  const [opportunitiesCount, setOpportunitiesCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
-        const [profileRes, allCampaignsRes] = await Promise.all([
+        const [profileRes, allCampaignsRes, importerCountRes, tenderCountRes] = await Promise.all([
           supabase.from('profiles').select('domain_name,contact_name,location,priority_markets').eq('user_id', user.id).maybeSingle(),
           supabase.from('campaigns').select('id,name,status,target_markets,launched_at,created_at').eq('user_id', user.id),
+          supabase.from('importer_requests').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+          supabase.from('tender_requests').select('*', { count: 'exact', head: true }).eq('status', 'published'),
         ]);
         setProfile(profileRes.data as Profile);
+        setOpportunitiesCount((importerCountRes.count ?? 0) + (tenderCountRes.count ?? 0));
 
         const allCampaigns = (allCampaignsRes.data ?? []) as Array<Campaign & { launched_at: string | null; created_at: string }>;
         const active = allCampaigns
@@ -205,6 +209,23 @@ const Dashboard = () => {
         </div>
 
         {/* Pipeline strip */}
+        <div className="rounded-xl border border-border bg-card p-5 mb-8 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between mb-4">
+            <div className="bg-secondary/60 rounded-lg p-2.5">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50 font-medium" variant="outline">
+              {t('dashboardPage.hub.opportunities.available', { count: opportunitiesCount })}
+            </Badge>
+          </div>
+          <h3 className="font-semibold text-foreground mb-1">{t('dashboardPage.hub.opportunities.title')}</h3>
+          <p className="text-sm text-muted-foreground mb-4">{t('dashboardPage.hub.opportunities.desc')}</p>
+          <Link to="/opportunites" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2 transition-all">
+            <ArrowRight className="h-4 w-4" />
+            {t('dashboardPage.hub.opportunities.cta')}
+          </Link>
+        </div>
+
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-foreground">{t('dashboardPage.hub.pipelineStrip.title')}</h3>
