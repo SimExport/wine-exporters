@@ -43,6 +43,10 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     --wine-light: 345 45% 35%;
     --wine-dark: 345 50% 15%;
 
+    /* Accent doré */
+    --gold: 42 55% 60%;
+    --gold-foreground: 345 50% 15%;
+
     --sidebar-background: 345 45% 22%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
@@ -85,6 +89,9 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     /* Wine color variants for gradients */
     --wine-light: 345 45% 55%;
     --wine-dark: 345 50% 35%;
+
+    --gold: 42 55% 55%;
+    --gold-foreground: 0 0% 98%;
 
     --sidebar-background: 345 30% 8%;
     --sidebar-foreground: 0 0% 98%;

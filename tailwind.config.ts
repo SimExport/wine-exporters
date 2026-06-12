@@ -73,6 +73,10 @@ export default {
 					700: 'hsl(345, 50%, 18%)',
 					800: 'hsl(345, 50%, 15%)',
 					900: 'hsl(345, 55%, 10%)',
+				},
+				gold: {
+					DEFAULT: 'hsl(var(--gold))',
+					foreground: 'hsl(var(--gold-foreground))'
 				}
 			},
 			borderRadius: {
