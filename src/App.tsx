@@ -25,6 +25,8 @@ import AdminInvitations from "./pages/AdminInvitations";
 import AdminSourcing from "./pages/AdminSourcing";
 import AdminUsers from "./pages/AdminUsers";
 import AdminUserProfile from "./pages/AdminUserProfile";
+import AdminOpportunities from "./pages/AdminOpportunities";
+import Opportunities from "./pages/Opportunities";
 import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -91,6 +93,7 @@ const App = () => (
             <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
             <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
             <Route path="/recherches" element={<DashboardLayout><SourcingRequests /></DashboardLayout>} />
+            <Route path="/opportunites" element={<DashboardLayout><Opportunities /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
               <DashboardLayout>
                 <AdminRoute>
@@ -116,6 +119,13 @@ const App = () => (
               <DashboardLayout>
                 <AdminRoute>
                   <AdminUsers />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
+            <Route path="/admin/opportunites" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminOpportunities />
                 </AdminRoute>
               </DashboardLayout>
             } />
