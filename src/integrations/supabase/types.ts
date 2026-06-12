@@ -529,12 +529,20 @@ export type Database = {
           full_name: string
           id: string
           origins: string | null
+          origins_en: string | null
+          origins_fr: string | null
           phone: string | null
           requirements: string | null
+          requirements_en: string | null
+          requirements_fr: string | null
           status: string
           submitted_at: string | null
           volume: string | null
+          volume_en: string | null
+          volume_fr: string | null
           wine_styles: string | null
+          wine_styles_en: string | null
+          wine_styles_fr: string | null
         }
         Insert: {
           company_name: string
@@ -544,12 +552,20 @@ export type Database = {
           full_name: string
           id?: string
           origins?: string | null
+          origins_en?: string | null
+          origins_fr?: string | null
           phone?: string | null
           requirements?: string | null
+          requirements_en?: string | null
+          requirements_fr?: string | null
           status?: string
           submitted_at?: string | null
           volume?: string | null
+          volume_en?: string | null
+          volume_fr?: string | null
           wine_styles?: string | null
+          wine_styles_en?: string | null
+          wine_styles_fr?: string | null
         }
         Update: {
           company_name?: string
@@ -559,12 +575,20 @@ export type Database = {
           full_name?: string
           id?: string
           origins?: string | null
+          origins_en?: string | null
+          origins_fr?: string | null
           phone?: string | null
           requirements?: string | null
+          requirements_en?: string | null
+          requirements_fr?: string | null
           status?: string
           submitted_at?: string | null
           volume?: string | null
+          volume_en?: string | null
+          volume_fr?: string | null
           wine_styles?: string | null
+          wine_styles_en?: string | null
+          wine_styles_fr?: string | null
         }
         Relationships: []
       }
@@ -1091,52 +1115,82 @@ export type Database = {
         Row: {
           agent_id: string | null
           available_volume: string | null
+          available_volume_en: string | null
+          available_volume_fr: string | null
           category: string | null
+          category_en: string | null
+          category_fr: string | null
           created_at: string
           deadline_answer: string | null
           deadline_sample: string | null
           designation_origin: string | null
+          designation_origin_en: string | null
+          designation_origin_fr: string | null
           id: string
           market: string
           price: string | null
           reference: string
           requirements: string | null
+          requirements_en: string | null
+          requirements_fr: string | null
           status: string
           style_profile: string | null
+          style_profile_en: string | null
+          style_profile_fr: string | null
           vintage: string | null
         }
         Insert: {
           agent_id?: string | null
           available_volume?: string | null
+          available_volume_en?: string | null
+          available_volume_fr?: string | null
           category?: string | null
+          category_en?: string | null
+          category_fr?: string | null
           created_at?: string
           deadline_answer?: string | null
           deadline_sample?: string | null
           designation_origin?: string | null
+          designation_origin_en?: string | null
+          designation_origin_fr?: string | null
           id?: string
           market: string
           price?: string | null
           reference: string
           requirements?: string | null
+          requirements_en?: string | null
+          requirements_fr?: string | null
           status?: string
           style_profile?: string | null
+          style_profile_en?: string | null
+          style_profile_fr?: string | null
           vintage?: string | null
         }
         Update: {
           agent_id?: string | null
           available_volume?: string | null
+          available_volume_en?: string | null
+          available_volume_fr?: string | null
           category?: string | null
+          category_en?: string | null
+          category_fr?: string | null
           created_at?: string
           deadline_answer?: string | null
           deadline_sample?: string | null
           designation_origin?: string | null
+          designation_origin_en?: string | null
+          designation_origin_fr?: string | null
           id?: string
           market?: string
           price?: string | null
           reference?: string
           requirements?: string | null
+          requirements_en?: string | null
+          requirements_fr?: string | null
           status?: string
           style_profile?: string | null
+          style_profile_en?: string | null
+          style_profile_fr?: string | null
           vintage?: string | null
         }
         Relationships: [
