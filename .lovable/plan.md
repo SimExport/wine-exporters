@@ -1,123 +1,84 @@
-## 1. Admin `/admin/opportunites` — liste + édition
+## Objectif
 
-Ajouter dans chaque onglet (sous l'importeur existant) une **section "Entrées publiées"** listant toutes les lignes de la table correspondante.
+Stocker les champs structurés (`wine_styles`, `volume`, `origins`, `requirements`, et équivalents tender) en deux versions `_fr` et `_en` au moment de l'import, pour que l'affichage `/opportunites` respecte la langue active du toggle i18n.
 
-### Onglet "Demandes directes"
-- Nouveau composant `src/components/admin/ImporterRequestsList.tsx` :
-  - `useEffect` → `supabase.from('importer_requests').select('*').order('created_at desc')`.
-  - Table compacte (10 lignes / page, pagination simple) : société, pays, email, status, date, bouton **Modifier**.
-  - Filtre status (all/published/archived/draft).
-- Nouveau composant `src/components/admin/ImporterRequestEditDialog.tsx` :
-  - `Dialog` shadcn avec formulaire (react-hook-form + zod existants dans le repo).
-  - Champs éditables : `full_name`, `company_name`, `country`, `email`, `phone`, `wine_styles`, `origins`, `volume`, `requirements` (Textarea), `status` (Select : published / draft / archived).
-  - Bouton **Enregistrer** → `supabase.from('importer_requests').update(...).eq('id', id)` + toast + refresh callback.
-  - Bouton **Supprimer** (avec confirmation simple `window.confirm` pour rester léger).
+## 1. Migration DB
 
-### Onglet "Appels d'offres"
-- Nouveau composant `src/components/admin/TenderRequestsList.tsx` : table (référence, marché, designation, agent.company, deadline_answer, status, Modifier).
-- Nouveau composant `src/components/admin/TenderRequestEditDialog.tsx` :
-  - Charge la liste `tender_agents` au montage pour alimenter un `Select` (avec option "Créer un nouvel agent" qui ouvre le Dialog agent inline déjà présent dans `TenderPdfImporter`, à extraire dans `src/components/admin/TenderAgentDialog.tsx` réutilisable).
-  - Champs : `reference`, `market`, `category`, `designation_origin`, `price`, `available_volume`, `vintage`, `deadline_answer` (input date), `deadline_sample` (input date), `style_profile` (Textarea), `requirements` (Textarea), `agent_id` (Select), `status` (Select).
-  - **Enregistrer** → update.
-  - **Supprimer** avec confirmation.
+Ajouter sur `importer_requests` :
+- `wine_styles_fr`, `wine_styles_en` (text)
+- `volume_fr`, `volume_en` (text)
+- `origins_fr`, `origins_en` (text)
+- `requirements_fr`, `requirements_en` (text, nullable)
 
-### Intégration dans `AdminOpportunities.tsx`
-Sous chaque `<TallyCsvImporter/>` / `<TenderPdfImporter/>`, ajouter un séparateur visuel + section "Entrées publiées" avec le nouveau composant. Pas de refactor du flux d'import.
+Ajouter sur `tender_requests` :
+- `category_fr`, `category_en`
+- `available_volume_fr`, `available_volume_en`
+- `designation_origin_fr`, `designation_origin_en`
+- `style_profile_fr`, `style_profile_en`
+- `requirements_fr`, `requirements_en`
 
-## 2. Page utilisateur `/opportunites` — cartes labellisées
+Les colonnes brutes existantes restent inchangées (debug/admin). Pas de backfill SQL : les lignes existantes seront retraitées via un bouton admin (voir §5).
 
-Restructurer `src/pages/Opportunities.tsx`.
+## 2. Edge Function `translate-opportunity-fields`
 
-### Carte "Demande directe" — lignes labellisées
-Layout `space-y-3`, chaque ligne = `<div>` avec label `text-xs uppercase tracking-wide text-muted-foreground` + badges en `flex flex-wrap gap-1.5`.
+Nouvelle fonction Deno, `verify_jwt = false` côté config mais validation JWT + rôle admin en code (utilise `SUPABASE_JWKS`).
 
-1. **Header** : drapeau + pays (titre) ⟷ date.
-2. **Société** : nom (text-sm font-medium).
-3. **Recherche :** un badge par valeur de `wine_styles` (split sur `,` et `/`), pill bordeaux (`bg-primary text-primary-foreground`).
-4. **Origine souhaitée :** un badge par valeur de `origins` (split sur `,` et `/`), pill `bg-muted text-primary border border-primary/20`.
-5. **Volume :** badge unique, pill `bg-gold text-gold-foreground`.
-6. **Message** (si non vide après trim) : `<p className="text-xs italic text-muted-foreground/80">`.
+- Input : `{ entries: Array<{ id?: string; fields: Record<string,string> }> }` (batch jusqu'à 20 entrées).
+- Appelle Anthropic Claude (`ANTHROPIC_API_KEY` déjà configurée) avec un prompt système qui :
+  - Précise que les valeurs sources viennent d'un formulaire Tally en anglais.
+  - Fournit le glossaire métier vin : `White→Blanc`, `Red→Rouge`, `Rosé→Rosé`, `Sparkling→Effervescent`, `Sweet→Doux`, `Fortified→Muté`, ranges de bouteilles avec espaces fines insécables, noms de pays/régions (`Sweden→Suède`, `Other Europe→Autre Europe`, `New World→Nouveau Monde`, etc.).
+  - Renvoie un JSON strict via `response_format`/tool-call structuré : pour chaque champ, `{ fr, en }`. `en` = normalisation légère (trim, casse cohérente). `fr` = traduction.
+- Output : `{ results: Array<{ id?: string; translations: Record<string, { fr: string; en: string }> }> }`.
+- Fallback en cas d'erreur Anthropic : `{ fr: raw, en: raw }` par champ, jamais d'échec dur côté client.
 
-Helper local `splitMulti(s) => s.split(/[,/]/).map(x=>x.trim()).filter(Boolean)`.
+## 3. Import CSV Tally — preview enrichie
 
-### Carte "Appel d'offres" — lignes labellisées
-1. **Header** : drapeau + market ⟷ deadline badge (urgence inchangée).
-2. **Référence :** valeur mono, **Catégorie :** badge bordeaux.
-3. **Origine :** designation_origin en pill `bg-muted text-primary border border-primary/20`.
-4. **Prix :** texte simple, **Volume disponible :** pill doré.
-5. **Millésime :** pill outline (si présent).
-6. **Échantillon attendu :** date (si présent).
-7. **Profil / Exigences** (si non vides) : paragraphes secondaires.
+Dans `TallyCsvImporter.tsx` :
+- Après parsing CSV, ajouter un bouton **"Traduire la sélection"** qui appelle l'Edge Function pour les lignes cochées et hydrate l'état local avec `wine_styles_fr/en`, `volume_fr/en`, `origins_fr/en`, `requirements_fr/en`.
+- Le tableau de preview gagne, sous chaque cellule structurée concernée, deux mini-textareas `FR` / `EN` éditables (compactes, `text-xs`). La colonne brute reste visible en lecture seule au-dessus pour référence.
+- Le bouton **"Importer la sélection"** est désactivé tant que les versions `_fr`/`_en` ne sont pas remplies pour les lignes sélectionnées (sinon import direct avec fallback = valeur brute, au choix UX — par défaut on auto-déclenche la traduction si manquante).
+- L'insert dans `importer_requests` inclut maintenant les 8 colonnes `_fr`/`_en`.
 
-Layout en deux colonnes pour les labels courts (label gauche fixe `w-28 text-xs uppercase muted`, contenu droit `flex-1`) — fallback colonne unique sur mobile.
+## 4. Import PDF Tender
 
-## 3. i18n FR/EN
+Dans `TenderPdfImporter.tsx` :
+- Après extraction PDF, appel automatique à `translate-opportunity-fields` pour `category`, `available_volume`, `designation_origin`, `style_profile`, `requirements`.
+- Champs éditables FR/EN dans le formulaire de preview avant insert.
 
-Ajouter dans `src/i18n/locales/fr.json` et `en.json` un namespace `opportunities` :
+## 5. Édition admin (entrées déjà publiées)
 
-```json
-"opportunities": {
-  "pageTitle": "Importateurs en recherche active",
-  "pageSubtitle": "Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur. Découvrez aussi les appels d'offres officiels en cours sur les marchés monopoles.",
-  "tabs": { "direct": "Demandes directes", "tender": "Appels d'offres" },
-  "labels": {
-    "search": "Recherche",
-    "origin": "Origine souhaitée",
-    "volume": "Volume",
-    "reference": "Référence",
-    "market": "Marché",
-    "category": "Catégorie",
-    "originDesignation": "Origine",
-    "price": "Prix",
-    "availableVolume": "Volume disponible",
-    "vintage": "Millésime",
-    "sampleDeadline": "Échantillon attendu",
-    "answerDeadline": "Deadline réponse",
-    "styleProfile": "Profil recherché",
-    "requirements": "Exigences"
-  },
-  "actions": {
-    "reply": "Répondre",
-    "addToCrm": "Ajouter au CRM",
-    "added": "Ajouté",
-    "viewContact": "Voir les coordonnées",
-    "viewAgent": "Voir l'agent"
-  },
-  "states": {
-    "emptyDirect": "Aucune demande directe pour le moment.",
-    "emptyTender": "Aucun appel d'offres pour le moment.",
-    "closed": "Clôturé",
-    "daysLeft": "{{count}}j restants"
-  },
-  "commissionNotice": "WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.",
-  "dialog": {
-    "directTitle": "{{company}}",
-    "directDescription": "Contactez directement {{name}}. Vous pouvez aussi ajouter cette demande à votre CRM pour la suivre.",
-    "tenderTitle": "Agent à contacter",
-    "tenderDescription": "Adressez votre offre à l'agent en charge de cet appel d'offres ({{reference}})."
-  }
-}
-```
+Dans `ImporterRequestEditDialog.tsx` et `TenderRequestEditDialog.tsx` :
+- Remplacer les champs uniques `Types de vin`, `Volume`, `Origines`, `Message` (resp. `Catégorie`, `Volume disponible`, etc.) par des paires d'inputs `FR` / `EN` côte à côte.
+- La colonne brute reste éditable dans une section repliée "Valeur brute (debug)".
+- Ajouter en haut du dialog un bouton **"Re-traduire automatiquement"** qui réinvoque l'Edge Function pour cette entrée et pré-remplit les paires FR/EN.
 
-Traductions EN équivalentes ("Looking for", "Preferred origin", "Volume", "Reference", "Market", "Category", "Origin", "Price", "Available volume", "Vintage", "Sample deadline", "Response deadline", "Style profile", "Requirements", "Reply", "Add to CRM", "Added", "View contacts", "View agent", "No direct requests yet.", "No tenders yet.", "Closed", "{{count}}d left", commissionNotice EN).
+Dans `ImporterRequestsList.tsx` et `TenderRequestsList.tsx` :
+- Ajouter un bouton global **"Traduire les entrées manquantes"** qui parcourt en batch les lignes dont au moins un `_fr` ou `_en` est `NULL`, appelle l'Edge Function et `UPDATE` les colonnes. Sert au backfill des 10 lignes Tally + 1 tender déjà en base.
 
-Brancher via `useTranslation()` dans `Opportunities.tsx` (les composants admin restent en FR car back-office).
+## 6. Affichage `/opportunites`
 
-## 4. Hors scope
-- Pas de modification des tables `importer_requests` / `tender_requests` / `tender_agents`.
-- Pas de modification de la logique d'import CSV/PDF (les composants `TallyCsvImporter` / `TenderPdfImporter` ne changent pas).
-- Pas d'autres pages touchées.
+Dans `Opportunities.tsx` :
+- Récupérer la langue active via `i18n.language` (`fr` ou `en`).
+- Helper `pickLang(row, base) = row[`${base}_${lang}`] ?? row[base]` (fallback sur brut si `_fr`/`_en` vide, utile en transition).
+- Remplacer tous les usages de `wine_styles`, `volume`, `origins`, `requirements` (et équivalents tender) par `pickLang(row, 'wine_styles')` etc.
+- `splitMulti()` continue de fonctionner sur les chaînes traduites.
+- `countryFlag()` reste appelée sur la valeur EN (mapping plus stable) : utiliser explicitement `row.origins_en` pour la résolution drapeau, et `pickLang(...)` pour le texte affiché.
 
-## Fichiers
-**Nouveaux**
-- `src/components/admin/ImporterRequestsList.tsx`
-- `src/components/admin/ImporterRequestEditDialog.tsx`
-- `src/components/admin/TenderRequestsList.tsx`
-- `src/components/admin/TenderRequestEditDialog.tsx`
-- `src/components/admin/TenderAgentDialog.tsx` (extrait du flow inline existant pour réutilisation)
+## 7. Types Supabase
 
-**Modifiés**
-- `src/pages/AdminOpportunities.tsx` — ajout des deux listes sous les importeurs.
-- `src/components/admin/TenderPdfImporter.tsx` — utilise `TenderAgentDialog` extrait (refactor mineur, pas de changement fonctionnel).
-- `src/pages/Opportunities.tsx` — restructuration cartes + `useTranslation`.
-- `src/i18n/locales/fr.json` + `en.json` — namespace `opportunities` complet.
+Après l'approbation de la migration, `src/integrations/supabase/types.ts` sera régénéré automatiquement, débloquant l'accès typé aux nouvelles colonnes pour tous les composants ci-dessus.
+
+## Détails techniques
+
+- **Endpoint Anthropic** : `https://api.anthropic.com/v1/messages`, modèle `claude-haiku-4-5` (rapide + suffisant pour de la traduction courte), `max_tokens: 1024`, sortie JSON strict via prompt + parse.
+- **Coût** : traduction faite une seule fois à l'import, donc négligeable.
+- **Sécurité** : l'Edge Function vérifie `has_role(auth.uid(), 'admin')` avant tout appel Anthropic, pour éviter qu'un user non-admin déclenche des coûts.
+- **Glossaire** : injecté dans le system prompt comme `<glossary>…</glossary>` pour cohérence inter-appels.
+- **Performance preview admin** : batch de 20 entrées par appel, parallélisé côté front si > 20 lignes.
+
+## Hors-scope
+
+- Pas de table `translations` séparée (colonnes inline = plus simple à éditer + filtrer).
+- Pas de traduction live côté frontend (coûteux et instable).
+- Pas de changement aux libellés UI déjà gérés par i18next.
+- Pas de changement aux autres pages.
