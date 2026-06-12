@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, Phone, MapPin, Calendar, Wine, Globe, Building2, Package, Plus, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Plus, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,46 @@ import { differenceInDays, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  'suede': '🇸🇪', 'suède': '🇸🇪', 'sweden': '🇸🇪',
+  'france': '🇫🇷',
+  'belgique': '🇧🇪', 'belgium': '🇧🇪',
+  'allemagne': '🇩🇪', 'germany': '🇩🇪',
+  'royaume-uni': '🇬🇧', 'royaume uni': '🇬🇧', 'united kingdom': '🇬🇧', 'uk': '🇬🇧', 'angleterre': '🇬🇧',
+  'etats-unis': '🇺🇸', 'états-unis': '🇺🇸', 'usa': '🇺🇸', 'united states': '🇺🇸', 'us': '🇺🇸',
+  'canada': '🇨🇦',
+  'suisse': '🇨🇭', 'switzerland': '🇨🇭',
+  'pays-bas': '🇳🇱', 'netherlands': '🇳🇱', 'hollande': '🇳🇱',
+  'italie': '🇮🇹', 'italy': '🇮🇹',
+  'espagne': '🇪🇸', 'spain': '🇪🇸',
+  'norvège': '🇳🇴', 'norvege': '🇳🇴', 'norway': '🇳🇴',
+  'finlande': '🇫🇮', 'finland': '🇫🇮',
+  'danemark': '🇩🇰', 'denmark': '🇩🇰',
+  'japon': '🇯🇵', 'japan': '🇯🇵',
+  'chine': '🇨🇳', 'china': '🇨🇳',
+  'irlande': '🇮🇪', 'ireland': '🇮🇪',
+  'autriche': '🇦🇹', 'austria': '🇦🇹',
+  'pologne': '🇵🇱', 'poland': '🇵🇱',
+  'portugal': '🇵🇹',
+  'luxembourg': '🇱🇺',
+  'australie': '🇦🇺', 'australia': '🇦🇺',
+  'bresil': '🇧🇷', 'brésil': '🇧🇷', 'brazil': '🇧🇷',
+  'mexique': '🇲🇽', 'mexico': '🇲🇽',
+  'coree du sud': '🇰🇷', 'corée du sud': '🇰🇷', 'south korea': '🇰🇷', 'korea': '🇰🇷',
+  'singapour': '🇸🇬', 'singapore': '🇸🇬',
+  'hong kong': '🇭🇰',
+};
+
+function countryFlag(input: string | null | undefined): string {
+  if (!input) return '🌍';
+  const s = input.toLowerCase();
+  if (COUNTRY_FLAGS[s.trim()]) return COUNTRY_FLAGS[s.trim()];
+  for (const key of Object.keys(COUNTRY_FLAGS)) {
+    if (s.includes(key)) return COUNTRY_FLAGS[key];
+  }
+  return '🌍';
+}
 
 interface ImporterRequest {
   id: string;
@@ -160,14 +200,16 @@ export default function Opportunities() {
   return (
     <div className="container mx-auto py-6 px-4 space-y-6">
       <SEO
-        title="Opportunités d'export — WineExporters"
-        description="Importateurs qui recherchent activement vos vins et appels d'offres en cours."
+        title="Importateurs en recherche active — WineExporters"
+        description="Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur, et les appels d'offres officiels en cours."
         path="/opportunites"
       />
       <header>
-        <h1 className="text-3xl font-semibold" style={{ fontFamily: 'Georgia, serif' }}>Opportunités d'export</h1>
-        <p className="text-muted-foreground mt-1">
-          Importateurs qui recherchent activement des vins, et appels d'offres officiels en cours.
+        <h1 className="text-3xl font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
+          Importateurs en recherche active
+        </h1>
+        <p className="text-muted-foreground mt-2 max-w-2xl">
+          Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur. Découvrez aussi les appels d'offres officiels en cours sur les marchés monopoles.
         </p>
       </header>
 
@@ -184,13 +226,14 @@ export default function Opportunities() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {importers.map(r => {
                 const added = addedRefs.has(r.id);
+                const req = r.requirements?.trim();
                 return (
                   <Card key={r.id} className="flex flex-col">
-                    <CardContent className="pt-6 flex-1 space-y-3">
+                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-4">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                          <Globe className="h-4 w-4 text-primary" />
-                          {r.country ?? '—'}
+                        <div className="flex items-center gap-2 font-semibold">
+                          <span className="text-2xl leading-none">{countryFlag(r.country)}</span>
+                          <span>{r.country ?? '—'}</span>
                         </div>
                         {r.submitted_at && (
                           <span className="text-xs text-muted-foreground">
@@ -198,31 +241,35 @@ export default function Opportunities() {
                           </span>
                         )}
                       </div>
-                      {r.wine_styles && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <Wine className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                          <span>{r.wine_styles}</span>
+                      {r.company_name && (
+                        <div className="text-sm font-medium">{r.company_name}</div>
+                      )}
+                      {(r.wine_styles || r.volume || r.origins) && (
+                        <div className="flex flex-wrap gap-2">
+                          {r.wine_styles && (
+                            <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs">
+                              {r.wine_styles}
+                            </span>
+                          )}
+                          {r.volume && (
+                            <span className="bg-gold text-gold-foreground rounded-full px-3 py-1 text-xs font-medium">
+                              {r.volume}
+                            </span>
+                          )}
+                          {r.origins && (
+                            <span className="border border-primary/30 text-primary rounded-full px-3 py-1 text-xs">
+                              {r.origins}
+                            </span>
+                          )}
                         </div>
                       )}
-                      {r.origins && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                          <span>{r.origins}</span>
-                        </div>
-                      )}
-                      {r.volume && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <Package className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                          <span>{r.volume}</span>
-                        </div>
-                      )}
-                      {r.requirements && (
-                        <p className="text-xs text-muted-foreground border-l-2 border-primary/30 pl-2 italic">
-                          {r.requirements}
+                      {req && (
+                        <p className="text-xs text-muted-foreground/80 leading-relaxed">
+                          {req}
                         </p>
                       )}
                     </CardContent>
-                    <div className="p-4 pt-0 flex gap-2">
+                    <div className="px-5 pb-5 flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => setContactDialog({ kind: 'importer', data: r })}>
                         Répondre
                       </Button>
@@ -244,37 +291,61 @@ export default function Opportunities() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tenders.map(t => {
                 const added = addedRefs.has(t.id);
+                const styleProfile = t.style_profile?.trim();
+                const tReq = t.requirements?.trim();
                 return (
                   <Card key={t.id} className="flex flex-col border-primary/20">
-                    <CardContent className="pt-6 flex-1 space-y-3">
+                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-4">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="text-xs text-muted-foreground font-mono">{t.reference}</div>
-                          <div className="font-semibold text-sm flex items-center gap-1">
-                            <Building2 className="h-4 w-4 text-primary" />
-                            {t.market}
+                        <div className="flex items-center gap-2 font-semibold">
+                          <span className="text-2xl leading-none">{countryFlag(t.market)}</span>
+                          <div>
+                            <div>{t.market}</div>
+                            <div className="text-xs text-muted-foreground font-mono font-normal">{t.reference}</div>
                           </div>
                         </div>
                         {deadlineBadge(t.deadline_answer)}
                       </div>
-                      <div className="space-y-1">
-                        {t.category && <Badge variant="secondary">{t.category}</Badge>}
-                        {t.designation_origin && <div className="text-sm font-medium">{t.designation_origin}</div>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        {t.price && <div><span className="text-muted-foreground">Prix :</span> {t.price}</div>}
-                        {t.available_volume && <div><span className="text-muted-foreground">Volume :</span> {t.available_volume}</div>}
-                        {t.vintage && <div><span className="text-muted-foreground">Millésime :</span> {t.vintage}</div>}
-                        {t.deadline_sample && <div><span className="text-muted-foreground">Échantillon :</span> {t.deadline_sample}</div>}
-                      </div>
-                      {t.style_profile && (
-                        <p className="text-xs text-muted-foreground border-l-2 border-primary/30 pl-2 italic">{t.style_profile}</p>
+                      {t.designation_origin && (
+                        <div className="text-base font-medium">{t.designation_origin}</div>
                       )}
-                      {t.requirements && (
-                        <p className="text-xs text-muted-foreground">{t.requirements}</p>
+                      {(t.category || t.available_volume || t.vintage || t.price) && (
+                        <div className="flex flex-wrap gap-2">
+                          {t.category && (
+                            <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs">
+                              {t.category}
+                            </span>
+                          )}
+                          {t.available_volume && (
+                            <span className="bg-gold text-gold-foreground rounded-full px-3 py-1 text-xs font-medium">
+                              {t.available_volume}
+                            </span>
+                          )}
+                          {t.price && (
+                            <span className="border border-gold/60 text-gold-foreground/80 bg-gold/10 rounded-full px-3 py-1 text-xs">
+                              {t.price}
+                            </span>
+                          )}
+                          {t.vintage && (
+                            <span className="border border-primary/30 text-primary rounded-full px-3 py-1 text-xs">
+                              {t.vintage}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {t.deadline_sample && (
+                        <div className="text-xs text-muted-foreground">
+                          Échantillon attendu : {t.deadline_sample}
+                        </div>
+                      )}
+                      {styleProfile && (
+                        <p className="text-xs text-muted-foreground/80 leading-relaxed">{styleProfile}</p>
+                      )}
+                      {tReq && (
+                        <p className="text-xs text-muted-foreground/80 leading-relaxed">{tReq}</p>
                       )}
                     </CardContent>
-                    <div className="p-4 pt-0 flex gap-2">
+                    <div className="px-5 pb-5 flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => setContactDialog({ kind: 'tender', data: t })}>
                         Répondre
                       </Button>
@@ -289,6 +360,10 @@ export default function Opportunities() {
           )}
         </TabsContent>
       </Tabs>
+
+      <div className="mt-8 rounded-md bg-muted/40 border border-border/50 px-4 py-3 text-center text-xs text-muted-foreground">
+        WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.
+      </div>
 
       <Dialog open={!!contactDialog} onOpenChange={(o) => !o && setContactDialog(null)}>
         <DialogContent>
