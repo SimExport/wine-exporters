@@ -36,6 +36,15 @@ interface Row {
   volume: string;
   requirements: string;
   submitted_at: string;
+  wine_styles_fr: string;
+  wine_styles_en: string;
+  origins_fr: string;
+  origins_en: string;
+  volume_fr: string;
+  volume_en: string;
+  requirements_fr: string;
+  requirements_en: string;
+  translated: boolean;
 }
 
 function mapRow(record: Record<string, string>, idx: number): Row {
@@ -48,12 +57,18 @@ function mapRow(record: Record<string, string>, idx: number): Row {
   for (const [csvCol, dbCol] of Object.entries(COLUMN_MAP)) {
     mapped[dbCol] = get(csvCol);
   }
+  for (const k of ['wine_styles', 'origins', 'volume', 'requirements']) {
+    mapped[`${k}_fr`] = '';
+    mapped[`${k}_en`] = '';
+  }
+  mapped.translated = false;
   return mapped as Row;
 }
 
 export function TallyCsvImporter() {
   const [rows, setRows] = useState<Row[]>([]);
   const [importing, setImporting] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const { toast } = useToast();
 
   const handleFile = (file: File) => {
@@ -82,6 +97,57 @@ export function TallyCsvImporter() {
   const updateRequirements = (id: string, value: string) =>
     setRows(prev => prev.map(r => (r.id === id ? { ...r, requirements: value } : r)));
 
+  const updateField = (id: string, key: keyof Row, value: string) =>
+    setRows(prev => prev.map(r => (r.id === id ? { ...r, [key]: value } : r)));
+
+  const translateSelected = async () => {
+    const selected = rows.filter(r => r.selected && !r.translated);
+    if (selected.length === 0) {
+      toast({ title: 'Rien à traduire', description: 'Lignes déjà traduites ou aucune sélection' });
+      return;
+    }
+    setTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-opportunity-fields', {
+        body: {
+          entries: selected.map(r => ({
+            id: r.id,
+            fields: {
+              wine_styles: r.wine_styles,
+              origins: r.origins,
+              volume: r.volume,
+              requirements: r.requirements,
+            },
+          })),
+        },
+      });
+      if (error) throw error;
+      const byId = new Map<string, any>();
+      for (const res of (data?.results ?? [])) byId.set(res.id, res.translations);
+      setRows(prev => prev.map(r => {
+        const t = byId.get(r.id);
+        if (!t) return r;
+        return {
+          ...r,
+          wine_styles_fr: t.wine_styles?.fr ?? r.wine_styles,
+          wine_styles_en: t.wine_styles?.en ?? r.wine_styles,
+          origins_fr: t.origins?.fr ?? r.origins,
+          origins_en: t.origins?.en ?? r.origins,
+          volume_fr: t.volume?.fr ?? r.volume,
+          volume_en: t.volume?.en ?? r.volume,
+          requirements_fr: t.requirements?.fr ?? r.requirements,
+          requirements_en: t.requirements?.en ?? r.requirements,
+          translated: true,
+        };
+      }));
+      toast({ title: 'Traduction terminée', description: `${selected.length} ligne(s) traduite(s)` });
+    } catch (e: any) {
+      toast({ title: 'Erreur traduction', description: e.message, variant: 'destructive' });
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const handleImport = async () => {
     const selected = rows.filter(r => r.selected);
     if (selected.length === 0) {
@@ -100,6 +166,14 @@ export function TallyCsvImporter() {
         origins: r.origins || null,
         volume: r.volume || null,
         requirements: r.requirements || null,
+        wine_styles_fr: r.wine_styles_fr || r.wine_styles || null,
+        wine_styles_en: r.wine_styles_en || r.wine_styles || null,
+        origins_fr: r.origins_fr || r.origins || null,
+        origins_en: r.origins_en || r.origins || null,
+        volume_fr: r.volume_fr || r.volume || null,
+        volume_en: r.volume_en || r.volume || null,
+        requirements_fr: r.requirements_fr || r.requirements || null,
+        requirements_en: r.requirements_en || r.requirements || null,
         submitted_at: r.submitted_at ? new Date(r.submitted_at).toISOString() : null,
         status: 'published',
       }));
@@ -149,10 +223,16 @@ export function TallyCsvImporter() {
               <div className="text-sm">
                 <span className="font-medium">{selectedCount}</span> / {rows.length} sélectionné(s)
               </div>
-              <Button onClick={handleImport} disabled={importing || selectedCount === 0}>
-                {importing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Importer la sélection
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={translateSelected} disabled={translating || selectedCount === 0}>
+                  {translating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Traduire la sélection
+                </Button>
+                <Button onClick={handleImport} disabled={importing || selectedCount === 0}>
+                  {importing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Importer la sélection
+                </Button>
+              </div>
             </div>
             <div className="border rounded-md overflow-x-auto">
               <Table>
@@ -165,9 +245,10 @@ export function TallyCsvImporter() {
                     <TableHead>Société</TableHead>
                     <TableHead>Pays</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Styles</TableHead>
-                    <TableHead>Volume</TableHead>
-                    <TableHead className="min-w-[240px]">Message</TableHead>
+                    <TableHead className="min-w-[220px]">Styles (brut / FR / EN)</TableHead>
+                    <TableHead className="min-w-[200px]">Origines (brut / FR / EN)</TableHead>
+                    <TableHead className="min-w-[200px]">Volume (brut / FR / EN)</TableHead>
+                    <TableHead className="min-w-[260px]">Message (brut / FR / EN)</TableHead>
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -181,16 +262,31 @@ export function TallyCsvImporter() {
                       <TableCell className="text-xs">{r.company_name}</TableCell>
                       <TableCell className="text-xs">{r.country}</TableCell>
                       <TableCell className="text-xs">{r.email}</TableCell>
-                      <TableCell className="text-xs">{r.wine_styles}</TableCell>
-                      <TableCell className="text-xs">{r.volume}</TableCell>
+                      <TableCell>
+                        <div className="text-[10px] text-muted-foreground mb-1">{r.wine_styles}</div>
+                        <Input value={r.wine_styles_fr} onChange={(e) => updateField(r.id, 'wine_styles_fr', e.target.value)} placeholder="FR" className="h-7 text-xs mb-1" />
+                        <Input value={r.wine_styles_en} onChange={(e) => updateField(r.id, 'wine_styles_en', e.target.value)} placeholder="EN" className="h-7 text-xs" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-[10px] text-muted-foreground mb-1">{r.origins}</div>
+                        <Input value={r.origins_fr} onChange={(e) => updateField(r.id, 'origins_fr', e.target.value)} placeholder="FR" className="h-7 text-xs mb-1" />
+                        <Input value={r.origins_en} onChange={(e) => updateField(r.id, 'origins_en', e.target.value)} placeholder="EN" className="h-7 text-xs" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-[10px] text-muted-foreground mb-1">{r.volume}</div>
+                        <Input value={r.volume_fr} onChange={(e) => updateField(r.id, 'volume_fr', e.target.value)} placeholder="FR" className="h-7 text-xs mb-1" />
+                        <Input value={r.volume_en} onChange={(e) => updateField(r.id, 'volume_en', e.target.value)} placeholder="EN" className="h-7 text-xs" />
+                      </TableCell>
                       <TableCell>
                         <Textarea
                           value={r.requirements}
                           onChange={(e) => updateRequirements(r.id, e.target.value)}
                           rows={2}
-                          className="text-xs min-h-[48px] min-w-[240px]"
+                          className="text-xs min-h-[40px] mb-1"
                           placeholder="(vide)"
                         />
+                        <Textarea value={r.requirements_fr} onChange={(e) => updateField(r.id, 'requirements_fr', e.target.value)} rows={2} className="text-xs min-h-[40px] mb-1" placeholder="FR" />
+                        <Textarea value={r.requirements_en} onChange={(e) => updateField(r.id, 'requirements_en', e.target.value)} rows={2} className="text-xs min-h-[40px]" placeholder="EN" />
                       </TableCell>
                       <TableCell>
                         <Button size="icon" variant="ghost" onClick={() => removeRow(r.id)}>
