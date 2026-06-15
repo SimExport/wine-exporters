@@ -1330,6 +1330,10 @@
     "back": "Back",
     "notFound": "Prospect not found",
     "backToProspects": "Back to prospects",
+    "stageSelect": {
+      "placeholder": "Choose a status",
+      "updated": "Status updated"
+    },
     "actions": {
       "price_list": "Receive price list",
       "samples": "Request samples",

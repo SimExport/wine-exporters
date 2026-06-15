@@ -1330,6 +1330,10 @@
     "back": "Retour",
     "notFound": "Prospect non trouvé",
     "backToProspects": "Retour aux prospects",
+    "stageSelect": {
+      "placeholder": "Choisir un statut",
+      "updated": "Statut mis à jour"
+    },
     "actions": {
       "price_list": "Recevoir la liste de prix",
       "samples": "Demander des échantillons",
