@@ -396,6 +396,57 @@ export default function ProspectDetail() {
     }
   }
 
+  const handleArchive = async () => {
+    if (!prospect) return
+    setProcessingAction(true)
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ archived_at: new Date().toISOString() } as any)
+        .eq('id', prospect.id)
+      if (error) throw error
+      toast({
+        title: t('prospectDetail.toasts.archived.title'),
+        description: t('prospectDetail.toasts.archived.description'),
+      })
+      navigate('/pipeline')
+    } catch (error: any) {
+      console.error('Error archiving prospect:', error)
+      toast({
+        title: t('common.error'),
+        description: error?.message || t('prospectDetail.toasts.archiveError.description'),
+        variant: 'destructive',
+      })
+    } finally {
+      setProcessingAction(false)
+      setConfirmAction(null)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!prospect) return
+    setProcessingAction(true)
+    try {
+      const { error } = await supabase.from('leads').delete().eq('id', prospect.id)
+      if (error) throw error
+      toast({
+        title: t('prospectDetail.toasts.deleted.title'),
+        description: t('prospectDetail.toasts.deleted.description'),
+      })
+      navigate('/pipeline')
+    } catch (error: any) {
+      console.error('Error deleting prospect:', error)
+      toast({
+        title: t('common.error'),
+        description: error?.message || t('prospectDetail.toasts.deleteError.description'),
+        variant: 'destructive',
+      })
+    } finally {
+      setProcessingAction(false)
+      setConfirmAction(null)
+    }
+  }
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'won': return 'default'
