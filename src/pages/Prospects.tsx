@@ -178,6 +178,7 @@ export default function Prospects() {
           campaigns!inner(name, user_id)
         `)
         .eq('campaigns.user_id', user?.id)
+        .is('archived_at', null)
         .order('created_at', { ascending: false })
 
       // Apply filters

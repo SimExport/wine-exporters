@@ -149,6 +149,7 @@ export default function Pipeline() {
           campaigns!inner(name, user_id)
         `)
         .eq('campaigns.user_id', user?.id)
+        .is('archived_at', null)
         .order('last_activity_at', { ascending: false })
 
       if (error) throw error
