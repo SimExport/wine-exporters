@@ -184,7 +184,22 @@ export default function AdminUserProfile() {
       toast({ title: 'Erreur', description: 'Impossible de générer le lien', variant: 'destructive' });
       return;
     }
-    window.open(signed, '_blank', 'noopener');
+    try {
+      const res = await fetch(signed);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const path = extractDocPath(fileUrl) || 'document';
+      a.download = path.split('/').pop() || 'document';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      toast({ title: 'Erreur téléchargement', description: e.message || String(e), variant: 'destructive' });
+    }
   };
 
   const handleDocCopy = async (fileUrl: string) => {
