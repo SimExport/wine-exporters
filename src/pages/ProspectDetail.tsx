@@ -12,6 +12,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { 
   ArrowLeft, 
   Mail, 
@@ -22,7 +33,9 @@ import {
   Edit, 
   Trash2,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  MoreVertical,
+  Archive,
 } from 'lucide-react'
 import { formatDateTime, formatCurrency } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
@@ -94,6 +107,8 @@ export default function ProspectDetail() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [showAddSample, setShowAddSample] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
+  const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [newSample, setNewSample] = useState({
     wine_id: '',
@@ -381,6 +396,57 @@ export default function ProspectDetail() {
     }
   }
 
+  const handleArchive = async () => {
+    if (!prospect) return
+    setProcessingAction(true)
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ archived_at: new Date().toISOString() } as any)
+        .eq('id', prospect.id)
+      if (error) throw error
+      toast({
+        title: t('prospectDetail.toasts.archived.title'),
+        description: t('prospectDetail.toasts.archived.description'),
+      })
+      navigate('/pipeline')
+    } catch (error: any) {
+      console.error('Error archiving prospect:', error)
+      toast({
+        title: t('common.error'),
+        description: error?.message || t('prospectDetail.toasts.archiveError.description'),
+        variant: 'destructive',
+      })
+    } finally {
+      setProcessingAction(false)
+      setConfirmAction(null)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!prospect) return
+    setProcessingAction(true)
+    try {
+      const { error } = await supabase.from('leads').delete().eq('id', prospect.id)
+      if (error) throw error
+      toast({
+        title: t('prospectDetail.toasts.deleted.title'),
+        description: t('prospectDetail.toasts.deleted.description'),
+      })
+      navigate('/pipeline')
+    } catch (error: any) {
+      console.error('Error deleting prospect:', error)
+      toast({
+        title: t('common.error'),
+        description: error?.message || t('prospectDetail.toasts.deleteError.description'),
+        variant: 'destructive',
+      })
+    } finally {
+      setProcessingAction(false)
+      setConfirmAction(null)
+    }
+  }
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'won': return 'default'
@@ -467,8 +533,61 @@ export default function ProspectDetail() {
               {t('prospectDetail.save')}
             </Button>
           )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label={t('common.actions')}>
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setConfirmAction('archive')}>
+                <Archive className="w-4 h-4 mr-2" />
+                {t('prospectDetail.menu.archive')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setConfirmAction('delete')}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t('prospectDetail.menu.delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
+      <AlertDialog open={confirmAction !== null} onOpenChange={(open) => !open && setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === 'delete'
+                ? t('prospectDetail.confirmDelete.title')
+                : t('prospectDetail.confirmArchive.title')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction === 'delete'
+                ? t('prospectDetail.confirmDelete.description')
+                : t('prospectDetail.confirmArchive.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={processingAction}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={processingAction}
+              onClick={(e) => {
+                e.preventDefault()
+                if (confirmAction === 'delete') handleDelete()
+                else if (confirmAction === 'archive') handleArchive()
+              }}
+              className={confirmAction === 'delete' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              {confirmAction === 'delete' ? t('prospectDetail.menu.delete') : t('prospectDetail.menu.archive')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
