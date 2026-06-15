@@ -626,6 +626,7 @@ export type Database = {
           requested_other: string | null
           source: string
           source_ref: string | null
+          stage_id: string | null
           status: string | null
           tally_response_id: string | null
           tally_response_url: string | null
@@ -667,6 +668,7 @@ export type Database = {
           requested_other?: string | null
           source?: string
           source_ref?: string | null
+          stage_id?: string | null
           status?: string | null
           tally_response_id?: string | null
           tally_response_url?: string | null
@@ -708,6 +710,7 @@ export type Database = {
           requested_other?: string | null
           source?: string
           source_ref?: string | null
+          stage_id?: string | null
           status?: string | null
           tally_response_id?: string | null
           tally_response_url?: string | null
@@ -727,6 +730,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_stages"
             referencedColumns: ["id"]
           },
         ]
@@ -766,6 +776,33 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pipeline_stages: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
           user_id?: string
         }
         Relationships: []

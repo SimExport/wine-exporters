@@ -19,6 +19,8 @@ import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
+import { StagesManagerDialog, type PipelineStage } from '@/components/pipeline/StagesManagerDialog'
+import { Settings2 } from 'lucide-react'
 
 interface Prospect {
   id: string
@@ -29,6 +31,7 @@ interface Prospect {
   country?: string
   requested_actions?: string[]
   prospect_status: string
+  stage_id?: string | null
   last_activity_at?: string
   created_at: string
   campaign_id: string
@@ -51,16 +54,29 @@ interface Campaign {
   name: string
 }
 
-const PIPELINE_STATUS_KEYS = [
-  { key: 'new', color: 'bg-slate-100 dark:bg-slate-800' },
-  { key: 'samples_requested', color: 'bg-amber-50 dark:bg-amber-950' },
-  { key: 'samples_sent', color: 'bg-blue-50 dark:bg-blue-950' },
-  { key: 'received', color: 'bg-indigo-50 dark:bg-indigo-950' },
-  { key: 'tasted', color: 'bg-purple-50 dark:bg-purple-950' },
-  { key: 'negotiation', color: 'bg-orange-50 dark:bg-orange-950' },
-  { key: 'won', color: 'bg-green-50 dark:bg-green-950' },
-  { key: 'lost', color: 'bg-red-50 dark:bg-red-950' },
+const DEFAULT_STAGE_NAMES = [
+  'À classer',
+  'Échantillons à envoyer',
+  'Échantillons envoyés',
+  'Échantillons réceptionnés',
+  'Échantillons dégustés',
+  'Négociation',
+  'Commande',
+  'Archivé',
 ] as const
+
+// Map legacy `prospect_status` enum -> default stage name. Used only at first-time seed
+// to migrate existing leads into the new dynamic stage system.
+const LEGACY_STATUS_TO_STAGE_NAME: Record<string, string> = {
+  new: 'À classer',
+  samples_requested: 'Échantillons à envoyer',
+  samples_sent: 'Échantillons envoyés',
+  received: 'Échantillons réceptionnés',
+  tasted: 'Échantillons dégustés',
+  negotiation: 'Négociation',
+  won: 'Commande',
+  lost: 'Archivé',
+}
 
 const REQUESTED_ACTION_KEYS = ['price_list', 'samples', 'video_call', 'tech_sheets', 'other'] as const
 
@@ -83,6 +99,8 @@ export default function Pipeline() {
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [draggedProspect, setDraggedProspect] = useState<string | null>(null)
+  const [stages, setStages] = useState<PipelineStage[]>([])
+  const [showStagesManager, setShowStagesManager] = useState(false)
 
   const [newProspect, setNewProspect] = useState({
     campaign_id: '',
@@ -123,6 +141,10 @@ export default function Pipeline() {
   const loadData = async () => {
     try {
       setLoading(true)
+
+      // 1. Load (and seed if necessary) pipeline stages for this user
+      const loadedStages = await loadOrSeedStages()
+      setStages(loadedStages)
 
       const { data: campaignsData } = await supabase
         .from('campaigns')
@@ -168,6 +190,73 @@ export default function Pipeline() {
     }
   }
 
+  const loadOrSeedStages = async (): Promise<PipelineStage[]> => {
+    const { data: existing, error } = await supabase
+      .from('pipeline_stages' as any)
+      .select('*')
+      .eq('user_id', user!.id)
+      .order('position', { ascending: true })
+
+    if (error) {
+      console.error('Error loading stages:', error)
+      return []
+    }
+
+    if (existing && existing.length > 0) {
+      return existing as any
+    }
+
+    // Seed defaults
+    const rows = DEFAULT_STAGE_NAMES.map((name, idx) => ({
+      user_id: user!.id,
+      name,
+      position: idx,
+    }))
+    const { data: inserted, error: insertError } = await supabase
+      .from('pipeline_stages' as any)
+      .insert(rows)
+      .select('*')
+    if (insertError || !inserted) {
+      console.error('Error seeding stages:', insertError)
+      return []
+    }
+    const seeded = (inserted as any as PipelineStage[]).sort((a, b) => a.position - b.position)
+
+    // One-time migration: assign existing leads' stage_id based on their legacy prospect_status
+    try {
+      const nameToId: Record<string, string> = {}
+      seeded.forEach(s => { nameToId[s.name] = s.id })
+
+      const { data: userLeads } = await supabase
+        .from('leads')
+        .select('id, prospect_status, campaigns!inner(user_id)')
+        .eq('campaigns.user_id', user!.id)
+        .is('stage_id', null)
+
+      if (userLeads && userLeads.length > 0) {
+        await Promise.all(userLeads.map((l: any) => {
+          const targetName = LEGACY_STATUS_TO_STAGE_NAME[l.prospect_status] || DEFAULT_STAGE_NAMES[0]
+          const stageId = nameToId[targetName]
+          if (!stageId) return Promise.resolve()
+          return supabase.from('leads').update({ stage_id: stageId } as any).eq('id', l.id)
+        }))
+      }
+    } catch (e) {
+      console.error('Legacy status migration failed:', e)
+    }
+
+    return seeded
+  }
+
+  const refreshStages = async () => {
+    const { data } = await supabase
+      .from('pipeline_stages' as any)
+      .select('*')
+      .eq('user_id', user!.id)
+      .order('position', { ascending: true })
+    setStages((data as any) || [])
+  }
+
   const handleDragStart = (prospectId: string) => {
     setDraggedProspect(prospectId)
   }
@@ -176,23 +265,23 @@ export default function Pipeline() {
     e.preventDefault()
   }
 
-  const handleDrop = async (newStatus: string) => {
+  const handleDrop = async (newStageId: string) => {
     if (!draggedProspect) return
 
     try {
       const { error } = await supabase
         .from('leads')
-        .update({ 
-          prospect_status: newStatus as any,
+        .update({
+          stage_id: newStageId,
           last_activity_at: new Date().toISOString()
-        })
+        } as any)
         .eq('id', draggedProspect)
 
       if (error) throw error
 
-      setProspects(prev => prev.map(p => 
-        p.id === draggedProspect 
-          ? { ...p, prospect_status: newStatus }
+      setProspects(prev => prev.map(p =>
+        p.id === draggedProspect
+          ? { ...p, stage_id: newStageId }
           : p
       ))
 
@@ -231,6 +320,8 @@ export default function Pipeline() {
         return
       }
 
+      const firstStageId = stages[0]?.id
+
       const { error } = await supabase
         .from('leads')
         .insert({
@@ -248,13 +339,14 @@ export default function Pipeline() {
           buyer_id: newProspect.email || 'unknown',
           market: newProspect.country || 'unknown',
           prospect_status: 'new' as any,
+          stage_id: firstStageId,
           last_activity_at: new Date().toISOString(),
           created_by: user?.id,
           requested_actions: newProspect.requested_actions as any,
           message_snippet: newProspect.requested_samples.length > 0 
             ? t('crm.createDialog.samplesRequestedSnippet', { list: newProspect.requested_samples.join(', ') })
             : null
-        })
+        } as any)
 
       if (error) throw error
 
@@ -300,9 +392,14 @@ export default function Pipeline() {
     }))
   }
 
-  const getProspectsByStatus = (status: string) => {
-    return prospects.filter(p => p.prospect_status === status)
+  const getProspectsByStageId = (stageId: string, isFirst: boolean) => {
+    return prospects.filter(p => p.stage_id === stageId || (isFirst && !p.stage_id))
   }
+
+  const prospectsCountByStage: Record<string, number> = {}
+  stages.forEach((s, idx) => {
+    prospectsCountByStage[s.id] = getProspectsByStageId(s.id, idx === 0).length
+  })
 
   const handleTagUpdate = async (prospectId: string, tag: string | null) => {
     try {
@@ -332,6 +429,10 @@ export default function Pipeline() {
           </div>
 
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowStagesManager(true)}>
+              <Settings2 className="w-4 h-4 mr-2" />
+              {t('pipeline.manageStages.button')}
+            </Button>
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
               <DialogTrigger asChild>
                 <Button>
@@ -516,19 +617,19 @@ export default function Pipeline() {
 
         {/* Kanban Board */}
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {PIPELINE_STATUS_KEYS.map(status => {
-            const statusProspects = getProspectsByStatus(status.key)
+          {stages.map((stage, idx) => {
+            const statusProspects = getProspectsByStageId(stage.id, idx === 0)
             
             return (
               <div
-                key={status.key}
-                className={`flex-shrink-0 w-72 rounded-lg ${status.color}`}
+                key={stage.id}
+                className="flex-shrink-0 w-72 rounded-lg bg-muted/40"
                 onDragOver={handleDragOver}
-                onDrop={() => handleDrop(status.key)}
+                onDrop={() => handleDrop(stage.id)}
               >
                 <div className="p-3 border-b border-border/50">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm">{t(`crm.kanbanStatuses.${status.key}`)}</h3>
+                    <h3 className="font-semibold text-sm">{stage.name}</h3>
                     <Badge variant="secondary" className="text-xs">
                       {statusProspects.length}
                     </Badge>
@@ -656,6 +757,17 @@ export default function Pipeline() {
           })}
         </div>
       </div>
+
+      {user && (
+        <StagesManagerDialog
+          open={showStagesManager}
+          onOpenChange={setShowStagesManager}
+          stages={stages}
+          prospectsCountByStage={prospectsCountByStage}
+          userId={user.id}
+          onChanged={refreshStages}
+        />
+      )}
     </div>
   )
 }

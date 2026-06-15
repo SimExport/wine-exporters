@@ -56,6 +56,7 @@ interface Prospect {
   requested_actions?: string[]
   requested_other?: string
   prospect_status: string
+  stage_id?: string | null
   estimated_amount?: number
   lost_reason?: string
   last_activity_at?: string
@@ -93,6 +94,12 @@ interface Wine {
 const PROSPECT_STATUS_KEYS = ['new','samples_requested','samples_sent','received','tasted','negotiation','won','lost'] as const
 const REQUESTED_ACTION_KEYS = ['price_list','samples','video_call','tech_sheets','other'] as const
 
+interface PipelineStageLite {
+  id: string
+  name: string
+  position: number
+}
+
 export default function ProspectDetail() {
   const { t } = useTranslation()
   const { id } = useParams()
@@ -104,6 +111,7 @@ export default function ProspectDetail() {
   const [sampleItems, setSampleItems] = useState<SampleItem[]>([])
   const [notes, setNotes] = useState<Note[]>([])
   const [wines, setWines] = useState<Wine[]>([])
+  const [stages, setStages] = useState<PipelineStageLite[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [showAddSample, setShowAddSample] = useState(false)
@@ -160,6 +168,14 @@ export default function ProspectDetail() {
         .order('created_at', { ascending: false })
 
       setNotes(notesData || [])
+
+      // Load user's pipeline stages
+      const { data: stagesData } = await supabase
+        .from('pipeline_stages' as any)
+        .select('id, name, position')
+        .eq('user_id', user?.id)
+        .order('position', { ascending: true })
+      setStages((stagesData as any) || [])
 
       // Load user's wines for sample selection
       const { data: winesData } = await supabase
@@ -252,6 +268,27 @@ export default function ProspectDetail() {
         variant: "destructive",
       })
     }
+  }
+
+  const handleUpdateStageId = async (newStageId: string) => {
+    if (!prospect) return
+    const previous = prospect.stage_id
+    // optimistic
+    setProspect(prev => prev ? { ...prev, stage_id: newStageId } : null)
+    const { error } = await supabase
+      .from('leads')
+      .update({ stage_id: newStageId, last_activity_at: new Date().toISOString() } as any)
+      .eq('id', prospect.id)
+    if (error) {
+      setProspect(prev => prev ? { ...prev, stage_id: previous ?? null } : null)
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: 'destructive',
+      })
+      return
+    }
+    toast({ title: t('prospectDetail.stageSelect.updated') })
   }
 
   const handleAddNote = async () => {
@@ -496,9 +533,25 @@ export default function ProspectDetail() {
               {`${prospect.first_name || ''} ${prospect.last_name || ''}`.trim()} — {prospect.company_name}
             </h1>
             <div className="flex items-center gap-2 mt-2">
-              <Badge variant={getStatusBadgeVariant(prospect.prospect_status)}>
-                {t(`crm.statuses.${prospect.prospect_status}`)}
-              </Badge>
+              {stages.length > 0 ? (
+                <Select
+                  value={prospect.stage_id || stages[0]?.id}
+                  onValueChange={handleUpdateStageId}
+                >
+                  <SelectTrigger className="w-56 h-8">
+                    <SelectValue placeholder={t('prospectDetail.stageSelect.placeholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stages.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge variant={getStatusBadgeVariant(prospect.prospect_status)}>
+                  {t(`crm.statuses.${prospect.prospect_status}`)}
+                </Badge>
+              )}
               <Badge variant="outline">
                 {prospect.campaigns?.name}
               </Badge>
