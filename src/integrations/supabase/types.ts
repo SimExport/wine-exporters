@@ -596,6 +596,7 @@ export type Database = {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          archived_at: string | null
           buyer_contact_id: string | null
           buyer_id: string
           campaign_id: string | null
@@ -634,6 +635,7 @@ export type Database = {
         Insert: {
           address_line1?: string | null
           address_line2?: string | null
+          archived_at?: string | null
           buyer_contact_id?: string | null
           buyer_id: string
           campaign_id?: string | null
@@ -674,6 +676,7 @@ export type Database = {
         Update: {
           address_line1?: string | null
           address_line2?: string | null
+          archived_at?: string | null
           buyer_contact_id?: string | null
           buyer_id?: string
           campaign_id?: string | null
