@@ -29,12 +29,31 @@ export default function AdminOpportunities() {
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke('notify-new-opportunities');
+      console.log('notify-new-opportunities response', { data, error });
       if (error) throw error;
+      const errs: string[] = data?.errors ?? [];
+      if (errs.length > 0) {
+        toast({
+          title: 'Envoi partiel',
+          description: `${data?.sent ?? 0}/${data?.totalRecipients ?? 0} envoyés. Erreurs: ${errs.slice(0, 2).join(' | ')}`,
+          variant: 'destructive',
+        });
+        return;
+      }
+      if ((data?.sent ?? 0) === 0) {
+        toast({
+          title: 'Aucun email envoyé',
+          description: 'La fonction a répondu mais 0 destinataire. Vérifiez les logs.',
+          variant: 'destructive',
+        });
+        return;
+      }
       toast({
         title: 'Notifications envoyées',
         description: `${data?.sent ?? 0} email(s) envoyé(s) sur ${data?.totalRecipients ?? 0} destinataire(s).`,
       });
     } catch (e: any) {
+      console.error('notify-new-opportunities error', e);
       toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
     } finally {
       setSending(false);
