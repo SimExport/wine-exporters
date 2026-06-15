@@ -533,8 +533,61 @@ export default function ProspectDetail() {
               {t('prospectDetail.save')}
             </Button>
           )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label={t('common.actions')}>
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setConfirmAction('archive')}>
+                <Archive className="w-4 h-4 mr-2" />
+                {t('prospectDetail.actions.archive')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setConfirmAction('delete')}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t('prospectDetail.actions.delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
+      <AlertDialog open={confirmAction !== null} onOpenChange={(open) => !open && setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === 'delete'
+                ? t('prospectDetail.confirmDelete.title')
+                : t('prospectDetail.confirmArchive.title')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction === 'delete'
+                ? t('prospectDetail.confirmDelete.description')
+                : t('prospectDetail.confirmArchive.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={processingAction}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={processingAction}
+              onClick={(e) => {
+                e.preventDefault()
+                if (confirmAction === 'delete') handleDelete()
+                else if (confirmAction === 'archive') handleArchive()
+              }}
+              className={confirmAction === 'delete' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              {confirmAction === 'delete' ? t('prospectDetail.actions.delete') : t('prospectDetail.actions.archive')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
