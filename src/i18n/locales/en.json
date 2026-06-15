@@ -1365,7 +1365,35 @@
       "saveError": {
         "title": "Error",
         "description": "Unable to save changes"
+      },
+      "archived": {
+        "title": "Prospect archived",
+        "description": "The prospect has been removed from your CRM"
+      },
+      "archiveError": {
+        "title": "Error",
+        "description": "Could not archive the prospect"
+      },
+      "deleted": {
+        "title": "Prospect deleted",
+        "description": "The prospect has been permanently deleted"
+      },
+      "deleteError": {
+        "title": "Error",
+        "description": "Could not delete the prospect"
       }
+    },
+    "menu": {
+      "archive": "Archive",
+      "delete": "Delete"
+    },
+    "confirmArchive": {
+      "title": "Archive this prospect?",
+      "description": "The prospect will be hidden from your CRM. You can restore it from the database."
+    },
+    "confirmDelete": {
+      "title": "Permanently delete this prospect?",
+      "description": "This action cannot be undone. Associated notes and samples will also be deleted."
     },
     "contact": {
       "title": "Contact info",
