@@ -12,6 +12,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { 
   ArrowLeft, 
   Mail, 
@@ -22,7 +33,9 @@ import {
   Edit, 
   Trash2,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  MoreVertical,
+  Archive,
 } from 'lucide-react'
 import { formatDateTime, formatCurrency } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
@@ -94,6 +107,8 @@ export default function ProspectDetail() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [showAddSample, setShowAddSample] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
+  const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [newSample, setNewSample] = useState({
     wine_id: '',
