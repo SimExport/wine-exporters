@@ -543,7 +543,7 @@ export default function ProspectDetail() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setConfirmAction('archive')}>
                 <Archive className="w-4 h-4 mr-2" />
-                {t('prospectDetail.actions.archive')}
+                {t('prospectDetail.menu.archive')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -551,7 +551,7 @@ export default function ProspectDetail() {
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                {t('prospectDetail.actions.delete')}
+                {t('prospectDetail.menu.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -583,7 +583,7 @@ export default function ProspectDetail() {
               }}
               className={confirmAction === 'delete' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
             >
-              {confirmAction === 'delete' ? t('prospectDetail.actions.delete') : t('prospectDetail.actions.archive')}
+              {confirmAction === 'delete' ? t('prospectDetail.menu.delete') : t('prospectDetail.menu.archive')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
