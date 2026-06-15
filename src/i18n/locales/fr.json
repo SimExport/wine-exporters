@@ -1060,7 +1060,26 @@
     "listView": "Vue liste",
     "addProspect": "Ajouter un prospect",
     "noProspects": "Aucun prospect",
-    "noName": "Sans nom"
+    "noName": "Sans nom",
+    "manageStages": {
+      "button": "Gérer les colonnes",
+      "title": "Gérer les colonnes du pipeline",
+      "description": "Renommez, réordonnez, ajoutez ou supprimez vos colonnes.",
+      "addPlaceholder": "Nom de la nouvelle colonne",
+      "add": "Ajouter",
+      "rename": "Renommer",
+      "delete": "Supprimer",
+      "empty": "Aucune colonne pour l'instant.",
+      "errors": {
+        "notEmpty": "Cette colonne contient des prospects. Déplacez-les d'abord."
+      },
+      "toasts": {
+        "created": "Colonne ajoutée",
+        "renamed": "Colonne renommée",
+        "reordered": "Ordre mis à jour",
+        "deleted": "Colonne supprimée"
+      }
+    }
   },
   "prospects": {
     "title": "Prospects",

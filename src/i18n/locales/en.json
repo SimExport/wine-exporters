@@ -1060,7 +1060,26 @@
     "listView": "List view",
     "addProspect": "Add a prospect",
     "noProspects": "No prospects",
-    "noName": "Unnamed"
+    "noName": "Unnamed",
+    "manageStages": {
+      "button": "Manage columns",
+      "title": "Manage pipeline columns",
+      "description": "Rename, reorder, add or delete your columns.",
+      "addPlaceholder": "New column name",
+      "add": "Add",
+      "rename": "Rename",
+      "delete": "Delete",
+      "empty": "No columns yet.",
+      "errors": {
+        "notEmpty": "This column contains prospects. Move them first."
+      },
+      "toasts": {
+        "created": "Column added",
+        "renamed": "Column renamed",
+        "reordered": "Order updated",
+        "deleted": "Column deleted"
+      }
+    }
   },
   "prospects": {
     "title": "Prospects",
