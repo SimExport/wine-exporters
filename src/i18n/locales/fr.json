@@ -1365,7 +1365,35 @@
       "saveError": {
         "title": "Erreur",
         "description": "Impossible de sauvegarder les modifications"
+      },
+      "archived": {
+        "title": "Prospect archivé",
+        "description": "Le prospect a été retiré de votre CRM"
+      },
+      "archiveError": {
+        "title": "Erreur",
+        "description": "Impossible d'archiver le prospect"
+      },
+      "deleted": {
+        "title": "Prospect supprimé",
+        "description": "Le prospect a été supprimé définitivement"
+      },
+      "deleteError": {
+        "title": "Erreur",
+        "description": "Impossible de supprimer le prospect"
       }
+    },
+    "menu": {
+      "archive": "Archiver",
+      "delete": "Supprimer"
+    },
+    "confirmArchive": {
+      "title": "Archiver ce prospect ?",
+      "description": "Le prospect sera masqué de votre CRM. Vous pourrez le restaurer depuis la base de données."
+    },
+    "confirmDelete": {
+      "title": "Supprimer définitivement ce prospect ?",
+      "description": "Cette action est irréversible. Toutes les notes et échantillons associés seront également supprimés."
     },
     "contact": {
       "title": "Coordonnées",
