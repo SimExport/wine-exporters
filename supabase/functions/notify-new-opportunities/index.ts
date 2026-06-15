@@ -52,6 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("notify-new-opportunities invoked", { method: req.method });
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Missing Authorization");
 
@@ -63,6 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userErr } = await admin.auth.getUser(token);
     if (userErr || !userData?.user) throw new Error("Unauthorized");
+    console.log("auth ok", { user: userData.user.email });
 
     const { data: roleRow } = await admin
       .from("user_roles")
@@ -71,6 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("role", "admin")
       .maybeSingle();
     if (!roleRow) throw new Error("Forbidden: admin only");
+    console.log("admin role ok");
 
     // Collect all user emails (paginated)
     const emails: string[] = [];
@@ -87,30 +90,41 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const unique = Array.from(new Set(emails.map((e) => e.toLowerCase())));
-    console.log(`notify-new-opportunities: sending to ${unique.length} recipients`);
+    console.log(`recipients collected: ${unique.length}`);
 
-    // Send via BCC batches of 100 (Resend recommended cap)
-    const chunkSize = 90;
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    // Send via BCC batches; stay well under Resend free tier 2 req/s
+    const chunkSize = 50;
     let sent = 0;
     const errors: string[] = [];
     for (let i = 0; i < unique.length; i += chunkSize) {
       const chunk = unique.slice(i, i + chunkSize);
-      const result = await resend.emails.send({
-        from: SENDER,
-        to: ["notifications@exportvins.fr"],
-        bcc: chunk,
-        subject,
-        html,
-      });
-      const err = (result as any)?.error;
-      if (err) {
-        console.error("Resend error chunk", i, err);
-        errors.push(JSON.stringify(err));
-      } else {
-        sent += chunk.length;
+      try {
+        const result = await resend.emails.send({
+          from: SENDER,
+          to: ["notifications@exportvins.fr"],
+          bcc: chunk,
+          subject,
+          html,
+        });
+        const err = (result as any)?.error;
+        const id = (result as any)?.data?.id;
+        if (err) {
+          console.error(`Resend chunk ${i} error:`, JSON.stringify(err));
+          errors.push(JSON.stringify(err));
+        } else {
+          sent += chunk.length;
+          console.log(`Resend chunk ${i} sent id=${id} count=${chunk.length}`);
+        }
+      } catch (e: any) {
+        console.error(`Resend chunk ${i} threw:`, e?.message || e);
+        errors.push(String(e?.message || e));
       }
+      await sleep(600);
     }
 
+    console.log(`notify-new-opportunities done: sent=${sent} errors=${errors.length}`);
     return new Response(JSON.stringify({ success: true, sent, totalRecipients: unique.length, errors }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
