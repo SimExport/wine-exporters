@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { getStageColor } from '@/components/pipeline/stage-colors'
 import { 
   ArrowLeft, 
   Mail, 
@@ -540,11 +541,33 @@ export default function ProspectDetail() {
                   onValueChange={handleUpdateStageId}
                 >
                   <SelectTrigger className="w-56 h-8">
-                    <SelectValue placeholder={t('prospectDetail.stageSelect.placeholder')} />
+                    <SelectValue placeholder={t('prospectDetail.stageSelect.placeholder')}>
+                      {(() => {
+                        const current = stages.find(s => s.id === (prospect.stage_id || stages[0]?.id))
+                        if (!current) return null
+                        return (
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="inline-block w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: getStageColor(current.color) }}
+                            />
+                            {current.name}
+                          </span>
+                        )
+                      })()}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {stages.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={s.id}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className="inline-block w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: getStageColor(s.color) }}
+                          />
+                          {s.name}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
