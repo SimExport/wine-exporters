@@ -975,16 +975,26 @@ export default function ProspectDetail() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('prospectDetail.samples.title')}</CardTitle>
-                <Dialog open={showAddSample} onOpenChange={setShowAddSample}>
+                <Dialog
+                  open={showAddSample}
+                  onOpenChange={(open) => {
+                    setShowAddSample(open)
+                    if (!open) resetSampleForm()
+                  }}
+                >
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => resetSampleForm()}>
                       <Plus className="w-4 h-4 mr-2" />
                       {t('prospectDetail.samples.addWine')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>{t('prospectDetail.samples.dialogTitle')}</DialogTitle>
+                      <DialogTitle>
+                        {editingSampleId
+                          ? t('prospectDetail.samples.dialogEditTitle', { defaultValue: 'Modifier un échantillon' })
+                          : t('prospectDetail.samples.dialogTitle')}
+                      </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div>
@@ -1021,11 +1031,19 @@ export default function ProspectDetail() {
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setShowAddSample(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowAddSample(false)
+                          resetSampleForm()
+                        }}
+                      >
                         {t('prospectDetail.samples.cancel')}
                       </Button>
-                      <Button onClick={handleAddSample} disabled={!newSample.wine_id}>
-                        {t('prospectDetail.samples.add')}
+                      <Button onClick={handleSaveSample} disabled={!newSample.wine_id}>
+                        {editingSampleId
+                          ? t('prospectDetail.samples.save', { defaultValue: 'Enregistrer' })
+                          : t('prospectDetail.samples.add')}
                       </Button>
                     </div>
                   </DialogContent>
@@ -1041,12 +1059,31 @@ export default function ProspectDetail() {
                 <div className="space-y-3">
                   {sampleItems.map(item => (
                     <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
+                      <div className="min-w-0">
                         <div className="font-medium">{item.wines?.name}</div>
                         <div className="text-sm text-muted-foreground">
                           {t('prospectDetail.samples.quantityLabel', { q: item.quantity })}
                           {item.comment && ` • ${item.comment}`}
                         </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenEditSample(item)}
+                          aria-label={t('prospectDetail.samples.edit', { defaultValue: 'Modifier' })}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeletingSample(item)}
+                          aria-label={t('prospectDetail.samples.delete', { defaultValue: 'Supprimer' })}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -1060,6 +1097,34 @@ export default function ProspectDetail() {
                   </Button>
                 </div>
               )}
+
+              <AlertDialog
+                open={deletingSample !== null}
+                onOpenChange={(open) => !open && setDeletingSample(null)}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t('prospectDetail.samples.deleteConfirm.title', { defaultValue: 'Supprimer cet échantillon ?' })}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('prospectDetail.samples.deleteConfirm.description', { defaultValue: 'Cette action est irréversible.' })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleDeleteSample()
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t('prospectDetail.samples.delete', { defaultValue: 'Supprimer' })}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </div>
