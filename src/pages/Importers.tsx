@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -78,6 +78,7 @@ const Importers = () => {
   const { t, i18n } = useTranslation();
   const localeCode = i18n.language.startsWith('en') ? 'en-US' : 'fr-FR';
   const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const contactsSectionRef = useRef<HTMLDivElement>(null);
   const [totalDbContacts, setTotalDbContacts] = useState<number>(0);
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
   const [loading, setLoading] = useState(false);
@@ -209,6 +210,14 @@ const Importers = () => {
   useEffect(() => {
     fetchContacts(selectedCountry, currentPage, itemsPerPage);
   }, [currentPage]);
+  useEffect(() => {
+    if (selectedCountry && contactsSectionRef.current) {
+      // Defer to next frame so the section is rendered before scrolling.
+      requestAnimationFrame(() => {
+        contactsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, [selectedCountry]);
   const exportToCSV = async () => {
     if (!selectedCountry) {
       toast({
@@ -354,7 +363,7 @@ const Importers = () => {
 
       {/* Selected country info */}
       {selectedCountry && (
-        <div className="flex items-center gap-3 mt-4 mb-2">
+        <div ref={contactsSectionRef} className="flex items-center gap-3 mt-4 mb-2 scroll-mt-4">
           <span className="text-sm font-medium text-foreground">
             {COUNTRIES.find(c => c.code === selectedCountry)?.name}
           </span>
