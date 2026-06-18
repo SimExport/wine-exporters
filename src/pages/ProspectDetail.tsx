@@ -121,6 +121,8 @@ export default function ProspectDetail() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [showAddSample, setShowAddSample] = useState(false)
+  const [editingSampleId, setEditingSampleId] = useState<string | null>(null)
+  const [deletingSample, setDeletingSample] = useState<SampleItem | null>(null)
   const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
   const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
