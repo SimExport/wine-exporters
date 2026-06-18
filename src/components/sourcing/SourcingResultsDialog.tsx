@@ -28,9 +28,10 @@ interface Props {
   summary: string | null;
   resultJson: { shortlist?: ShortlistItem[] } | null;
   marketLabel: string;
+  requestId?: string | null;
 }
 
-export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson, marketLabel }: Props) {
+export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson, marketLabel, requestId }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -63,8 +64,11 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
         phone: string | null;
         website_url: string | null;
         email: string | null;
+        state: string | null;
+        full_address: string | null;
+        Address: string | null;
       } | null = null;
-      const contactCols = 'street, city, postal_code, country, phone, website_url, email';
+      const contactCols = 'street, city, postal_code, country, phone, website_url, email, state, full_address, "Address"';
       if (item.email) {
         const { data } = await supabase
           .from('buyer_contacts')
@@ -82,6 +86,17 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
           .maybeSingle();
         contact = (data as any) ?? null;
       }
+      // Fallback street from full_address / Address (first segment before the comma)
+      let street = contact?.street || null;
+      if (!street) {
+        const raw = contact?.full_address || contact?.Address || null;
+        if (raw) {
+          const first = raw.split(',')[0]?.trim();
+          if (first && !/^\d{4,}$/.test(first) && first.toLowerCase() !== (contact?.city || '').toLowerCase()) {
+            street = first;
+          }
+        }
+      }
       const { error } = await supabase.from('leads').insert({
         campaign_id: campaignId,
         company_name: item.company_name,
@@ -90,7 +105,8 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
         email: item.email || contact?.email || null,
         phone: item.phone || contact?.phone || null,
         website_url: item.website_url || contact?.website_url || null,
-        address_line1: contact?.street || null,
+        address_line1: street,
+        address_line2: contact?.state || null,
         city: contact?.city || null,
         postal_code: contact?.postal_code || null,
         country: contact?.country || marketLabel || null,
@@ -101,6 +117,10 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
         prospect_status: 'new' as any,
         last_activity_at: new Date().toISOString(),
         created_by: user.id,
+        source: 'sourcing',
+        source_ref: requestId ?? null,
+        source_score: typeof item.score === 'number' ? item.score : null,
+        source_relevance: item.reason ?? null,
       });
       if (error) throw error;
       setAddedIdx(prev => new Set(prev).add(idx));
