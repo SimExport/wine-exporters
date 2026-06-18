@@ -54,12 +54,46 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
           return;
         }
       }
+      // Enrich from buyer_contacts (address fields not present in LLM shortlist)
+      let contact: {
+        street: string | null;
+        city: string | null;
+        postal_code: string | null;
+        country: string | null;
+        phone: string | null;
+        website_url: string | null;
+        email: string | null;
+      } | null = null;
+      const contactCols = 'street, city, postal_code, country, phone, website_url, email';
+      if (item.email) {
+        const { data } = await supabase
+          .from('buyer_contacts')
+          .select(contactCols)
+          .eq('email', item.email)
+          .maybeSingle();
+        contact = (data as any) ?? null;
+      }
+      if (!contact && item.company_name) {
+        const { data } = await supabase
+          .from('buyer_contacts')
+          .select(contactCols)
+          .eq('company_name', item.company_name)
+          .limit(1)
+          .maybeSingle();
+        contact = (data as any) ?? null;
+      }
       const { error } = await supabase.from('leads').insert({
         campaign_id: campaignId,
         company_name: item.company_name,
-        email: item.email || null,
-        phone: item.phone || null,
-        website_url: item.website_url || null,
+        first_name: null,
+        last_name: null,
+        email: item.email || contact?.email || null,
+        phone: item.phone || contact?.phone || null,
+        website_url: item.website_url || contact?.website_url || null,
+        address_line1: contact?.street || null,
+        city: contact?.city || null,
+        postal_code: contact?.postal_code || null,
+        country: contact?.country || marketLabel || null,
         buyer_id: item.email || item.company_name,
         market: marketLabel,
         message_snippet: item.reason,
