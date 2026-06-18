@@ -98,6 +98,7 @@ interface PipelineStageLite {
   id: string
   name: string
   position: number
+  color?: string | null
 }
 
 export default function ProspectDetail() {
@@ -172,7 +173,7 @@ export default function ProspectDetail() {
       // Load user's pipeline stages
       const { data: stagesData } = await supabase
         .from('pipeline_stages' as any)
-        .select('id, name, position')
+        .select('id, name, position, color')
         .eq('user_id', user?.id)
         .order('position', { ascending: true })
       setStages((stagesData as any) || [])
