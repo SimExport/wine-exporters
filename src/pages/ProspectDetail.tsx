@@ -333,52 +333,121 @@ export default function ProspectDetail() {
     }
   }
 
-  const handleAddSample = async () => {
+  const resetSampleForm = () => {
+    setNewSample({ wine_id: '', quantity: 1, comment: '' })
+    setEditingSampleId(null)
+  }
+
+  const handleOpenEditSample = (item: SampleItem) => {
+    // Resolve wine_id for the Select: real wine id, or matching "cuvee-…" option by name
+    let wineId = item.wine_id || ''
+    if (!wineId && item.wines?.name) {
+      const match = wines.find(w => w.id.startsWith('cuvee-') && w.name === item.wines!.name)
+      if (match) wineId = match.id
+    }
+    // Strip the auto-prepended cuvée prefix from the comment so it's not duplicated on save
+    let comment = item.comment || ''
+    if (!item.wine_id && item.wines?.name) {
+      const prefix = t('prospectDetail.samples.cuveePrefix', { name: item.wines.name })
+      if (comment.startsWith(prefix)) {
+        comment = comment.slice(prefix.length)
+        if (comment.startsWith(' - ')) comment = comment.slice(3)
+      }
+    }
+    setNewSample({ wine_id: wineId, quantity: item.quantity, comment })
+    setEditingSampleId(item.id)
+    setShowAddSample(true)
+  }
+
+  const handleSaveSample = async () => {
     if (!newSample.wine_id || !prospect) return
 
     try {
-      // Check if this is a cuvée from profile (starts with "cuvee-") or a real wine
       const isCuveeFromProfile = newSample.wine_id.startsWith('cuvee-')
       const selectedWine = wines.find(w => w.id === newSample.wine_id)
-
-      const { data, error } = await supabase
-        .from('sample_items')
-        .insert({
-          lead_id: prospect.id,
-          wine_id: isCuveeFromProfile ? null : newSample.wine_id,
-          quantity: newSample.quantity,
-          comment: isCuveeFromProfile ? `${t('prospectDetail.samples.cuveePrefix', { name: selectedWine?.name })}${newSample.comment ? ` - ${newSample.comment}` : ''}` : newSample.comment
-        })
-        .select(`
-          *,
-          wines(name)
-        `)
-        .single()
-
-      if (error) throw error
-
-      // For cuvées from profile, manually set the wine name for display
-      const itemToAdd = {
-        ...data,
-        wines: isCuveeFromProfile ? { name: selectedWine?.name || t('prospectDetail.samples.cuveeFallback') } : data.wines
+      const payload = {
+        wine_id: isCuveeFromProfile ? null : newSample.wine_id,
+        quantity: newSample.quantity,
+        comment: isCuveeFromProfile
+          ? `${t('prospectDetail.samples.cuveePrefix', { name: selectedWine?.name })}${newSample.comment ? ` - ${newSample.comment}` : ''}`
+          : newSample.comment,
       }
 
-      setSampleItems(prev => [itemToAdd, ...prev])
-      setNewSample({ wine_id: '', quantity: 1, comment: '' })
+      if (editingSampleId) {
+        const { data, error } = await supabase
+          .from('sample_items')
+          .update(payload)
+          .eq('id', editingSampleId)
+          .select(`*, wines(name)`)
+          .single()
+        if (error) throw error
+
+        const updated: SampleItem = {
+          ...data,
+          wines: isCuveeFromProfile
+            ? { name: selectedWine?.name || t('prospectDetail.samples.cuveeFallback') }
+            : data.wines,
+        }
+        setSampleItems(prev => prev.map(s => (s.id === editingSampleId ? updated : s)))
+        toast({
+          title: t('prospectDetail.toasts.sampleUpdated.title'),
+          description: t('prospectDetail.toasts.sampleUpdated.description'),
+        })
+      } else {
+        const { data, error } = await supabase
+          .from('sample_items')
+          .insert({ lead_id: prospect.id, ...payload })
+          .select(`*, wines(name)`)
+          .single()
+        if (error) throw error
+
+        const itemToAdd = {
+          ...data,
+          wines: isCuveeFromProfile
+            ? { name: selectedWine?.name || t('prospectDetail.samples.cuveeFallback') }
+            : data.wines,
+        }
+        setSampleItems(prev => [itemToAdd, ...prev])
+        toast({
+          title: t('prospectDetail.toasts.sampleAdded.title'),
+          description: t('prospectDetail.toasts.sampleAdded.description'),
+        })
+      }
+
+      resetSampleForm()
       setShowAddSample(false)
-
-      toast({
-        title: t('prospectDetail.toasts.sampleAdded.title'),
-        description: t('prospectDetail.toasts.sampleAdded.description'),
-      })
-
     } catch (error) {
-      console.error('Error adding sample:', error)
+      console.error('Error saving sample:', error)
       toast({
         title: t('prospectDetail.toasts.sampleError.title'),
         description: t('prospectDetail.toasts.sampleError.description'),
-        variant: "destructive",
+        variant: 'destructive',
       })
+    }
+  }
+
+  const handleDeleteSample = async () => {
+    if (!deletingSample) return
+    try {
+      const { error } = await supabase
+        .from('sample_items')
+        .delete()
+        .eq('id', deletingSample.id)
+      if (error) throw error
+      setSampleItems(prev => prev.filter(s => s.id !== deletingSample.id))
+      toast({
+        title: t('prospectDetail.toasts.sampleDeleted.title'),
+        description: t('prospectDetail.toasts.sampleDeleted.description'),
+      })
+    } catch (error) {
+      console.error('Error deleting sample:', error)
+      toast({
+        title: t('prospectDetail.toasts.sampleError.title'),
+        description: t('prospectDetail.toasts.sampleError.description'),
+        variant: 'destructive',
+      })
+    } finally {
+      setDeletingSample(null)
     }
   }
 
