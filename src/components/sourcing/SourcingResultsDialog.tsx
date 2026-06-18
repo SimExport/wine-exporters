@@ -68,7 +68,7 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
         full_address: string | null;
         Address: string | null;
       } | null = null;
-      const contactCols = 'street, city, postal_code, country, phone, website_url, email, state, full_address, "Address"';
+      const contactCols = 'street, city, postal_code, country, phone, website_url, email, state, full_address, Address';
       if (item.email) {
         const { data } = await supabase
           .from('buyer_contacts')
