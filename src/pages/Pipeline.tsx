@@ -21,6 +21,7 @@ import { fr, enUS } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
 import { StagesManagerDialog, type PipelineStage } from '@/components/pipeline/StagesManagerDialog'
 import { Settings2 } from 'lucide-react'
+import { DEFAULT_STAGE_COLORS, getStageColor } from '@/components/pipeline/stage-colors'
 
 interface Prospect {
   id: string
@@ -211,6 +212,7 @@ export default function Pipeline() {
       user_id: user!.id,
       name,
       position: idx,
+      color: DEFAULT_STAGE_COLORS[idx] ?? null,
     }))
     const { data: inserted, error: insertError } = await supabase
       .from('pipeline_stages' as any)
