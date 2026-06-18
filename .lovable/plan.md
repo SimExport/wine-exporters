@@ -1,63 +1,80 @@
-# Import complet : Recherche sur-mesure → CRM
+## Objectifs
 
-## Constat
+1. Importer une adresse plus complète depuis Recherche sur-mesure (rue + complément, ville, code postal, état/région, pays).
+2. Afficher un drapeau emoji du pays à côté du contact, sur la fiche prospect et dans les cartes CRM.
+3. Afficher de façon visible l'origine "Recherche sur-mesure" + score + pertinence (raison) sur la fiche prospect et dans la carte CRM.
 
-Aujourd'hui, dans `src/components/sourcing/SourcingResultsDialog.tsx`, la fonction `addToCrm` n'insère dans `leads` que `company_name`, `email`, `phone`, `website_url`, `market`, plus un snippet et le `buyer_id`. Adresse, ville, code postal et pays ne sont jamais transmis, alors que la table `leads` possède bien `address_line1`, `address_line2`, `city`, `postal_code`, `country`, `first_name`, `last_name`.
+## Périmètre
 
-La raison : le LLM (`process-sourcing-request`) ne renvoie dans le `shortlist` que `company_name`, `email`, `phone`, `website_url`, `score`, `reason`. Les champs d'adresse existent côté source (`buyer_contacts.street/city/postal_code/country/full_address`) mais ne remontent pas jusqu'au dialog. À noter : `buyer_contacts` n'a pas de `first_name`/`last_name`, donc ces deux champs resteront vides (non disponibles dans la donnée source).
+- `SourcingResultsDialog.tsx` : enrichir l'import (adresse + score + reason + source).
+- `src/lib/country-flag.ts` (nouveau) : helper `getCountryFlag(name)` → emoji drapeau via `COUNTRIES.dbAliases / englishName / name` → `isoA2` → emoji (code points régionaux).
+- `ProspectDetail.tsx` : drapeau à côté du pays (header + bloc adresse), affichage rue/complément/état déjà géré, et nouveau bloc "Provenance" (badge "Recherche sur-mesure", score /10, raison) visible quand `source = 'sourcing'`.
+- `Pipeline.tsx` (cartes CRM) : drapeau devant le pays, et petit badge "Sur-mesure · 8/10" quand `source = 'sourcing'`.
+- Migration : ajouter `source_score INT` et `source_relevance TEXT` sur `leads` (les colonnes `source`, `source_ref` existent déjà). Pas d'autre changement de schéma.
 
-## Correctif (logique d'import uniquement)
+## Détails techniques
 
-Modifications limitées à `src/components/sourcing/SourcingResultsDialog.tsx`. Aucune autre page, table ou composant n'est touché. Aucun changement de schéma. Aucun changement à l'edge function.
+### 1. Enrichissement adresse à l'import
 
-### 1. Récupérer le pays contexte de la recherche
+Dans `addToCrm` (SourcingResultsDialog) : étendre la sélection `buyer_contacts` à `street, address_line2:Address, city, state, postal_code, country, phone, website_url, email, full_address`. Mapping vers `leads` :
 
-Ajouter une nouvelle prop optionnelle `marketCountry?: string | null` au dialog (en plus du `marketLabel` déjà existant, qui est un libellé d'affichage). Les deux appelants (`SourcingRequests.tsx`, `AdminSourcing.tsx`) sont déjà autorisés à être ajustés ? Non — la consigne est de ne rien toucher hors logique d'import. Donc on n'ajoute pas de prop : on réutilise `marketLabel` qui contient déjà le nom du marché (pays) ciblé par la recherche, et on l'utilise comme fallback `country`.
+- `address_line1` ← `contact.street` (sinon parse simple de `full_address` si `street` vide : première portion avant la première virgule, uniquement si elle ne ressemble pas au code postal/ville).
+- `address_line2` ← `contact.state` (région/état, utile US/CA/AU/etc.) si non vide.
+- `city` ← `contact.city`.
+- `postal_code` ← `contact.postal_code`.
+- `country` ← `contact.country ?? marketLabel`.
 
-### 2. Enrichir chaque item à l'import
+Si aucun match `buyer_contacts` et `full_address`/`Address` absent : on garde au minimum `country = marketLabel`.
 
-Dans `addToCrm(item, idx)`, avant l'`insert` dans `leads` :
+### 2. Provenance / score / pertinence
 
-- Faire un lookup `buyer_contacts` pour récupérer les champs d'adresse :
-  - Priorité 1 : match par `email` (si `item.email` présent), via `.eq('email', item.email).maybeSingle()`.
-  - Priorité 2 (fallback) : match par `company_name` exact + `country` ∈ variantes du marché ; on simplifie en `eq('company_name', item.company_name).limit(1).maybeSingle()`.
-  - Si aucun match, on continue sans enrichissement (le LLM peut avoir reformulé un nom).
-- Sélectionner `street, city, postal_code, country, phone, website_url, email` sur ce lookup.
+Champs ajoutés à l'insert `leads` :
+- `source` = `'sourcing'`
+- `source_ref` = id de la `sourcing_request` (passer une nouvelle prop `requestId: string` au dialog depuis `SourcingRequests.tsx` et `AdminSourcing.tsx`).
+- `source_score` = `item.score` (int 1-10).
+- `source_relevance` = `item.reason`.
 
-### 3. Mapping complet vers `leads`
+`message_snippet` reste = `item.reason` pour compat ; `owner_notes` inchangé.
 
-Construire le payload d'insert avec :
+### 3. Helper drapeau
 
-| Champ leads        | Source                                                                  |
-|--------------------|-------------------------------------------------------------------------|
-| `company_name`     | `item.company_name`                                                     |
-| `email`            | `item.email ?? contact?.email`                                          |
-| `phone`            | `item.phone ?? contact?.phone`                                          |
-| `website_url`      | `item.website_url ?? contact?.website_url`                              |
-| `address_line1`    | `contact?.street`                                                       |
-| `city`             | `contact?.city`                                                         |
-| `postal_code`      | `contact?.postal_code`                                                  |
-| `country`          | `contact?.country ?? marketLabel`                                       |
-| `first_name`       | `null` (non disponible dans `buyer_contacts`)                           |
-| `last_name`        | `null` (idem)                                                           |
-| `market`           | `marketLabel` (inchangé)                                                |
-| `message_snippet`  | `item.reason` (inchangé)                                                |
-| `owner_notes`      | `'Issu de Recherche sur-mesure'` (inchangé)                             |
-| `buyer_id`         | `item.email \|\| item.company_name` (inchangé)                          |
-| `prospect_status`  | `'new'` (inchangé)                                                      |
-| `created_by`       | `user.id` (inchangé)                                                    |
-| `last_activity_at` | `now()` (inchangé)                                                      |
+```ts
+// src/lib/country-flag.ts
+export function getCountryFlag(name?: string | null): string {
+  if (!name) return '';
+  const norm = name.trim().toLowerCase();
+  const c = COUNTRIES.find(c =>
+    c.name.toLowerCase() === norm ||
+    c.englishName.toLowerCase() === norm ||
+    c.dbAliases.some(a => a.toLowerCase() === norm)
+  );
+  if (!c) return '';
+  return String.fromCodePoint(...[...c.isoA2.toUpperCase()].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+}
+```
 
-### 4. Dédup
+### 4. Affichage
 
-Le check existant (skip si `email` déjà présent sur la même campagne) reste inchangé.
+**ProspectDetail.tsx**
+- Badge pays (ligne 582) : préfixer par `{getCountryFlag(prospect.country)} `.
+- Bloc adresse (ligne 786+) : ajouter une ligne `state` si présent, et `{getCountryFlag(country)} {country}` à la fin.
+- Nouveau bloc card "Provenance" rendu si `prospect.source === 'sourcing'` : badge "Recherche sur-mesure", `Score : X/10` (couleur selon seuils 8/5), `Pertinence : <source_relevance>`. Placé sous l'en-tête, avant les notes.
 
-## Hors scope
+**Pipeline.tsx**
+- Ligne 701-704 (affichage country sur carte) : préfixer drapeau.
+- Sous le bloc country, si `prospect.source === 'sourcing'`, afficher un petit badge `Sur-mesure · {source_score}/10`. Étendre l'interface `Prospect` (lignes 32+) avec `source`, `source_score`, `source_relevance` et la sélection Supabase correspondante.
 
-- Pas de modification de `process-sourcing-request` (l'edge function continue de renvoyer le même shortlist compact).
-- Pas de modification de `SourcingRequests.tsx` / `AdminSourcing.tsx` / `Pipeline.tsx` / migrations / `types.ts`.
-- `first_name` / `last_name` restent vides faute de donnée source ; pourra être traité ultérieurement si on enrichit `buyer_contacts` ou le prompt LLM.
+### 5. i18n
 
-## Fichier modifié
+Ajouter clés dans `fr.json` / `en.json` :
+- `prospectDetail.source.title` = "Provenance" / "Source"
+- `prospectDetail.source.sourcing` = "Recherche sur-mesure" / "Custom search"
+- `prospectDetail.source.score` = "Score" / "Score"
+- `prospectDetail.source.relevance` = "Pertinence" / "Relevance"
+- `crm.card.sourcingBadge` = "Sur-mesure" / "Custom"
 
-- `src/components/sourcing/SourcingResultsDialog.tsx` — uniquement la fonction `addToCrm`.
+## Hors périmètre
+
+- Pas de changement à l'edge function `process-sourcing-request` (le score/reason sont déjà retournés).
+- Pas de changement à `buyer_contacts`, `CRM.tsx` filtres, `Prospects.tsx`.
+- Pas de prénom/nom (non disponibles dans la shortlist LLM).
