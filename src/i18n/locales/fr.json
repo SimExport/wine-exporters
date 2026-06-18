@@ -1344,6 +1344,12 @@
     "back": "Retour",
     "notFound": "Prospect non trouvé",
     "backToProspects": "Retour aux prospects",
+    "source": {
+      "title": "Provenance",
+      "sourcing": "Recherche sur-mesure",
+      "score": "Score",
+      "relevance": "Pertinence"
+    },
     "stageSelect": {
       "placeholder": "Choisir un statut",
       "updated": "Statut mis à jour"
