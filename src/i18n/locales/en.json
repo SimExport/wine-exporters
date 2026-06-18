@@ -995,6 +995,9 @@
       "tech_sheets": "Tech sheets",
       "other": "Other"
     },
+    "card": {
+      "sourcingBadge": "Custom"
+    },
     "toasts": {
       "loadError": {
         "title": "Error",
