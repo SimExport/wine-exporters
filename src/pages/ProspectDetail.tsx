@@ -121,6 +121,8 @@ export default function ProspectDetail() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [showAddSample, setShowAddSample] = useState(false)
+  const [editingSampleId, setEditingSampleId] = useState<string | null>(null)
+  const [deletingSample, setDeletingSample] = useState<SampleItem | null>(null)
   const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
   const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
@@ -331,52 +333,121 @@ export default function ProspectDetail() {
     }
   }
 
-  const handleAddSample = async () => {
+  const resetSampleForm = () => {
+    setNewSample({ wine_id: '', quantity: 1, comment: '' })
+    setEditingSampleId(null)
+  }
+
+  const handleOpenEditSample = (item: SampleItem) => {
+    // Resolve wine_id for the Select: real wine id, or matching "cuvee-…" option by name
+    let wineId = item.wine_id || ''
+    if (!wineId && item.wines?.name) {
+      const match = wines.find(w => w.id.startsWith('cuvee-') && w.name === item.wines!.name)
+      if (match) wineId = match.id
+    }
+    // Strip the auto-prepended cuvée prefix from the comment so it's not duplicated on save
+    let comment = item.comment || ''
+    if (!item.wine_id && item.wines?.name) {
+      const prefix = t('prospectDetail.samples.cuveePrefix', { name: item.wines.name })
+      if (comment.startsWith(prefix)) {
+        comment = comment.slice(prefix.length)
+        if (comment.startsWith(' - ')) comment = comment.slice(3)
+      }
+    }
+    setNewSample({ wine_id: wineId, quantity: item.quantity, comment })
+    setEditingSampleId(item.id)
+    setShowAddSample(true)
+  }
+
+  const handleSaveSample = async () => {
     if (!newSample.wine_id || !prospect) return
 
     try {
-      // Check if this is a cuvée from profile (starts with "cuvee-") or a real wine
       const isCuveeFromProfile = newSample.wine_id.startsWith('cuvee-')
       const selectedWine = wines.find(w => w.id === newSample.wine_id)
-
-      const { data, error } = await supabase
-        .from('sample_items')
-        .insert({
-          lead_id: prospect.id,
-          wine_id: isCuveeFromProfile ? null : newSample.wine_id,
-          quantity: newSample.quantity,
-          comment: isCuveeFromProfile ? `${t('prospectDetail.samples.cuveePrefix', { name: selectedWine?.name })}${newSample.comment ? ` - ${newSample.comment}` : ''}` : newSample.comment
-        })
-        .select(`
-          *,
-          wines(name)
-        `)
-        .single()
-
-      if (error) throw error
-
-      // For cuvées from profile, manually set the wine name for display
-      const itemToAdd = {
-        ...data,
-        wines: isCuveeFromProfile ? { name: selectedWine?.name || t('prospectDetail.samples.cuveeFallback') } : data.wines
+      const payload = {
+        wine_id: isCuveeFromProfile ? null : newSample.wine_id,
+        quantity: newSample.quantity,
+        comment: isCuveeFromProfile
+          ? `${t('prospectDetail.samples.cuveePrefix', { name: selectedWine?.name })}${newSample.comment ? ` - ${newSample.comment}` : ''}`
+          : newSample.comment,
       }
 
-      setSampleItems(prev => [itemToAdd, ...prev])
-      setNewSample({ wine_id: '', quantity: 1, comment: '' })
+      if (editingSampleId) {
+        const { data, error } = await supabase
+          .from('sample_items')
+          .update(payload)
+          .eq('id', editingSampleId)
+          .select(`*, wines(name)`)
+          .single()
+        if (error) throw error
+
+        const updated: SampleItem = {
+          ...data,
+          wines: isCuveeFromProfile
+            ? { name: selectedWine?.name || t('prospectDetail.samples.cuveeFallback') }
+            : data.wines,
+        }
+        setSampleItems(prev => prev.map(s => (s.id === editingSampleId ? updated : s)))
+        toast({
+          title: t('prospectDetail.toasts.sampleUpdated.title'),
+          description: t('prospectDetail.toasts.sampleUpdated.description'),
+        })
+      } else {
+        const { data, error } = await supabase
+          .from('sample_items')
+          .insert({ lead_id: prospect.id, ...payload })
+          .select(`*, wines(name)`)
+          .single()
+        if (error) throw error
+
+        const itemToAdd = {
+          ...data,
+          wines: isCuveeFromProfile
+            ? { name: selectedWine?.name || t('prospectDetail.samples.cuveeFallback') }
+            : data.wines,
+        }
+        setSampleItems(prev => [itemToAdd, ...prev])
+        toast({
+          title: t('prospectDetail.toasts.sampleAdded.title'),
+          description: t('prospectDetail.toasts.sampleAdded.description'),
+        })
+      }
+
+      resetSampleForm()
       setShowAddSample(false)
-
-      toast({
-        title: t('prospectDetail.toasts.sampleAdded.title'),
-        description: t('prospectDetail.toasts.sampleAdded.description'),
-      })
-
     } catch (error) {
-      console.error('Error adding sample:', error)
+      console.error('Error saving sample:', error)
       toast({
         title: t('prospectDetail.toasts.sampleError.title'),
         description: t('prospectDetail.toasts.sampleError.description'),
-        variant: "destructive",
+        variant: 'destructive',
       })
+    }
+  }
+
+  const handleDeleteSample = async () => {
+    if (!deletingSample) return
+    try {
+      const { error } = await supabase
+        .from('sample_items')
+        .delete()
+        .eq('id', deletingSample.id)
+      if (error) throw error
+      setSampleItems(prev => prev.filter(s => s.id !== deletingSample.id))
+      toast({
+        title: t('prospectDetail.toasts.sampleDeleted.title'),
+        description: t('prospectDetail.toasts.sampleDeleted.description'),
+      })
+    } catch (error) {
+      console.error('Error deleting sample:', error)
+      toast({
+        title: t('prospectDetail.toasts.sampleError.title'),
+        description: t('prospectDetail.toasts.sampleError.description'),
+        variant: 'destructive',
+      })
+    } finally {
+      setDeletingSample(null)
     }
   }
 
@@ -904,16 +975,26 @@ export default function ProspectDetail() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('prospectDetail.samples.title')}</CardTitle>
-                <Dialog open={showAddSample} onOpenChange={setShowAddSample}>
+                <Dialog
+                  open={showAddSample}
+                  onOpenChange={(open) => {
+                    setShowAddSample(open)
+                    if (!open) resetSampleForm()
+                  }}
+                >
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => resetSampleForm()}>
                       <Plus className="w-4 h-4 mr-2" />
                       {t('prospectDetail.samples.addWine')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>{t('prospectDetail.samples.dialogTitle')}</DialogTitle>
+                      <DialogTitle>
+                        {editingSampleId
+                          ? t('prospectDetail.samples.dialogEditTitle', { defaultValue: 'Modifier un échantillon' })
+                          : t('prospectDetail.samples.dialogTitle')}
+                      </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div>
@@ -950,11 +1031,19 @@ export default function ProspectDetail() {
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setShowAddSample(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowAddSample(false)
+                          resetSampleForm()
+                        }}
+                      >
                         {t('prospectDetail.samples.cancel')}
                       </Button>
-                      <Button onClick={handleAddSample} disabled={!newSample.wine_id}>
-                        {t('prospectDetail.samples.add')}
+                      <Button onClick={handleSaveSample} disabled={!newSample.wine_id}>
+                        {editingSampleId
+                          ? t('prospectDetail.samples.save', { defaultValue: 'Enregistrer' })
+                          : t('prospectDetail.samples.add')}
                       </Button>
                     </div>
                   </DialogContent>
@@ -970,12 +1059,31 @@ export default function ProspectDetail() {
                 <div className="space-y-3">
                   {sampleItems.map(item => (
                     <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
+                      <div className="min-w-0">
                         <div className="font-medium">{item.wines?.name}</div>
                         <div className="text-sm text-muted-foreground">
                           {t('prospectDetail.samples.quantityLabel', { q: item.quantity })}
                           {item.comment && ` • ${item.comment}`}
                         </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenEditSample(item)}
+                          aria-label={t('prospectDetail.samples.edit', { defaultValue: 'Modifier' })}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeletingSample(item)}
+                          aria-label={t('prospectDetail.samples.delete', { defaultValue: 'Supprimer' })}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -989,6 +1097,34 @@ export default function ProspectDetail() {
                   </Button>
                 </div>
               )}
+
+              <AlertDialog
+                open={deletingSample !== null}
+                onOpenChange={(open) => !open && setDeletingSample(null)}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t('prospectDetail.samples.deleteConfirm.title', { defaultValue: 'Supprimer cet échantillon ?' })}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('prospectDetail.samples.deleteConfirm.description', { defaultValue: 'Cette action est irréversible.' })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleDeleteSample()
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t('prospectDetail.samples.delete', { defaultValue: 'Supprimer' })}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </div>

@@ -1,80 +1,57 @@
-## Objectifs
+## Objectif
 
-1. Importer une adresse plus complète depuis Recherche sur-mesure (rue + complément, ville, code postal, état/région, pays).
-2. Afficher un drapeau emoji du pays à côté du contact, sur la fiche prospect et dans les cartes CRM.
-3. Afficher de façon visible l'origine "Recherche sur-mesure" + score + pertinence (raison) sur la fiche prospect et dans la carte CRM.
+Permettre, dans la section « Échantillons demandés » de la fiche prospect, l'édition et la suppression de chaque échantillon déjà ajouté.
 
 ## Périmètre
 
-- `SourcingResultsDialog.tsx` : enrichir l'import (adresse + score + reason + source).
-- `src/lib/country-flag.ts` (nouveau) : helper `getCountryFlag(name)` → emoji drapeau via `COUNTRIES.dbAliases / englishName / name` → `isoA2` → emoji (code points régionaux).
-- `ProspectDetail.tsx` : drapeau à côté du pays (header + bloc adresse), affichage rue/complément/état déjà géré, et nouveau bloc "Provenance" (badge "Recherche sur-mesure", score /10, raison) visible quand `source = 'sourcing'`.
-- `Pipeline.tsx` (cartes CRM) : drapeau devant le pays, et petit badge "Sur-mesure · 8/10" quand `source = 'sourcing'`.
-- Migration : ajouter `source_score INT` et `source_relevance TEXT` sur `leads` (les colonnes `source`, `source_ref` existent déjà). Pas d'autre changement de schéma.
+Modifications uniquement dans `src/pages/ProspectDetail.tsx`, dans la section Samples (état/handlers liés + bloc JSX `{/* Samples */}`). Pas de changement de schéma, ni d'autres pages/composants. Ajout de clés i18n dans `fr.json` / `en.json` uniquement sous `prospectDetail.samples.*`.
 
-## Détails techniques
+## Détails
 
-### 1. Enrichissement adresse à l'import
+### État
 
-Dans `addToCrm` (SourcingResultsDialog) : étendre la sélection `buyer_contacts` à `street, address_line2:Address, city, state, postal_code, country, phone, website_url, email, full_address`. Mapping vers `leads` :
+Réutiliser le même `Dialog` que l'ajout en passant en mode édition :
+- `editingSampleId: string | null` — id de l'échantillon en cours d'édition (null = mode ajout).
+- `deletingSample: SampleItem | null` — échantillon ciblé par la confirmation de suppression.
 
-- `address_line1` ← `contact.street` (sinon parse simple de `full_address` si `street` vide : première portion avant la première virgule, uniquement si elle ne ressemble pas au code postal/ville).
-- `address_line2` ← `contact.state` (région/état, utile US/CA/AU/etc.) si non vide.
-- `city` ← `contact.city`.
-- `postal_code` ← `contact.postal_code`.
-- `country` ← `contact.country ?? marketLabel`.
+### Pré-remplissage à l'édition
 
-Si aucun match `buyer_contacts` et `full_address`/`Address` absent : on garde au minimum `country = marketLabel`.
+Sur chaque ligne d'échantillon, deux boutons icônes (`Edit`, `Trash2`) :
+- Edit : déduit le `wine_id` à utiliser dans le `Select` :
+  - Si `item.wine_id` est non-null → tel quel.
+  - Sinon (cuvée du profil), retrouver l'option `cuvee-…` correspondante en matchant `wines.find(w => w.id.startsWith('cuvee-') && w.name === item.wines?.name)`. Si introuvable, laisser vide.
+- Pré-remplit `newSample` avec `{ wine_id, quantity: item.quantity, comment: cleanComment }` puis `setEditingSampleId(item.id)` et `setShowAddSample(true)`.
+- `cleanComment` : si le commentaire commence par le préfixe cuvée (`prospectDetail.samples.cuveePrefix`), on retire ce préfixe et le séparateur ` - ` pour ne ré-afficher que la note utilisateur (afin de ne pas dupliquer le préfixe à la sauvegarde, qui le rajoute automatiquement pour les cuvées). À l'enregistrement, la logique cuvée existante régénère le préfixe.
 
-### 2. Provenance / score / pertinence
+### Enregistrement unifié
 
-Champs ajoutés à l'insert `leads` :
-- `source` = `'sourcing'`
-- `source_ref` = id de la `sourcing_request` (passer une nouvelle prop `requestId: string` au dialog depuis `SourcingRequests.tsx` et `AdminSourcing.tsx`).
-- `source_score` = `item.score` (int 1-10).
-- `source_relevance` = `item.reason`.
+Renommer la cible du bouton de la modal en `handleSaveSample` :
+- Si `editingSampleId === null` → comportement actuel `INSERT`.
+- Sinon → `UPDATE` sur `sample_items` (`wine_id`, `quantity`, `comment` avec la même logique cuvée/préfixe) puis remplacement de l'élément dans `sampleItems` (en conservant `wines.name` reconstitué pour les cuvées). Toast `sampleUpdated` (nouvelle clé i18n).
 
-`message_snippet` reste = `item.reason` pour compat ; `owner_notes` inchangé.
+À la fermeture / annulation de la modal, reset `editingSampleId = null` et `newSample` aux valeurs par défaut. Le titre de la modal et le label du bouton principal changent selon le mode (`dialogTitle` / `dialogEditTitle`, `add` / `save`).
 
-### 3. Helper drapeau
+### Suppression
 
-```ts
-// src/lib/country-flag.ts
-export function getCountryFlag(name?: string | null): string {
-  if (!name) return '';
-  const norm = name.trim().toLowerCase();
-  const c = COUNTRIES.find(c =>
-    c.name.toLowerCase() === norm ||
-    c.englishName.toLowerCase() === norm ||
-    c.dbAliases.some(a => a.toLowerCase() === norm)
-  );
-  if (!c) return '';
-  return String.fromCodePoint(...[...c.isoA2.toUpperCase()].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
-}
-```
+Trash icon → ouvre un `AlertDialog` (déjà importé dans le fichier) de confirmation :
+- Titre + description i18n (`samples.deleteConfirm.title` / `.description`).
+- Action destructive : `DELETE FROM sample_items WHERE id = deletingSample.id`, mise à jour optimiste `setSampleItems(prev => prev.filter(...))`, toast succès, fermeture.
 
-### 4. Affichage
+L'AlertDialog est rendu localement à l'intérieur de la card Samples pour rester confiné au périmètre demandé.
 
-**ProspectDetail.tsx**
-- Badge pays (ligne 582) : préfixer par `{getCountryFlag(prospect.country)} `.
-- Bloc adresse (ligne 786+) : ajouter une ligne `state` si présent, et `{getCountryFlag(country)} {country}` à la fin.
-- Nouveau bloc card "Provenance" rendu si `prospect.source === 'sourcing'` : badge "Recherche sur-mesure", `Score : X/10` (couleur selon seuils 8/5), `Pertinence : <source_relevance>`. Placé sous l'en-tête, avant les notes.
+### i18n (nouvelles clés sous `prospectDetail.samples`)
 
-**Pipeline.tsx**
-- Ligne 701-704 (affichage country sur carte) : préfixer drapeau.
-- Sous le bloc country, si `prospect.source === 'sourcing'`, afficher un petit badge `Sur-mesure · {source_score}/10`. Étendre l'interface `Prospect` (lignes 32+) avec `source`, `source_score`, `source_relevance` et la sélection Supabase correspondante.
-
-### 5. i18n
-
-Ajouter clés dans `fr.json` / `en.json` :
-- `prospectDetail.source.title` = "Provenance" / "Source"
-- `prospectDetail.source.sourcing` = "Recherche sur-mesure" / "Custom search"
-- `prospectDetail.source.score` = "Score" / "Score"
-- `prospectDetail.source.relevance` = "Pertinence" / "Relevance"
-- `crm.card.sourcingBadge` = "Sur-mesure" / "Custom"
+- `dialogEditTitle` — « Modifier un échantillon » / « Edit sample »
+- `save` — « Enregistrer » / « Save »
+- `edit` — « Modifier » / « Edit » (aria-label)
+- `delete` — « Supprimer » / « Delete » (aria-label)
+- `deleteConfirm.title` — « Supprimer cet échantillon ? » / « Delete this sample? »
+- `deleteConfirm.description` — « Cette action est irréversible. » / « This cannot be undone. »
+- `toasts.sampleUpdated.title` / `.description`
+- `toasts.sampleDeleted.title` / `.description`
 
 ## Hors périmètre
 
-- Pas de changement à l'edge function `process-sourcing-request` (le score/reason sont déjà retournés).
-- Pas de changement à `buyer_contacts`, `CRM.tsx` filtres, `Prospects.tsx`.
-- Pas de prénom/nom (non disponibles dans la shortlist LLM).
+- Pas de modification de la table `sample_items` ou des RLS.
+- Pas de modification d'autres sections de la fiche prospect.
+- Pas de changement de comportement du bouton « Marquer envoyés ».
