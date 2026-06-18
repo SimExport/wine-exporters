@@ -1482,7 +1482,15 @@
       "quantityLabel": "Quantité: {{q}}",
       "markSent": "Marquer \"Échantillons envoyés\"",
       "cuveePrefix": "Cuvée: {{name}}",
-      "cuveeFallback": "Cuvée"
+      "cuveeFallback": "Cuvée",
+      "dialogEditTitle": "Modifier un échantillon",
+      "save": "Enregistrer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleteConfirm": {
+        "title": "Supprimer cet échantillon ?",
+        "description": "Cette action est irréversible."
+      }
     },
     "commercial": {
       "title": "Suivi commercial",
