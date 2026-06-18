@@ -1482,7 +1482,15 @@
       "quantityLabel": "Quantity: {{q}}",
       "markSent": "Mark as \"Samples sent\"",
       "cuveePrefix": "Wine: {{name}}",
-      "cuveeFallback": "Wine"
+      "cuveeFallback": "Wine",
+      "dialogEditTitle": "Edit sample",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": {
+        "title": "Delete this sample?",
+        "description": "This action cannot be undone."
+      }
     },
     "commercial": {
       "title": "Sales tracking",
