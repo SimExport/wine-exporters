@@ -1401,6 +1401,14 @@
         "title": "Error",
         "description": "Unable to add sample"
       },
+      "sampleUpdated": {
+        "title": "Sample updated",
+        "description": "The sample has been updated"
+      },
+      "sampleDeleted": {
+        "title": "Sample deleted",
+        "description": "The sample has been removed from the request"
+      },
       "saved": {
         "title": "Changes saved",
         "description": "Information has been updated"
