@@ -1069,6 +1069,7 @@
       "add": "Add",
       "rename": "Rename",
       "delete": "Delete",
+      "colorAria": "Change color",
       "empty": "No columns yet.",
       "errors": {
         "notEmpty": "This column contains prospects. Move them first."
@@ -1079,6 +1080,16 @@
         "reordered": "Order updated",
         "deleted": "Column deleted"
       }
+    },
+    "stageColors": {
+      "slate": "Slate",
+      "bordeaux": "Bordeaux",
+      "amber": "Amber",
+      "green": "Green",
+      "blue": "Blue",
+      "violet": "Violet",
+      "gray": "Gray",
+      "rose": "Rose"
     }
   },
   "prospects": {

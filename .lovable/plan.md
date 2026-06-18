@@ -1,91 +1,43 @@
-# Pipeline personnalisable + changement de statut depuis la fiche prospect
+## Plan — Améliorations du pipeline personnalisable
 
-Périmètre strict : page `/pipeline`, page `/prospects/:id`, et nouvelle table `pipeline_stages`. Aucune autre page (Prospects liste, CRM, Campagnes, Admin…) n'est modifiée. La colonne existante `leads.prospect_status` reste en place pour compatibilité ; on ajoute une nouvelle référence `stage_id` utilisée uniquement par les vues `/pipeline` et `/prospects/:id`.
+Les deux features principales (colonnes dynamiques + dropdown statut) sont en place. Ces ajouts capitalisent dessus pour rendre le pipeline vraiment exploitable au quotidien, sans toucher aux autres pages.
 
-## 1. Base de données
+### 1. Couleur par colonne (champ `color` déjà présent en base)
 
-Nouvelle table `public.pipeline_stages` :
-- `id uuid pk`
-- `user_id uuid` (référence `auth.users`, `on delete cascade`, `not null`)
-- `name text not null`
-- `position integer not null default 0`
-- `color text` (optionnel, non utilisé pour l'instant côté UI mais conservé pour évolution)
-- `created_at timestamptz default now()`
+Dans le dialog **« Gérer les colonnes »** (`StagesManagerDialog.tsx`) :
+- Ajouter un petit sélecteur de couleur à côté de chaque stage (palette restreinte de 6–8 teintes cohérentes avec le design system : ardoise, bordeaux, ambre, vert, bleu, violet, gris).
+- Sauvegarde immédiate dans `pipeline_stages.color` (update optimiste).
+- Pour les 8 stages seedés au premier chargement, attribuer une couleur par défaut (au lieu de `null`).
 
-GRANTs : `select/insert/update/delete` pour `authenticated`, `all` pour `service_role`. Pas d'accès `anon`.
+### 2. Application de la couleur dans l'UI
 
-RLS activée + policy unique « Users manage their own stages » `for all` avec `auth.uid() = user_id`.
+- **Kanban (`Pipeline.tsx`)** : barre de couleur en haut de chaque colonne + pastille à côté du nom.
+- **Fiche prospect (`ProspectDetail.tsx`)** : le `Select` du statut affiche une pastille colorée devant chaque option, et le trigger reprend la couleur du stage courant.
 
-Sur `public.leads` : ajout d'une colonne `stage_id uuid` (nullable, `references pipeline_stages(id) on delete set null`) + index sur `stage_id`. La colonne `prospect_status` n'est pas supprimée (utilisée ailleurs hors périmètre).
+### 3. Compteur de prospects par colonne
 
-Pas de seed via migration (les stages dépendent de `auth.uid()`). Le seed est effectué côté client au premier chargement (voir §2).
+- Afficher `({count})` à droite du nom de colonne dans le Kanban.
+- Mise à jour en direct lors d'un drag-and-drop.
 
-## 2. Page `/pipeline`
+### 4. Polish drag-and-drop des stages
 
-### Chargement
-- Au montage : charger `pipeline_stages` filtrés par `user_id`, triés par `position`.
-- Si aucune ligne : insérer en batch les 8 stages par défaut dans l'ordre demandé :
-  1. À classer
-  2. Échantillons à envoyer
-  3. Échantillons envoyés
-  4. Échantillons réceptionnés
-  5. Échantillons dégustés
-  6. Négociation
-  7. Commande
-  8. Archivé
+- Indicateur visuel plus net pendant le drag (ligne d'insertion entre colonnes dans le dialog de gestion).
+- Toast confirmation `Ordre mis à jour` après réorganisation.
 
-  Puis migrer une fois les `leads` existants de l'utilisateur : map `prospect_status` → stage seedé correspondant et écrire `stage_id`. Cette migration ne tourne qu'au moment du seed initial (quand aucun stage n'existait), pour ne pas écraser les choix manuels ultérieurs.
+### Détails techniques
 
-- Charger les prospects via la requête existante (filtre `campaigns.user_id` + `archived_at is null`) en sélectionnant aussi `stage_id`.
+- Aucune nouvelle migration : la colonne `pipeline_stages.color` existe déjà.
+- Modifications confinées à :
+  - `src/components/pipeline/StagesManagerDialog.tsx`
+  - `src/pages/Pipeline.tsx`
+  - `src/pages/ProspectDetail.tsx`
+  - `src/i18n/locales/{fr,en}.json` (nouvelles clés UI)
+- Mise à jour du seed `loadOrSeedStages` pour inclure une couleur par défaut.
+- Pas de changement sur `/prospects`, `/campaigns`, `/importateurs`, `/recherches-sur-mesure`, `/opportunites`, ni les pages admin.
 
-### Rendu du Kanban
-- Les colonnes proviennent dynamiquement de l'état `stages` (ordre `position`).
-- Regroupement des prospects par `stage_id`. Les prospects avec `stage_id` null tombent dans la première colonne (« À classer ») visuellement, mais ne sont pas réécrits en base tant que l'utilisateur ne les déplace pas.
-- Le drag-and-drop met à jour `leads.stage_id` (au lieu de `prospect_status`) + `last_activity_at`.
+### Hors scope
 
-### Bouton « Gérer les colonnes »
-- Bouton secondaire (`variant="outline"`, `size="sm"`) à côté de « Ajouter un prospect » en haut à droite.
-- Ouvre un `Dialog` listant les stages :
-  - Poignée de drag (icône `GripVertical`) pour réordonner. Au drop, recalcul des `position` (0..n) et `update` en batch.
-  - Champ texte inline pour renommer (sauvegarde au blur ou Enter).
-  - Bouton suppression : avant `delete`, vérifier `count` de prospects ayant ce `stage_id`. Si > 0, toast d'erreur « Cette colonne contient des prospects. Déplacez-les d'abord. ». Sinon `delete`.
-  - Bloc en bas : input + bouton « Ajouter » qui insère une nouvelle stage avec `position = max(position)+1`.
-- Après chaque opération réussie, rafraîchir l'état local des stages (et recharger les colonnes du Kanban).
+- Pas d'ajout de filtres ni d'export sur le pipeline (à traiter dans un lot suivant si tu le souhaites).
+- Pas de stages partagés entre utilisateurs.
 
-### Drag-and-drop des stages
-- Utilisation de l'API HTML5 native déjà employée pour les cartes prospects (pas de nouvelle dépendance).
-
-## 3. Page `/prospects/:id`
-
-- Charger `pipeline_stages` de l'utilisateur (triés par position) au montage.
-- Remplacer le `Badge` actuel affichant `t(\`crm.statuses.\${prospect.prospect_status}\`)` par un `Select` shadcn :
-  - Options = stages utilisateur.
-  - Valeur courante = `prospect.stage_id` ; si null, sélectionner visuellement la première stage sans écrire en base.
-  - Au changement : optimistic update local + `update leads set stage_id = ?, last_activity_at = now() where id = ?`. Toast succès « Statut mis à jour ». En cas d'erreur, rollback + toast destructif.
-- Le reste de la page (édition, notes, samples, archive/delete) reste inchangé. La logique `handleUpdateStatus` existante basée sur `prospect_status` (won/lost validations) n'est pas appelée par ce nouveau select et reste en place pour les autres flux non touchés.
-
-## 4. i18n
-
-Ajout des clés FR/EN sous `pipeline.manageStages.*` :
-- `button` : « Gérer les colonnes » / « Manage columns »
-- `title`, `addPlaceholder`, `add`, `rename`, `delete`, `empty`
-- `errors.notEmpty` : « Cette colonne contient des prospects. Déplacez-les d'abord. »
-- `toasts.created/renamed/reordered/deleted` (succès/erreur)
-
-Et sous `prospectDetail.stageSelect.*` :
-- `placeholder` : « Choisir un statut »
-- `updated` : « Statut mis à jour »
-
-Les noms des 8 stages par défaut sont insérés tels quels en base (français) — non traduits, car ce sont des données utilisateur modifiables.
-
-## 5. Détails techniques
-
-- Types Supabase : régénérés automatiquement après migration ; utiliser `as any` ponctuellement si besoin avant régénération.
-- Aucun nouvel item de navigation, aucune modification de `App.tsx`, `Prospects.tsx`, `CRM.tsx`, `Pipeline` colonnes hardcodées (`PIPELINE_STATUS_KEYS`) supprimées du fichier `Pipeline.tsx` uniquement.
-- Pas de Realtime, pas d'edge function, pas de nouvelle dépendance npm.
-
-## Hors périmètre
-
-- Suppression de la colonne `leads.prospect_status` (gardée pour les autres pages).
-- Toute modification visuelle sur `/prospects` (liste), `/campaigns`, `/importateurs`, `/recherches-sur-mesure`, `/opportunites`, admin.
-- Couleur personnalisée par colonne (champ `color` créé mais non exposé UI).
+Dis-moi si tu veux ajuster le scope (par ex. uniquement les couleurs, ou inclure des filtres) avant que je passe en build.

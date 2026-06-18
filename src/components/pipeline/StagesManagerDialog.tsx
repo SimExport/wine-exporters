@@ -12,6 +12,9 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { GripVertical, Trash2, Plus } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { STAGE_COLOR_PALETTE, getStageColor } from './stage-colors'
+import { cn } from '@/lib/utils'
 
 export interface PipelineStage {
   id: string
@@ -35,6 +38,7 @@ export function StagesManagerDialog({ open, onOpenChange, stages, prospectsCount
   const [localStages, setLocalStages] = useState<PipelineStage[]>(stages)
   const [newName, setNewName] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   // Sync local state when dialog opens or props change
@@ -112,9 +116,26 @@ export function StagesManagerDialog({ open, onOpenChange, stages, prospectsCount
 
   const handleDragStart = (id: string) => setDraggedId(id)
 
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault()
+  const handleDragOver = (e: React.DragEvent, id?: string) => {
+    e.preventDefault()
+    if (id && id !== dragOverId) setDragOverId(id)
+  }
+
+  const handleColorChange = async (id: string, color: string) => {
+    setLocalStages(prev => prev.map(s => s.id === id ? { ...s, color } : s))
+    const { error } = await supabase
+      .from('pipeline_stages' as any)
+      .update({ color })
+      .eq('id', id)
+    if (error) {
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' })
+      return
+    }
+    await onChanged()
+  }
 
   const handleDropOn = async (targetId: string) => {
+    setDragOverId(null)
     if (!draggedId || draggedId === targetId) {
       setDraggedId(null)
       return
@@ -161,11 +182,43 @@ export function StagesManagerDialog({ open, onOpenChange, stages, prospectsCount
               key={stage.id}
               draggable
               onDragStart={() => handleDragStart(stage.id)}
-              onDragOver={handleDragOver}
+              onDragOver={(e) => handleDragOver(e, stage.id)}
+              onDragLeave={() => setDragOverId(prev => prev === stage.id ? null : prev)}
               onDrop={() => handleDropOn(stage.id)}
-              className="flex items-center gap-2 p-2 rounded-md border bg-card"
+              className={cn(
+                'flex items-center gap-2 p-2 rounded-md border bg-card transition-colors',
+                dragOverId === stage.id && draggedId && draggedId !== stage.id && 'border-primary border-2',
+                draggedId === stage.id && 'opacity-50'
+              )}
             >
               <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-5 h-5 rounded-full border border-border flex-shrink-0 hover:scale-110 transition-transform"
+                    style={{ backgroundColor: getStageColor(stage.color) }}
+                    aria-label={t('pipeline.manageStages.colorAria')}
+                  />
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {STAGE_COLOR_PALETTE.map(c => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() => handleColorChange(stage.id, c.value)}
+                        className={cn(
+                          'w-7 h-7 rounded-full border-2 transition-transform hover:scale-110',
+                          getStageColor(stage.color) === c.value ? 'border-foreground' : 'border-transparent'
+                        )}
+                        style={{ backgroundColor: c.value }}
+                        aria-label={t(c.labelKey)}
+                      />
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Input
                 defaultValue={stage.name}
                 onBlur={(e) => handleRename(stage.id, e.target.value)}
