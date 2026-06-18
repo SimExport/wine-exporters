@@ -790,7 +790,7 @@ export default function ProspectDetail() {
                       </a>
                     </div>
                   )}
-                  {(prospect.address_line1 || prospect.city) && (
+                  {(prospect.address_line1 || prospect.address_line2 || prospect.city || prospect.country) && (
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 mt-0.5" />
                       <div>
@@ -800,6 +800,14 @@ export default function ProspectDetail() {
                           <div>
                             {prospect.postal_code && `${prospect.postal_code} `}
                             {prospect.city}
+                          </div>
+                        )}
+                        {prospect.country && (
+                          <div>
+                            {getCountryFlag(prospect.country) && (
+                              <span className="mr-1" aria-hidden>{getCountryFlag(prospect.country)}</span>
+                            )}
+                            {prospect.country}
                           </div>
                         )}
                       </div>
