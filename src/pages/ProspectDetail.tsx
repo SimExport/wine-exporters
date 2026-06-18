@@ -40,6 +40,7 @@ import {
 } from 'lucide-react'
 import { formatDateTime, formatCurrency } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
+import { getCountryFlag } from '@/lib/country-flag'
 
 interface Prospect {
   id: string
@@ -65,6 +66,9 @@ interface Prospect {
   tally_response_url?: string
   created_at: string
   campaign_id: string
+  source?: string | null
+  source_score?: number | null
+  source_relevance?: string | null
   campaigns?: {
     name: string
   }
@@ -581,6 +585,9 @@ export default function ProspectDetail() {
               </Badge>
               {prospect.country && (
                 <Badge variant="secondary">
+                  {getCountryFlag(prospect.country) && (
+                    <span className="mr-1" aria-hidden>{getCountryFlag(prospect.country)}</span>
+                  )}
                   {prospect.country}
                 </Badge>
               )}
