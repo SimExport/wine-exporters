@@ -1069,6 +1069,7 @@
       "add": "Ajouter",
       "rename": "Renommer",
       "delete": "Supprimer",
+      "colorAria": "Changer la couleur",
       "empty": "Aucune colonne pour l'instant.",
       "errors": {
         "notEmpty": "Cette colonne contient des prospects. Déplacez-les d'abord."
@@ -1079,6 +1080,16 @@
         "reordered": "Ordre mis à jour",
         "deleted": "Colonne supprimée"
       }
+    },
+    "stageColors": {
+      "slate": "Ardoise",
+      "bordeaux": "Bordeaux",
+      "amber": "Ambre",
+      "green": "Vert",
+      "blue": "Bleu",
+      "violet": "Violet",
+      "gray": "Gris",
+      "rose": "Rose"
     }
   },
   "prospects": {
