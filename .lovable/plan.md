@@ -1,43 +1,63 @@
-## Plan — Améliorations du pipeline personnalisable
+# Import complet : Recherche sur-mesure → CRM
 
-Les deux features principales (colonnes dynamiques + dropdown statut) sont en place. Ces ajouts capitalisent dessus pour rendre le pipeline vraiment exploitable au quotidien, sans toucher aux autres pages.
+## Constat
 
-### 1. Couleur par colonne (champ `color` déjà présent en base)
+Aujourd'hui, dans `src/components/sourcing/SourcingResultsDialog.tsx`, la fonction `addToCrm` n'insère dans `leads` que `company_name`, `email`, `phone`, `website_url`, `market`, plus un snippet et le `buyer_id`. Adresse, ville, code postal et pays ne sont jamais transmis, alors que la table `leads` possède bien `address_line1`, `address_line2`, `city`, `postal_code`, `country`, `first_name`, `last_name`.
 
-Dans le dialog **« Gérer les colonnes »** (`StagesManagerDialog.tsx`) :
-- Ajouter un petit sélecteur de couleur à côté de chaque stage (palette restreinte de 6–8 teintes cohérentes avec le design system : ardoise, bordeaux, ambre, vert, bleu, violet, gris).
-- Sauvegarde immédiate dans `pipeline_stages.color` (update optimiste).
-- Pour les 8 stages seedés au premier chargement, attribuer une couleur par défaut (au lieu de `null`).
+La raison : le LLM (`process-sourcing-request`) ne renvoie dans le `shortlist` que `company_name`, `email`, `phone`, `website_url`, `score`, `reason`. Les champs d'adresse existent côté source (`buyer_contacts.street/city/postal_code/country/full_address`) mais ne remontent pas jusqu'au dialog. À noter : `buyer_contacts` n'a pas de `first_name`/`last_name`, donc ces deux champs resteront vides (non disponibles dans la donnée source).
 
-### 2. Application de la couleur dans l'UI
+## Correctif (logique d'import uniquement)
 
-- **Kanban (`Pipeline.tsx`)** : barre de couleur en haut de chaque colonne + pastille à côté du nom.
-- **Fiche prospect (`ProspectDetail.tsx`)** : le `Select` du statut affiche une pastille colorée devant chaque option, et le trigger reprend la couleur du stage courant.
+Modifications limitées à `src/components/sourcing/SourcingResultsDialog.tsx`. Aucune autre page, table ou composant n'est touché. Aucun changement de schéma. Aucun changement à l'edge function.
 
-### 3. Compteur de prospects par colonne
+### 1. Récupérer le pays contexte de la recherche
 
-- Afficher `({count})` à droite du nom de colonne dans le Kanban.
-- Mise à jour en direct lors d'un drag-and-drop.
+Ajouter une nouvelle prop optionnelle `marketCountry?: string | null` au dialog (en plus du `marketLabel` déjà existant, qui est un libellé d'affichage). Les deux appelants (`SourcingRequests.tsx`, `AdminSourcing.tsx`) sont déjà autorisés à être ajustés ? Non — la consigne est de ne rien toucher hors logique d'import. Donc on n'ajoute pas de prop : on réutilise `marketLabel` qui contient déjà le nom du marché (pays) ciblé par la recherche, et on l'utilise comme fallback `country`.
 
-### 4. Polish drag-and-drop des stages
+### 2. Enrichir chaque item à l'import
 
-- Indicateur visuel plus net pendant le drag (ligne d'insertion entre colonnes dans le dialog de gestion).
-- Toast confirmation `Ordre mis à jour` après réorganisation.
+Dans `addToCrm(item, idx)`, avant l'`insert` dans `leads` :
 
-### Détails techniques
+- Faire un lookup `buyer_contacts` pour récupérer les champs d'adresse :
+  - Priorité 1 : match par `email` (si `item.email` présent), via `.eq('email', item.email).maybeSingle()`.
+  - Priorité 2 (fallback) : match par `company_name` exact + `country` ∈ variantes du marché ; on simplifie en `eq('company_name', item.company_name).limit(1).maybeSingle()`.
+  - Si aucun match, on continue sans enrichissement (le LLM peut avoir reformulé un nom).
+- Sélectionner `street, city, postal_code, country, phone, website_url, email` sur ce lookup.
 
-- Aucune nouvelle migration : la colonne `pipeline_stages.color` existe déjà.
-- Modifications confinées à :
-  - `src/components/pipeline/StagesManagerDialog.tsx`
-  - `src/pages/Pipeline.tsx`
-  - `src/pages/ProspectDetail.tsx`
-  - `src/i18n/locales/{fr,en}.json` (nouvelles clés UI)
-- Mise à jour du seed `loadOrSeedStages` pour inclure une couleur par défaut.
-- Pas de changement sur `/prospects`, `/campaigns`, `/importateurs`, `/recherches-sur-mesure`, `/opportunites`, ni les pages admin.
+### 3. Mapping complet vers `leads`
 
-### Hors scope
+Construire le payload d'insert avec :
 
-- Pas d'ajout de filtres ni d'export sur le pipeline (à traiter dans un lot suivant si tu le souhaites).
-- Pas de stages partagés entre utilisateurs.
+| Champ leads        | Source                                                                  |
+|--------------------|-------------------------------------------------------------------------|
+| `company_name`     | `item.company_name`                                                     |
+| `email`            | `item.email ?? contact?.email`                                          |
+| `phone`            | `item.phone ?? contact?.phone`                                          |
+| `website_url`      | `item.website_url ?? contact?.website_url`                              |
+| `address_line1`    | `contact?.street`                                                       |
+| `city`             | `contact?.city`                                                         |
+| `postal_code`      | `contact?.postal_code`                                                  |
+| `country`          | `contact?.country ?? marketLabel`                                       |
+| `first_name`       | `null` (non disponible dans `buyer_contacts`)                           |
+| `last_name`        | `null` (idem)                                                           |
+| `market`           | `marketLabel` (inchangé)                                                |
+| `message_snippet`  | `item.reason` (inchangé)                                                |
+| `owner_notes`      | `'Issu de Recherche sur-mesure'` (inchangé)                             |
+| `buyer_id`         | `item.email \|\| item.company_name` (inchangé)                          |
+| `prospect_status`  | `'new'` (inchangé)                                                      |
+| `created_by`       | `user.id` (inchangé)                                                    |
+| `last_activity_at` | `now()` (inchangé)                                                      |
 
-Dis-moi si tu veux ajuster le scope (par ex. uniquement les couleurs, ou inclure des filtres) avant que je passe en build.
+### 4. Dédup
+
+Le check existant (skip si `email` déjà présent sur la même campagne) reste inchangé.
+
+## Hors scope
+
+- Pas de modification de `process-sourcing-request` (l'edge function continue de renvoyer le même shortlist compact).
+- Pas de modification de `SourcingRequests.tsx` / `AdminSourcing.tsx` / `Pipeline.tsx` / migrations / `types.ts`.
+- `first_name` / `last_name` restent vides faute de donnée source ; pourra être traité ultérieurement si on enrichit `buyer_contacts` ou le prompt LLM.
+
+## Fichier modifié
+
+- `src/components/sourcing/SourcingResultsDialog.tsx` — uniquement la fonction `addToCrm`.
