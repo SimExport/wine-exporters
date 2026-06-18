@@ -1401,6 +1401,14 @@
         "title": "Erreur",
         "description": "Impossible d'ajouter l'échantillon"
       },
+      "sampleUpdated": {
+        "title": "Échantillon mis à jour",
+        "description": "L'échantillon a été modifié"
+      },
+      "sampleDeleted": {
+        "title": "Échantillon supprimé",
+        "description": "L'échantillon a été retiré de la demande"
+      },
       "saved": {
         "title": "Modifications sauvegardées",
         "description": "Les informations ont été mises à jour"
