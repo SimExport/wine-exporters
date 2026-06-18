@@ -833,6 +833,37 @@ export default function ProspectDetail() {
             </CardContent>
           </Card>
 
+          {/* Provenance (Recherche sur-mesure) */}
+          {prospect.source === 'sourcing' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('prospectDetail.source.title', { defaultValue: 'Provenance' })}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="default">
+                    {t('prospectDetail.source.sourcing', { defaultValue: 'Recherche sur-mesure' })}
+                  </Badge>
+                  {typeof prospect.source_score === 'number' && (
+                    <Badge
+                      variant={prospect.source_score >= 8 ? 'default' : prospect.source_score >= 5 ? 'secondary' : 'outline'}
+                    >
+                      {t('prospectDetail.source.score', { defaultValue: 'Score' })} : {prospect.source_score}/10
+                    </Badge>
+                  )}
+                </div>
+                {prospect.source_relevance && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">
+                      {t('prospectDetail.source.relevance', { defaultValue: 'Pertinence' })}
+                    </Label>
+                    <p className="text-sm mt-1 whitespace-pre-wrap">{prospect.source_relevance}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Requested Actions */}
           <Card>
             <CardHeader>
