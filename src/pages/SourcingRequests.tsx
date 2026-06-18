@@ -427,6 +427,7 @@ export default function SourcingRequests() {
         summary={activeReq?.result_summary ?? null}
         resultJson={activeReq?.result_json ?? null}
         marketLabel={activeReq ? marketLabel(activeReq.target_market) : ''}
+        requestId={activeReq?.id ?? null}
       />
     </div>
   );

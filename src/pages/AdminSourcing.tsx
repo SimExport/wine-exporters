@@ -251,6 +251,7 @@ export default function AdminSourcing() {
         summary={activeRequest?.result_summary ?? null}
         resultJson={activeRequest?.result_json ?? null}
         marketLabel={activeRequest ? marketLabel(activeRequest.target_market) : ''}
+        requestId={activeRequest?.id ?? null}
       />
     </div>
   );

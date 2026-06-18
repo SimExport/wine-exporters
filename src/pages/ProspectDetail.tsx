@@ -40,6 +40,7 @@ import {
 } from 'lucide-react'
 import { formatDateTime, formatCurrency } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
+import { getCountryFlag } from '@/lib/country-flag'
 
 interface Prospect {
   id: string
@@ -65,6 +66,9 @@ interface Prospect {
   tally_response_url?: string
   created_at: string
   campaign_id: string
+  source?: string | null
+  source_score?: number | null
+  source_relevance?: string | null
   campaigns?: {
     name: string
   }
@@ -581,6 +585,9 @@ export default function ProspectDetail() {
               </Badge>
               {prospect.country && (
                 <Badge variant="secondary">
+                  {getCountryFlag(prospect.country) && (
+                    <span className="mr-1" aria-hidden>{getCountryFlag(prospect.country)}</span>
+                  )}
                   {prospect.country}
                 </Badge>
               )}
@@ -783,7 +790,7 @@ export default function ProspectDetail() {
                       </a>
                     </div>
                   )}
-                  {(prospect.address_line1 || prospect.city) && (
+                  {(prospect.address_line1 || prospect.address_line2 || prospect.city || prospect.country) && (
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 mt-0.5" />
                       <div>
@@ -793,6 +800,14 @@ export default function ProspectDetail() {
                           <div>
                             {prospect.postal_code && `${prospect.postal_code} `}
                             {prospect.city}
+                          </div>
+                        )}
+                        {prospect.country && (
+                          <div>
+                            {getCountryFlag(prospect.country) && (
+                              <span className="mr-1" aria-hidden>{getCountryFlag(prospect.country)}</span>
+                            )}
+                            {prospect.country}
                           </div>
                         )}
                       </div>
@@ -817,6 +832,37 @@ export default function ProspectDetail() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Provenance (Recherche sur-mesure) */}
+          {prospect.source === 'sourcing' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('prospectDetail.source.title', { defaultValue: 'Provenance' })}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="default">
+                    {t('prospectDetail.source.sourcing', { defaultValue: 'Recherche sur-mesure' })}
+                  </Badge>
+                  {typeof prospect.source_score === 'number' && (
+                    <Badge
+                      variant={prospect.source_score >= 8 ? 'default' : prospect.source_score >= 5 ? 'secondary' : 'outline'}
+                    >
+                      {t('prospectDetail.source.score', { defaultValue: 'Score' })} : {prospect.source_score}/10
+                    </Badge>
+                  )}
+                </div>
+                {prospect.source_relevance && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">
+                      {t('prospectDetail.source.relevance', { defaultValue: 'Pertinence' })}
+                    </Label>
+                    <p className="text-sm mt-1 whitespace-pre-wrap">{prospect.source_relevance}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Requested Actions */}
           <Card>
