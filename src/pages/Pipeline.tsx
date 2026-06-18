@@ -625,13 +625,20 @@ export default function Pipeline() {
             return (
               <div
                 key={stage.id}
-                className="flex-shrink-0 w-72 rounded-lg bg-muted/40"
+                className="flex-shrink-0 w-72 rounded-lg bg-muted/40 overflow-hidden"
                 onDragOver={handleDragOver}
                 onDrop={() => handleDrop(stage.id)}
               >
+                <div className="h-1" style={{ backgroundColor: getStageColor(stage.color) }} />
                 <div className="p-3 border-b border-border/50">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm">{stage.name}</h3>
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                      <span
+                        className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: getStageColor(stage.color) }}
+                      />
+                      {stage.name}
+                    </h3>
                     <Badge variant="secondary" className="text-xs">
                       {statusProspects.length}
                     </Badge>
