@@ -1344,6 +1344,12 @@
     "back": "Back",
     "notFound": "Prospect not found",
     "backToProspects": "Back to prospects",
+    "source": {
+      "title": "Source",
+      "sourcing": "Custom search",
+      "score": "Score",
+      "relevance": "Relevance"
+    },
     "stageSelect": {
       "placeholder": "Choose a status",
       "updated": "Status updated"
