@@ -626,6 +626,8 @@ export type Database = {
           requested_other: string | null
           source: string
           source_ref: string | null
+          source_relevance: string | null
+          source_score: number | null
           stage_id: string | null
           status: string | null
           tally_response_id: string | null
@@ -668,6 +670,8 @@ export type Database = {
           requested_other?: string | null
           source?: string
           source_ref?: string | null
+          source_relevance?: string | null
+          source_score?: number | null
           stage_id?: string | null
           status?: string | null
           tally_response_id?: string | null
@@ -710,6 +714,8 @@ export type Database = {
           requested_other?: string | null
           source?: string
           source_ref?: string | null
+          source_relevance?: string | null
+          source_score?: number | null
           stage_id?: string | null
           status?: string | null
           tally_response_id?: string | null
