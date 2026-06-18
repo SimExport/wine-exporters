@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { StagesManagerDialog, type PipelineStage } from '@/components/pipeline/StagesManagerDialog'
 import { Settings2 } from 'lucide-react'
 import { DEFAULT_STAGE_COLORS, getStageColor } from '@/components/pipeline/stage-colors'
+import { getCountryFlag } from '@/lib/country-flag'
 
 interface Prospect {
   id: string
@@ -39,6 +40,9 @@ interface Prospect {
   status?: string | null
   remind_at?: string | null
   remind_note?: string | null
+  source?: string | null
+  source_score?: number | null
+  source_relevance?: string | null
   campaigns?: {
     name: string
   }
@@ -701,8 +705,17 @@ export default function Pipeline() {
                                 {prospect.country && (
                                   <span className="flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />
+                                    {getCountryFlag(prospect.country) && (
+                                      <span aria-hidden>{getCountryFlag(prospect.country)}</span>
+                                    )}
                                     {prospect.country}
                                   </span>
+                                )}
+                                {prospect.source === 'sourcing' && (
+                                  <Badge variant="outline" className="text-[10px] px-1 py-0 border-primary/40 text-primary">
+                                    {t('crm.card.sourcingBadge', { defaultValue: 'Sur-mesure' })}
+                                    {typeof prospect.source_score === 'number' ? ` · ${prospect.source_score}/10` : ''}
+                                  </Badge>
                                 )}
                               </div>
 
