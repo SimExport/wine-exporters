@@ -52,31 +52,31 @@ const handler = async (req: Request): Promise<Response> => {
 
     const t = isEn
       ? {
-          subject: `🎯 ${safeCount} interested contact${safeCount > 1 ? "s" : ""} available for your campaign "${campaign.name}"`,
-          h1: "Your interested contacts are ready",
-          intro: `Good news! <strong>${safeCount}</strong> interested contact${safeCount > 1 ? "s" : ""} from your campaign <strong style="color:#59191F;">${campaign.name}</strong> have been added to your workspace.`,
+          subject: `🎯 ${safeCount} qualified prospect${safeCount > 1 ? "s" : ""} available for your campaign "${campaign.name}"`,
+          h1: "Your qualified prospects are ready",
+          intro: `Good news! <strong>${safeCount}</strong> qualified prospect${safeCount > 1 ? "s" : ""} from your campaign <strong style="color:#59191F;">${campaign.name}</strong> have been added to your workspace.`,
           howToTitle: "How to access them",
           steps: [
             'Open the <strong>Campaigns</strong> tab in the left sidebar.',
             `Click on your campaign <strong>"${campaign.name}"</strong>.`,
-            'Scroll to the <strong>Interested contacts</strong> section.',
-            'Click <strong>Add to CRM</strong> on each contact to start following up.',
+            'Scroll to the <strong>Qualified prospects</strong> section.',
+            'Click <strong>Add to CRM</strong> on each prospect to start following up.',
           ],
-          cta: "View my interested contacts",
+          cta: "View my qualified prospects",
           footer: "— The WineExporters team",
         }
       : {
-          subject: `🎯 ${safeCount} contact${safeCount > 1 ? "s" : ""} intéressé${safeCount > 1 ? "s" : ""} disponible${safeCount > 1 ? "s" : ""} pour votre campagne « ${campaign.name} »`,
-          h1: "Vos contacts intéressés sont disponibles",
-          intro: `Bonne nouvelle ! <strong>${safeCount}</strong> contact${safeCount > 1 ? "s" : ""} intéressé${safeCount > 1 ? "s" : ""} issu${safeCount > 1 ? "s" : ""} de votre campagne <strong style="color:#59191F;">${campaign.name}</strong> ${safeCount > 1 ? "ont" : "a"} été ajouté${safeCount > 1 ? "s" : ""} dans votre espace.`,
+          subject: `🎯 ${safeCount} prospect${safeCount > 1 ? "s" : ""} qualifié${safeCount > 1 ? "s" : ""} disponible${safeCount > 1 ? "s" : ""} pour votre campagne « ${campaign.name} »`,
+          h1: "Vos prospects qualifiés sont disponibles",
+          intro: `Bonne nouvelle ! <strong>${safeCount}</strong> prospect${safeCount > 1 ? "s" : ""} qualifié${safeCount > 1 ? "s" : ""} issu${safeCount > 1 ? "s" : ""} de votre campagne <strong style="color:#59191F;">${campaign.name}</strong> ${safeCount > 1 ? "ont" : "a"} été ajouté${safeCount > 1 ? "s" : ""} dans votre espace.`,
           howToTitle: "Comment les retrouver",
           steps: [
             'Ouvrez le menu <strong>Campagnes</strong> dans la barre latérale.',
             `Cliquez sur votre campagne <strong>« ${campaign.name} »</strong>.`,
-            'Faites défiler jusqu\'à la section <strong>Contacts intéressés</strong>.',
-            'Cliquez sur <strong>Ajouter au CRM</strong> sur chaque contact pour le suivre.',
+            'Faites défiler jusqu\'à la section <strong>Prospects qualifiés</strong>.',
+            'Cliquez sur <strong>Ajouter au CRM</strong> sur chaque prospect pour le suivre.',
           ],
-          cta: "Voir mes contacts intéressés",
+          cta: "Voir mes prospects qualifiés",
           footer: "— L'équipe WineExporters",
         };
 

@@ -798,7 +798,7 @@
       "prospectsLabel": "Prospects",
       "viewProspects": "Voir les prospects",
       "noteCard": "Note à l'équipe",
-      "interestedContactsCard": "Contacts intéressés",
+      "interestedContactsCard": "Prospects qualifiés",
       "interestedContacts": {
         "company": "Société",
         "contact": "Contact",
@@ -807,7 +807,7 @@
         "actions": "Actions recommandées",
         "addToCrm": "Ajouter au CRM",
         "added": "Ajouté",
-        "addedToast": "Contact ajouté au CRM"
+        "addedToast": "Prospect ajouté au CRM"
       }
     },
     "banner": {
@@ -1921,17 +1921,17 @@
       "error": "Erreur lors de l'envoi du rapport"
     },
     "interestedContacts": {
-      "importBtn": "Importer contacts",
-      "dialogTitle": "Importer des contacts intéressés",
-      "dialogDesc": "Téléchargez un CSV de contacts intéressés pour la campagne « {{campaign}} ».",
+      "importBtn": "Importer prospects qualifiés",
+      "dialogTitle": "Importer des prospects qualifiés",
+      "dialogDesc": "Téléchargez un CSV de prospects qualifiés pour la campagne « {{campaign}} ».",
       "fileLabel": "Fichier CSV",
       "expectedColumns": "Colonnes attendues : {{columns}}",
-      "previewCount": "{{count}} contact(s) détecté(s).",
+      "previewCount": "{{count}} prospect(s) détecté(s).",
       "import": "Importer",
       "invalidCsv": "Fichier CSV invalide ou vide.",
       "missingColumns": "Colonnes manquantes : {{columns}}",
-      "successTitle": "Contacts importés",
-      "successDesc": "{{count}} contact(s) ajouté(s).",
+      "successTitle": "Prospects importés",
+      "successDesc": "{{count}} prospect(s) ajouté(s).",
       "error": "Erreur lors de l'import"
     }
   },
@@ -1984,7 +1984,7 @@
       "s2Title": "Notre équipe identifie les importateurs",
       "s2Desc": "Sélection manuelle d'importateurs alignés avec votre profil et vos marchés.",
       "s3Title": "Vous recevez les mises en relation",
-      "s3Desc": "Les contacts intéressés arrivent directement dans votre CRM intégré.",
+      "s3Desc": "Les prospects qualifiés arrivent directement dans votre CRM intégré.",
       "cta": "Suivant"
     },
     "crm": {
