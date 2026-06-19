@@ -169,6 +169,12 @@ export function CampaignInterestedContactsUpload({ campaignId, campaignName }: P
       const payload = parsed.map((r) => ({ ...r, campaign_id: campaignId }));
       const { error } = await supabase.from('campaign_interested_contacts').insert(payload);
       if (error) throw error;
+      // Notify campaign owner (non-blocking)
+      supabase.functions
+        .invoke('notify-campaign-interested-contacts', {
+          body: { campaignId, count: parsed.length },
+        })
+        .catch((e) => console.error('notify-campaign-interested-contacts failed', e));
       toast({
         title: t('adminCampaigns.interestedContacts.successTitle'),
         description: t('adminCampaigns.interestedContacts.successDesc', { count: parsed.length }),
