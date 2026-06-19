@@ -798,7 +798,7 @@
       "prospectsLabel": "Prospects",
       "viewProspects": "View prospects",
       "noteCard": "Note to the team",
-      "interestedContactsCard": "Interested contacts",
+      "interestedContactsCard": "Qualified prospects",
       "interestedContacts": {
         "company": "Company",
         "contact": "Contact",
@@ -807,7 +807,7 @@
         "actions": "Recommended actions",
         "addToCrm": "Add to CRM",
         "added": "Added",
-        "addedToast": "Contact added to CRM"
+        "addedToast": "Prospect added to CRM"
       }
     },
     "banner": {
@@ -1921,17 +1921,17 @@
       "error": "Error while sending the report"
     },
     "interestedContacts": {
-      "importBtn": "Import contacts",
-      "dialogTitle": "Import interested contacts",
-      "dialogDesc": "Upload a CSV of interested contacts for campaign \"{{campaign}}\".",
+      "importBtn": "Import qualified prospects",
+      "dialogTitle": "Import qualified prospects",
+      "dialogDesc": "Upload a CSV of qualified prospects for campaign \"{{campaign}}\".",
       "fileLabel": "CSV file",
       "expectedColumns": "Expected columns: {{columns}}",
-      "previewCount": "{{count}} contact(s) detected.",
+      "previewCount": "{{count}} prospect(s) detected.",
       "import": "Import",
       "invalidCsv": "Invalid or empty CSV file.",
       "missingColumns": "Missing columns: {{columns}}",
-      "successTitle": "Contacts imported",
-      "successDesc": "{{count}} contact(s) added.",
+      "successTitle": "Prospects imported",
+      "successDesc": "{{count}} prospect(s) added.",
       "error": "Import error"
     }
   },
@@ -1984,7 +1984,7 @@
       "s2Title": "Our team identifies importers",
       "s2Desc": "Manual selection of importers aligned with your profile and markets.",
       "s3Title": "You receive the introductions",
-      "s3Desc": "Interested contacts land directly in your built-in CRM.",
+      "s3Desc": "Qualified prospects land directly in your built-in CRM.",
       "cta": "Next"
     },
     "crm": {
