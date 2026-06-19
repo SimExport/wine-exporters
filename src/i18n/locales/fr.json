@@ -797,7 +797,18 @@
       "statsCard": "Statistiques",
       "prospectsLabel": "Prospects",
       "viewProspects": "Voir les prospects",
-      "noteCard": "Note à l'équipe"
+      "noteCard": "Note à l'équipe",
+      "interestedContactsCard": "Contacts intéressés",
+      "interestedContacts": {
+        "company": "Société",
+        "contact": "Contact",
+        "score": "Score",
+        "description": "Description",
+        "actions": "Actions recommandées",
+        "addToCrm": "Ajouter au CRM",
+        "added": "Ajouté",
+        "addedToast": "Contact ajouté au CRM"
+      }
     },
     "banner": {
       "pendingTitle": "En attente de validation",
