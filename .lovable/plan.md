@@ -1,74 +1,40 @@
-## Plan : CSV de contacts intéressés par campagne
+## Plan : Email automatique après upload CSV contacts intéressés
 
 ### Objectif
-Permettre à l'admin d'uploader un CSV de contacts intéressés pour une campagne donnée, et afficher cette liste côté utilisateur dans la page de détail de la campagne, avec un bouton "Ajouter au CRM" par ligne (même pattern que les recherches sur-mesure).
+Après un upload réussi par l'admin, envoyer un email automatique au propriétaire de la campagne (via Resend), au branding WineExporters by ExportVins / couleur `#59191F`, pour lui dire que les contacts intéressés sont disponibles dans sa campagne.
 
-### Format CSV attendu (basé sur l'exemple fourni)
-Colonnes : `company_name, email, contact_name, country, score, description, recommended_actions`
-- `score` : entier 1-5
-- `description` : pitch / résumé du fit
-- `recommended_actions` : actions suggérées
+### 1. Nouvelle edge function
+`supabase/functions/notify-campaign-interested-contacts/index.ts`
 
-### 1. Base de données — nouvelle table
+- Inputs : `{ campaignId: string, count: number }`
+- Reprend exactement la structure (header bordeaux, container blanc, footer) de `notify-campaign-validated`.
+- Lit `campaigns` (nom, user_id) + email user via `auth.admin.getUserById` + `user_settings.ui_language` pour FR/EN.
+- Envoie via Resend depuis `WineExporters <notifications@exportvins.fr>`, BCC `simon@exportvins.fr`.
+- Log dans `campaign_email_logs` avec `event_type: 'interested_contacts_uploaded'`.
 
-`campaign_interested_contacts`
-- `id` uuid PK
-- `campaign_id` uuid FK → `campaigns(id)` ON DELETE CASCADE
-- `company_name` text NOT NULL
-- `email` text
-- `contact_name` text
-- `country` text
-- `score` integer (nullable, 1-5)
-- `description` text
-- `recommended_actions` text
-- `added_to_crm_by` uuid[] (pour marquer côté utilisateur les contacts déjà ajoutés au CRM, par user_id)
-- `created_at`, `updated_at`
+### Contenu (FR / EN)
+- Sujet FR : `🎯 {count} contacts intéressés disponibles pour votre campagne « {nom} »`
+- Sujet EN : `🎯 {count} interested contacts available for your campaign "{name}"`
+- Corps :
+  - H1 : "Vos contacts intéressés sont disponibles" / "Your interested contacts are ready"
+  - Paragraphe : `{count}` contacts intéressés issus de votre campagne `{nom}` sont maintenant accessibles dans votre espace.
+  - Mode d'emploi en bullets :
+    1. Ouvrez le menu **Campagnes** dans le menu latéral.
+    2. Cliquez sur votre campagne **« {nom} »**.
+    3. Faites défiler jusqu'à la section **Contacts intéressés**.
+    4. Cliquez sur **Ajouter au CRM** sur chaque contact pour le suivre.
+  - CTA bouton : "Voir mes contacts intéressés" → `https://wine-exporters.com/campaigns/{id}`
+  - Footer : "— L'équipe WineExporters"
 
-GRANTS : `authenticated` (SELECT/UPDATE), `service_role` ALL.
-
-RLS :
-- SELECT : admin OU propriétaire de la campagne (`EXISTS campaigns WHERE id = campaign_id AND user_id = auth.uid()`)
-- INSERT/DELETE : admin uniquement
-- UPDATE : propriétaire de la campagne (pour mettre à jour `added_to_crm_by` après ajout au CRM)
-
-### 2. Admin — Page `AdminCampaigns.tsx`
-
-Sur chaque ligne du tableau des campagnes, ajouter un bouton "Importer contacts" (icône `Upload`) qui ouvre un `Dialog` :
-- Input `<input type="file" accept=".csv">`
-- Parsing client (split CSV simple supportant les guillemets, déjà fait dans `TallyCsvImporter`) ou utiliser `papaparse` si déjà présent — je vérifierai ; sinon parsing manuel inspiré de `TallyCsvImporter.tsx`.
-- Aperçu (X lignes détectées) puis bouton "Importer" qui insère en batch dans `campaign_interested_contacts` avec le `campaign_id` de la ligne.
-- Toast de succès / erreur.
-
-Aucun autre composant/page modifié.
-
-### 3. Utilisateur — Page `CampaignDetail.tsx`
-
-Ajouter une nouvelle `Card` "Contacts intéressés" sous le grid existant (en `lg:col-span-2`) :
-- Affiche un tableau avec colonnes : Société, Contact (nom + email + pays), Score (badge), Description, Actions recommandées, Action.
-- Action : bouton "Ajouter au CRM" par ligne, qui réutilise la même logique que `SourcingResultsDialog.addToCrm` :
-  - `getOrCreateManualCampaign(user.id)` puis insert dans `leads` avec `source: 'campaign_interest'`, `source_ref: campaign.id`, `source_score: score`, `source_relevance: description`, `country`, `company_name`, `email`.
-  - Marquer la ligne comme ajoutée (badge "Ajouté") et persister via UPDATE de `added_to_crm_by` (array append) pour que le statut soit conservé d'une visite à l'autre.
-- Si la campagne n'a aucun contact intéressé, la carte n'est pas affichée.
-
-### 4. i18n
-Ajouter clés FR/EN :
-- `adminCampaigns.interestedContacts.*` : `importBtn`, `dialogTitle`, `fileLabel`, `previewCount`, `import`, `success`, `error`, `invalidCsv`, `missingColumns`
-- `campaigns.detail.interestedContactsCard`, `campaigns.detail.interestedContacts.*` : titres de colonnes, `addToCrm`, `added`, `empty`
-
-### Hors scope
-- Aucune modification des autres pages, tables, ou composants existants.
-- Pas de modification de `SourcingResultsDialog`, `CRM`, `Prospects`, etc.
-- Pas de traitement serveur (parsing en client, insert direct via RLS).
-
-### Détails techniques
-```text
-src/pages/AdminCampaigns.tsx
-  + bouton "Importer contacts" par ligne + state dialogOpenForCampaignId
-  + composant inline (ou dans un nouveau fichier src/components/admin/CampaignInterestedContactsUpload.tsx)
-
-src/pages/CampaignDetail.tsx
-  + useEffect fetch from campaign_interested_contacts where campaign_id = id
-  + nouvelle Card avec table et bouton "Ajouter au CRM"
+### 2. Appel depuis l'upload admin
+Dans `src/components/admin/CampaignInterestedContactsUpload.tsx`, après `insert` réussi, invoquer en non-bloquant :
+```ts
+supabase.functions.invoke('notify-campaign-interested-contacts', {
+  body: { campaignId, count: parsed.length }
+}).catch(e => console.error('notify failed', e));
 ```
 
-Si vous préférez un fichier séparé pour le composant d'upload admin plutôt qu'inline, je créerai `src/components/admin/CampaignInterestedContactsUpload.tsx` — cela reste dans le scope autorisé (ajout uniquement, pas de modification d'autres composants).
+### Hors scope
+- Aucun changement aux autres edge functions, ni à CampaignDetail/AdminCampaigns au-delà du composant upload déjà créé.
+- Pas de modification du schéma DB (la table `campaign_email_logs` accepte déjà un `event_type` libre — vérifié visuellement).
+- Aucune nouvelle clé secrète (RESEND_API_KEY est déjà présente).
