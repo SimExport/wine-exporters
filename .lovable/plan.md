@@ -1,32 +1,36 @@
-## Diagnostic
+## Problème
 
-- Lany existe bien avec l’email `contact@lanye-barrac.fr`.
-- Sa campagne `campagne 1` est bien en statut `results`.
-- Les 17 prospects qualifiés sont bien en base pour cette campagne.
-- Le blocage principal confirmé : `campaign_interested_contacts` n’a aucun droit Data API effectif (`GRANT` absent), donc l’application ne peut pas lire les lignes même si les règles RLS sont correctes.
+Sur la page **Campagnes**, les lignes du tableau ne sont pas cliquables. Le seul moyen d'ouvrir une campagne est via les boutons d'action à droite :
+- **Brouillon** → bouton « Reprendre » (ouvre le wizard).
+- **Autres statuts** (validation, sending, **results**, failed) → bouton « Voir prospects » qui va vers `/prospects?campaign=...` — **pas** vers la page de détail de la campagne où se trouve la carte « Prospects qualifiés ».
 
-## Plan de correction
+C'est pour ça que Lany ne tombe jamais sur la carte : même en cliquant sur le bouton d'action de sa campagne en statut « Résultats », elle est redirigée vers la liste globale des prospects, pas vers le détail de la campagne.
 
-1. **Appliquer le correctif d’accès base de données**
-   - Donner l’accès à la table `campaign_interested_contacts` pour les utilisateurs connectés.
-   - Garder les règles RLS existantes : Lany ne verra que les prospects de ses propres campagnes, les admins gardent l’accès complet.
-   - Donner l’accès complet au `service_role` pour les imports admin et fonctions Edge.
+## Correction proposée
 
-2. **Vérifier l’accès après migration**
-   - Contrôler que les droits existent bien après application.
-   - Vérifier que la campagne de Lany retourne toujours 17 prospects qualifiés.
+Dans `src/pages/Campaigns.tsx`, sur le tableau « Vos campagnes » :
 
-3. **Sécuriser l’expérience côté interface**
-   - Si nécessaire, ajuster l’écran campagne pour afficher un message clair quand la campagne est en statut `results` mais que les prospects ne sont pas récupérés, au lieu d’un écran vide silencieux.
-   - Conserver le libellé utilisateur `Prospects qualifiés` partout.
+1. **Rendre la ligne entière cliquable**
+   - Au clic sur la ligne :
+     - Statut `draft` → ouvre le wizard (comportement actuel du bouton « Reprendre »).
+     - Tout autre statut → navigue vers `/campaigns/{id}` (page de détail, où s'affiche la carte « Prospects qualifiés »).
+   - Curseur `pointer` + effet hover sur la ligne pour signaler la clicabilité.
+   - Les boutons d'action (Reprendre / Archiver / Supprimer) gardent leur comportement et stoppent la propagation du clic pour ne pas déclencher la navigation de la ligne.
 
-## Migration prévue
+2. **Renommer et rediriger le bouton d'action des campagnes non-brouillon**
+   - « Voir prospects » → **« Voir la campagne »**.
+   - Cible : `/campaigns/{id}` au lieu de `/prospects?campaign=...`.
+   - Raison : c'est la page de détail qui contient la carte « Prospects qualifiés » + les stats + les actions par contact. La page `/prospects` reste accessible depuis le menu latéral pour la vue globale.
 
-```sql
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.campaign_interested_contacts TO authenticated;
-GRANT ALL ON public.campaign_interested_contacts TO service_role;
-```
+3. **Traductions FR/EN**
+   - Mettre à jour `campaigns.list.table.viewProspects` → « Voir la campagne » / « View campaign ».
+
+## Hors scope
+
+- Pas de changement de logique métier ni de RLS/GRANT (déjà corrigés à l'étape précédente).
+- Pas de modification de la page de détail elle-même.
+- Pas de modification de la page `/prospects`.
 
 ## Résultat attendu
 
-Lany doit voir la carte `Prospects qualifiés` sur sa campagne `campagne 1`, avec ses 17 prospects qualifiés et les actions associées.
+Lany peut cliquer directement sur la ligne de sa « campagne 1 » (ou sur « Voir la campagne ») et atterrit sur la page de détail où la carte **« Prospects qualifiés »** avec ses 17 contacts s'affiche automatiquement.

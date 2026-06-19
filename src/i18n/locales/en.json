@@ -663,7 +663,7 @@
         "opens": "{{count}} opens",
         "clicks": "{{count}} clicks",
         "replies": "{{count}} replies",
-        "viewProspects": "View prospects",
+        "viewProspects": "View campaign",
         "archive": "Archive",
         "delete": "Delete"
       }

@@ -1020,7 +1020,17 @@ ${campaignData.sendAsName}`} />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCampaigns.map(campaign => <TableRow key={campaign.id}>
+                  {filteredCampaigns.map(campaign => <TableRow
+                      key={campaign.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => {
+                        if (campaign.status === 'draft') {
+                          resumeDraft(campaign.id);
+                        } else {
+                          navigate(`/campaigns/${campaign.id}`);
+                        }
+                      }}
+                    >
                       <TableCell className="font-medium">
                         {campaign.name}
                       </TableCell>
@@ -1064,14 +1074,14 @@ ${campaignData.sendAsName}`} />
                         {formatDate(campaign.created_at)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                           {campaign.status === 'draft' ? (
                             <Button size="sm" onClick={() => resumeDraft(campaign.id)}>
                               <Pencil className="h-4 w-4 mr-1" />
                               {t('campaigns.list.table.resume', { defaultValue: 'Reprendre' })}
                             </Button>
                           ) : (
-                            <Button size="sm" variant="outline" onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}>
+                            <Button size="sm" variant="outline" onClick={() => navigate(`/campaigns/${campaign.id}`)}>
                               <Eye className="h-4 w-4 mr-1" />
                               {t('campaigns.list.table.viewProspects')}
                             </Button>
