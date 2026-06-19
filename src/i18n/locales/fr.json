@@ -797,7 +797,18 @@
       "statsCard": "Statistiques",
       "prospectsLabel": "Prospects",
       "viewProspects": "Voir les prospects",
-      "noteCard": "Note à l'équipe"
+      "noteCard": "Note à l'équipe",
+      "interestedContactsCard": "Contacts intéressés",
+      "interestedContacts": {
+        "company": "Société",
+        "contact": "Contact",
+        "score": "Score",
+        "description": "Description",
+        "actions": "Actions recommandées",
+        "addToCrm": "Ajouter au CRM",
+        "added": "Ajouté",
+        "addedToast": "Contact ajouté au CRM"
+      }
     },
     "banner": {
       "pendingTitle": "En attente de validation",
@@ -1908,6 +1919,20 @@
       "successTitle": "Rapport envoyé",
       "successDesc": "Le client sera notifié par email.",
       "error": "Erreur lors de l'envoi du rapport"
+    },
+    "interestedContacts": {
+      "importBtn": "Importer contacts",
+      "dialogTitle": "Importer des contacts intéressés",
+      "dialogDesc": "Téléchargez un CSV de contacts intéressés pour la campagne « {{campaign}} ».",
+      "fileLabel": "Fichier CSV",
+      "expectedColumns": "Colonnes attendues : {{columns}}",
+      "previewCount": "{{count}} contact(s) détecté(s).",
+      "import": "Importer",
+      "invalidCsv": "Fichier CSV invalide ou vide.",
+      "missingColumns": "Colonnes manquantes : {{columns}}",
+      "successTitle": "Contacts importés",
+      "successDesc": "{{count}} contact(s) ajouté(s).",
+      "error": "Erreur lors de l'import"
     }
   },
   "parseAddresses": {

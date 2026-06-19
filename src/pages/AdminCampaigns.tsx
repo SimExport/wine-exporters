@@ -17,6 +17,7 @@ import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, Search
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
+import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
 import { formatDate } from '@/lib/format';
 
 interface Campaign {
@@ -803,6 +804,10 @@ export default function AdminCampaigns() {
                            <Eye className="h-4 w-4 mr-1" />
                            {t('adminCampaigns.table.viewProspects')}
                          </Button>
+                         <CampaignInterestedContactsUpload
+                           campaignId={campaign.id}
+                           campaignName={campaign.name}
+                         />
                        </div>
                      </TableCell>
                   </TableRow>
