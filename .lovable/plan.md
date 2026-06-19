@@ -1,17 +1,16 @@
-## Problème
+## Objectif
 
-La route `/campaigns/:id` n'est pas déclarée dans `src/App.tsx`. Le composant `CampaignDetail` est importé mais aucun `<Route>` ne le branche — d'où le 404 quand on clique sur une campagne.
+Aligner le compteur « Prospects » sur le nombre de contacts qualifiés (table `campaign_interested_contacts`) au lieu du nombre de leads, et nettoyer le détail de la campagne.
 
-## Correction
+## Changements
 
-Ajouter dans `src/App.tsx`, juste après la route `/campaigns` :
+1. **`src/pages/Campaigns.tsx`** — dans `fetchCampaigns()`, remplacer le `count` sur `leads` par un `count` sur `campaign_interested_contacts` filtré par `campaign_id`. La colonne « Prospects » de la liste affichera donc le même nombre que les « Prospects qualifiés » (ex. 17).
 
-```tsx
-<Route path="/campaigns/:id" element={<DashboardLayout><CampaignDetail /></DashboardLayout>} />
-```
+2. **`src/pages/CampaignDetail.tsx`** :
+   - Dans `fetchCampaign()`, remplacer le `count` sur `leads` par un `count` sur `campaign_interested_contacts`. La carte « Statistiques › Prospects » affichera 17 au lieu de 0.
+   - Supprimer le bouton « Voir les prospects » dans la carte Statistiques (ainsi que le bloc `pt-4 space-y-2` qui ne contient plus rien).
 
-Protégée comme les autres routes utilisateur (DashboardLayout + ProtectedRoute si c'est le pattern utilisé pour `/campaigns`).
+## Hors périmètre
 
-## Hors scope
-
-Aucune autre modification.
+- Aucune modification de base de données, de RLS, ni de la section CRM / Prospects.
+- Les autres KPIs (ouvertures, clics, réponses) restent inchangés.
