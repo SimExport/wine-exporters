@@ -82,6 +82,7 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
             <Route path="/campaigns" element={<DashboardLayout><Campaigns /></DashboardLayout>} />
+            <Route path="/campaigns/:id" element={<DashboardLayout><CampaignDetail /></DashboardLayout>} />
             <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
             <Route path="/importers" element={<DashboardLayout><Importers /></DashboardLayout>} />
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
