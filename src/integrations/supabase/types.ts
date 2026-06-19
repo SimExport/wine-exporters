@@ -216,6 +216,59 @@ export type Database = {
           },
         ]
       }
+      campaign_interested_contacts: {
+        Row: {
+          added_to_crm_by: string[]
+          campaign_id: string
+          company_name: string
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          recommended_actions: string | null
+          score: number | null
+          updated_at: string
+        }
+        Insert: {
+          added_to_crm_by?: string[]
+          campaign_id: string
+          company_name: string
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          recommended_actions?: string | null
+          score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          added_to_crm_by?: string[]
+          campaign_id?: string
+          company_name?: string
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          recommended_actions?: string | null
+          score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_interested_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_reports: {
         Row: {
           campaign_name: string
