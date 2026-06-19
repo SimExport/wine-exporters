@@ -1919,6 +1919,20 @@
       "successTitle": "Report sent",
       "successDesc": "The client will be notified by email.",
       "error": "Error while sending the report"
+    },
+    "interestedContacts": {
+      "importBtn": "Import contacts",
+      "dialogTitle": "Import interested contacts",
+      "dialogDesc": "Upload a CSV of interested contacts for campaign \"{{campaign}}\".",
+      "fileLabel": "CSV file",
+      "expectedColumns": "Expected columns: {{columns}}",
+      "previewCount": "{{count}} contact(s) detected.",
+      "import": "Import",
+      "invalidCsv": "Invalid or empty CSV file.",
+      "missingColumns": "Missing columns: {{columns}}",
+      "successTitle": "Contacts imported",
+      "successDesc": "{{count}} contact(s) added.",
+      "error": "Import error"
     }
   },
   "parseAddresses": {
