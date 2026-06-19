@@ -196,7 +196,7 @@ const Campaigns = () => {
       const campaignsWithCounts = await Promise.all((data || []).map(async campaign => {
         const {
           count
-        } = await supabase.from('leads').select('*', {
+        } = await supabase.from('campaign_interested_contacts').select('*', {
           count: 'exact',
           head: true
         }).eq('campaign_id', campaign.id);
