@@ -89,9 +89,9 @@ const CampaignDetail = () => {
 
       if (error) throw error;
 
-      // Fetch prospect count
+      // Fetch prospect count (qualified interested contacts)
       const { count } = await supabase
-        .from('leads')
+        .from('campaign_interested_contacts')
         .select('*', { count: 'exact', head: true })
         .eq('campaign_id', id);
 
@@ -422,16 +422,6 @@ const CampaignDetail = () => {
               <div>
                 <h5 className="font-medium text-sm">{t('campaigns.detail.prospectsLabel')}</h5>
                 <p className="text-2xl font-bold">{campaign.prospect_count || 0}</p>
-              </div>
-              
-              <div className="pt-4 space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigate(`/prospects?campaign=${campaign.id}`)}
-                >
-                  {t('campaigns.detail.viewProspects')}
-                </Button>
               </div>
             </CardContent>
           </Card>
