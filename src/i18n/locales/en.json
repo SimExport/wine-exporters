@@ -137,7 +137,8 @@
   "credits": {
     "nextPeriod": "the next period",
     "noCreditsCampaign": "You've used your monthly campaign credit. It will reset on {{date}}.",
-    "noCreditsSearch": "You've used your monthly search credit. It will reset on {{date}}."
+    "noCreditsSearch": "You've used your monthly search credit. It will reset on {{date}}.",
+    "noCreditsExport": "You've used all your export credits for this month. They will reset on {{date}}."
   },
   "dashboard": {
     "title": "Dashboard",
