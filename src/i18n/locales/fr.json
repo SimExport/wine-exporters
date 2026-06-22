@@ -352,7 +352,13 @@
       "partialDescription": "Ce pays contient {{total}} contacts mais il ne vous reste que {{remaining}} crédits d'export ce mois-ci. Voulez-vous télécharger les {{remaining}} premiers contacts ?",
       "partialConfirm": "Télécharger {{remaining}} contacts",
       "cancel": "Annuler",
-      "successWithRemaining": "{{exported}} contacts exportés. Solde restant : {{remaining}}."
+      "successWithRemaining": "{{exported}} contacts exportés. Solde restant : {{remaining}}.",
+      "pageSelected": "Les {{count}} contacts de cette page sont sélectionnés.",
+      "selectAllList": "Sélectionner les {{total}} contacts de la liste",
+      "allSelected": "Les {{total}} contacts sont sélectionnés.",
+      "clearSelection": "Effacer la sélection",
+      "downloadWithCount": "Télécharger ({{count}})",
+      "partialDescriptionSelection": "Vous avez sélectionné {{total}} contacts mais il ne vous reste que {{remaining}} crédits d'export ce mois-ci. Voulez-vous télécharger les {{remaining}} premiers ?"
     },
     "selected": {
       "contactsCount": "— {{count}} contacts",
