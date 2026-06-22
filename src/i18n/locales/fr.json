@@ -1119,7 +1119,10 @@
         "tag": "Étiquette",
         "inactivity": "Inactivité",
         "createdAt": "Date d'ajout",
-        "reminder": "Rappel"
+        "reminder": "Rappel",
+        "lastNote": "Dernière note",
+        "samples": "Échantillons demandés",
+        "address": "Adresse"
       }
     }
   },
