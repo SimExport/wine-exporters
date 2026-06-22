@@ -1523,7 +1523,14 @@
       "title": "Notes internes",
       "placeholder": "Ajouter une note...",
       "addBtn": "Ajouter note",
-      "empty": "Aucune note pour l'instant"
+      "empty": "Aucune note pour l'instant",
+      "editBtn": "Modifier",
+      "deleteBtn": "Supprimer",
+      "saveBtn": "Enregistrer",
+      "cancelBtn": "Annuler",
+      "edited": "modifié",
+      "deleteConfirmTitle": "Supprimer cette note ?",
+      "deleteConfirmDescription": "Cette action est définitive."
     },
     "tally": {
       "title": "Référence Tally",
