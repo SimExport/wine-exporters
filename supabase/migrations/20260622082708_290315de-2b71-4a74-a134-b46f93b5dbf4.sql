@@ -1,0 +1,2 @@
+CREATE POLICY "Users can update their own prospect notes" ON public.prospect_notes FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own prospect notes" ON public.prospect_notes FOR DELETE TO authenticated USING (auth.uid() = user_id);
