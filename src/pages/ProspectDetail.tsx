@@ -1388,6 +1388,26 @@ export default function ProspectDetail() {
           </Card>
         </div>
       </div>
+
+      <AlertDialog open={!!deletingNoteId} onOpenChange={(open) => !open && setDeletingNoteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('prospectDetail.notes.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('prospectDetail.notes.deleteConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('prospectDetail.notes.cancelBtn')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingNoteId && handleDeleteNote(deletingNoteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('prospectDetail.notes.deleteBtn')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
