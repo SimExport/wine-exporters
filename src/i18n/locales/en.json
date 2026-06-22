@@ -1119,7 +1119,10 @@
         "tag": "Tag",
         "inactivity": "Inactivity",
         "createdAt": "Date added",
-        "reminder": "Reminder"
+        "reminder": "Reminder",
+        "lastNote": "Last note",
+        "samples": "Samples requested",
+        "address": "Address"
       }
     }
   },
