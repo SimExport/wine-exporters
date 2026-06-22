@@ -1104,6 +1104,23 @@
       "violet": "Violet",
       "gray": "Gris",
       "rose": "Rose"
+    },
+    "customize": {
+      "button": "Personnaliser",
+      "title": "Afficher sur les cartes",
+      "fields": {
+        "contactName": "Nom du contact",
+        "email": "Email",
+        "phone": "Téléphone",
+        "country": "Pays",
+        "source": "Provenance",
+        "campaign": "Campagne",
+        "actions": "Actions demandées",
+        "tag": "Étiquette",
+        "inactivity": "Inactivité",
+        "createdAt": "Date d'ajout",
+        "reminder": "Rappel"
+      }
     }
   },
   "prospects": {
