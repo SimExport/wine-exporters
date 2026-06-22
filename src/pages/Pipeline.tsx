@@ -110,7 +110,7 @@ const DEFAULT_CARD_FIELDS: CardField[] = [
 ]
 
 export default function Pipeline() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -845,7 +845,7 @@ export default function Pipeline() {
 
                               {visibleFields.has('createdAt') && prospect.created_at && (
                                 <p className="text-[10px] text-muted-foreground mt-1">
-                                  {format(new Date(prospect.created_at), 'P', { locale: t('common.locale') === 'fr' ? fr : enUS })}
+                                  {format(new Date(prospect.created_at), 'P', { locale: i18n.language?.startsWith('fr') ? fr : enUS })}
                                 </p>
                               )}
 
