@@ -1104,6 +1104,23 @@
       "violet": "Violet",
       "gray": "Gray",
       "rose": "Rose"
+    },
+    "customize": {
+      "button": "Customize",
+      "title": "Show on cards",
+      "fields": {
+        "contactName": "Contact name",
+        "email": "Email",
+        "phone": "Phone",
+        "country": "Country",
+        "source": "Source",
+        "campaign": "Campaign",
+        "actions": "Requested actions",
+        "tag": "Tag",
+        "inactivity": "Inactivity",
+        "createdAt": "Date added",
+        "reminder": "Reminder"
+      }
     }
   },
   "prospects": {

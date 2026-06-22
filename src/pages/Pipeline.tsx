@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone } from 'lucide-react'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone, Eye } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -86,8 +86,31 @@ const LEGACY_STATUS_TO_STAGE_NAME: Record<string, string> = {
 
 const REQUESTED_ACTION_KEYS = ['price_list', 'samples', 'video_call', 'tech_sheets', 'other'] as const
 
+type CardField =
+  | 'contactName'
+  | 'email'
+  | 'phone'
+  | 'country'
+  | 'source'
+  | 'campaign'
+  | 'actions'
+  | 'tag'
+  | 'inactivity'
+  | 'createdAt'
+  | 'reminder'
+
+const ALL_CARD_FIELDS: CardField[] = [
+  'contactName', 'email', 'phone', 'country', 'source',
+  'campaign', 'actions', 'tag', 'inactivity', 'createdAt', 'reminder',
+]
+
+const DEFAULT_CARD_FIELDS: CardField[] = [
+  'contactName', 'email', 'phone', 'country', 'source',
+  'campaign', 'actions', 'tag', 'inactivity', 'reminder',
+]
+
 export default function Pipeline() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -107,6 +130,33 @@ export default function Pipeline() {
   const [draggedProspect, setDraggedProspect] = useState<string | null>(null)
   const [stages, setStages] = useState<PipelineStage[]>([])
   const [showStagesManager, setShowStagesManager] = useState(false)
+
+  const storageKey = user ? `pipeline-card-fields:${user.id}` : null
+  const [visibleFields, setVisibleFields] = useState<Set<CardField>>(new Set(DEFAULT_CARD_FIELDS))
+
+  useEffect(() => {
+    if (!storageKey) return
+    try {
+      const raw = localStorage.getItem(storageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw) as CardField[]
+        setVisibleFields(new Set(parsed.filter(f => ALL_CARD_FIELDS.includes(f))))
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey])
+
+  const toggleField = (field: CardField) => {
+    setVisibleFields(prev => {
+      const next = new Set(prev)
+      if (next.has(field)) next.delete(field)
+      else next.add(field)
+      if (storageKey) {
+        try { localStorage.setItem(storageKey, JSON.stringify(Array.from(next))) } catch {}
+      }
+      return next
+    })
+  }
 
   const [newProspect, setNewProspect] = useState({
     campaign_id: '',
@@ -436,6 +486,29 @@ export default function Pipeline() {
           </div>
 
           <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Eye className="w-4 h-4 mr-2" />
+                  {t('pipeline.customize.button')}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  {t('pipeline.customize.title')}
+                </div>
+                {ALL_CARD_FIELDS.map(field => (
+                  <DropdownMenuItem
+                    key={field}
+                    onSelect={(e) => { e.preventDefault(); toggleField(field) }}
+                    className="gap-2"
+                  >
+                    <Checkbox checked={visibleFields.has(field)} />
+                    <span className="text-sm">{t(`pipeline.customize.fields.${field}`)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={() => setShowStagesManager(true)}>
               <Settings2 className="w-4 h-4 mr-2" />
               {t('pipeline.manageStages.button')}
@@ -671,6 +744,7 @@ export default function Pipeline() {
                                   {prospect.company_name || t('pipeline.noName')}
                                 </Link>
                                 {/* Temperature tag */}
+                                {visibleFields.has('tag') && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <button className="flex-shrink-0 focus:outline-none">
@@ -694,17 +768,18 @@ export default function Pipeline() {
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
+                                )}
                               </div>
                               
-                              {(prospect.first_name || prospect.last_name) && (
+                              {visibleFields.has('contactName') && (prospect.first_name || prospect.last_name) && (
                                 <p className="text-xs text-muted-foreground truncate">
                                   {prospect.first_name} {prospect.last_name}
                                 </p>
                               )}
 
-                              {(prospect.email || prospect.phone) && (
+                              {((visibleFields.has('email') && prospect.email) || (visibleFields.has('phone') && prospect.phone)) && (
                                 <div className="mt-1 space-y-0.5">
-                                  {prospect.email && (
+                                  {visibleFields.has('email') && prospect.email && (
                                     <a
                                       href={`mailto:${prospect.email}`}
                                       onClick={(e) => e.stopPropagation()}
@@ -714,7 +789,7 @@ export default function Pipeline() {
                                       <span className="truncate">{prospect.email}</span>
                                     </a>
                                   )}
-                                  {prospect.phone && (
+                                  {visibleFields.has('phone') && prospect.phone && (
                                     <a
                                       href={`tel:${prospect.phone}`}
                                       onClick={(e) => e.stopPropagation()}
@@ -727,8 +802,9 @@ export default function Pipeline() {
                                 </div>
                               )}
 
+                              {((visibleFields.has('country') && prospect.country) || (visibleFields.has('source') && prospect.source === 'sourcing')) && (
                               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                {prospect.country && (
+                                {visibleFields.has('country') && prospect.country && (
                                   <span className="flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />
                                     {getCountryFlag(prospect.country) && (
@@ -737,15 +813,16 @@ export default function Pipeline() {
                                     {prospect.country}
                                   </span>
                                 )}
-                                {prospect.source === 'sourcing' && (
+                                {visibleFields.has('source') && prospect.source === 'sourcing' && (
                                   <Badge variant="outline" className="text-[10px] px-1 py-0 border-primary/40 text-primary">
                                     {t('crm.card.sourcingBadge', { defaultValue: 'Sur-mesure' })}
                                     {typeof prospect.source_score === 'number' ? ` · ${prospect.source_score}/10` : ''}
                                   </Badge>
                                 )}
                               </div>
+                              )}
 
-                              {prospect.requested_actions && prospect.requested_actions.length > 0 && (
+                              {visibleFields.has('actions') && prospect.requested_actions && prospect.requested_actions.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
                                   {prospect.requested_actions.slice(0, 2).map(action => (
                                     <Badge key={action} variant="outline" className="text-[10px] px-1 py-0">
@@ -760,13 +837,22 @@ export default function Pipeline() {
                                 </div>
                               )}
 
-                              <p className="text-[10px] text-muted-foreground mt-2">
-                                {prospect.campaigns?.name}
-                              </p>
+                              {visibleFields.has('campaign') && (
+                                <p className="text-[10px] text-muted-foreground mt-2">
+                                  {prospect.campaigns?.name}
+                                </p>
+                              )}
+
+                              {visibleFields.has('createdAt') && prospect.created_at && (
+                                <p className="text-[10px] text-muted-foreground mt-1">
+                                  {format(new Date(prospect.created_at), 'P', { locale: i18n.language?.startsWith('fr') ? fr : enUS })}
+                                </p>
+                              )}
 
                               {/* Inactivity + Reminder row */}
+                              {(visibleFields.has('inactivity') || visibleFields.has('reminder')) && (
                               <div className="flex items-center justify-between mt-1.5">
-                                {(() => {
+                                {visibleFields.has('inactivity') ? (() => {
                                   const info = getInactivityInfo(prospect.last_activity_at)
                                   return (
                                     <div className={`flex items-center gap-1 text-[10px] ${info.isAlert ? 'text-orange-500' : 'text-muted-foreground'}`}>
@@ -774,7 +860,8 @@ export default function Pipeline() {
                                       {info.label}
                                     </div>
                                   )
-                                })()}
+                                })() : <span />}
+                                {visibleFields.has('reminder') && (
                                 <ReminderPopover
                                   leadId={prospect.id}
                                   remindAt={prospect.remind_at}
@@ -786,7 +873,9 @@ export default function Pipeline() {
                                   }
                                   size="sm"
                                 />
+                                )}
                               </div>
+                              )}
                             </div>
                           </div>
                         </CardContent>
