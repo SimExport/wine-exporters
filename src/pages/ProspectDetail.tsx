@@ -88,6 +88,7 @@ interface Note {
   id: string
   body: string
   created_at: string
+  updated_at?: string
   user_id: string
 }
 
@@ -126,6 +127,9 @@ export default function ProspectDetail() {
   const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
   const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editingNoteBody, setEditingNoteBody] = useState('')
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
   const [newSample, setNewSample] = useState({
     wine_id: '',
     quantity: 1,
