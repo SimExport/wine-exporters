@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock } from 'lucide-react'
+import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock, Mail, Phone } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
 import { subDays, isAfter, differenceInDays } from 'date-fns'
@@ -29,6 +29,7 @@ interface Prospect {
   last_name?: string
   company_name?: string
   email?: string
+  phone?: string
   country?: string
   requested_actions?: string[]
   prospect_status: string
