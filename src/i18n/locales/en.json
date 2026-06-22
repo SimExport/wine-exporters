@@ -1918,7 +1918,13 @@
       "markCompleted": "Mark completed",
       "addProspect": "Add prospect",
       "viewProspects": "View prospects",
-      "allMarkets": "Selected markets"
+      "allMarkets": "Selected markets",
+      "editStats": "Statistics",
+      "statsPopoverTitle": "Edit statistics",
+      "openRate": "Open rate (%)",
+      "interestedClicks": "Interested clicks",
+      "saveStats": "Save",
+      "statsSaved": "Statistics updated"
     },
     "drawer": {
       "title": "Add a prospect to \"{{name}}\"",
