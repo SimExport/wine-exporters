@@ -343,6 +343,17 @@
     "exportError": "Unable to export the data",
     "exportSuccess": "CSV export downloaded successfully",
     "exportFailure": "Error during export",
+    "exportCredits": {
+      "balance": "{{remaining}} / 500 export credits available this month",
+      "download": "Download list",
+      "paidOnly": "CSV export is reserved for paid subscribers.",
+      "quotaExhausted": "Export quota reached. Your credits will reset on {{date}}.",
+      "partialTitle": "Partial download",
+      "partialDescription": "This country has {{total}} contacts but you only have {{remaining}} export credits left this month. Download the first {{remaining}} contacts?",
+      "partialConfirm": "Download {{remaining}} contacts",
+      "cancel": "Cancel",
+      "successWithRemaining": "{{exported}} contacts exported. Remaining balance: {{remaining}}."
+    },
     "selected": {
       "contactsCount": "— {{count}} contacts",
       "clearFilter": "Clear filter"
