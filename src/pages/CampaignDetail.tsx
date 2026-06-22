@@ -30,6 +30,8 @@ interface Campaign {
   validated_at: string;
   admin_reviewer: string;
   prospect_count?: number;
+  stats_opens?: number | null;
+  stats_clicks?: number | null;
 }
 
 interface Document {
