@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag } from 'lucide-react'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -30,6 +30,7 @@ interface Prospect {
   last_name?: string
   company_name?: string
   email?: string
+  phone?: string
   country?: string
   requested_actions?: string[]
   prospect_status: string

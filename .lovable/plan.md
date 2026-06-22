@@ -1,30 +1,28 @@
-## Objectif
-Permettre de modifier (et supprimer) une note interne déjà ajoutée sur la fiche prospect, en cas de faute de frappe ou d'erreur.
+### Summary
+Add the contact email and phone number to both the Kanban cards (Pipeline) and the list table (Prospects) views in the CRM.
 
-## Changements
+### Files to modify
 
-### `src/pages/ProspectDetail.tsx`
-- Ajouter un état local `editingNoteId` + `editingBody` pour suivre la note en cours d'édition.
-- Dans le rendu de chaque note (ligne ~1206) :
-  - Afficher au survol deux petits boutons icône en haut à droite de la carte : « Éditer » (icône Pencil) et « Supprimer » (icône Trash).
-  - Si la note est en mode édition : remplacer le texte par un `<Textarea>` pré-rempli + boutons « Enregistrer » / « Annuler ».
-- Ajouter deux handlers :
-  - `handleUpdateNote(noteId)` : `UPDATE prospect_notes SET body = ... WHERE id = ...`, puis recharge les notes et toast succès.
-  - `handleDeleteNote(noteId)` : confirmation via `AlertDialog` (ou `confirm` simple), `DELETE FROM prospect_notes WHERE id = ...`, puis recharge.
-- Indiquer « (modifié) » à côté de la date si `updated_at > created_at` (si la colonne existe ; sinon on s'en passe).
+#### `src/pages/Pipeline.tsx` (Kanban cards)
+1. Add `phone?: string` to the `Prospect` interface.
+2. Import `Mail` and `Phone` from `lucide-react`.
+3. In each kanban card, display email and phone below the contact name as compact rows with icons.
+   - Only show if the field has a value.
+   - Style: `text-xs text-muted-foreground` with `truncate` to fit the narrow card.
 
-### Traductions
-- `src/i18n/locales/fr.json` & `en.json` : ajouter sous `prospectDetail.notes` :
-  - `editBtn` (Modifier / Edit)
-  - `deleteBtn` (Supprimer / Delete)
-  - `saveBtn` (Enregistrer / Save)
-  - `cancelBtn` (Annuler / Cancel)
-  - `deleteConfirm` (« Supprimer cette note ? » / "Delete this note?")
-  - toasts `noteUpdated`, `noteDeleted`
+#### `src/pages/Prospects.tsx` (List table)
+1. Add `phone?: string` to the `Prospect` interface.
+2. Import `Mail` and `Phone` from `lucide-react`.
+3. Add two new columns in the table header: `Email` and `Phone` (after the existing `Contact` column).
+4. Add corresponding cells in each row showing the email and phone values, with icons.
+5. Update CSV export headers and rows to include Email and Phone.
 
-### Base de données
-Aucune migration nécessaire : les policies RLS UPDATE/DELETE existantes sur `prospect_notes` (3 policies déjà en place) couvrent normalement le owner. À vérifier en lecture seule au moment de l'implémentation ; si une policy UPDATE/DELETE manque, ajouter une migration `USING (user_id = auth.uid())`.
+#### `src/i18n/locales/fr.json`
+- Add `"email": "Email"` and `"phone": "Téléphone"` under `prospects.table`.
 
-## Hors scope
-- Édition des notes ailleurs que sur la fiche prospect (les notes campagnes etc. ne sont pas concernées).
-- Historique des modifications.
+#### `src/i18n/locales/en.json`
+- Add `"email": "Email"` and `"phone": "Phone"` under `prospects.table`.
+
+### Out of scope
+- No database changes (the `leads` table already has a `phone` column and the queries already use `*`).
+- No changes to Prospect detail page.
