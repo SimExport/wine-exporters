@@ -1,45 +1,59 @@
 ## Objectif
 
-Afficher dans la carte "Statistiques" de la page Campagne (vue utilisateur) trois indicateurs, et permettre à l'admin de saisir manuellement les deux nouveaux dans le drawer d'édition d'une campagne.
+Ajouter un export CSV des importateurs du pays sélectionné sur `/importateurs`, gouverné par un nouveau quota mensuel `export_credits` (500/mois) appliqué uniquement aux utilisateurs avec un plan actif (paid).
 
-## Vue utilisateur — `src/pages/CampaignDetail.tsx`
+## Base de données — migration
 
-Dans la carte "Statistiques" (lignes ~414-427), remplacer le bloc actuel par trois lignes empilées :
+Sur la table existante `public.user_credits` :
+- Ajouter colonne `export_credits integer NOT NULL DEFAULT 500`
+- Mettre à jour les lignes existantes : `UPDATE public.user_credits SET export_credits = 500`
 
-1. **Prospects qualifiés trouvés** — valeur actuelle `campaign.prospect_count` (renommé uniquement, logique inchangée — toujours basé sur `campaign_interested_contacts`).
-2. **Pourcentage d'ouverture** — `campaign.stats_opens` affiché en `%` (ex. `42 %`). Si `null` → `—`.
-3. **Nombre de clics sur "intéressé"** — `campaign.stats_clicks`. Si `null` → `—`.
+Ajouter une fonction `public.consume_export_credits(_count integer)` (SECURITY DEFINER) :
+- Vérifie `auth.uid()`
+- Décrémente `export_credits` de `_count` si `export_credits >= _count`
+- Retourne le nouveau solde, ou `-1` si solde insuffisant
 
-Les champs `stats_opens` et `stats_clicks` sont déjà fetchés dans `fetchCampaign` (table `campaigns`). Aucun changement de requête.
+Le reset mensuel : la table possède déjà `next_reset_date` et `subscription_start_date`. Aucun job n'effectue actuellement le reset côté serveur dans ce qu'on voit (les colonnes par défaut sont à 1). Pour rester minimal et conforme à "ne pas modifier les composants existants", on ajoute un trigger/fonction `reset_export_credits_if_due()` invoqué côté client à chaque `fetchCredits` via une RPC `public.ensure_export_credits_reset()` : si `now()::date >= next_reset_date`, remettre `export_credits = 500` et avancer `next_reset_date` d'un mois. Cette RPC n'altère pas `campaign_credits`/`search_credits` (déjà gérés ailleurs).
 
-Ajout des clés i18n FR/EN sous `campaigns.detail` :
-- `prospectsLabel` : renommer en "Prospects qualifiés trouvés" / "Qualified prospects found"
-- `openRateLabel` : "Pourcentage d'ouverture" / "Open rate"
-- `interestedClicksLabel` : "Clics sur intéressé" / "Interested clicks"
+## Hook `src/hooks/useCredits.tsx`
 
-## Vue admin — `src/pages/AdminCampaigns.tsx`
+- Étendre `UserCredits` avec `export_credits: number`
+- Inclure `export_credits` dans le `select`
+- Avant le select, appeler `supabase.rpc('ensure_export_credits_reset')` (ignore l'erreur si fonction absente pendant le déploiement)
+- Ajouter `consumeExportCredits(count: number)` qui appelle la RPC `consume_export_credits`
+- Exposer `exportCredits`, `consumeExportCredits`, et un `noCreditsMessage('export')`
+- Ajouter clés i18n `credits.noCreditsExport`
 
-Dans le drawer d'édition de campagne (zone existante qui gère déjà `selectedCampaign`), ajouter une section "Statistiques" avec deux champs `Input type="number"` :
-- **Pourcentage d'ouverture** → `stats_opens` (0-100)
-- **Nombre de clics sur intéressé** → `stats_clicks`
+## Page `src/pages/Importers.tsx`
 
-Le champ "Prospects qualifiés trouvés" est affiché en lecture seule (valeur calculée automatiquement via `campaign_interested_contacts`).
+Modifier uniquement cette page :
 
-Bouton "Enregistrer les statistiques" qui fait un `UPDATE campaigns SET stats_opens, stats_clicks WHERE id = selectedCampaign.id`, puis recharge la liste et toast de confirmation.
+1. **Affichage du solde** — sous le sélecteur de pays (à côté du compteur "X contacts"), afficher pour les utilisateurs `hasPaidAccess` :
+   `"{exportCredits} / 500 crédits d'export disponibles ce mois-ci"`
+   (clé i18n `importers.exportCredits.balance`)
 
-Ajout des clés i18n FR/EN sous `adminCampaigns` :
-- `statsSection` : "Statistiques"
-- `openRateField` : "Pourcentage d'ouverture (%)"
-- `interestedClicksField` : "Clics sur intéressé"
-- `saveStats` : "Enregistrer les statistiques"
-- `statsSaved` : "Statistiques mises à jour"
+2. **Bouton "Télécharger la liste"** — à droite du compteur de contacts, visible quand `selectedCountry && contacts.length > 0`. Désactivé si `!hasPaidAccess` (tooltip explicatif) ou si `exportCredits <= 0`.
+
+3. **Logique d'export** — remplacer la fonction `exportToCSV` existante :
+   - Si `!hasPaidAccess` : toast d'erreur "Réservé aux abonnés"
+   - Si `exportCredits <= 0` : toast bloquant avec message de quota épuisé + date de reset
+   - Si `totalCount > exportCredits` : ouvrir un `AlertDialog` proposant un export partiel de `exportCredits` lignes (boutons "Télécharger {n} contacts" / "Annuler")
+   - Sinon : export complet de `totalCount` lignes
+   - Avant le fetch : appeler `consumeExportCredits(nbLignesÀExporter)`. Si retour `ok: false`, abandonner avec toast.
+   - Fetch des contacts via `supabase.from('buyer_contacts').select(...).in('country', country.dbAliases).order('company_name').limit(nbLignesÀExporter)`
+   - Génération CSV identique à l'existant (mêmes 9 colonnes)
+   - Toast de succès : "{n} contacts exportés. Solde restant : {remaining}"
+
+4. **i18n** — clés ajoutées sous `importers.exportCredits` (FR/EN) : `balance`, `download`, `paidOnly`, `quotaExhausted`, `partialTitle`, `partialDescription`, `partialConfirm`, `successWithRemaining`.
 
 ## Hors scope
 
-- Pas de modification de la base de données : `stats_opens`, `stats_clicks`, `stats_replies` existent déjà sur `campaigns`.
-- Pas de changement à l'upload CSV existant ni à `CampaignInterestedContactsUpload`.
-- Pas de KPI "emails envoyés", "taux de clic", "très intéressés", "qualifiés Tally" pour l'instant — l'utilisateur a précisé en deuxième partie de message qu'il souhaite uniquement les 3 KPIs (prospects qualifiés, % ouverture, clics intéressé) dans la carte Statistiques. À confirmer si on veut quand même ajouter une rangée de cards supplémentaire en haut de page avec les autres KPIs.
+- Aucun changement à `Profile`, `Billing`, `AppSidebar`, autres pages, ni aux crédits `campaign_credits`/`search_credits`.
+- Aucune modification de la table `buyer_contacts` ni de ses RLS.
+- Aucun job cron : le reset mensuel est déclenché paresseusement via la RPC au chargement de `useCredits`.
 
-## Question avant build
+## Détails techniques
 
-La deuxième partie du message contredit la première (6 KPIs en cards en haut vs 3 valeurs dans la carte Statistiques existante). Le plan ci-dessus suit la **deuxième partie** (plus précise et alignée au screenshot). Confirmer ou demander d'ajouter en plus une rangée de cards en haut avec les 6 KPIs initiaux.
+- Migration SQL en une transaction : `ALTER TABLE … ADD COLUMN`, `UPDATE`, `CREATE OR REPLACE FUNCTION consume_export_credits`, `CREATE OR REPLACE FUNCTION ensure_export_credits_reset`, `GRANT EXECUTE … TO authenticated`. Pas de nouvelle table → pas de policies à créer.
+- `consume_export_credits` est atomique (UPDATE conditionnel + RETURNING) pour éviter les courses entre clics rapides.
+- Limite Supabase de 1000 lignes par requête : passer explicitement `.limit(nbLignesÀExporter)` (max 500 ici, donc OK).
