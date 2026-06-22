@@ -1131,6 +1131,8 @@
         "Campaign",
         "Company",
         "Contact",
+        "Email",
+        "Phone",
         "Country",
         "Requested actions",
         "Status"
@@ -1150,6 +1152,8 @@
       "campaign": "Campaign",
       "company": "Company",
       "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
       "country": "Country",
       "actions": "Requested actions",
       "status": "Status",
