@@ -702,6 +702,31 @@ export default function Pipeline() {
                                 </p>
                               )}
 
+                              {(prospect.email || prospect.phone) && (
+                                <div className="mt-1 space-y-0.5">
+                                  {prospect.email && (
+                                    <a
+                                      href={`mailto:${prospect.email}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground truncate"
+                                    >
+                                      <Mail className="w-3 h-3 flex-shrink-0" />
+                                      <span className="truncate">{prospect.email}</span>
+                                    </a>
+                                  )}
+                                  {prospect.phone && (
+                                    <a
+                                      href={`tel:${prospect.phone}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground truncate"
+                                    >
+                                      <Phone className="w-3 h-3 flex-shrink-0" />
+                                      <span className="truncate">{prospect.phone}</span>
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+
                               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                                 {prospect.country && (
                                   <span className="flex items-center gap-1">
