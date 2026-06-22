@@ -511,7 +511,9 @@ const Importers = () => {
                 title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
               >
                 {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                {t('importers.exportCredits.download')}
+                {effectiveSelectionCount > 0
+                  ? t('importers.exportCredits.downloadWithCount', { count: effectiveSelectionCount })
+                  : t('importers.exportCredits.download')}
               </Button>
             </div>
           )}
