@@ -1404,6 +1404,14 @@
         "title": "Error",
         "description": "Unable to add note"
       },
+      "noteUpdated": {
+        "title": "Note updated",
+        "description": "The note has been updated"
+      },
+      "noteDeleted": {
+        "title": "Note deleted",
+        "description": "The note has been deleted"
+      },
       "sampleAdded": {
         "title": "Sample added",
         "description": "The sample has been added to the request"
@@ -1515,7 +1523,14 @@
       "title": "Internal notes",
       "placeholder": "Add a note...",
       "addBtn": "Add note",
-      "empty": "No notes yet"
+      "empty": "No notes yet",
+      "editBtn": "Edit",
+      "deleteBtn": "Delete",
+      "saveBtn": "Save",
+      "cancelBtn": "Cancel",
+      "edited": "edited",
+      "deleteConfirmTitle": "Delete this note?",
+      "deleteConfirmDescription": "This action is permanent."
     },
     "tally": {
       "title": "Tally reference",

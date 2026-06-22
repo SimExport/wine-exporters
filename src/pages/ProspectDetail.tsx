@@ -88,6 +88,7 @@ interface Note {
   id: string
   body: string
   created_at: string
+  updated_at?: string
   user_id: string
 }
 
@@ -126,6 +127,9 @@ export default function ProspectDetail() {
   const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
   const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editingNoteBody, setEditingNoteBody] = useState('')
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
   const [newSample, setNewSample] = useState({
     wine_id: '',
     quantity: 1,
@@ -336,6 +340,66 @@ export default function ProspectDetail() {
   const resetSampleForm = () => {
     setNewSample({ wine_id: '', quantity: 1, comment: '' })
     setEditingSampleId(null)
+  }
+
+  const handleStartEditNote = (note: Note) => {
+    setEditingNoteId(note.id)
+    setEditingNoteBody(note.body)
+  }
+
+  const handleCancelEditNote = () => {
+    setEditingNoteId(null)
+    setEditingNoteBody('')
+  }
+
+  const handleUpdateNote = async (noteId: string) => {
+    if (!editingNoteBody.trim()) return
+    try {
+      const { data, error } = await supabase
+        .from('prospect_notes')
+        .update({ body: editingNoteBody.trim() })
+        .eq('id', noteId)
+        .select()
+        .single()
+      if (error) throw error
+      setNotes(prev => prev.map(n => (n.id === noteId ? { ...n, ...data } : n)))
+      setEditingNoteId(null)
+      setEditingNoteBody('')
+      toast({
+        title: t('prospectDetail.toasts.noteUpdated.title'),
+        description: t('prospectDetail.toasts.noteUpdated.description'),
+      })
+    } catch (error) {
+      console.error('Error updating note:', error)
+      toast({
+        title: t('prospectDetail.toasts.noteError.title'),
+        description: t('prospectDetail.toasts.noteError.description'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('prospect_notes')
+        .delete()
+        .eq('id', noteId)
+      if (error) throw error
+      setNotes(prev => prev.filter(n => n.id !== noteId))
+      setDeletingNoteId(null)
+      toast({
+        title: t('prospectDetail.toasts.noteDeleted.title'),
+        description: t('prospectDetail.toasts.noteDeleted.description'),
+      })
+    } catch (error) {
+      console.error('Error deleting note:', error)
+      toast({
+        title: t('prospectDetail.toasts.noteError.title'),
+        description: t('prospectDetail.toasts.noteError.description'),
+        variant: 'destructive',
+      })
+    }
   }
 
   const handleOpenEditSample = (item: SampleItem) => {
@@ -1204,11 +1268,57 @@ export default function ProspectDetail() {
                   </p>
                 ) : (
                   notes.map(note => (
-                    <div key={note.id} className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm">{note.body}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {formatDateTime(note.created_at)}
-                      </p>
+                    <div key={note.id} className="p-3 bg-muted rounded-lg group">
+                      {editingNoteId === note.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editingNoteBody}
+                            onChange={(e) => setEditingNoteBody(e.target.value)}
+                            rows={3}
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button size="sm" variant="ghost" onClick={handleCancelEditNote}>
+                              {t('prospectDetail.notes.cancelBtn')}
+                            </Button>
+                            <Button size="sm" onClick={() => handleUpdateNote(note.id)} disabled={!editingNoteBody.trim()}>
+                              {t('prospectDetail.notes.saveBtn')}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm whitespace-pre-wrap flex-1">{note.body}</p>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => handleStartEditNote(note)}
+                                aria-label={t('prospectDetail.notes.editBtn')}
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => setDeletingNoteId(note.id)}
+                                aria-label={t('prospectDetail.notes.deleteBtn')}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {formatDateTime(note.created_at)}
+                            {note.updated_at && note.updated_at !== note.created_at && (
+                              <span className="ml-1 italic">({t('prospectDetail.notes.edited')})</span>
+                            )}
+                          </p>
+                        </>
+                      )}
                     </div>
                   ))
                 )}
@@ -1278,6 +1388,26 @@ export default function ProspectDetail() {
           </Card>
         </div>
       </div>
+
+      <AlertDialog open={!!deletingNoteId} onOpenChange={(open) => !open && setDeletingNoteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('prospectDetail.notes.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('prospectDetail.notes.deleteConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('prospectDetail.notes.cancelBtn')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingNoteId && handleDeleteNote(deletingNoteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('prospectDetail.notes.deleteBtn')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
