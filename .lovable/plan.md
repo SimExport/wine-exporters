@@ -1,59 +1,70 @@
 ## Objectif
 
-Ajouter un export CSV des importateurs du pays sélectionné sur `/importateurs`, gouverné par un nouveau quota mensuel `export_credits` (500/mois) appliqué uniquement aux utilisateurs avec un plan actif (paid).
-
-## Base de données — migration
-
-Sur la table existante `public.user_credits` :
-- Ajouter colonne `export_credits integer NOT NULL DEFAULT 500`
-- Mettre à jour les lignes existantes : `UPDATE public.user_credits SET export_credits = 500`
-
-Ajouter une fonction `public.consume_export_credits(_count integer)` (SECURITY DEFINER) :
-- Vérifie `auth.uid()`
-- Décrémente `export_credits` de `_count` si `export_credits >= _count`
-- Retourne le nouveau solde, ou `-1` si solde insuffisant
-
-Le reset mensuel : la table possède déjà `next_reset_date` et `subscription_start_date`. Aucun job n'effectue actuellement le reset côté serveur dans ce qu'on voit (les colonnes par défaut sont à 1). Pour rester minimal et conforme à "ne pas modifier les composants existants", on ajoute un trigger/fonction `reset_export_credits_if_due()` invoqué côté client à chaque `fetchCredits` via une RPC `public.ensure_export_credits_reset()` : si `now()::date >= next_reset_date`, remettre `export_credits = 500` et avancer `next_reset_date` d'un mois. Cette RPC n'altère pas `campaign_credits`/`search_credits` (déjà gérés ailleurs).
-
-## Hook `src/hooks/useCredits.tsx`
-
-- Étendre `UserCredits` avec `export_credits: number`
-- Inclure `export_credits` dans le `select`
-- Avant le select, appeler `supabase.rpc('ensure_export_credits_reset')` (ignore l'erreur si fonction absente pendant le déploiement)
-- Ajouter `consumeExportCredits(count: number)` qui appelle la RPC `consume_export_credits`
-- Exposer `exportCredits`, `consumeExportCredits`, et un `noCreditsMessage('export')`
-- Ajouter clés i18n `credits.noCreditsExport`
+Permettre une sélection fine des contacts à exporter sur `/importateurs` via des cases à cocher, avec un mécanisme "tout sélectionner la page" puis "sélectionner les N contacts de la liste entière".
 
 ## Page `src/pages/Importers.tsx`
 
-Modifier uniquement cette page :
+### Nouvel état
+- `selectedIds: Set<string>` — ids de `buyer_contacts` cochés (persistant à travers la pagination)
+- `selectAllAcrossPages: boolean` — quand `true`, indique que TOUS les contacts du pays sont sélectionnés (pas seulement ceux chargés), pour éviter d'avoir à fetcher 168 ids juste pour cocher
+- Reset des deux à chaque changement de `selectedCountry`
 
-1. **Affichage du solde** — sous le sélecteur de pays (à côté du compteur "X contacts"), afficher pour les utilisateurs `hasPaidAccess` :
-   `"{exportCredits} / 500 crédits d'export disponibles ce mois-ci"`
-   (clé i18n `importers.exportCredits.balance`)
+### Colonne checkbox dans le tableau
+- Nouvelle première colonne avec `<Checkbox>` (shadcn `@/components/ui/checkbox`) dans `TableHead` et chaque `TableRow`
+- Header checkbox = "tout cocher sur la page courante" :
+  - `checked` quand tous les `contacts.id` de la page sont dans `selectedIds` (ou `selectAllAcrossPages === true`)
+  - `indeterminate` quand certains seulement
+  - onCheckedChange : ajoute/retire les ids de la page dans `selectedIds` ; si on décoche, désactive aussi `selectAllAcrossPages`
+- Row checkbox : toggle l'id du contact. Si on décoche pendant `selectAllAcrossPages`, on bascule en mode "ids explicites" (initialiser `selectedIds` avec tous les ids du pays via fetch d'ids → voir ci-dessous) puis retirer celui décoché.
 
-2. **Bouton "Télécharger la liste"** — à droite du compteur de contacts, visible quand `selectedCountry && contacts.length > 0`. Désactivé si `!hasPaidAccess` (tooltip explicatif) ou si `exportCredits <= 0`.
+### Bandeau "sélectionner tous les N contacts"
+- Affiché juste au-dessus du tableau quand : tous les contacts de la page sont cochés ET `totalCount > contacts.length` ET `!selectAllAcrossPages`
+- Texte : `"Les {{pageCount}} contacts de cette page sont sélectionnés."` + bouton lien `"Sélectionner les {{totalCount}} contacts de la liste"`
+- Clic → `setSelectAllAcrossPages(true)` et vide `selectedIds` (inutile de stocker les ids individuellement dans ce mode)
+- Quand `selectAllAcrossPages === true`, afficher un bandeau confirmant `"Les {{totalCount}} contacts sont sélectionnés."` + bouton `"Effacer la sélection"`
 
-3. **Logique d'export** — remplacer la fonction `exportToCSV` existante :
-   - Si `!hasPaidAccess` : toast d'erreur "Réservé aux abonnés"
-   - Si `exportCredits <= 0` : toast bloquant avec message de quota épuisé + date de reset
-   - Si `totalCount > exportCredits` : ouvrir un `AlertDialog` proposant un export partiel de `exportCredits` lignes (boutons "Télécharger {n} contacts" / "Annuler")
-   - Sinon : export complet de `totalCount` lignes
-   - Avant le fetch : appeler `consumeExportCredits(nbLignesÀExporter)`. Si retour `ok: false`, abandonner avec toast.
-   - Fetch des contacts via `supabase.from('buyer_contacts').select(...).in('country', country.dbAliases).order('company_name').limit(nbLignesÀExporter)`
-   - Génération CSV identique à l'existant (mêmes 9 colonnes)
-   - Toast de succès : "{n} contacts exportés. Solde restant : {remaining}"
+### Compteur de sélection + bouton télécharger
+- Remplacer le bouton existant "Télécharger la liste" par un bouton dont le label devient :
+  - `"Télécharger ({{n}})"` quand `n = effectiveSelectionCount > 0`
+  - `"Télécharger la liste"` (comportement actuel = tout le pays) quand aucune sélection
+- `effectiveSelectionCount` = `selectAllAcrossPages ? totalCount : selectedIds.size`
+- Disabled quand `!hasPaidAccess`, `exporting`, ou (sélection > 0 ET `exportCredits <= 0`)
 
-4. **i18n** — clés ajoutées sous `importers.exportCredits` (FR/EN) : `balance`, `download`, `paidOnly`, `quotaExhausted`, `partialTitle`, `partialDescription`, `partialConfirm`, `successWithRemaining`.
+### Logique d'export adaptée
+Renommer/étendre `performExport` :
+- Si `effectiveSelectionCount > 0` :
+  - `limit = effectiveSelectionCount` (1 contact = 1 crédit)
+  - Si `effectiveSelectionCount > exportCredits` → ouvrir le `AlertDialog` partiel existant (adapté pour utiliser la sélection comme total)
+  - Sinon consommer `effectiveSelectionCount` crédits puis fetch :
+    - mode `selectAllAcrossPages` : `select * .in('country', dbAliases).order('company_name').limit(limit)` (identique à l'export pays actuel)
+    - mode ids explicites : `select * .in('id', Array.from(selectedIds))` — Supabase tolère jusqu'à plusieurs milliers d'ids dans un `.in()`, on découpe par chunks de 500 si > 500 (sécurité, même si limité par quota)
+- Si aucune sélection → comportement actuel (export du pays entier)
+
+### AlertDialog partiel
+- Adapter le texte pour distinguer "contacts sélectionnés" vs "contacts du pays" via un paramètre (clé i18n `partialDescriptionSelection`).
+
+### Reset de la sélection
+- À chaque changement de `selectedCountry` ou après un export réussi : vider `selectedIds` et `selectAllAcrossPages`.
+
+## i18n (FR/EN) — `src/i18n/locales/*.json` sous `importers.exportCredits`
+
+Ajout des clés :
+- `selectAllRow` : "Tout sélectionner sur cette page"
+- `pageSelected` : "Les {{count}} contacts de cette page sont sélectionnés."
+- `selectAllList` : "Sélectionner les {{total}} contacts de la liste"
+- `allSelected` : "Les {{total}} contacts sont sélectionnés."
+- `clearSelection` : "Effacer la sélection"
+- `downloadWithCount` : "Télécharger ({{count}})"
+- `partialDescriptionSelection` : "Vous avez sélectionné {{total}} contacts mais il ne vous reste que {{remaining}} crédits d'export ce mois-ci. Voulez-vous télécharger les {{remaining}} premiers ?"
 
 ## Hors scope
 
-- Aucun changement à `Profile`, `Billing`, `AppSidebar`, autres pages, ni aux crédits `campaign_credits`/`search_credits`.
-- Aucune modification de la table `buyer_contacts` ni de ses RLS.
-- Aucun job cron : le reset mensuel est déclenché paresseusement via la RPC au chargement de `useCredits`.
+- Pas de changement à la base, au hook `useCredits`, à la pagination ou au composant `CountrySelector`.
+- Pas de modification d'autres pages.
+- Les CSV restent identiques (mêmes 9 colonnes, même nommage de fichier).
 
 ## Détails techniques
 
-- Migration SQL en une transaction : `ALTER TABLE … ADD COLUMN`, `UPDATE`, `CREATE OR REPLACE FUNCTION consume_export_credits`, `CREATE OR REPLACE FUNCTION ensure_export_credits_reset`, `GRANT EXECUTE … TO authenticated`. Pas de nouvelle table → pas de policies à créer.
-- `consume_export_credits` est atomique (UPDATE conditionnel + RETURNING) pour éviter les courses entre clics rapides.
-- Limite Supabase de 1000 lignes par requête : passer explicitement `.limit(nbLignesÀExporter)` (max 500 ici, donc OK).
+- Utilisation du composant `@/components/ui/checkbox` (shadcn, déjà installé dans le projet — sinon utiliser un `<input type="checkbox">` natif stylé).
+- `Set<string>` géré via `new Set(prev)` pour rester immuable.
+- En mode `selectAllAcrossPages`, la décoché ligne-par-ligne reste hors scope (UX simple : on désactive seulement le mode via le bouton "Effacer la sélection") — confirmer si tu veux le toggle individuel possible en mode "tout sélectionné".
