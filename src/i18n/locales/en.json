@@ -1404,6 +1404,14 @@
         "title": "Error",
         "description": "Unable to add note"
       },
+      "noteUpdated": {
+        "title": "Note updated",
+        "description": "The note has been updated"
+      },
+      "noteDeleted": {
+        "title": "Note deleted",
+        "description": "The note has been deleted"
+      },
       "sampleAdded": {
         "title": "Sample added",
         "description": "The sample has been added to the request"
