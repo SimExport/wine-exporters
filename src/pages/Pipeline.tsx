@@ -241,7 +241,42 @@ export default function Pipeline() {
 
       if (error) throw error
 
-      setProspects(prospectsData || [])
+      const leadsList = prospectsData || []
+      const leadIds = leadsList.map((l: any) => l.id)
+
+      // Fetch latest internal note + sample counts in parallel
+      const [notesRes, samplesRes] = await Promise.all([
+        leadIds.length
+          ? supabase
+              .from('prospect_notes')
+              .select('lead_id, body, created_at')
+              .in('lead_id', leadIds)
+              .order('created_at', { ascending: false })
+          : Promise.resolve({ data: [] as any[] }),
+        leadIds.length
+          ? supabase
+              .from('sample_items')
+              .select('lead_id')
+              .in('lead_id', leadIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ])
+
+      const lastNoteByLead: Record<string, string> = {}
+      ;((notesRes as any).data || []).forEach((n: any) => {
+        if (!lastNoteByLead[n.lead_id]) lastNoteByLead[n.lead_id] = n.body
+      })
+      const samplesCountByLead: Record<string, number> = {}
+      ;((samplesRes as any).data || []).forEach((s: any) => {
+        samplesCountByLead[s.lead_id] = (samplesCountByLead[s.lead_id] || 0) + 1
+      })
+
+      setProspects(
+        leadsList.map((l: any) => ({
+          ...l,
+          last_note: lastNoteByLead[l.id] ?? null,
+          samples_count: samplesCountByLead[l.id] ?? 0,
+        }))
+      )
 
     } catch (error) {
       console.error('Error loading data:', error)
