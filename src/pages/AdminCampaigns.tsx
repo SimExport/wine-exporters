@@ -18,6 +18,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
+import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
 import { formatDate } from '@/lib/format';
 
 interface Campaign {
