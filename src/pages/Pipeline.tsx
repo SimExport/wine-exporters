@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone, Eye } from 'lucide-react'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone, Eye, StickyNote, Package } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -32,6 +32,9 @@ interface Prospect {
   email?: string
   phone?: string
   country?: string
+  address_line1?: string
+  city?: string
+  postal_code?: string
   requested_actions?: string[]
   prospect_status: string
   stage_id?: string | null
@@ -47,6 +50,8 @@ interface Prospect {
   campaigns?: {
     name: string
   }
+  last_note?: string | null
+  samples_count?: number
 }
 
 const LEAD_TAG_KEYS = [
@@ -98,10 +103,14 @@ type CardField =
   | 'inactivity'
   | 'createdAt'
   | 'reminder'
+  | 'lastNote'
+  | 'samples'
+  | 'address'
 
 const ALL_CARD_FIELDS: CardField[] = [
   'contactName', 'email', 'phone', 'country', 'source',
   'campaign', 'actions', 'tag', 'inactivity', 'createdAt', 'reminder',
+  'lastNote', 'samples', 'address',
 ]
 
 const DEFAULT_CARD_FIELDS: CardField[] = [
