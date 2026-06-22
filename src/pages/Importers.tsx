@@ -686,7 +686,9 @@ const Importers = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('importers.exportCredits.partialTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('importers.exportCredits.partialDescription', { total: totalCount, remaining: exportCredits })}
+              {effectiveSelectionCount > 0
+                ? t('importers.exportCredits.partialDescriptionSelection', { total: effectiveSelectionCount, remaining: exportCredits })
+                : t('importers.exportCredits.partialDescription', { total: totalCount, remaining: exportCredits })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -694,7 +696,8 @@ const Importers = () => {
             <AlertDialogAction
               onClick={() => {
                 setPartialOpen(false);
-                performExport(exportCredits);
+                const mode = effectiveSelectionCount > 0 && !selectAllAcrossPages ? 'selection' : 'country';
+                performExport(exportCredits, mode);
               }}
             >
               {t('importers.exportCredits.partialConfirm', { remaining: exportCredits })}
