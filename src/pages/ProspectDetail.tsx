@@ -342,6 +342,66 @@ export default function ProspectDetail() {
     setEditingSampleId(null)
   }
 
+  const handleStartEditNote = (note: Note) => {
+    setEditingNoteId(note.id)
+    setEditingNoteBody(note.body)
+  }
+
+  const handleCancelEditNote = () => {
+    setEditingNoteId(null)
+    setEditingNoteBody('')
+  }
+
+  const handleUpdateNote = async (noteId: string) => {
+    if (!editingNoteBody.trim()) return
+    try {
+      const { data, error } = await supabase
+        .from('prospect_notes')
+        .update({ body: editingNoteBody.trim() })
+        .eq('id', noteId)
+        .select()
+        .single()
+      if (error) throw error
+      setNotes(prev => prev.map(n => (n.id === noteId ? { ...n, ...data } : n)))
+      setEditingNoteId(null)
+      setEditingNoteBody('')
+      toast({
+        title: t('prospectDetail.toasts.noteUpdated.title'),
+        description: t('prospectDetail.toasts.noteUpdated.description'),
+      })
+    } catch (error) {
+      console.error('Error updating note:', error)
+      toast({
+        title: t('prospectDetail.toasts.noteError.title'),
+        description: t('prospectDetail.toasts.noteError.description'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('prospect_notes')
+        .delete()
+        .eq('id', noteId)
+      if (error) throw error
+      setNotes(prev => prev.filter(n => n.id !== noteId))
+      setDeletingNoteId(null)
+      toast({
+        title: t('prospectDetail.toasts.noteDeleted.title'),
+        description: t('prospectDetail.toasts.noteDeleted.description'),
+      })
+    } catch (error) {
+      console.error('Error deleting note:', error)
+      toast({
+        title: t('prospectDetail.toasts.noteError.title'),
+        description: t('prospectDetail.toasts.noteError.description'),
+        variant: 'destructive',
+      })
+    }
+  }
+
   const handleOpenEditSample = (item: SampleItem) => {
     // Resolve wine_id for the Select: real wine id, or matching "cuvee-…" option by name
     let wineId = item.wine_id || ''
