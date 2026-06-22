@@ -530,11 +530,45 @@ const Importers = () => {
           </div> : contacts.length === 0 ? <div className="p-12 text-center text-muted-foreground">
             {t('importers.table.noResultsForCountry')}
           </div> : <>
+            {/* Selection banner */}
+            {hasPaidAccess && (selectAllAcrossPages || (allPageSelected && totalCount > contacts.length)) && (
+              <div className="bg-muted/50 border-b px-4 py-2 text-sm flex items-center justify-center gap-2 flex-wrap">
+                {selectAllAcrossPages ? (
+                  <>
+                    <span>{t('importers.exportCredits.allSelected', { total: totalCount })}</span>
+                    <Button variant="link" size="sm" className="h-auto p-0" onClick={clearSelection}>
+                      {t('importers.exportCredits.clearSelection')}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <span>{t('importers.exportCredits.pageSelected', { count: contacts.length })}</span>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0"
+                      onClick={() => { setSelectAllAcrossPages(true); setSelectedIds(new Set()); }}
+                    >
+                      {t('importers.exportCredits.selectAllList', { total: totalCount })}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
             {/* Table */}
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    {hasPaidAccess && (
+                      <TableHead className="w-10">
+                        <Checkbox
+                          checked={allPageSelected ? true : (somePageSelected ? 'indeterminate' : false)}
+                          onCheckedChange={(v) => togglePage(v === true)}
+                          aria-label="Select page"
+                        />
+                      </TableHead>
+                    )}
                     <TableHead>{t('importers.table.company')}</TableHead>
                     <TableHead>{t('importers.table.country')}</TableHead>
                     <TableHead>{t('importers.table.address')}</TableHead>
@@ -550,9 +584,18 @@ const Importers = () => {
                   {contacts.map(contact => {
                     const fullAddress = formatAddress(contact);
                     const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
-
+                    const rowChecked = selectAllAcrossPages || selectedIds.has(contact.id);
                     return (
                       <TableRow key={contact.id} className="hover:bg-muted/50">
+                        {hasPaidAccess && (
+                          <TableCell className="w-10">
+                            <Checkbox
+                              checked={rowChecked}
+                              onCheckedChange={(v) => toggleRow(contact.id, v === true)}
+                              aria-label={`Select ${contact.company_name}`}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell className="font-medium">
                           {contact.company_name}
                         </TableCell>
