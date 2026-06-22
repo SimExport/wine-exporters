@@ -1,51 +1,36 @@
-## Objectif
+## Ajouter 3 nouveaux champs personnalisables aux cartes Kanban
 
-Permettre à chaque utilisateur de choisir quelles informations afficher sur les cartes du Kanban CRM (Pipeline). Aujourd'hui les champs sont figés ; on ajoute un menu "Personnaliser" avec des cases à cocher.
+Étendre la fonctionnalité "Personnaliser" du Pipeline pour inclure trois nouvelles informations optionnelles sur chaque carte lead.
 
-## Champs disponibles
+### Nouveaux champs ajoutés au menu de personnalisation
+1. **Dernière note interne** — affiche le contenu (tronqué ~2 lignes) de la note la plus récente de `prospect_notes` pour ce lead
+2. **Échantillons demandés** — affiche le nombre/liste des échantillons demandés (depuis `sample_items` liés au lead)
+3. **Adresse** — affiche l'adresse du contact (depuis `buyer_contacts.full_address` ou champs équivalents sur le lead)
 
-Liste proposée (toutes les infos déjà présentes sur les leads) :
+Tous trois seront **décochés par défaut** (comportement actuel inchangé pour les utilisateurs existants).
 
-- Nom du contact (prénom + nom)
-- Email
-- Téléphone
-- Pays (avec drapeau)
-- Provenance (badge Sur-mesure / source)
-- Campagne d'origine
-- Actions demandées (price list, samples, etc.)
-- Étiquette température (hot/warm/cold)
-- Date de dernière activité / inactivité
-- Rappel (reminder)
+### Modifications
 
-**Toujours visibles (non désactivables)** : Nom de société (titre de la carte) + poignée de glisser/déposer. Tout le reste est optionnel.
+**`src/pages/Pipeline.tsx`**
+- Étendre le type `CardField` avec `'lastNote' | 'samples' | 'address'`
+- Ajouter ces 3 entrées dans `ALL_CARD_FIELDS` (non inclus dans `DEFAULT_CARD_FIELDS`)
+- Étendre l'interface `Prospect` avec `last_note?: string`, `samples_count?: number` (+ éventuellement liste courte), `address?: string`
+- Étendre la requête Supabase qui charge les leads pour récupérer ces données :
+  - jointure `prospect_notes` (ORDER BY created_at DESC LIMIT 1 par lead) → dernière note
+  - jointure `sample_items` (count + éventuels noms de vins) par lead
+  - récupération de l'adresse depuis le contact lié ou champs lead existants
+- Ajouter 3 blocs de rendu conditionnel dans la carte, wrappés par `visibleFields.has('lastNote')` etc., avec icônes adaptées (StickyNote, Package, MapPin) et troncature visuelle
 
-**Sélection par défaut** (correspond à ce qui s'affiche aujourd'hui pour ne rien casser) : Nom du contact, Email, Téléphone, Pays, Provenance, Campagne, Actions demandées, Température, Inactivité, Rappel.
+**`src/i18n/locales/fr.json` & `src/i18n/locales/en.json`**
+- Ajouter sous `pipeline.customize.fields` :
+  - `lastNote` → "Dernière note" / "Last note"
+  - `samples` → "Échantillons demandés" / "Samples requested"
+  - `address` → "Adresse" / "Address"
 
-> Note : "date d'ajout" n'est actuellement pas affichée sur les cartes (on affiche "dernière activité"). Je l'ajoute aussi comme option si tu veux l'avoir. À confirmer en commentaire si tu préfères remplacer l'inactivité par la date de création.
+### Hors scope
+- Pas de modification de la vue Liste (`Prospects.tsx`)
+- Pas de modification de la base de données
+- Persistance toujours via `localStorage` (clé inchangée → les nouveaux champs apparaissent simplement décochés pour les utilisateurs existants)
 
-## UX
-
-- Bouton **"Personnaliser la vue"** (icône `Eye` / `Sliders`) à côté de "Gérer les étapes" dans l'en-tête du Pipeline.
-- Ouvre un `DropdownMenu` (ou petit `Popover`) avec une liste de `Checkbox` — une par champ.
-- Changement appliqué instantanément à toutes les colonnes.
-- Préférences **persistées dans `localStorage`** par utilisateur (clé `pipeline-card-fields:<user_id>`). Pas de migration BDD nécessaire, c'est un réglage purement visuel et propre au navigateur.
-
-## Implémentation technique
-
-Fichier unique modifié : `src/pages/Pipeline.tsx`
-
-1. Définir un type `CardField` (union des clés ci-dessus) et un tableau `ALL_CARD_FIELDS` avec leurs labels i18n.
-2. Hook `useState<Set<CardField>>` initialisé depuis `localStorage` (fallback = ensemble par défaut).
-3. `useEffect` qui sauvegarde dans `localStorage` à chaque changement.
-4. Nouveau composant local `CardFieldsMenu` (DropdownMenu + Checkbox) rendu dans l'en-tête.
-5. Dans le rendu de chaque carte, envelopper chaque bloc existant (email, téléphone, pays, etc.) par `visibleFields.has('email') && (...)`.
-6. Ajouter les clés i18n dans `src/i18n/locales/fr.json` et `en.json` sous `pipeline.customize` :
-   - `button` : "Personnaliser" / "Customize"
-   - `title` : "Afficher sur les cartes" / "Show on cards"
-   - une entrée par champ (`fields.email`, `fields.phone`, etc.)
-
-## Hors périmètre
-
-- Vue Liste (`Prospects.tsx`) inchangée — déjà personnalisable via les colonnes existantes.
-- Pas de modification de la base de données.
-- Pas de synchronisation des préférences entre appareils (localStorage uniquement). Si tu veux une persistance serveur plus tard, on pourra ajouter une colonne `pipeline_card_fields jsonb` sur `user_settings`.
+### Point à confirmer
+Pour "Échantillons demandés" : afficher uniquement **le compte** (ex: "3 échantillons demandés") ou **la liste courte** des noms de vins ? Par défaut je partirais sur le compte pour garder la carte compacte.
