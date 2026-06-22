@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone, Eye } from 'lucide-react'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone, Eye, StickyNote, Package } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -32,6 +32,9 @@ interface Prospect {
   email?: string
   phone?: string
   country?: string
+  address_line1?: string
+  city?: string
+  postal_code?: string
   requested_actions?: string[]
   prospect_status: string
   stage_id?: string | null
@@ -47,6 +50,8 @@ interface Prospect {
   campaigns?: {
     name: string
   }
+  last_note?: string | null
+  samples_count?: number
 }
 
 const LEAD_TAG_KEYS = [
@@ -98,10 +103,14 @@ type CardField =
   | 'inactivity'
   | 'createdAt'
   | 'reminder'
+  | 'lastNote'
+  | 'samples'
+  | 'address'
 
 const ALL_CARD_FIELDS: CardField[] = [
   'contactName', 'email', 'phone', 'country', 'source',
   'campaign', 'actions', 'tag', 'inactivity', 'createdAt', 'reminder',
+  'lastNote', 'samples', 'address',
 ]
 
 const DEFAULT_CARD_FIELDS: CardField[] = [
@@ -232,7 +241,42 @@ export default function Pipeline() {
 
       if (error) throw error
 
-      setProspects(prospectsData || [])
+      const leadsList = prospectsData || []
+      const leadIds = leadsList.map((l: any) => l.id)
+
+      // Fetch latest internal note + sample counts in parallel
+      const [notesRes, samplesRes] = await Promise.all([
+        leadIds.length
+          ? supabase
+              .from('prospect_notes')
+              .select('lead_id, body, created_at')
+              .in('lead_id', leadIds)
+              .order('created_at', { ascending: false })
+          : Promise.resolve({ data: [] as any[] }),
+        leadIds.length
+          ? supabase
+              .from('sample_items')
+              .select('lead_id')
+              .in('lead_id', leadIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ])
+
+      const lastNoteByLead: Record<string, string> = {}
+      ;((notesRes as any).data || []).forEach((n: any) => {
+        if (!lastNoteByLead[n.lead_id]) lastNoteByLead[n.lead_id] = n.body
+      })
+      const samplesCountByLead: Record<string, number> = {}
+      ;((samplesRes as any).data || []).forEach((s: any) => {
+        samplesCountByLead[s.lead_id] = (samplesCountByLead[s.lead_id] || 0) + 1
+      })
+
+      setProspects(
+        leadsList.map((l: any) => ({
+          ...l,
+          last_note: lastNoteByLead[l.id] ?? null,
+          samples_count: samplesCountByLead[l.id] ?? 0,
+        }))
+      )
 
     } catch (error) {
       console.error('Error loading data:', error)
@@ -840,6 +884,29 @@ export default function Pipeline() {
                               {visibleFields.has('campaign') && (
                                 <p className="text-[10px] text-muted-foreground mt-2">
                                   {prospect.campaigns?.name}
+                                </p>
+                              )}
+
+                              {visibleFields.has('address') && (prospect.address_line1 || prospect.city || prospect.postal_code) && (
+                                <p className="flex items-start gap-1 text-[10px] text-muted-foreground mt-1.5">
+                                  <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                  <span className="line-clamp-2">
+                                    {[prospect.address_line1, [prospect.postal_code, prospect.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
+                                  </span>
+                                </p>
+                              )}
+
+                              {visibleFields.has('samples') && (prospect.samples_count ?? 0) > 0 && (
+                                <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-1.5">
+                                  <Package className="w-3 h-3 flex-shrink-0" />
+                                  {t('crm.card.samplesCount', { count: prospect.samples_count!, defaultValue: '{{count}} échantillon(s) demandé(s)' })}
+                                </p>
+                              )}
+
+                              {visibleFields.has('lastNote') && prospect.last_note && (
+                                <p className="flex items-start gap-1 text-[10px] text-muted-foreground mt-1.5 italic">
+                                  <StickyNote className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                  <span className="line-clamp-2">{prospect.last_note}</span>
                                 </p>
                               )}
 

@@ -1007,7 +1007,9 @@
       "other": "Other"
     },
     "card": {
-      "sourcingBadge": "Custom"
+      "sourcingBadge": "Custom",
+      "samplesCount_one": "{{count}} sample requested",
+      "samplesCount_other": "{{count}} samples requested"
     },
     "toasts": {
       "loadError": {
@@ -1119,7 +1121,10 @@
         "tag": "Tag",
         "inactivity": "Inactivity",
         "createdAt": "Date added",
-        "reminder": "Reminder"
+        "reminder": "Reminder",
+        "lastNote": "Last note",
+        "samples": "Samples requested",
+        "address": "Address"
       }
     }
   },

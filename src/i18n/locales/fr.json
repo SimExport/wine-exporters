@@ -1007,7 +1007,9 @@
       "other": "Autre"
     },
     "card": {
-      "sourcingBadge": "Sur-mesure"
+      "sourcingBadge": "Sur-mesure",
+      "samplesCount_one": "{{count}} échantillon demandé",
+      "samplesCount_other": "{{count}} échantillons demandés"
     },
     "toasts": {
       "loadError": {
@@ -1119,7 +1121,10 @@
         "tag": "Étiquette",
         "inactivity": "Inactivité",
         "createdAt": "Date d'ajout",
-        "reminder": "Rappel"
+        "reminder": "Rappel",
+        "lastNote": "Dernière note",
+        "samples": "Échantillons demandés",
+        "address": "Adresse"
       }
     }
   },
