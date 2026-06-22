@@ -13,11 +13,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
+import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
 import { formatDate } from '@/lib/format';
 
 interface Campaign {
@@ -808,6 +809,10 @@ export default function AdminCampaigns() {
                            campaignId={campaign.id}
                            campaignName={campaign.name}
                          />
+                          <CampaignStatsPopover
+                            campaign={campaign}
+                            onSaved={fetchCampaigns}
+                          />
                        </div>
                      </TableCell>
                   </TableRow>

@@ -1,36 +1,45 @@
-## Ajouter 3 nouveaux champs personnalisables aux cartes Kanban
+## Objectif
 
-Étendre la fonctionnalité "Personnaliser" du Pipeline pour inclure trois nouvelles informations optionnelles sur chaque carte lead.
+Afficher dans la carte "Statistiques" de la page Campagne (vue utilisateur) trois indicateurs, et permettre à l'admin de saisir manuellement les deux nouveaux dans le drawer d'édition d'une campagne.
 
-### Nouveaux champs ajoutés au menu de personnalisation
-1. **Dernière note interne** — affiche le contenu (tronqué ~2 lignes) de la note la plus récente de `prospect_notes` pour ce lead
-2. **Échantillons demandés** — affiche le nombre/liste des échantillons demandés (depuis `sample_items` liés au lead)
-3. **Adresse** — affiche l'adresse du contact (depuis `buyer_contacts.full_address` ou champs équivalents sur le lead)
+## Vue utilisateur — `src/pages/CampaignDetail.tsx`
 
-Tous trois seront **décochés par défaut** (comportement actuel inchangé pour les utilisateurs existants).
+Dans la carte "Statistiques" (lignes ~414-427), remplacer le bloc actuel par trois lignes empilées :
 
-### Modifications
+1. **Prospects qualifiés trouvés** — valeur actuelle `campaign.prospect_count` (renommé uniquement, logique inchangée — toujours basé sur `campaign_interested_contacts`).
+2. **Pourcentage d'ouverture** — `campaign.stats_opens` affiché en `%` (ex. `42 %`). Si `null` → `—`.
+3. **Nombre de clics sur "intéressé"** — `campaign.stats_clicks`. Si `null` → `—`.
 
-**`src/pages/Pipeline.tsx`**
-- Étendre le type `CardField` avec `'lastNote' | 'samples' | 'address'`
-- Ajouter ces 3 entrées dans `ALL_CARD_FIELDS` (non inclus dans `DEFAULT_CARD_FIELDS`)
-- Étendre l'interface `Prospect` avec `last_note?: string`, `samples_count?: number` (+ éventuellement liste courte), `address?: string`
-- Étendre la requête Supabase qui charge les leads pour récupérer ces données :
-  - jointure `prospect_notes` (ORDER BY created_at DESC LIMIT 1 par lead) → dernière note
-  - jointure `sample_items` (count + éventuels noms de vins) par lead
-  - récupération de l'adresse depuis le contact lié ou champs lead existants
-- Ajouter 3 blocs de rendu conditionnel dans la carte, wrappés par `visibleFields.has('lastNote')` etc., avec icônes adaptées (StickyNote, Package, MapPin) et troncature visuelle
+Les champs `stats_opens` et `stats_clicks` sont déjà fetchés dans `fetchCampaign` (table `campaigns`). Aucun changement de requête.
 
-**`src/i18n/locales/fr.json` & `src/i18n/locales/en.json`**
-- Ajouter sous `pipeline.customize.fields` :
-  - `lastNote` → "Dernière note" / "Last note"
-  - `samples` → "Échantillons demandés" / "Samples requested"
-  - `address` → "Adresse" / "Address"
+Ajout des clés i18n FR/EN sous `campaigns.detail` :
+- `prospectsLabel` : renommer en "Prospects qualifiés trouvés" / "Qualified prospects found"
+- `openRateLabel` : "Pourcentage d'ouverture" / "Open rate"
+- `interestedClicksLabel` : "Clics sur intéressé" / "Interested clicks"
 
-### Hors scope
-- Pas de modification de la vue Liste (`Prospects.tsx`)
-- Pas de modification de la base de données
-- Persistance toujours via `localStorage` (clé inchangée → les nouveaux champs apparaissent simplement décochés pour les utilisateurs existants)
+## Vue admin — `src/pages/AdminCampaigns.tsx`
 
-### Point à confirmer
-Pour "Échantillons demandés" : afficher uniquement **le compte** (ex: "3 échantillons demandés") ou **la liste courte** des noms de vins ? Par défaut je partirais sur le compte pour garder la carte compacte.
+Dans le drawer d'édition de campagne (zone existante qui gère déjà `selectedCampaign`), ajouter une section "Statistiques" avec deux champs `Input type="number"` :
+- **Pourcentage d'ouverture** → `stats_opens` (0-100)
+- **Nombre de clics sur intéressé** → `stats_clicks`
+
+Le champ "Prospects qualifiés trouvés" est affiché en lecture seule (valeur calculée automatiquement via `campaign_interested_contacts`).
+
+Bouton "Enregistrer les statistiques" qui fait un `UPDATE campaigns SET stats_opens, stats_clicks WHERE id = selectedCampaign.id`, puis recharge la liste et toast de confirmation.
+
+Ajout des clés i18n FR/EN sous `adminCampaigns` :
+- `statsSection` : "Statistiques"
+- `openRateField` : "Pourcentage d'ouverture (%)"
+- `interestedClicksField` : "Clics sur intéressé"
+- `saveStats` : "Enregistrer les statistiques"
+- `statsSaved` : "Statistiques mises à jour"
+
+## Hors scope
+
+- Pas de modification de la base de données : `stats_opens`, `stats_clicks`, `stats_replies` existent déjà sur `campaigns`.
+- Pas de changement à l'upload CSV existant ni à `CampaignInterestedContactsUpload`.
+- Pas de KPI "emails envoyés", "taux de clic", "très intéressés", "qualifiés Tally" pour l'instant — l'utilisateur a précisé en deuxième partie de message qu'il souhaite uniquement les 3 KPIs (prospects qualifiés, % ouverture, clics intéressé) dans la carte Statistiques. À confirmer si on veut quand même ajouter une rangée de cards supplémentaire en haut de page avec les autres KPIs.
+
+## Question avant build
+
+La deuxième partie du message contredit la première (6 KPIs en cards en haut vs 3 valeurs dans la carte Statistiques existante). Le plan ci-dessus suit la **deuxième partie** (plus précise et alignée au screenshot). Confirmer ou demander d'ajouter en plus une rangée de cards en haut avec les 6 KPIs initiaux.

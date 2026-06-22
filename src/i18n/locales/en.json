@@ -795,7 +795,9 @@
       "techsLinkLabel": "Tech sheets link",
       "documentNotFound": "Document not found",
       "statsCard": "Statistics",
-      "prospectsLabel": "Prospects",
+      "prospectsLabel": "Qualified prospects found",
+      "openRateLabel": "Open rate",
+      "interestedClicksLabel": "Interested clicks",
       "viewProspects": "View prospects",
       "noteCard": "Note to the team",
       "interestedContactsCard": "Qualified prospects",
@@ -1916,7 +1918,13 @@
       "markCompleted": "Mark completed",
       "addProspect": "Add prospect",
       "viewProspects": "View prospects",
-      "allMarkets": "Selected markets"
+      "allMarkets": "Selected markets",
+      "editStats": "Statistics",
+      "statsPopoverTitle": "Edit statistics",
+      "openRate": "Open rate (%)",
+      "interestedClicks": "Interested clicks",
+      "saveStats": "Save",
+      "statsSaved": "Statistics updated"
     },
     "drawer": {
       "title": "Add a prospect to \"{{name}}\"",

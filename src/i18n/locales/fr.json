@@ -795,7 +795,9 @@
       "techsLinkLabel": "Lien fiches techniques",
       "documentNotFound": "Document introuvable",
       "statsCard": "Statistiques",
-      "prospectsLabel": "Prospects",
+      "prospectsLabel": "Prospects qualifiés trouvés",
+      "openRateLabel": "Pourcentage d'ouverture",
+      "interestedClicksLabel": "Clics sur intéressé",
       "viewProspects": "Voir les prospects",
       "noteCard": "Note à l'équipe",
       "interestedContactsCard": "Prospects qualifiés",
@@ -1916,7 +1918,13 @@
       "markCompleted": "Marquer terminée",
       "addProspect": "Ajouter prospect",
       "viewProspects": "Voir prospects",
-      "allMarkets": "Marchés sélectionnés"
+      "allMarkets": "Marchés sélectionnés",
+      "editStats": "Statistiques",
+      "statsPopoverTitle": "Modifier les statistiques",
+      "openRate": "Pourcentage d'ouverture (%)",
+      "interestedClicks": "Clics sur intéressé",
+      "saveStats": "Enregistrer",
+      "statsSaved": "Statistiques mises à jour"
     },
     "drawer": {
       "title": "Ajouter un prospect à \"{{name}}\"",

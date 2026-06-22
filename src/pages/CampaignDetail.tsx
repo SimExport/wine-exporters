@@ -30,6 +30,8 @@ interface Campaign {
   validated_at: string;
   admin_reviewer: string;
   prospect_count?: number;
+  stats_opens?: number | null;
+  stats_clicks?: number | null;
 }
 
 interface Document {
@@ -422,6 +424,18 @@ const CampaignDetail = () => {
               <div>
                 <h5 className="font-medium text-sm">{t('campaigns.detail.prospectsLabel')}</h5>
                 <p className="text-2xl font-bold">{campaign.prospect_count || 0}</p>
+              </div>
+              <div>
+                <h5 className="font-medium text-sm">{t('campaigns.detail.openRateLabel')}</h5>
+                <p className="text-2xl font-bold">
+                  {campaign.stats_opens != null ? `${campaign.stats_opens} %` : '—'}
+                </p>
+              </div>
+              <div>
+                <h5 className="font-medium text-sm">{t('campaigns.detail.interestedClicksLabel')}</h5>
+                <p className="text-2xl font-bold">
+                  {campaign.stats_clicks != null ? campaign.stats_clicks : '—'}
+                </p>
               </div>
             </CardContent>
           </Card>
