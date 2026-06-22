@@ -1268,11 +1268,57 @@ export default function ProspectDetail() {
                   </p>
                 ) : (
                   notes.map(note => (
-                    <div key={note.id} className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm">{note.body}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {formatDateTime(note.created_at)}
-                      </p>
+                    <div key={note.id} className="p-3 bg-muted rounded-lg group">
+                      {editingNoteId === note.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editingNoteBody}
+                            onChange={(e) => setEditingNoteBody(e.target.value)}
+                            rows={3}
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button size="sm" variant="ghost" onClick={handleCancelEditNote}>
+                              {t('prospectDetail.notes.cancelBtn')}
+                            </Button>
+                            <Button size="sm" onClick={() => handleUpdateNote(note.id)} disabled={!editingNoteBody.trim()}>
+                              {t('prospectDetail.notes.saveBtn')}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm whitespace-pre-wrap flex-1">{note.body}</p>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => handleStartEditNote(note)}
+                                aria-label={t('prospectDetail.notes.editBtn')}
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => setDeletingNoteId(note.id)}
+                                aria-label={t('prospectDetail.notes.deleteBtn')}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {formatDateTime(note.created_at)}
+                            {note.updated_at && note.updated_at !== note.created_at && (
+                              <span className="ml-1 italic">({t('prospectDetail.notes.edited')})</span>
+                            )}
+                          </p>
+                        </>
+                      )}
                     </div>
                   ))
                 )}
