@@ -887,6 +887,29 @@ export default function Pipeline() {
                                 </p>
                               )}
 
+                              {visibleFields.has('address') && (prospect.address_line1 || prospect.city || prospect.postal_code) && (
+                                <p className="flex items-start gap-1 text-[10px] text-muted-foreground mt-1.5">
+                                  <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                  <span className="line-clamp-2">
+                                    {[prospect.address_line1, [prospect.postal_code, prospect.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
+                                  </span>
+                                </p>
+                              )}
+
+                              {visibleFields.has('samples') && (prospect.samples_count ?? 0) > 0 && (
+                                <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-1.5">
+                                  <Package className="w-3 h-3 flex-shrink-0" />
+                                  {t('crm.card.samplesCount', { count: prospect.samples_count!, defaultValue: '{{count}} échantillon(s) demandé(s)' })}
+                                </p>
+                              )}
+
+                              {visibleFields.has('lastNote') && prospect.last_note && (
+                                <p className="flex items-start gap-1 text-[10px] text-muted-foreground mt-1.5 italic">
+                                  <StickyNote className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                  <span className="line-clamp-2">{prospect.last_note}</span>
+                                </p>
+                              )}
+
                               {visibleFields.has('createdAt') && prospect.created_at && (
                                 <p className="text-[10px] text-muted-foreground mt-1">
                                   {format(new Date(prospect.created_at), 'P', { locale: i18n.language?.startsWith('fr') ? fr : enUS })}
