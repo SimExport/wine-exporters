@@ -7,6 +7,7 @@ import { formatDateLong } from '@/lib/format';
 export interface UserCredits {
   campaign_credits: number;
   search_credits: number;
+  export_credits: number;
   next_reset_date: string | null;
 }
 
@@ -32,9 +33,15 @@ export const useCredits = () => {
       return;
     }
     setLoading(true);
+    // Lazy monthly reset for export credits — ignore errors silently.
+    try {
+      await supabase.rpc('ensure_export_credits_reset');
+    } catch (e) {
+      // no-op
+    }
     const { data, error } = await supabase
       .from('user_credits')
-      .select('campaign_credits, search_credits, next_reset_date')
+      .select('campaign_credits, search_credits, export_credits, next_reset_date')
       .eq('user_id', user.id)
       .maybeSingle();
 
@@ -43,7 +50,7 @@ export const useCredits = () => {
       setCredits(null);
     } else {
       setCredits(
-        data ?? { campaign_credits: 0, search_credits: 0, next_reset_date: null }
+        data ?? { campaign_credits: 0, search_credits: 0, export_credits: 0, next_reset_date: null }
       );
     }
     setLoading(false);
@@ -83,12 +90,28 @@ export const useCredits = () => {
     return { ok: true, remaining };
   }, [credits, fetchCredits]);
 
+  const consumeExportCredits = useCallback(async (count: number): Promise<{
+    ok: boolean;
+    remaining: number;
+  }> => {
+    const { data, error } = await supabase.rpc('consume_export_credits', { _count: count });
+    if (error) {
+      console.error('consume_export_credits error:', error);
+      return { ok: false, remaining: credits?.export_credits ?? 0 };
+    }
+    const remaining = typeof data === 'number' ? data : -1;
+    if (remaining < 0) return { ok: false, remaining: credits?.export_credits ?? 0 };
+    await fetchCredits();
+    return { ok: true, remaining };
+  }, [credits, fetchCredits]);
+
   const resetDateLabel = formatResetDate(credits?.next_reset_date ?? null);
 
-  const noCreditsMessage = (kind: 'campaign' | 'search') =>
-    kind === 'campaign'
-      ? t('credits.noCreditsCampaign', { date: resetDateLabel })
-      : t('credits.noCreditsSearch', { date: resetDateLabel });
+  const noCreditsMessage = (kind: 'campaign' | 'search' | 'export') => {
+    if (kind === 'campaign') return t('credits.noCreditsCampaign', { date: resetDateLabel });
+    if (kind === 'export') return t('credits.noCreditsExport', { date: resetDateLabel });
+    return t('credits.noCreditsSearch', { date: resetDateLabel });
+  };
 
   return {
     credits,
@@ -96,9 +119,11 @@ export const useCredits = () => {
     refetch: fetchCredits,
     consumeCampaignCredit,
     consumeSearchCredit,
+    consumeExportCredits,
     resetDateLabel,
     noCreditsMessage,
     campaignCredits: credits?.campaign_credits ?? 0,
     searchCredits: credits?.search_credits ?? 0,
+    exportCredits: credits?.export_credits ?? 0,
   };
 };

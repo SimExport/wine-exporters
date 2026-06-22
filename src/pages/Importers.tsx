@@ -7,7 +7,17 @@ import { CountrySelector, COUNTRIES as COUNTRY_LIST } from '@/components/importe
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -98,7 +108,14 @@ const Importers = () => {
     searchCredits,
     consumeSearchCredit,
     noCreditsMessage,
+    exportCredits,
+    consumeExportCredits,
+    resetDateLabel,
   } = useCredits();
+
+  const EXPORT_QUOTA = 500;
+  const [partialOpen, setPartialOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const handleSourcingSubmit = async () => {
     if (!user || !sourcingMarket) return;
@@ -218,46 +235,47 @@ const Importers = () => {
       });
     }
   }, [selectedCountry]);
-  const exportToCSV = async () => {
-    if (!selectedCountry) {
-      toast({
-        title: t('common.error'),
-        description: t('importers.selectMarketError'),
-        variant: 'destructive'
-      });
-      return;
-    }
+  const performExport = async (limit: number) => {
+    if (!selectedCountry || limit <= 0) return;
+    const country = COUNTRIES.find(c => c.code === selectedCountry);
+    if (!country) return;
+    setExporting(true);
     try {
-      // Find the English name from the country code
-      const country = COUNTRIES.find(c => c.code === selectedCountry);
-      if (!country) return;
-      const {
-        data,
-        error
-      } = await supabase.from('buyer_contacts').select('*').in('country', country.dbAliases).order('company_name', {
-        ascending: true
-      }).limit(10000);
-      if (error) {
-        console.error('Error fetching data for export:', error);
+      // Consume credits FIRST (atomic, server-side)
+      const consume = await consumeExportCredits(limit);
+      if (!consume.ok) {
         toast({
           title: t('common.error'),
-          description: t('importers.exportError'),
-          variant: 'destructive'
+          description: t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }),
+          variant: 'destructive',
         });
         return;
       }
 
-      // Create CSV content
-      const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
-      const csvContent = [headers.join(','), ...(data || []).map(contact => headers.map(header => {
-        const value = contact[header as keyof BuyerContact] || '';
-        return `"${value.toString().replace(/"/g, '""')}"`;
-      }).join(','))].join('\n');
+      const { data, error } = await supabase
+        .from('buyer_contacts')
+        .select('*')
+        .in('country', country.dbAliases)
+        .order('company_name', { ascending: true })
+        .limit(limit);
+      if (error) {
+        console.error('Error fetching data for export:', error);
+        toast({ title: t('common.error'), description: t('importers.exportError'), variant: 'destructive' });
+        return;
+      }
 
-      // Download CSV
-      const blob = new Blob([csvContent], {
-        type: 'text/csv;charset=utf-8;'
-      });
+      const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
+      const csvContent = [
+        headers.join(','),
+        ...(data || []).map(contact =>
+          headers.map(header => {
+            const value = (contact as any)[header] || '';
+            return `"${value.toString().replace(/"/g, '""')}"`;
+          }).join(',')
+        ),
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
@@ -266,18 +284,40 @@ const Importers = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
       toast({
         title: t('common.success'),
-        description: t('importers.exportSuccess')
+        description: t('importers.exportCredits.successWithRemaining', {
+          exported: data?.length ?? limit,
+          remaining: consume.remaining,
+        }),
       });
     } catch (error) {
       console.error('Error during export:', error);
+      toast({ title: t('common.error'), description: t('importers.exportFailure'), variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDownloadClick = () => {
+    if (!hasPaidAccess) {
+      toast({ title: t('common.error'), description: t('importers.exportCredits.paidOnly'), variant: 'destructive' });
+      return;
+    }
+    if (exportCredits <= 0) {
       toast({
         title: t('common.error'),
-        description: t('importers.exportFailure'),
-        variant: 'destructive'
+        description: t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }),
+        variant: 'destructive',
       });
+      return;
     }
+    if (totalCount > exportCredits) {
+      setPartialOpen(true);
+      return;
+    }
+    performExport(totalCount);
   };
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = (currentPage - 1) * itemsPerPage + 1;
@@ -363,16 +403,35 @@ const Importers = () => {
 
       {/* Selected country info */}
       {selectedCountry && (
-        <div ref={contactsSectionRef} className="flex items-center gap-3 mt-4 mb-2 scroll-mt-4">
-          <span className="text-sm font-medium text-foreground">
-            {COUNTRIES.find(c => c.code === selectedCountry)?.name}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {t('importers.selected.contactsCount', { count: totalCount })}
-          </span>
-          <Button variant="ghost" size="sm" onClick={() => setSelectedCountry('')} className="text-xs h-6 px-2">
-            {t('importers.selected.clearFilter')}
-          </Button>
+        <div ref={contactsSectionRef} className="flex items-center justify-between gap-3 mt-4 mb-2 scroll-mt-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-medium text-foreground">
+              {COUNTRIES.find(c => c.code === selectedCountry)?.name}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {t('importers.selected.contactsCount', { count: totalCount })}
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => setSelectedCountry('')} className="text-xs h-6 px-2">
+              {t('importers.selected.clearFilter')}
+            </Button>
+          </div>
+          {hasPaidAccess && contacts.length > 0 && (
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs text-muted-foreground">
+                {t('importers.exportCredits.balance', { remaining: exportCredits })}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadClick}
+                disabled={exporting || exportCredits <= 0}
+                title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
+              >
+                {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                {t('importers.exportCredits.download')}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -493,6 +552,28 @@ const Importers = () => {
             </div>
           </>}
       </Card>
+
+      <AlertDialog open={partialOpen} onOpenChange={setPartialOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('importers.exportCredits.partialTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('importers.exportCredits.partialDescription', { total: totalCount, remaining: exportCredits })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('importers.exportCredits.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setPartialOpen(false);
+                performExport(exportCredits);
+              }}
+            >
+              {t('importers.exportCredits.partialConfirm', { remaining: exportCredits })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 export default Importers;

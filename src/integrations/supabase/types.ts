@@ -1305,6 +1305,7 @@ export type Database = {
       user_credits: {
         Row: {
           campaign_credits: number
+          export_credits: number
           id: string
           next_reset_date: string
           search_credits: number
@@ -1314,6 +1315,7 @@ export type Database = {
         }
         Insert: {
           campaign_credits?: number
+          export_credits?: number
           id?: string
           next_reset_date?: string
           search_credits?: number
@@ -1323,6 +1325,7 @@ export type Database = {
         }
         Update: {
           campaign_credits?: number
+          export_credits?: number
           id?: string
           next_reset_date?: string
           search_credits?: number
@@ -1464,7 +1467,9 @@ export type Database = {
     }
     Functions: {
       consume_campaign_credit: { Args: never; Returns: number }
+      consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
+      ensure_export_credits_reset: { Args: never; Returns: undefined }
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { uid: string }; Returns: string }
       get_users_emails_for_admin: {
