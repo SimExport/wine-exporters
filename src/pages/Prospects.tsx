@@ -317,6 +317,8 @@ export default function Prospects() {
       p.campaigns?.name || '',
       p.company_name || '',
       `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+      p.email || '',
+      p.phone || '',
       p.country || '',
       p.requested_actions?.map(a => t(`crm.actions.${a}`)).join(', ') || '',
       t(`crm.statuses.${p.prospect_status}`)
@@ -657,6 +659,8 @@ export default function Prospects() {
                     <TableHead>{t('prospects.table.campaign')}</TableHead>
                     <TableHead>{t('prospects.table.company')}</TableHead>
                     <TableHead>{t('prospects.table.contact')}</TableHead>
+                    <TableHead>{t('prospects.table.email')}</TableHead>
+                    <TableHead>{t('prospects.table.phone')}</TableHead>
                     <TableHead>{t('prospects.table.country')}</TableHead>
                     <TableHead>{t('prospects.table.actions')}</TableHead>
                     <TableHead>{t('prospects.table.status')}</TableHead>
@@ -682,6 +686,32 @@ export default function Prospects() {
                       </TableCell>
                       <TableCell>
                         {`${prospect.first_name || ''} ${prospect.last_name || ''}`.trim()}
+                      </TableCell>
+                      <TableCell>
+                        {prospect.email ? (
+                          <a
+                            href={`mailto:${prospect.email}`}
+                            className="flex items-center gap-1 text-xs hover:underline"
+                          >
+                            <Mail className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{prospect.email}</span>
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {prospect.phone ? (
+                          <a
+                            href={`tel:${prospect.phone}`}
+                            className="flex items-center gap-1 text-xs hover:underline"
+                          >
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span>{prospect.phone}</span>
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>{prospect.country}</TableCell>
                       <TableCell>
