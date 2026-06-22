@@ -7,6 +7,7 @@ import { CountrySelector, COUNTRIES as COUNTRY_LIST } from '@/components/importe
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download } from 'lucide-react';
 import {
   AlertDialog,
@@ -116,6 +117,52 @@ const Importers = () => {
   const EXPORT_QUOTA = 500;
   const [partialOpen, setPartialOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllAcrossPages, setSelectAllAcrossPages] = useState(false);
+
+  // Reset selection when country changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+    setSelectAllAcrossPages(false);
+  }, [selectedCountry]);
+
+  const effectiveSelectionCount = selectAllAcrossPages ? totalCount : selectedIds.size;
+  const pageIds = contacts.map(c => c.id);
+  const allPageSelected = pageIds.length > 0 && (selectAllAcrossPages || pageIds.every(id => selectedIds.has(id)));
+  const somePageSelected = !selectAllAcrossPages && pageIds.some(id => selectedIds.has(id));
+
+  const toggleRow = (id: string, checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (selectAllAcrossPages) {
+        // Switch out of "all" mode: we don't track individual ids in that mode,
+        // so toggling a row simply clears the global mode and starts fresh from page ids minus this one.
+        setSelectAllAcrossPages(false);
+        pageIds.forEach(pid => next.add(pid));
+      }
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const togglePage = (checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (checked) {
+        pageIds.forEach(id => next.add(id));
+      } else {
+        pageIds.forEach(id => next.delete(id));
+        setSelectAllAcrossPages(false);
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setSelectAllAcrossPages(false);
+  };
 
   const handleSourcingSubmit = async () => {
     if (!user || !sourcingMarket) return;
@@ -235,7 +282,7 @@ const Importers = () => {
       });
     }
   }, [selectedCountry]);
-  const performExport = async (limit: number) => {
+  const performExport = async (limit: number, mode: 'country' | 'selection' = 'country') => {
     if (!selectedCountry || limit <= 0) return;
     const country = COUNTRIES.find(c => c.code === selectedCountry);
     if (!country) return;
@@ -252,16 +299,40 @@ const Importers = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('buyer_contacts')
-        .select('*')
-        .in('country', country.dbAliases)
-        .order('company_name', { ascending: true })
-        .limit(limit);
-      if (error) {
-        console.error('Error fetching data for export:', error);
-        toast({ title: t('common.error'), description: t('importers.exportError'), variant: 'destructive' });
-        return;
+      let data: any[] | null = null;
+      if (mode === 'selection' && !selectAllAcrossPages) {
+        // Fetch only selected ids (cap to `limit` after sort for partial case)
+        const ids = Array.from(selectedIds);
+        const chunks: string[][] = [];
+        for (let i = 0; i < ids.length; i += 500) chunks.push(ids.slice(i, i + 500));
+        const results: any[] = [];
+        for (const chunk of chunks) {
+          const { data: rows, error } = await supabase
+            .from('buyer_contacts')
+            .select('*')
+            .in('id', chunk);
+          if (error) {
+            console.error('Error fetching selected contacts:', error);
+            toast({ title: t('common.error'), description: t('importers.exportError'), variant: 'destructive' });
+            return;
+          }
+          if (rows) results.push(...rows);
+        }
+        results.sort((a, b) => (a.company_name || '').localeCompare(b.company_name || ''));
+        data = results.slice(0, limit);
+      } else {
+        const { data: rows, error } = await supabase
+          .from('buyer_contacts')
+          .select('*')
+          .in('country', country.dbAliases)
+          .order('company_name', { ascending: true })
+          .limit(limit);
+        if (error) {
+          console.error('Error fetching data for export:', error);
+          toast({ title: t('common.error'), description: t('importers.exportError'), variant: 'destructive' });
+          return;
+        }
+        data = rows;
       }
 
       const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
@@ -292,6 +363,7 @@ const Importers = () => {
           remaining: consume.remaining,
         }),
       });
+      clearSelection();
     } catch (error) {
       console.error('Error during export:', error);
       toast({ title: t('common.error'), description: t('importers.exportFailure'), variant: 'destructive' });
@@ -313,11 +385,22 @@ const Importers = () => {
       });
       return;
     }
+    const count = effectiveSelectionCount;
+    if (count > 0) {
+      if (count > exportCredits) {
+        setPartialOpen(true);
+        return;
+      }
+      // selectAllAcrossPages → fetch via country; otherwise via ids
+      performExport(count, selectAllAcrossPages ? 'country' : 'selection');
+      return;
+    }
+    // No selection → export the full country
     if (totalCount > exportCredits) {
       setPartialOpen(true);
       return;
     }
-    performExport(totalCount);
+    performExport(totalCount, 'country');
   };
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = (currentPage - 1) * itemsPerPage + 1;
