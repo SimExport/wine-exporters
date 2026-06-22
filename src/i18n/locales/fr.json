@@ -137,7 +137,8 @@
   "credits": {
     "nextPeriod": "la prochaine période",
     "noCreditsCampaign": "Vous avez utilisé votre crédit de campagne mensuel. Il sera réinitialisé le {{date}}.",
-    "noCreditsSearch": "Vous avez utilisé votre crédit de recherche mensuel. Il sera réinitialisé le {{date}}."
+    "noCreditsSearch": "Vous avez utilisé votre crédit de recherche mensuel. Il sera réinitialisé le {{date}}.",
+    "noCreditsExport": "Vous avez utilisé tous vos crédits d'export pour ce mois. Ils seront réinitialisés le {{date}}."
   },
   "dashboard": {
     "title": "Tableau de bord",
