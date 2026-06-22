@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock } from 'lucide-react'
+import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock, Mail, Phone } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
 import { subDays, isAfter, differenceInDays } from 'date-fns'
@@ -29,6 +29,7 @@ interface Prospect {
   last_name?: string
   company_name?: string
   email?: string
+  phone?: string
   country?: string
   requested_actions?: string[]
   prospect_status: string
@@ -316,6 +317,8 @@ export default function Prospects() {
       p.campaigns?.name || '',
       p.company_name || '',
       `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+      p.email || '',
+      p.phone || '',
       p.country || '',
       p.requested_actions?.map(a => t(`crm.actions.${a}`)).join(', ') || '',
       t(`crm.statuses.${p.prospect_status}`)
@@ -656,6 +659,8 @@ export default function Prospects() {
                     <TableHead>{t('prospects.table.campaign')}</TableHead>
                     <TableHead>{t('prospects.table.company')}</TableHead>
                     <TableHead>{t('prospects.table.contact')}</TableHead>
+                    <TableHead>{t('prospects.table.email')}</TableHead>
+                    <TableHead>{t('prospects.table.phone')}</TableHead>
                     <TableHead>{t('prospects.table.country')}</TableHead>
                     <TableHead>{t('prospects.table.actions')}</TableHead>
                     <TableHead>{t('prospects.table.status')}</TableHead>
@@ -681,6 +686,32 @@ export default function Prospects() {
                       </TableCell>
                       <TableCell>
                         {`${prospect.first_name || ''} ${prospect.last_name || ''}`.trim()}
+                      </TableCell>
+                      <TableCell>
+                        {prospect.email ? (
+                          <a
+                            href={`mailto:${prospect.email}`}
+                            className="flex items-center gap-1 text-xs hover:underline"
+                          >
+                            <Mail className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{prospect.email}</span>
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {prospect.phone ? (
+                          <a
+                            href={`tel:${prospect.phone}`}
+                            className="flex items-center gap-1 text-xs hover:underline"
+                          >
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span>{prospect.phone}</span>
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>{prospect.country}</TableCell>
                       <TableCell>

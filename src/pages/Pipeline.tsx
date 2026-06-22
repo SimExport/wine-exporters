@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag } from 'lucide-react'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -30,6 +30,7 @@ interface Prospect {
   last_name?: string
   company_name?: string
   email?: string
+  phone?: string
   country?: string
   requested_actions?: string[]
   prospect_status: string
@@ -699,6 +700,31 @@ export default function Pipeline() {
                                 <p className="text-xs text-muted-foreground truncate">
                                   {prospect.first_name} {prospect.last_name}
                                 </p>
+                              )}
+
+                              {(prospect.email || prospect.phone) && (
+                                <div className="mt-1 space-y-0.5">
+                                  {prospect.email && (
+                                    <a
+                                      href={`mailto:${prospect.email}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground truncate"
+                                    >
+                                      <Mail className="w-3 h-3 flex-shrink-0" />
+                                      <span className="truncate">{prospect.email}</span>
+                                    </a>
+                                  )}
+                                  {prospect.phone && (
+                                    <a
+                                      href={`tel:${prospect.phone}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground truncate"
+                                    >
+                                      <Phone className="w-3 h-3 flex-shrink-0" />
+                                      <span className="truncate">{prospect.phone}</span>
+                                    </a>
+                                  )}
+                                </div>
                               )}
 
                               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
