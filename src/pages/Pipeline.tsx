@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone } from 'lucide-react'
+import { Plus, GripVertical, MapPin, AlertTriangle, Clock, Tag, Mail, Phone, Eye } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { format, differenceInDays } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -86,6 +86,29 @@ const LEGACY_STATUS_TO_STAGE_NAME: Record<string, string> = {
 
 const REQUESTED_ACTION_KEYS = ['price_list', 'samples', 'video_call', 'tech_sheets', 'other'] as const
 
+type CardField =
+  | 'contactName'
+  | 'email'
+  | 'phone'
+  | 'country'
+  | 'source'
+  | 'campaign'
+  | 'actions'
+  | 'tag'
+  | 'inactivity'
+  | 'createdAt'
+  | 'reminder'
+
+const ALL_CARD_FIELDS: CardField[] = [
+  'contactName', 'email', 'phone', 'country', 'source',
+  'campaign', 'actions', 'tag', 'inactivity', 'createdAt', 'reminder',
+]
+
+const DEFAULT_CARD_FIELDS: CardField[] = [
+  'contactName', 'email', 'phone', 'country', 'source',
+  'campaign', 'actions', 'tag', 'inactivity', 'reminder',
+]
+
 export default function Pipeline() {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -107,6 +130,33 @@ export default function Pipeline() {
   const [draggedProspect, setDraggedProspect] = useState<string | null>(null)
   const [stages, setStages] = useState<PipelineStage[]>([])
   const [showStagesManager, setShowStagesManager] = useState(false)
+
+  const storageKey = user ? `pipeline-card-fields:${user.id}` : null
+  const [visibleFields, setVisibleFields] = useState<Set<CardField>>(new Set(DEFAULT_CARD_FIELDS))
+
+  useEffect(() => {
+    if (!storageKey) return
+    try {
+      const raw = localStorage.getItem(storageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw) as CardField[]
+        setVisibleFields(new Set(parsed.filter(f => ALL_CARD_FIELDS.includes(f))))
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey])
+
+  const toggleField = (field: CardField) => {
+    setVisibleFields(prev => {
+      const next = new Set(prev)
+      if (next.has(field)) next.delete(field)
+      else next.add(field)
+      if (storageKey) {
+        try { localStorage.setItem(storageKey, JSON.stringify(Array.from(next))) } catch {}
+      }
+      return next
+    })
+  }
 
   const [newProspect, setNewProspect] = useState({
     campaign_id: '',
@@ -436,6 +486,29 @@ export default function Pipeline() {
           </div>
 
           <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Eye className="w-4 h-4 mr-2" />
+                  {t('pipeline.customize.button')}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  {t('pipeline.customize.title')}
+                </div>
+                {ALL_CARD_FIELDS.map(field => (
+                  <DropdownMenuItem
+                    key={field}
+                    onSelect={(e) => { e.preventDefault(); toggleField(field) }}
+                    className="gap-2"
+                  >
+                    <Checkbox checked={visibleFields.has(field)} />
+                    <span className="text-sm">{t(`pipeline.customize.fields.${field}`)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={() => setShowStagesManager(true)}>
               <Settings2 className="w-4 h-4 mr-2" />
               {t('pipeline.manageStages.button')}
