@@ -1404,6 +1404,14 @@
         "title": "Erreur",
         "description": "Impossible d'ajouter la note"
       },
+      "noteUpdated": {
+        "title": "Note modifiée",
+        "description": "La note a été mise à jour"
+      },
+      "noteDeleted": {
+        "title": "Note supprimée",
+        "description": "La note a été supprimée"
+      },
       "sampleAdded": {
         "title": "Échantillon ajouté",
         "description": "L'échantillon a été ajouté à la demande"
