@@ -1,70 +1,28 @@
-## Objectif
+# Fix du bouton "Gérer mon abonnement" sur /billing
 
-Permettre une sélection fine des contacts à exporter sur `/importateurs` via des cases à cocher, avec un mécanisme "tout sélectionner la page" puis "sélectionner les N contacts de la liste entière".
+## Problème
+Le bouton appelle l'edge function `create-portal-session`, qui exige que `profiles.stripe_customer_id` soit renseigné. Pour beaucoup d'utilisateurs ce champ est `null` (le webhook Stripe ne l'a pas rempli, ou abonnement créé hors webhook), donc la fonction renvoie une erreur "No Stripe customer ID found" et le toast d'erreur s'affiche.
 
-## Page `src/pages/Importers.tsx`
+Une seconde fonction `customer-portal` existe déjà et fait la recherche par email — plus robuste.
 
-### Nouvel état
-- `selectedIds: Set<string>` — ids de `buyer_contacts` cochés (persistant à travers la pagination)
-- `selectAllAcrossPages: boolean` — quand `true`, indique que TOUS les contacts du pays sont sélectionnés (pas seulement ceux chargés), pour éviter d'avoir à fetcher 168 ids juste pour cocher
-- Reset des deux à chaque changement de `selectedCountry`
+## Correction
 
-### Colonne checkbox dans le tableau
-- Nouvelle première colonne avec `<Checkbox>` (shadcn `@/components/ui/checkbox`) dans `TableHead` et chaque `TableRow`
-- Header checkbox = "tout cocher sur la page courante" :
-  - `checked` quand tous les `contacts.id` de la page sont dans `selectedIds` (ou `selectAllAcrossPages === true`)
-  - `indeterminate` quand certains seulement
-  - onCheckedChange : ajoute/retire les ids de la page dans `selectedIds` ; si on décoche, désactive aussi `selectAllAcrossPages`
-- Row checkbox : toggle l'id du contact. Si on décoche pendant `selectAllAcrossPages`, on bascule en mode "ids explicites" (initialiser `selectedIds` avec tous les ids du pays via fetch d'ids → voir ci-dessous) puis retirer celui décoché.
+### `supabase/functions/create-portal-session/index.ts`
+- Garder en priorité `profiles.stripe_customer_id` quand il est présent.
+- Fallback : si null/introuvable, faire `stripe.customers.list({ email: user.email, limit: 1 })`.
+- Si trouvé via email, mettre à jour `profiles.stripe_customer_id` pour la prochaine fois.
+- Si toujours rien, renvoyer un 404 explicite ("Aucun abonnement Stripe trouvé pour cet email") au lieu d'une erreur générique.
 
-### Bandeau "sélectionner tous les N contacts"
-- Affiché juste au-dessus du tableau quand : tous les contacts de la page sont cochés ET `totalCount > contacts.length` ET `!selectAllAcrossPages`
-- Texte : `"Les {{pageCount}} contacts de cette page sont sélectionnés."` + bouton lien `"Sélectionner les {{totalCount}} contacts de la liste"`
-- Clic → `setSelectAllAcrossPages(true)` et vide `selectedIds` (inutile de stocker les ids individuellement dans ce mode)
-- Quand `selectAllAcrossPages === true`, afficher un bandeau confirmant `"Les {{totalCount}} contacts sont sélectionnés."` + bouton `"Effacer la sélection"`
+### `src/pages/Billing.tsx`
+- Afficher le message d'erreur retourné par la fonction (au lieu du toast générique) quand `error.context?.status === 404`, pour guider l'utilisateur (ex: "Aucun abonnement Stripe associé à votre email — contactez le support").
 
-### Compteur de sélection + bouton télécharger
-- Remplacer le bouton existant "Télécharger la liste" par un bouton dont le label devient :
-  - `"Télécharger ({{n}})"` quand `n = effectiveSelectionCount > 0`
-  - `"Télécharger la liste"` (comportement actuel = tout le pays) quand aucune sélection
-- `effectiveSelectionCount` = `selectAllAcrossPages ? totalCount : selectedIds.size`
-- Disabled quand `!hasPaidAccess`, `exporting`, ou (sélection > 0 ET `exportCredits <= 0`)
+### i18n (`src/i18n/locales/{fr,en}.json`)
+- Ajouter `billing.portalNoCustomer` (FR : "Aucun abonnement Stripe trouvé pour votre compte. Contactez le support si vous pensez qu'il s'agit d'une erreur.").
 
-### Logique d'export adaptée
-Renommer/étendre `performExport` :
-- Si `effectiveSelectionCount > 0` :
-  - `limit = effectiveSelectionCount` (1 contact = 1 crédit)
-  - Si `effectiveSelectionCount > exportCredits` → ouvrir le `AlertDialog` partiel existant (adapté pour utiliser la sélection comme total)
-  - Sinon consommer `effectiveSelectionCount` crédits puis fetch :
-    - mode `selectAllAcrossPages` : `select * .in('country', dbAliases).order('company_name').limit(limit)` (identique à l'export pays actuel)
-    - mode ids explicites : `select * .in('id', Array.from(selectedIds))` — Supabase tolère jusqu'à plusieurs milliers d'ids dans un `.in()`, on découpe par chunks de 500 si > 500 (sécurité, même si limité par quota)
-- Si aucune sélection → comportement actuel (export du pays entier)
-
-### AlertDialog partiel
-- Adapter le texte pour distinguer "contacts sélectionnés" vs "contacts du pays" via un paramètre (clé i18n `partialDescriptionSelection`).
-
-### Reset de la sélection
-- À chaque changement de `selectedCountry` ou après un export réussi : vider `selectedIds` et `selectAllAcrossPages`.
-
-## i18n (FR/EN) — `src/i18n/locales/*.json` sous `importers.exportCredits`
-
-Ajout des clés :
-- `selectAllRow` : "Tout sélectionner sur cette page"
-- `pageSelected` : "Les {{count}} contacts de cette page sont sélectionnés."
-- `selectAllList` : "Sélectionner les {{total}} contacts de la liste"
-- `allSelected` : "Les {{total}} contacts sont sélectionnés."
-- `clearSelection` : "Effacer la sélection"
-- `downloadWithCount` : "Télécharger ({{count}})"
-- `partialDescriptionSelection` : "Vous avez sélectionné {{total}} contacts mais il ne vous reste que {{remaining}} crédits d'export ce mois-ci. Voulez-vous télécharger les {{remaining}} premiers ?"
+## Vérification
+- Tester via Playwright sur `/billing` : cliquer "Gérer mon abonnement" → vérifier l'ouverture du portail Stripe dans un nouvel onglet (ou le message d'erreur explicite si pas de customer).
+- Consulter les logs de l'edge function pour confirmer le chemin emprunté (profile vs email lookup).
 
 ## Hors scope
-
-- Pas de changement à la base, au hook `useCredits`, à la pagination ou au composant `CountrySelector`.
-- Pas de modification d'autres pages.
-- Les CSV restent identiques (mêmes 9 colonnes, même nommage de fichier).
-
-## Détails techniques
-
-- Utilisation du composant `@/components/ui/checkbox` (shadcn, déjà installé dans le projet — sinon utiliser un `<input type="checkbox">` natif stylé).
-- `Set<string>` géré via `new Set(prev)` pour rester immuable.
-- En mode `selectAllAcrossPages`, la décoché ligne-par-ligne reste hors scope (UX simple : on désactive seulement le mode via le bouton "Effacer la sélection") — confirmer si tu veux le toggle individuel possible en mode "tout sélectionné".
+- Pas de modification du webhook Stripe, du checkout, ni de la table `profiles`.
+- La fonction `customer-portal` (doublon) reste en place inchangée.
