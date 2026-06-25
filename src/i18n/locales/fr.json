@@ -1598,6 +1598,7 @@
     "loginRequiredShort": "Veuillez vous connecter",
     "checkoutError": "Erreur lors de la création du paiement",
     "portalError": "Erreur lors de l'ouverture du portail",
+    "portalNoCustomer": "Aucun abonnement Stripe trouvé pour votre compte. Contactez le support si vous pensez qu'il s'agit d'une erreur.",
     "loading": "Chargement...",
     "status": {
       "active": "Actif",

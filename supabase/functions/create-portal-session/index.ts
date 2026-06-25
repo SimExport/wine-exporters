@@ -41,30 +41,47 @@ serve(async (req) => {
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Get stripe_customer_id from profiles table
-    const { data: profile, error: profileError } = await supabaseClient
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+    // Try profile first
+    const { data: profile } = await supabaseClient
       .from("profiles")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (profileError) {
-      logStep("Profile error", { error: profileError.message });
-      throw new Error("Could not fetch user profile");
+    let customerId: string | null = profile?.stripe_customer_id ?? null;
+
+    // Fallback: lookup by email
+    if (!customerId) {
+      if (!user.email) {
+        return new Response(JSON.stringify({ error: "no_customer" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        });
+      }
+      logStep("Profile missing stripe_customer_id, searching by email", { email: user.email });
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length === 0) {
+        logStep("No Stripe customer found by email");
+        return new Response(JSON.stringify({ error: "no_customer" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        });
+      }
+      customerId = customers.data[0].id;
+      // Persist for next time
+      await supabaseClient
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("user_id", user.id);
     }
 
-    if (!profile?.stripe_customer_id) {
-      logStep("No Stripe customer ID found");
-      throw new Error("No Stripe customer ID found for this user");
-    }
+    logStep("Using Stripe customer", { customerId });
 
-    logStep("Found Stripe customer", { customerId: profile.stripe_customer_id });
-
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    
     const origin = req.headers.get("origin") || "http://localhost:3000";
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: profile.stripe_customer_id,
+      customer: customerId,
       return_url: `${origin}/billing`,
     });
 
