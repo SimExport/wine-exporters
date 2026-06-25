@@ -1598,6 +1598,7 @@
     "loginRequiredShort": "Please sign in",
     "checkoutError": "Error creating payment",
     "portalError": "Error opening portal",
+    "portalNoCustomer": "No Stripe subscription found for your account. Contact support if you think this is a mistake.",
     "loading": "Loading...",
     "status": {
       "active": "Active",
