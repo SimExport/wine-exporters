@@ -113,7 +113,12 @@ const Billing = () => {
 
       if (error) {
         console.error('Portal error:', error);
-        toast.error(t('billing.portalError'));
+        const status = (error as any)?.context?.status;
+        if (status === 404) {
+          toast.error(t('billing.portalNoCustomer'));
+        } else {
+          toast.error(t('billing.portalError'));
+        }
         return;
       }
 
