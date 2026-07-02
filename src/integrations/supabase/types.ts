@@ -227,6 +227,7 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          phone: string | null
           recommended_actions: string | null
           score: number | null
           updated_at: string
@@ -241,6 +242,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          phone?: string | null
           recommended_actions?: string | null
           score?: number | null
           updated_at?: string
@@ -255,6 +257,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          phone?: string | null
           recommended_actions?: string | null
           score?: number | null
           updated_at?: string
