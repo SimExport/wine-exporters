@@ -813,6 +813,23 @@ export default function AdminCampaigns() {
                             campaign={campaign}
                             onSaved={fetchCampaigns}
                           />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(`${window.location.origin}/interest/${campaign.id}`, '_blank', 'noopener,noreferrer')}
+                            title={t('adminCampaigns.interestForm.open')}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            {t('adminCampaigns.interestForm.label')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyToClipboard(`${window.location.origin}/interest/${campaign.id}`)}
+                            title={t('adminCampaigns.interestForm.copy')}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
                        </div>
                      </TableCell>
                   </TableRow>
