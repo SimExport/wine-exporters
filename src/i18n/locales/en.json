@@ -2312,5 +2312,32 @@
       "added": "Added to CRM",
       "error": "Error"
     }
+  },
+  "interestForm": {
+    "loading": "Loading...",
+    "notFound": "This form is no longer available.",
+    "subtitle": "Fill in your details and {{name}} will get back to you directly within a few days.",
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "company": "Company",
+      "country": "Country"
+    },
+    "interests": {
+      "title": "What are you interested in?",
+      "samples": "Receive samples",
+      "price_list": "Request price list",
+      "presentation": "Request presentation deck",
+      "technical_sheets": "Request technical sheets",
+      "visio_call": "Schedule a video call",
+      "phone_call": "Schedule a phone call"
+    },
+    "submit": "Send my interest",
+    "submitting": "Sending...",
+    "success": {
+      "title": "Thank you!",
+      "message": "{{name}} will be in touch shortly."
+    },
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }
