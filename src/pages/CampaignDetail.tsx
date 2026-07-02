@@ -464,6 +464,47 @@ const CampaignDetail = () => {
               onAdd={addInterestedToCrm}
             />
           )}
+
+          {/* Admin-only: public interest form link */}
+          {isAdmin && campaign && (
+            <Card className="lg:col-span-2 border-dashed">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ExternalLink className="h-4 w-4" />
+                  {t('adminCampaigns.interestForm.cardTitle')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {t('adminCampaigns.interestForm.cardDesc')}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <code className="flex-1 min-w-0 truncate rounded-md bg-muted px-3 py-2 text-xs">
+                    {`${window.location.origin}/interest/${campaign.id ?? id}`}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/interest/${campaign.id ?? id}`);
+                      toast({ title: t('adminCampaigns.copiedTitle'), description: t('adminCampaigns.copiedDesc') });
+                    }}
+                  >
+                    <Copy className="h-4 w-4 mr-1" />
+                    {t('adminCampaigns.interestForm.copy')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(`${window.location.origin}/interest/${campaign.id ?? id}`, '_blank', 'noopener,noreferrer')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    {t('adminCampaigns.interestForm.open')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
