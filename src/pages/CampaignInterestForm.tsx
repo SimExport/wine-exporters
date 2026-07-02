@@ -70,7 +70,7 @@ export default function CampaignInterestForm() {
     if (!campaignId || !info) return;
     setError(null);
     setSubmitting(true);
-    const { error } = await supabase.from("campaign_interest_responses").insert({
+    const { error } = await (supabase.from as any)("campaign_interest_responses").insert({
       campaign_id: campaignId,
       full_name: fullName.trim().slice(0, 120),
       email: email.trim().toLowerCase().slice(0, 255),
