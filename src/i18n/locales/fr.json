@@ -1876,6 +1876,13 @@
     "errorTitle": "Erreur",
     "copiedTitle": "Copié",
     "copiedDesc": "Nom copié dans le presse-papier",
+    "interestForm": {
+      "label": "Formulaire d'intérêt",
+      "copy": "Copier le lien",
+      "open": "Ouvrir",
+      "cardTitle": "Formulaire d'intérêt public",
+      "cardDesc": "Partagez ce lien avec des acheteurs qualifiés. Toute personne disposant du lien peut soumettre son intérêt pour cette campagne."
+    },
     "validateConfirm": "Valider la campagne \"{{name}}\" ?",
     "validatedTitle": "Campagne validée",
     "validatedDesc": "La campagne \"{{name}}\" est maintenant active",
