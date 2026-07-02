@@ -12,8 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/lib/format';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { InterestedContactsSection } from '@/components/campaigns/InterestedContactsSection';
-import { useRole } from '@/hooks/useRole';
-import { Copy, ExternalLink } from 'lucide-react';
 
 interface Campaign {
   id: string;
