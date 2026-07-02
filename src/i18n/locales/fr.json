@@ -2312,5 +2312,32 @@
       "added": "Ajouté au CRM",
       "error": "Erreur"
     }
+  },
+  "interestForm": {
+    "loading": "Chargement...",
+    "notFound": "Ce formulaire n'est plus disponible.",
+    "subtitle": "Remplissez vos coordonnées et {{name}} vous recontactera directement sous quelques jours.",
+    "fields": {
+      "fullName": "Nom complet",
+      "email": "Email",
+      "company": "Société",
+      "country": "Pays"
+    },
+    "interests": {
+      "title": "Qu'est-ce qui vous intéresse ?",
+      "samples": "Recevoir des échantillons",
+      "price_list": "Demander la liste de prix",
+      "presentation": "Recevoir la présentation",
+      "technical_sheets": "Recevoir les fiches techniques",
+      "visio_call": "Planifier une visio",
+      "phone_call": "Planifier un appel téléphonique"
+    },
+    "submit": "Envoyer mon intérêt",
+    "submitting": "Envoi...",
+    "success": {
+      "title": "Merci !",
+      "message": "{{name}} vous recontactera très prochainement."
+    },
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
   }
 }
