@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.submit-campaign-interest]
 verify_jwt = false
+
+[functions.send-interest-confirmation]
+verify_jwt = false

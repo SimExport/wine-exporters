@@ -202,5 +202,23 @@ Deno.serve(async (req) => {
     return json(500, { error: "Could not save your submission" });
   }
 
+  // Fire-and-forget confirmation email to the prospect
+  try {
+    supabase.functions
+      .invoke("send-interest-confirmation", {
+        body: {
+          email,
+          full_name,
+          producer_name,
+          user_name: producer_name,
+        },
+      })
+      .then(({ error }) => {
+        if (error) console.error("Confirmation email invoke error:", error);
+      });
+  } catch (e) {
+    console.error("Failed to enqueue confirmation email:", e);
+  }
+
   return json(200, { ok: true });
 });
