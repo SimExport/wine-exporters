@@ -1876,6 +1876,13 @@
     "errorTitle": "Error",
     "copiedTitle": "Copied",
     "copiedDesc": "Name copied to clipboard",
+    "interestForm": {
+      "label": "Interest form",
+      "copy": "Copy link",
+      "open": "Open",
+      "cardTitle": "Public interest form",
+      "cardDesc": "Share this link with qualified buyers. Anyone with the link can submit interest for this campaign."
+    },
     "validateConfirm": "Validate campaign \"{{name}}\"?",
     "validatedTitle": "Campaign validated",
     "validatedDesc": "Campaign \"{{name}}\" is now active",
