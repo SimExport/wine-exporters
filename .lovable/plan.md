@@ -1,52 +1,70 @@
-## Contexte
+## Public Interest Form for Campaigns
 
-Sur `/campaigns/:id`, la section "Prospects qualifiés" est un tableau où les colonnes **Description** et **Actions recommandées** contiennent des paragraphes entiers issus du CSV admin. Résultat : lignes très hautes, lecture en diagonale difficile, action "Ajouter au CRM" repoussée hors écran, ergonomie médiocre sur laptop.
+### Goal
+A fully public page (no auth, no app shell) where qualified buyers can express interest in a producer's wines. The form is scoped to a campaign via URL, and responses are stored for the campaign owner to review.
 
-## Objectif
+### Route
+`/interest/:campaignId` — standalone page rendered outside `DashboardLayout`, added as a top-level route in `src/App.tsx` before the catch-all.
 
-Rendre l'information scannable en un coup d'œil, tout en gardant accès au texte complet à la demande. Pas de changement de données ni de logique métier — uniquement l'UI de cette section dans `src/pages/CampaignDetail.tsx`.
+### Data model
+New table `public.campaign_interest_responses`:
+- `id` uuid PK
+- `campaign_id` uuid (FK → campaigns.id, on delete cascade, indexed)
+- `full_name` text NOT NULL
+- `email` text NOT NULL
+- `company` text
+- `country` text
+- `interests` text[] NOT NULL DEFAULT '{}' — one or more of:
+  - `samples` — Receive samples
+  - `price_list` — Request price list
+  - `presentation` — Request presentation deck
+  - `technical_sheets` — Request technical sheets
+  - `visio_call` — Schedule a video call
+  - `phone_call` — Schedule a phone call
+- `created_at` timestamptz DEFAULT now()
 
-## Proposition
+A CHECK constraint ensures every value in `interests` is one of the allowed slugs.
 
-Remplacer le tableau par une **liste de cartes prospects**, une carte par contact, avec hiérarchie visuelle claire :
+RLS + grants:
+- `GRANT INSERT ON ... TO anon, authenticated` (public form) and `GRANT SELECT ON ... TO authenticated` + `GRANT ALL TO service_role`.
+- Policy `anon+authenticated can insert` (no restriction on user_id since none stored).
+- Policy `Campaign owner can select` using `EXISTS (SELECT 1 FROM campaigns WHERE id = campaign_id AND user_id = auth.uid())`.
+- Admins can select via `has_role(auth.uid(), 'admin')`.
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  🏢 True Terroir Ltd                        [5/5]  🇬🇧 UK   │
-│  👤 Diego Pistellato · ✉ diego@trueterroir.co.uk            │
-│                                                             │
-│  Importateur spécialisé UK axé sur les vins de producteurs  │
-│  artisanaux, bio, biodynamiques… [Voir plus]                │
-│                                                             │
-│  ▸ Actions recommandées (repliable)                         │
-│                                                             │
-│                              [✓ Ajouté]  ou  [+ Au CRM]     │
-└─────────────────────────────────────────────────────────────┘
+### Public campaign info (needed for title)
+Campaigns table is private. Add a `SECURITY DEFINER` SQL function:
+
+```
+public.get_campaign_public_info(_campaign_id uuid)
+returns table(campaign_id uuid, campaign_name text, producer_name text)
 ```
 
-### Détails d'ergonomie
+Returns `campaigns.name` and the owner's `profiles.company_name` (falling back to `user_settings.display_name`). Grant EXECUTE to `anon` and `authenticated`. Only exposes 2 non-sensitive fields — no emails, no user_id.
 
-1. **En-tête de carte dense** : nom société en titre, score en badge à droite, drapeau + pays (helper `country-flag.ts` déjà en place), contact/email sur une ligne.
-2. **Description tronquée à ~3 lignes** (`line-clamp-3`) avec bouton texte "Voir plus / Voir moins" qui déplie inline. Pas de modal — la lecture reste dans le flux.
-3. **Actions recommandées dans un `<Collapsible>`** replié par défaut, avec chevron et libellé "Actions recommandées". Icône dédiée (ex. `Sparkles`/`Target`) pour la différencier visuellement de la description.
-4. **CTA "Ajouter au CRM"** ancré en bas à droite de la carte, toujours visible sans scroll horizontal. État "Ajouté" garde le même badge vert actuel.
-5. **Barre d'outils** au-dessus de la liste :
-   - Champ recherche (filtre client sur société / contact / email / description)
-   - Tri : Score décroissant (défaut) · Nom · Pays
-   - Filtre score (≥ 4, ≥ 3, tous)
-   - Bouton "Tout déplier / tout replier" pour les actions
-6. **Responsive** : grille 1 colonne mobile, 2 colonnes ≥ `lg`. Cartes de hauteur homogène (flex).
-7. **Compteur & progression** : à côté du titre, "X sur Y ajoutés au CRM" avec petite barre de progression, pour donner un sens de complétion à l'utilisateur qui traite la liste.
-8. **Vide/aucun résultat de recherche** : `EmptyState` réutilisé (pattern déjà standardisé dans le projet).
+### Frontend
+New file `src/pages/CampaignInterestForm.tsx`:
+- Reads `campaignId` from `useParams`.
+- On mount, calls `supabase.rpc('get_campaign_public_info', { _campaign_id })`. Shows a 404-style empty state if not found.
+- Page layout: centered card on plain background, brand wordmark at top, no sidebar / no navbar / no footer. Bilingual via `useTranslation` (FR default).
+- Title: `producer_name` (or campaign_name fallback).
+- Subtitle: `"Fill in your details and {producer_name} will get back to you directly within a few days."`
+- Form (react-hook-form + zod):
+  - `full_name` required, max 120
+  - `email` required, valid email, max 255
+  - `company` optional, max 200
+  - `country` optional, max 100
+  - `interests` — group of 6 checkboxes (labels above), any combination allowed, none required. Stored as string[] of slugs.
+  - Submit button: "Send my interest" / "Envoyer mon intérêt"
+- On submit → `supabase.from('campaign_interest_responses').insert(...)`. On success, replace form with a success state: `"Thank you! {producer_name} will be in touch shortly."` No redirect, no navigation.
+- SEO: `<SEO>` with title `"{producer_name} — Interest form"` and `noindex`.
 
-### Aspects techniques
+### i18n keys
+Add under `interestForm.*` in both `fr.json` and `en.json`: title fallback, subtitle template, field labels, placeholders, `interests.title` ("What are you interested in?") + one label per slug (samples, price_list, presentation, technical_sheets, visio_call, phone_call), submit, success, notFound, errorGeneric.
 
-- Fichier unique modifié : `src/pages/CampaignDetail.tsx`.
-- Composants shadcn déjà présents : `Card`, `Collapsible`, `Input`, `Select`, `Badge`, `Button`, `Progress`.
-- Utilitaires : `line-clamp-3` (Tailwind), helper drapeau existant, i18n étendu (`campaigns.detail.interestedContacts.*` : `seeMore`, `seeLess`, `recommendedActions`, `search`, `sortBy`, `expandAll`, `collapseAll`, `progress`).
-- Aucune migration, aucun changement de RLS, aucun changement backend.
+### App wiring
+`src/App.tsx`: add `<Route path="/interest/:campaignId" element={<CampaignInterestForm />} />` above the `*` route, outside `DashboardLayout`, no auth guard.
 
-## Questions avant implémentation
-
-1. OK pour passer du tableau à une **grille de cartes 2 colonnes** en desktop, ou préférez-vous conserver un tableau mais avec description tronquée + expand inline ?
-2. Faut-il ajouter la **barre d'outils recherche/tri/filtre** dans cette itération, ou rester minimal (cartes + expand seulement) pour livrer vite ?
+### Out of scope
+- Notifying the campaign owner by email on new response (later via trigger + edge function).
+- Admin/owner UI to browse responses on `CampaignDetail`.
+- Rate limiting / captcha.
