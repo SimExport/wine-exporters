@@ -827,7 +827,22 @@
         "actions": "Actions recommandées",
         "addToCrm": "Ajouter au CRM",
         "added": "Ajouté",
-        "addedToast": "Prospect ajouté au CRM"
+        "addedToast": "Prospect ajouté au CRM",
+        "searchPlaceholder": "Rechercher société, contact, email…",
+        "seeMore": "Voir plus",
+        "seeLess": "Voir moins",
+        "progress": "{{added}} / {{total}} ajoutés",
+        "noResults": "Aucun prospect ne correspond à votre recherche.",
+        "sort": {
+          "score": "Score décroissant",
+          "name": "Nom",
+          "country": "Pays"
+        },
+        "filter": {
+          "all": "Tous les scores",
+          "gte4": "Score ≥ 4",
+          "gte3": "Score ≥ 3"
+        }
       }
     },
     "banner": {
