@@ -1470,6 +1470,14 @@ export type Database = {
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
+      get_campaign_public_info: {
+        Args: { _campaign_id: string }
+        Returns: {
+          campaign_id: string
+          campaign_name: string
+          producer_name: string
+        }[]
+      }
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { uid: string }; Returns: string }
       get_users_emails_for_admin: {
