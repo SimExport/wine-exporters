@@ -33,6 +33,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
+import CampaignInterestForm from "./pages/CampaignInterestForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
+            <Route path="/interest/:campaignId" element={<CampaignInterestForm />} />
             <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
             <Route
               path="/register"
