@@ -65,6 +65,7 @@ const CampaignDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useRole();
   const { t } = useTranslation();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
