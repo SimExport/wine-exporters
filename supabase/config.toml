@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.notify-new-opportunities]
 verify_jwt = true
+
+[functions.submit-campaign-interest]
+verify_jwt = false
