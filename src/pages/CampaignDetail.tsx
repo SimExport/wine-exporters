@@ -5,13 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CampaignStatusBanner } from '@/components/CampaignStatusBanner';
-import { ArrowLeft, Globe, Wine, FileText, Calendar, Target, Users, UserPlus, Check, Mail } from 'lucide-react';
+import { ArrowLeft, Globe, Wine, FileText, Calendar, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/lib/format';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
+import { InterestedContactsSection } from '@/components/campaigns/InterestedContactsSection';
 
 interface Campaign {
   id: string;
@@ -454,95 +454,12 @@ const CampaignDetail = () => {
 
           {/* Interested contacts */}
           {interested.length > 0 && (
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  {t('campaigns.detail.interestedContactsCard')}
-                  <Badge variant="secondary" className="ml-2">{interested.length}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t('campaigns.detail.interestedContacts.company')}</TableHead>
-                        <TableHead>{t('campaigns.detail.interestedContacts.contact')}</TableHead>
-                        <TableHead className="w-20">{t('campaigns.detail.interestedContacts.score')}</TableHead>
-                        <TableHead>{t('campaigns.detail.interestedContacts.description')}</TableHead>
-                        <TableHead>{t('campaigns.detail.interestedContacts.actions')}</TableHead>
-                        <TableHead className="w-40" />
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {interested.map((c) => {
-                        const added = isAdded(c);
-                        return (
-                          <TableRow key={c.id}>
-                            <TableCell className="font-medium">
-                              <div>{c.company_name}</div>
-                              {c.country && (
-                                <div className="text-xs text-muted-foreground">{c.country}</div>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-col gap-1 text-xs">
-                                {c.contact_name && <span>{c.contact_name}</span>}
-                                {c.email && (
-                                  <a
-                                    href={`mailto:${c.email}`}
-                                    className="flex items-center gap-1 text-primary hover:underline"
-                                  >
-                                    <Mail className="h-3 w-3" />
-                                    {c.email}
-                                  </a>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {c.score != null ? (
-                                <Badge
-                                  variant={c.score >= 4 ? 'default' : c.score >= 3 ? 'secondary' : 'outline'}
-                                >
-                                  {c.score}/5
-                                </Badge>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground max-w-md">
-                              {c.description || '—'}
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground max-w-xs">
-                              {c.recommended_actions || '—'}
-                            </TableCell>
-                            <TableCell>
-                              {added ? (
-                                <Badge variant="secondary" className="gap-1">
-                                  <Check className="h-3 w-3" />
-                                  {t('campaigns.detail.interestedContacts.added')}
-                                </Badge>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={addingId === c.id}
-                                  onClick={() => addInterestedToCrm(c)}
-                                >
-                                  <UserPlus className="h-3 w-3 mr-1" />
-                                  {t('campaigns.detail.interestedContacts.addToCrm')}
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+            <InterestedContactsSection
+              contacts={interested}
+              currentUserId={user?.id}
+              addingId={addingId}
+              onAdd={addInterestedToCrm}
+            />
           )}
         </div>
       </div>
