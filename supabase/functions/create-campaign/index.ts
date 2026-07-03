@@ -115,33 +115,33 @@ Output ONLY the complete HTML, no explanation, no markdown, no code fences. Star
 function buildOwnerEmailHtml(campaignName: string, markets: string[]): string {
   const marketsList = markets.length
     ? markets.map((m) => `<span style="display:inline-block;background:#59191F;color:#fff;padding:4px 10px;border-radius:999px;font-size:12px;margin:2px;">${m}</span>`).join(" ")
-    : `<em style="color:#a3a3a3;">n/a</em>`;
+    : `<em style="color:#888;">n/a</em>`;
   return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Your campaign is live</title><link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap" rel="stylesheet"/></head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Rubik,Arial,Helvetica,sans-serif;color:#ffffff;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 16px;">
+<body style="margin:0;padding:0;background-color:#faf6f0;font-family:Rubik,Arial,Helvetica,sans-serif;color:#1a1a1a;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#faf6f0;padding:40px 16px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr><td align="center" style="padding-bottom:32px;">
           <div style="display:inline-block;padding:12px 20px;border:1px solid #59191F;border-radius:8px;">
-            <span style="font-size:20px;font-weight:700;letter-spacing:0.5px;color:#ffffff;">Wine<span style="color:#59191F;">Exporters</span></span>
+            <span style="font-size:20px;font-weight:700;letter-spacing:0.5px;color:#1a1a1a;">Wine<span style="color:#59191F;">Exporters</span></span>
           </div>
         </td></tr>
-        <tr><td style="background-color:#111111;border:1px solid #1f1f1f;border-radius:12px;padding:40px 32px;">
-          <h1 style="margin:0 0 20px 0;font-size:22px;font-weight:600;color:#ffffff;line-height:1.3;">Your campaign is live 🚀</h1>
-          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#e5e5e5;">Great news — your campaign <strong style="color:#fff;">${escapeHtml(campaignName)}</strong> has just been sent to wine importers in your selected markets:</p>
+        <tr><td style="background-color:#ffffff;border:1px solid #e5e5e5;border-radius:12px;padding:40px 32px;">
+          <h1 style="margin:0 0 20px 0;font-size:22px;font-weight:600;color:#1a1a1a;line-height:1.3;">Your campaign is live 🚀</h1>
+          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#1a1a1a;">Great news — your campaign <strong style="color:#1a1a1a;">${escapeHtml(campaignName)}</strong> has just been sent to wine importers in your selected markets:</p>
           <p style="margin:0 0 20px 0;line-height:2;">${marketsList}</p>
-          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#e5e5e5;">You'll receive a detailed performance report once results are available (opens, clicks, replies and qualified prospects).</p>
-          <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#e5e5e5;">In the meantime, all replies land directly in your inbox — respond quickly to maximise conversion.</p>
-          <div style="height:1px;background-color:#1f1f1f;margin:28px 0;"></div>
-          <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#ffffff;">Votre campagne est en ligne 🚀</h2>
-          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#e5e5e5;">Excellente nouvelle — votre campagne <strong style="color:#fff;">${escapeHtml(campaignName)}</strong> vient d'être envoyée aux importateurs de vins sur les marchés que vous avez sélectionnés.</p>
-          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#e5e5e5;">Vous recevrez un rapport détaillé dès que les résultats seront disponibles (ouvertures, clics, réponses et prospects qualifiés).</p>
-          <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#e5e5e5;">D'ici là, toutes les réponses arrivent directement dans votre boîte mail — répondez rapidement pour maximiser la conversion.</p>
-          <div style="height:1px;background-color:#1f1f1f;margin:24px 0;"></div>
-          <p style="margin:0;font-size:14px;line-height:1.6;color:#a3a3a3;">Best regards / Cordialement,<br/><strong style="color:#ffffff;">Simon Lemonnier</strong><br/><span style="font-size:12px;">WineExporters by ExportVins</span></p>
+          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#1a1a1a;">You'll receive a detailed performance report once results are available (opens, clicks, replies and qualified prospects).</p>
+          <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#1a1a1a;">Qualified prospects and responses will appear directly in your WineExporters dashboard as soon as they are available.</p>
+          <div style="height:1px;background-color:#e5e5e5;margin:28px 0;"></div>
+          <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#1a1a1a;">Votre campagne est en ligne 🚀</h2>
+          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#1a1a1a;">Excellente nouvelle — votre campagne <strong style="color:#1a1a1a;">${escapeHtml(campaignName)}</strong> vient d'être envoyée aux importateurs de vins sur les marchés que vous avez sélectionnés.</p>
+          <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#1a1a1a;">Vous recevrez un rapport détaillé dès que les résultats seront disponibles (ouvertures, clics, réponses et prospects qualifiés).</p>
+          <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#1a1a1a;">Les prospects qualifiés et les réponses apparaîtront directement dans votre tableau de bord WineExporters dès qu'ils seront disponibles.</p>
+          <div style="height:1px;background-color:#e5e5e5;margin:24px 0;"></div>
+          <p style="margin:0;font-size:14px;line-height:1.6;color:#555555;">Best regards / Cordialement,<br/><strong style="color:#1a1a1a;">Simon Lemonnier</strong><br/><span style="font-size:12px;">WineExporters by ExportVins</span></p>
         </td></tr>
         <tr><td align="center" style="padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#737373;">Powered by <a href="https://wine-exporters.com" style="color:#59191F;text-decoration:none;font-weight:600;">WineExporters</a> — wine-exporters.com</p>
+          <p style="margin:0;font-size:12px;color:#666666;">Powered by <a href="https://wine-exporters.com" style="color:#59191F;text-decoration:none;font-weight:600;">WineExporters by ExportVins</a> — wine-exporters.com</p>
         </td></tr>
       </table>
     </td></tr>
