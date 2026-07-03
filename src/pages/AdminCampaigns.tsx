@@ -1195,6 +1195,71 @@ export default function AdminCampaigns() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Interest form responses sheet */}
+      <Sheet
+        open={!!responsesSheetCampaign}
+        onOpenChange={(open) => !open && setResponsesSheetCampaign(null)}
+      >
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t('adminCampaigns.responsesSheet.title')}</SheetTitle>
+            <SheetDescription>
+              {responsesSheetCampaign?.name}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6 space-y-3">
+            {(responsesSheetCampaign
+              ? responsesByCampaign[responsesSheetCampaign.id] || []
+              : []
+            ).map((r) => {
+              const wantsSamples = /samples|\bsample\b|échantillon/i.test(
+                r.recommended_actions || '',
+              );
+              const enriched = !!(r.description && r.description.trim());
+              return (
+                <div key={r.id} className="rounded-lg border p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-medium">{r.contact_name || '—'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {r.email || '—'}
+                        {r.phone ? ` · ${r.phone}` : ''}
+                      </div>
+                    </div>
+                    <Badge variant={enriched ? 'default' : 'secondary'}>
+                      {enriched
+                        ? t('adminCampaigns.responsesSheet.enriched')
+                        : t('adminCampaigns.responsesSheet.pending')}
+                    </Badge>
+                  </div>
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">
+                      {t('adminCampaigns.responsesSheet.company')}:
+                    </span>{' '}
+                    {r.company_name || '—'}
+                    {r.country ? ` · ${r.country}` : ''}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{formatDateTime(r.created_at)}</span>
+                    {wantsSamples && (
+                      <Badge variant="outline" className="text-xs">
+                        {t('adminCampaigns.responsesSheet.wantsSamples')}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {responsesSheetCampaign &&
+              (responsesByCampaign[responsesSheetCampaign.id]?.length ?? 0) === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  {t('adminCampaigns.responsesSheet.empty')}
+                </p>
+              )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
