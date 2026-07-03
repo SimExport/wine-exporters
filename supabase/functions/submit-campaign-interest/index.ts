@@ -51,19 +51,22 @@ async function enrichWithAI(input: {
   interests: string[];
   producer_name: string;
   campaign_name: string;
-}): Promise<{ description: string; recommended_actions: string }> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
+  producer_profile: Record<string, unknown>;
+}): Promise<{ description: string; recommended_actions: string; score: number }> {
+  const key = Deno.env.get("ANTHROPIC_API_KEY");
   const fallbackActions = input.interests
     .map((s) => `• ${INTEREST_LABELS[s] ?? s}`)
     .join("\n");
   const fallback = {
     description: `${input.full_name}${input.company ? ` from ${input.company}` : ""}${input.country ? ` (${input.country})` : ""} submitted the public interest form for campaign "${input.campaign_name}".`,
     recommended_actions: fallbackActions || "• Follow up with the prospect",
+    score: 3,
   };
   if (!key) return fallback;
 
   try {
     const prompt = `You enrich a CRM record for a wine producer named "${input.producer_name}".
+Producer profile: ${JSON.stringify(input.producer_profile)}
 A qualified buyer just submitted an interest form for the campaign "${input.campaign_name}".
 
 Buyer details:
@@ -74,37 +77,41 @@ Buyer details:
 - Phone: ${input.phone ?? "n/a"}
 - Interests requested: ${input.interests.map((s) => INTEREST_LABELS[s] ?? s).join(", ") || "none specified"}
 
-Return STRICT JSON with two keys only:
+Return STRICT JSON with three keys only:
 {
-  "description": "1-2 short sentences in ENGLISH summarizing who the prospect is and what they are looking for. Neutral, professional tone. No greeting.",
-  "recommended_actions": "A short bulleted list (use '• ' as bullet) in ENGLISH with 2-4 concrete next actions the producer should take, tailored to the interests requested."
+  "description": "2-3 sentences in ENGLISH describing the prospect company (business type, likely market fit with the producer). Neutral, professional tone. No greeting.",
+  "recommended_actions": "A short bulleted list (use '• ' as bullet) in ENGLISH with 2-4 concrete next actions the producer should take, tailored to the interests requested.",
+  "score": "Integer 1-5 qualifying the lead (1=cold, 5=hot) based on completeness of the submission and fit with the producer profile."
 }
 No prose, no code fences.`;
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${key}`,
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "claude-sonnet-4-5",
+        max_tokens: 1000,
         messages: [
-          { role: "system", content: "You output only valid JSON. No commentary." },
           { role: "user", content: prompt },
         ],
-        response_format: { type: "json_object" },
+        system: "You output only valid JSON. No commentary, no code fences.",
       }),
     });
 
     if (!resp.ok) {
-      console.error("AI gateway error", resp.status, await resp.text().catch(() => ""));
+      console.error("Anthropic error", resp.status, await resp.text().catch(() => ""));
       return fallback;
     }
     const data = await resp.json();
-    const content = data?.choices?.[0]?.message?.content;
-    if (typeof content !== "string") return fallback;
-    const parsed = JSON.parse(content);
+    const rawContent = data?.content?.[0]?.text;
+    if (typeof rawContent !== "string") return fallback;
+    const cleaned = rawContent.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
+    const parsed = JSON.parse(cleaned);
+    const parsedScore = Number(parsed?.score);
     return {
       description:
         typeof parsed?.description === "string" && parsed.description.trim()
@@ -114,6 +121,10 @@ No prose, no code fences.`;
         typeof parsed?.recommended_actions === "string" && parsed.recommended_actions.trim()
           ? parsed.recommended_actions.trim().slice(0, 2000)
           : fallback.recommended_actions,
+      score:
+        Number.isFinite(parsedScore) && parsedScore >= 1 && parsedScore <= 5
+          ? Math.round(parsedScore)
+          : fallback.score,
     };
   } catch (e) {
     console.error("AI enrichment failed:", e);
