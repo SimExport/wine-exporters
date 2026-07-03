@@ -734,6 +734,7 @@ export default function AdminCampaigns() {
                   <TableHead>{t('adminCampaigns.table.markets')}</TableHead>
                   <TableHead>{t('adminCampaigns.table.status')}</TableHead>
                   <TableHead>{t('adminCampaigns.table.prospects')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.forms')}</TableHead>
                   <TableHead>{t('adminCampaigns.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -778,6 +779,23 @@ export default function AdminCampaigns() {
                     </TableCell>
                     <TableCell>
                       <span className="font-medium">{campaign.prospect_count || 0}</span>
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const count = responsesByCampaign[campaign.id]?.length || 0;
+                        return (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="p-0 h-auto font-medium"
+                            disabled={count === 0}
+                            onClick={() => setResponsesSheetCampaign(campaign)}
+                          >
+                            <ClipboardList className="h-3 w-3 mr-1" />
+                            {count}
+                          </Button>
+                        );
+                      })()}
                     </TableCell>
                      <TableCell>
                        <div className="flex gap-2">
