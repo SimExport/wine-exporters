@@ -1996,6 +1996,14 @@
       "cancel": "Cancel",
       "save": "Save"
     },
+    "responsesSheet": {
+      "title": "Interest form responses",
+      "company": "Company",
+      "enriched": "Enriched",
+      "pending": "Pending",
+      "wantsSamples": "Wants samples",
+      "empty": "No responses yet."
+    },
     "upload": {
       "title": "Send a campaign report",
       "client": "Client",
