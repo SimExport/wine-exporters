@@ -268,24 +268,15 @@ export default function AdminCampaigns() {
     }
 
     try {
-      const { error: campaignError } = await supabase
-        .from('campaigns')
-        .update({ 
-          status: 'active',
-          validated_at: new Date().toISOString(),
-          admin_reviewer: (await supabase.auth.getUser()).data.user?.id
-        })
-        .eq('id', campaignId);
+      const { data, error: fnError } = await supabase.functions
+        .invoke('create-campaign', { body: { campaignId } });
 
-      if (campaignError) throw campaignError;
+      if (fnError || (data && (data as any).error)) {
+        throw new Error(fnError?.message || (data as any)?.error || 'create-campaign failed');
+      }
 
-      // Remove from local state immediately (optimistic update)
+      // Remove from local state (optimistic update)
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
-
-      // Best-effort: notify user that their campaign is validated
-      supabase.functions
-        .invoke('notify-campaign-validated', { body: { campaignId } })
-        .catch((e) => console.error('notify-campaign-validated failed:', e));
 
       toast({
         title: t('adminCampaigns.validatedTitle'),
