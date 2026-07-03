@@ -1,33 +1,18 @@
-## Goal
-After a prospect submits the public interest form, send them a branded confirmation email via Resend.
+## Problème
 
-## Changes
+Dans `src/pages/AdminCampaigns.tsx`, le lien du formulaire d'intérêt est construit avec `window.location.origin`. Quand un admin est sur le preview Lovable (`id-preview--…lovable.app`), le lien copié pointe vers ce domaine, qui exige une connexion Lovable → inaccessible en navigation privée.
 
-### 1. New Edge Function: `send-interest-confirmation`
-- Public (`verify_jwt = false`) in `supabase/config.toml`.
-- Input: `{ email, full_name, producer_name, user_name }`.
-- Validates input (email format, string lengths), CORS headers.
-- Uses `RESEND_API_KEY` (already configured).
-- Sends from `simon@exportvins.fr` — note: Resend requires the sending domain (`exportvins.fr`) to be verified in the Resend account. If not verified, sending will fail; will surface a clear error. Existing `notify-campaign-submission` currently sends via `notifications@resend.dev`, so this may need domain verification.
-- Subject: `Your interest has been received — {Producer Name}`
-- HTML email using WineExporters design system:
-  - Dark background `#0a0a0a`
-  - Burgundy accent `#59191F`
-  - White text, sans-serif, centered, max-width 600px
-  - "WineExporters" wordmark header
-  - Body copy per spec
-  - Footer: `Powered by WineExporters — wine-exporters.com`
+La route `/interest/:campaignId` n'a aucun garde d'authentification, donc elle est bien publique — c'est juste le **domaine** utilisé qui est mauvais.
 
-### 2. Update `submit-campaign-interest` Edge Function
-- After successful insert into `campaign_interested_contacts`, fetch the producer's display name (already have `producer_name` from `get_campaign_public_info`).
-- Also fetch producer's contact name / display name (`user_name`) to personalize "[User Name] has received your message". Reuse the same RPC result — `producer_name` already resolves to domain/display/contact name.
-- Invoke `send-interest-confirmation` (fire-and-forget; failure to send email must not fail the submission — log only).
+## Correction
 
-### 3. No frontend changes
-The form already awaits `submit-campaign-interest`; email is triggered server-side.
+Forcer la génération du lien vers le domaine public de production, indépendamment du domaine où se trouve l'admin.
 
-## Technical notes
-- Email HTML built inline (no template file), consistent with existing `notify-campaign-submission` pattern.
-- `[User Name]` in the spec = producer name (the recipient producer of the campaign), same value used as `[Producer Name]` in subject.
-- Idempotency: no dedup key added (form submissions are already user-initiated one-offs).
-- Domain verification for `simon@exportvins.fr` on Resend is a prerequisite; if unverified, will fall back to logging the error without breaking submission.
+1. Créer une constante `PUBLIC_SITE_URL = "https://wine-exporters.com"` (idéalement lisible via `import.meta.env.VITE_PUBLIC_SITE_URL` avec fallback en dur sur `https://wine-exporters.com`).
+2. Dans `AdminCampaigns.tsx`, remplacer les deux occurrences `${window.location.origin}/interest/${campaign.id}` par `${PUBLIC_SITE_URL}/interest/${campaign.id}` (bouton "Ouvrir" + bouton "Copier").
+3. Aucune autre page/route à modifier. Le SPA fallback de l'hébergement Lovable sert déjà `/interest/:id` sur `wine-exporters.com`.
+
+## Vérification
+
+- Copier le lien depuis `/admin/campaigns` → il commence par `https://wine-exporters.com/interest/…`.
+- Ouvrir ce lien en navigation privée → le formulaire s'affiche sans demande de login.
