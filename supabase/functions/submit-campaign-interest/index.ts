@@ -183,6 +183,26 @@ Deno.serve(async (req) => {
   const producer_name: string = info?.producer_name ?? info?.campaign_name ?? "the producer";
   const campaign_name: string = info?.campaign_name ?? "";
 
+  // Fetch owner profile for richer AI context
+  let producer_profile: Record<string, unknown> = {};
+  try {
+    const { data: campaignRow } = await supabase
+      .from("campaigns")
+      .select("user_id")
+      .eq("id", campaign_id)
+      .maybeSingle();
+    if (campaignRow?.user_id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("domain_name, aoc, city, country, target_buyer, strong_points")
+        .eq("user_id", campaignRow.user_id)
+        .maybeSingle();
+      if (profile) producer_profile = profile as Record<string, unknown>;
+    }
+  } catch (e) {
+    console.error("Profile fetch failed:", e);
+  }
+
   const enriched = await enrichWithAI({
     full_name,
     email,
@@ -192,6 +212,7 @@ Deno.serve(async (req) => {
     interests,
     producer_name,
     campaign_name,
+    producer_profile,
   });
 
   const { error: insertErr } = await supabase
@@ -205,12 +226,39 @@ Deno.serve(async (req) => {
       phone,
       description: enriched.description,
       recommended_actions: enriched.recommended_actions,
-      score: 5,
+      score: enriched.score,
     });
 
   if (insertErr) {
     console.error("Insert failed:", insertErr);
     return json(500, { error: "Could not save your submission" });
+  }
+
+  // Also create a CRM lead for the campaign owner
+  try {
+    const nameParts = full_name.trim().split(/\s+/);
+    const first_name = nameParts[0] ?? full_name;
+    const last_name = nameParts.slice(1).join(" ") || null;
+    const { error: leadErr } = await supabase.from("leads").insert({
+      campaign_id,
+      first_name,
+      last_name,
+      email,
+      company_name: company,
+      country,
+      phone,
+      market: country,
+      buyer_id: `interest_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      status: "new",
+      source: "interest_form",
+      source_score: enriched.score,
+      owner_notes: enriched.description,
+      requested_actions: interests as unknown as string[],
+      last_activity_at: new Date().toISOString(),
+    });
+    if (leadErr) console.error("Lead insert failed:", leadErr);
+  } catch (e) {
+    console.error("Lead creation error:", e);
   }
 
   // Fire-and-forget confirmation email to the prospect
