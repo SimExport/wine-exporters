@@ -1996,6 +1996,14 @@
       "cancel": "Annuler",
       "save": "Enregistrer"
     },
+    "responsesSheet": {
+      "title": "Réponses au formulaire d'intérêt",
+      "company": "Société",
+      "enriched": "Enrichi",
+      "pending": "En attente",
+      "wantsSamples": "Souhaite des échantillons",
+      "empty": "Aucune réponse pour le moment."
+    },
     "upload": {
       "title": "Envoyer un rapport de campagne",
       "client": "Client",
