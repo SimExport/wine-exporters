@@ -9,17 +9,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3 } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
 import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
 
 interface Campaign {
   id: string;
@@ -36,6 +37,19 @@ interface Campaign {
   user_settings?: {
     display_name: string | null;
   } | null;
+}
+
+interface InterestResponse {
+  id: string;
+  campaign_id: string;
+  contact_name: string | null;
+  email: string | null;
+  company_name: string | null;
+  country: string | null;
+  phone: string | null;
+  description: string | null;
+  recommended_actions: string | null;
+  created_at: string;
 }
 
 interface Wine {
@@ -71,6 +85,8 @@ export default function AdminCampaigns() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [emailLogs, setEmailLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [responsesByCampaign, setResponsesByCampaign] = useState<Record<string, InterestResponse[]>>({});
+  const [responsesSheetCampaign, setResponsesSheetCampaign] = useState<Campaign | null>(null);
   const { toast } = useToast();
 
   // Filters
@@ -186,6 +202,22 @@ export default function AdminCampaigns() {
       );
 
       setCampaigns(campaignsWithCounts as any);
+
+      // Fetch all interest-form responses for these campaigns
+      const campaignIds = rows.map((c: any) => c.id);
+      if (campaignIds.length) {
+        const { data: responses } = await supabase
+          .from('campaign_interested_contacts')
+          .select('id, campaign_id, contact_name, email, company_name, country, phone, description, recommended_actions, created_at')
+          .in('campaign_id', campaignIds)
+          .order('created_at', { ascending: false });
+        const grouped: Record<string, InterestResponse[]> = {};
+        (responses || []).forEach((r: any) => {
+          if (!grouped[r.campaign_id]) grouped[r.campaign_id] = [];
+          grouped[r.campaign_id].push(r as InterestResponse);
+        });
+        setResponsesByCampaign(grouped);
+      }
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
