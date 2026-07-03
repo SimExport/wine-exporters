@@ -1953,6 +1953,7 @@
       "markets": "Markets",
       "status": "Status",
       "prospects": "Prospects",
+      "forms": "Forms",
       "actions": "Actions",
       "validate": "Validate",
       "reject": "Reject",
@@ -1994,6 +1995,14 @@
       "remove": "Remove",
       "cancel": "Cancel",
       "save": "Save"
+    },
+    "responsesSheet": {
+      "title": "Interest form responses",
+      "company": "Company",
+      "enriched": "Enriched",
+      "pending": "Pending",
+      "wantsSamples": "Wants samples",
+      "empty": "No responses yet."
     },
     "upload": {
       "title": "Send a campaign report",

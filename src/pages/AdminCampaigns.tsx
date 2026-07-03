@@ -9,17 +9,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3 } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
 import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
 
 interface Campaign {
   id: string;
@@ -36,6 +37,19 @@ interface Campaign {
   user_settings?: {
     display_name: string | null;
   } | null;
+}
+
+interface InterestResponse {
+  id: string;
+  campaign_id: string;
+  contact_name: string | null;
+  email: string | null;
+  company_name: string | null;
+  country: string | null;
+  phone: string | null;
+  description: string | null;
+  recommended_actions: string | null;
+  created_at: string;
 }
 
 interface Wine {
@@ -71,6 +85,8 @@ export default function AdminCampaigns() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [emailLogs, setEmailLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [responsesByCampaign, setResponsesByCampaign] = useState<Record<string, InterestResponse[]>>({});
+  const [responsesSheetCampaign, setResponsesSheetCampaign] = useState<Campaign | null>(null);
   const { toast } = useToast();
 
   // Filters
@@ -186,6 +202,22 @@ export default function AdminCampaigns() {
       );
 
       setCampaigns(campaignsWithCounts as any);
+
+      // Fetch all interest-form responses for these campaigns
+      const campaignIds = rows.map((c: any) => c.id);
+      if (campaignIds.length) {
+        const { data: responses } = await supabase
+          .from('campaign_interested_contacts')
+          .select('id, campaign_id, contact_name, email, company_name, country, phone, description, recommended_actions, created_at')
+          .in('campaign_id', campaignIds)
+          .order('created_at', { ascending: false });
+        const grouped: Record<string, InterestResponse[]> = {};
+        (responses || []).forEach((r: any) => {
+          if (!grouped[r.campaign_id]) grouped[r.campaign_id] = [];
+          grouped[r.campaign_id].push(r as InterestResponse);
+        });
+        setResponsesByCampaign(grouped);
+      }
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({
@@ -702,6 +734,7 @@ export default function AdminCampaigns() {
                   <TableHead>{t('adminCampaigns.table.markets')}</TableHead>
                   <TableHead>{t('adminCampaigns.table.status')}</TableHead>
                   <TableHead>{t('adminCampaigns.table.prospects')}</TableHead>
+                  <TableHead>{t('adminCampaigns.table.forms')}</TableHead>
                   <TableHead>{t('adminCampaigns.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -746,6 +779,23 @@ export default function AdminCampaigns() {
                     </TableCell>
                     <TableCell>
                       <span className="font-medium">{campaign.prospect_count || 0}</span>
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const count = responsesByCampaign[campaign.id]?.length || 0;
+                        return (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="p-0 h-auto font-medium"
+                            disabled={count === 0}
+                            onClick={() => setResponsesSheetCampaign(campaign)}
+                          >
+                            <ClipboardList className="h-3 w-3 mr-1" />
+                            {count}
+                          </Button>
+                        );
+                      })()}
                     </TableCell>
                      <TableCell>
                        <div className="flex gap-2">
@@ -1145,6 +1195,71 @@ export default function AdminCampaigns() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Interest form responses sheet */}
+      <Sheet
+        open={!!responsesSheetCampaign}
+        onOpenChange={(open) => !open && setResponsesSheetCampaign(null)}
+      >
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t('adminCampaigns.responsesSheet.title')}</SheetTitle>
+            <SheetDescription>
+              {responsesSheetCampaign?.name}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6 space-y-3">
+            {(responsesSheetCampaign
+              ? responsesByCampaign[responsesSheetCampaign.id] || []
+              : []
+            ).map((r) => {
+              const wantsSamples = /samples|\bsample\b|échantillon/i.test(
+                r.recommended_actions || '',
+              );
+              const enriched = !!(r.description && r.description.trim());
+              return (
+                <div key={r.id} className="rounded-lg border p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-medium">{r.contact_name || '—'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {r.email || '—'}
+                        {r.phone ? ` · ${r.phone}` : ''}
+                      </div>
+                    </div>
+                    <Badge variant={enriched ? 'default' : 'secondary'}>
+                      {enriched
+                        ? t('adminCampaigns.responsesSheet.enriched')
+                        : t('adminCampaigns.responsesSheet.pending')}
+                    </Badge>
+                  </div>
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">
+                      {t('adminCampaigns.responsesSheet.company')}:
+                    </span>{' '}
+                    {r.company_name || '—'}
+                    {r.country ? ` · ${r.country}` : ''}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{formatDateTime(r.created_at)}</span>
+                    {wantsSamples && (
+                      <Badge variant="outline" className="text-xs">
+                        {t('adminCampaigns.responsesSheet.wantsSamples')}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {responsesSheetCampaign &&
+              (responsesByCampaign[responsesSheetCampaign.id]?.length ?? 0) === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  {t('adminCampaigns.responsesSheet.empty')}
+                </p>
+              )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
