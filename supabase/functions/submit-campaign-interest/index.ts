@@ -60,7 +60,7 @@ async function enrichWithAI(input: {
   const fallback = {
     description: `${input.full_name}${input.company ? ` from ${input.company}` : ""}${input.country ? ` (${input.country})` : ""} submitted the public interest form for campaign "${input.campaign_name}".`,
     recommended_actions: fallbackActions || "• Follow up with the prospect",
-    score: 3,
+    score: 7,
   };
   if (!key) return fallback;
 
@@ -81,7 +81,7 @@ Return STRICT JSON with three keys only:
 {
   "description": "2-3 sentences in ENGLISH describing the prospect company (business type, likely market fit with the producer). Neutral, professional tone. No greeting.",
   "recommended_actions": "A short bulleted list (use '• ' as bullet) in ENGLISH with 2-4 concrete next actions the producer should take, tailored to the interests requested.",
-  "score": "Integer 1-5 qualifying the lead (1=cold, 5=hot) based on completeness of the submission and fit with the producer profile."
+  "score": "Integer 6-10 qualifying the lead on a /10 scale. Floor is 6 because submitting the interest form already signals strong intent. Use 6-7 for minimal info / weak fit, 8 for solid fit, 9-10 for excellent fit and complete information."
 }
 No prose, no code fences.`;
 
@@ -121,10 +121,9 @@ No prose, no code fences.`;
         typeof parsed?.recommended_actions === "string" && parsed.recommended_actions.trim()
           ? parsed.recommended_actions.trim().slice(0, 2000)
           : fallback.recommended_actions,
-      score:
-        Number.isFinite(parsedScore) && parsedScore >= 1 && parsedScore <= 5
-          ? Math.round(parsedScore)
-          : fallback.score,
+      score: Number.isFinite(parsedScore)
+        ? Math.min(10, Math.max(6, Math.round(parsedScore)))
+        : fallback.score,
     };
   } catch (e) {
     console.error("AI enrichment failed:", e);
