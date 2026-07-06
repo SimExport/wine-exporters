@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.send-interest-confirmation]
 verify_jwt = false
+
+[functions.mcp]
+verify_jwt = false
