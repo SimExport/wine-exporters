@@ -36,7 +36,7 @@ interface Props {
 }
 
 type SortKey = 'score' | 'name' | 'country';
-type ScoreFilter = 'all' | '4' | '3';
+type ScoreFilter = 'all' | '8' | '6';
 
 export function InterestedContactsSection({ contacts, currentUserId, addingId, onAdd }: Props) {
   const { t } = useTranslation();
@@ -118,8 +118,8 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('campaigns.detail.interestedContacts.filter.all', { defaultValue: 'Tous les scores' })}</SelectItem>
-              <SelectItem value="4">{t('campaigns.detail.interestedContacts.filter.gte4', { defaultValue: 'Score ≥ 4' })}</SelectItem>
-              <SelectItem value="3">{t('campaigns.detail.interestedContacts.filter.gte3', { defaultValue: 'Score ≥ 3' })}</SelectItem>
+              <SelectItem value="8">{t('campaigns.detail.interestedContacts.filter.gte8', { defaultValue: 'Score ≥ 8' })}</SelectItem>
+              <SelectItem value="6">{t('campaigns.detail.interestedContacts.filter.gte6', { defaultValue: 'Score ≥ 6' })}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -157,7 +157,7 @@ function ProspectCard({
   const flag = getCountryFlag(c.country);
 
   const scoreVariant: 'default' | 'secondary' | 'outline' = c.score != null
-    ? (c.score >= 4 ? 'default' : c.score >= 3 ? 'secondary' : 'outline')
+    ? (c.score >= 8 ? 'default' : c.score >= 6 ? 'secondary' : 'outline')
     : 'outline';
 
   return (
@@ -182,7 +182,7 @@ function ProspectCard({
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {c.score != null && (
-            <Badge variant={scoreVariant}>{c.score}/5</Badge>
+            <Badge variant={scoreVariant}>{c.score}/10</Badge>
           )}
           {c.country && (
             <Badge variant="outline" className="gap-1 font-normal">

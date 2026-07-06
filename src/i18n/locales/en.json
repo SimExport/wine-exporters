@@ -840,8 +840,8 @@
         },
         "filter": {
           "all": "All scores",
-          "gte4": "Score ≥ 4",
-          "gte3": "Score ≥ 3"
+          "gte8": "Score ≥ 8",
+          "gte6": "Score ≥ 6"
         }
       }
     },
