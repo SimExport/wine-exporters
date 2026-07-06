@@ -1,58 +1,67 @@
-# Unification du scoring sur /10
-
 ## Objectif
-Aligner tous les scores prospects sur une échelle /10, avec des plages contextuelles selon la source.
+Deux actions admin par campagne : (1) synchroniser les stats Brevo (ouvertures/clics) et (2) importer les cliqueurs comme leads scorés 4-7/10, en excluant ceux déjà présents.
 
-## Plages retenues
-- **Formulaire d'intérêt** (soumission volontaire) : **6–10** (plancher élevé car intention forte)
-- **Cliqueurs** (ouvertures/clics email, futur import) : **4–7**
-- **Recherches sur-mesure** : échelle native **1–10** conservée (déjà en place)
+## Prérequis DB
+La table `campaigns` ne stocke pas encore l'ID Brevo. Migration :
+- Ajouter `campaigns.brevo_campaign_id bigint` (nullable, index).
+- Backfill impossible côté auto → laissé NULL pour les anciennes campagnes ; l'UI proposera un champ pour le saisir à la main si absent (voir §UI).
 
-## Changements
+## Persistance de l'ID Brevo
+- `supabase/functions/create-campaign/index.ts` : après `brevoId = createJson?.id`, faire un `UPDATE campaigns SET brevo_campaign_id = brevoId WHERE id = campaign.id`.
+- Pour la campagne Yves Loison (déjà envoyée), l'admin saisira l'ID manuellement via l'UI.
 
-### 1. Edge function `submit-campaign-interest`
-- Modifier le prompt Anthropic : demander un entier **6-10** au lieu de 1-5, en expliquant la logique (soumission = intention forte).
-- Fallback score : passer de `3` à `7`.
-- Validation : clamp entre 6 et 10 (au lieu de 1-5).
-- La valeur écrite dans `campaign_interested_contacts.score` **et** `leads.source_score` sera donc sur 10.
+## Nouvelle Edge Function `sync-brevo-campaign`
+Fichier : `supabase/functions/sync-brevo-campaign/index.ts` (verify_jwt = true, admin-only via `has_role`).
 
-Note : pas de migration SQL (les colonnes sont `integer`, aucune contrainte 1-5 côté base). Les anciennes lignes 1-5 restent telles quelles ; on peut optionnellement les remapper (voir §4).
+Payload : `{ campaign_id: uuid, mode: 'stats' | 'clicks' | 'both' }`.
 
-### 2. Affichage `/5` → `/10`
-Un seul endroit code en dur `/5` :
-- `src/components/campaigns/InterestedContactsSection.tsx`
-  - Badge : `{c.score}/5` → `{c.score}/10`
-  - Seuils de variante badge : `>=4 default, >=3 secondary` → `>=8 default, >=6 secondary, sinon outline`
-  - Filtre `scoreFilter` (options "Tous / 3+ / 4+ / 5") → adapter à `6+ / 8+ / 10` avec les libellés i18n correspondants.
+Étapes :
+1. Auth : `getClaims` puis `has_role(user, 'admin')`. Charger `campaigns.brevo_campaign_id` ; 400 si absent.
+2. **Stats** (`mode` in `stats|both`) : `GET https://api.brevo.com/v3/emailCampaigns/{brevoId}` avec header `api-key: BREVO_API_KEY`. Extraire `statistics.globalStats.uniqueViews` et `.clickers` (ou `.uniqueClicks`). UPDATE `campaigns.stats_opens`, `stats_clicks`.
+3. **Clics** (`mode` in `clicks|both`) :
+   - `GET /v3/emailCampaigns/{brevoId}/statistics` puis pagination `GET /v3/contacts/lists/{listId}/contacts` — plus simple : `GET /v3/emailCampaigns/{brevoId}/reports/clicks` n'existe pas ; on utilise `GET /v3/contacts/campaignStats/{brevoId}` OU on itère sur les URLs cliquées via `GET /v3/emailCampaigns/{brevoId}` (renvoie `statistics.linksStats`) — ces endpoints Brevo donnent des compteurs, pas des emails.
+   - Endpoint réel pour lister les emails des cliqueurs : **`GET /v3/emailCampaigns/{brevoId}/reports/clicks/{link}`** (par lien) OU **`GET /v3/contacts/segments`**. Le seul endpoint fiable qui retourne des emails de cliqueurs est **`GET /v3/emailCampaigns/{brevoId}` avec `?statistics=linksStats`** combiné à l'export de **`POST /v3/contacts/exportRecipients`** → asynchrone.
+   - Approche retenue : utiliser **`GET /v3/emailCampaigns/{brevoId}` puis pour chaque URL, `GET /v3/emailCampaigns/{brevoId}/reports/clickedLinks`** *si dispo*. Sinon, fallback API : `GET /v3/contacts/lists/{listId}/contacts?modifiedSince=…` filtré par event.
+   - **Décision plan** : appeler `POST /v3/contacts/emailCampaigns/exportRecipients` avec `{ recipientsType: "clickers", notifyUrl: null }` → réponse asynchrone contenant un `processId`. Poll `GET /v3/processes/{processId}` toutes les 3s (max 30s) pour récupérer l'URL du CSV, télécharger, parser les emails.
+   - Pour chaque email :
+     - Skip si présent dans `campaign_interested_contacts` (par email, même campagne) OU `leads` (email + campaign_id).
+     - Enrichir via Claude (mêmes prompts que `submit-campaign-interest`, mais forcer score entier **4-7** ; fallback 5).
+     - INSERT dans `leads` : `campaign_id`, `email`, `first_name` = partie avant @, `buyer_id = 'click_<ts>_<rand>'`, `status='new'`, `source='click'`, `source_score`, `owner_notes = description`, `last_activity_at = now()`.
+4. Retourne `{ opens, clicks, imported_leads, skipped }`.
 
-`ProspectDetail.tsx` affiche déjà `source_score/10` avec seuils 8/5 — rien à changer.
+Sécurité : validation Zod du payload, corsHeaders sur toutes réponses, surface les erreurs Brevo avec status + body.
 
-### 3. Helper de source (optionnel, léger)
-Ajouter dans `src/lib/format.ts` (ou nouveau `src/lib/score.ts`) un helper `getScoreRangeForSource(source)` retournant `{min, max}` — utilisé par la future ingestion "cliqueurs" et documenté en commentaire. Pas d'UI/logique métier nouvelle pour les cliqueurs (aucune ingestion existante aujourd'hui).
+## UI Admin
+Fichier : `src/pages/AdminCampaigns.tsx` (colonne actions de la table). À côté de `CampaignStatsPopover` :
 
-### 4. Remap des anciennes valeurs 1-5 (recommandé)
-Migration SQL one-shot pour remapper les scores existants issus du formulaire vers 6-10 :
-```
-UPDATE campaign_interested_contacts
-SET score = LEAST(10, GREATEST(6, 5 + score))
-WHERE score BETWEEN 1 AND 5;
+- Nouveau composant `src/components/admin/BrevoSyncButton.tsx` :
+  - Bouton "Sync Brevo" (icône `RefreshCw`) → dropdown avec 3 actions : "Sync stats", "Importer les cliqueurs", "Les deux".
+  - Si `brevo_campaign_id` NULL → prompt input pour saisir l'ID Brevo (UPDATE campaigns d'abord), puis appelle l'action.
+  - Appelle `supabase.functions.invoke('sync-brevo-campaign', { body: { campaign_id, mode } })`.
+  - Toast succès avec `{ imported_leads, opens, clicks }` ; toast erreur détaillée si Brevo échoue.
+  - Rafraîchit la liste des campagnes après succès.
 
-UPDATE leads
-SET source_score = LEAST(10, GREATEST(6, 5 + source_score))
-WHERE source = 'interest_form' AND source_score BETWEEN 1 AND 5;
-```
-Formule : 1→6, 2→7, 3→8, 4→9, 5→10.
+Pas de changement sur `CampaignStatsPopover` (édition manuelle conservée en repli).
 
-### 5. i18n
-Mettre à jour libellés du filtre score (fr/en) : "Score ≥ 6 / ≥ 8 / = 10".
+## i18n
+Ajouter clés `adminCampaigns.brevoSync.*` (fr/en) : label bouton, options du menu, prompt "Brevo campaign ID", toasts succès/erreur.
+
+## Config
+- `supabase/config.toml` : ajouter `[functions.sync-brevo-campaign] verify_jwt = true`.
+- Aucun nouveau secret : `BREVO_API_KEY` et `ANTHROPIC_API_KEY` déjà configurés.
+
+## Scoring cliqueurs
+Extension du prompt Claude existant : demander score entier **4-7** (fort intérêt passif mais pas déclaratif), avec règles 4=faible signal, 5=standard, 6=bon fit, 7=très bon fit. Fallback 5. Description en anglais, 2-3 phrases, comme `submit-campaign-interest`.
 
 ## Fichiers touchés
-- `supabase/functions/submit-campaign-interest/index.ts`
-- `src/components/campaigns/InterestedContactsSection.tsx`
-- `src/lib/score.ts` (nouveau, petit)
+- migration SQL (ajout `brevo_campaign_id`)
+- `supabase/functions/sync-brevo-campaign/index.ts` (nouveau)
+- `supabase/functions/create-campaign/index.ts` (persistance ID)
+- `supabase/config.toml`
+- `src/components/admin/BrevoSyncButton.tsx` (nouveau)
+- `src/pages/AdminCampaigns.tsx` (intégration bouton)
 - `src/i18n/locales/fr.json`, `src/i18n/locales/en.json`
-- 1 migration SQL (remap)
 
 ## Hors scope
-- Ingestion des cliqueurs (aucune source de leads "click" n'existe encore — la plage 4-7 est réservée pour cette future feature via le helper).
-- Recherches sur-mesure : aucun changement, déjà sur /10.
+- Automatisation cron (déclenchement manuel uniquement, réutilisable plus tard).
+- Interface pour ré-enrichir un lead cliqueur existant.
