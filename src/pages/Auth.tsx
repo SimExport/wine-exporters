@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,9 @@ const Auth = () => {
   const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextParam = searchParams.get('next');
+  const safeNext = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : null;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -33,7 +36,11 @@ const Auth = () => {
         toast({ title: t('auth.errorTitle'), description: errorMessage, variant: "destructive" });
       } else {
         toast({ title: t('auth.signedIn'), description: t('auth.welcome') });
-        navigate('/');
+        if (safeNext) {
+          window.location.href = safeNext;
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       toast({ title: t('common.error'), description: t('auth.unexpectedError') });
