@@ -308,7 +308,7 @@ Deno.serve(async (req) => {
     // Step 4 — Update campaign status
     step = "update_campaign";
     const { error: uErr } = await admin.from("campaigns")
-      .update({ status: "active", validated_at: new Date().toISOString(), admin_reviewer: callerId, launched_at: new Date().toISOString() })
+      .update({ status: "active", validated_at: new Date().toISOString(), admin_reviewer: callerId, launched_at: new Date().toISOString(), brevo_campaign_id: brevoId })
       .eq("id", campaignId);
     if (uErr) throw new Error(`Update campaign failed: ${uErr.message}`);
 

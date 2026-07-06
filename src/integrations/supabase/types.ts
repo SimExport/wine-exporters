@@ -313,6 +313,7 @@ export type Database = {
           admin_reviewer: string | null
           audience_estimate: number | null
           blacklist_buyer_ids: string[] | null
+          brevo_campaign_id: number | null
           channels: string[] | null
           client_note: string | null
           created_at: string
@@ -361,6 +362,7 @@ export type Database = {
           admin_reviewer?: string | null
           audience_estimate?: number | null
           blacklist_buyer_ids?: string[] | null
+          brevo_campaign_id?: number | null
           channels?: string[] | null
           client_note?: string | null
           created_at?: string
@@ -409,6 +411,7 @@ export type Database = {
           admin_reviewer?: string | null
           audience_estimate?: number | null
           blacklist_buyer_ids?: string[] | null
+          brevo_campaign_id?: number | null
           channels?: string[] | null
           client_note?: string | null
           created_at?: string

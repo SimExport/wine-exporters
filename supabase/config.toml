@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.mcp]
 verify_jwt = false
+
+[functions.sync-brevo-campaign]
+verify_jwt = true
