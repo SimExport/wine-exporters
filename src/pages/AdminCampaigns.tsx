@@ -307,8 +307,13 @@ export default function AdminCampaigns() {
         throw new Error(fnError?.message || (data as any)?.error || 'create-campaign failed');
       }
 
-      // Remove from local state (optimistic update)
-      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+      // Notify the user their campaign is validated (best-effort)
+      supabase.functions
+        .invoke('notify-campaign-validated', { body: { campaignId } })
+        .catch((e) => console.error('notify-campaign-validated failed:', e));
+
+      // Reflect new status locally
+      setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: 'active' } : c));
 
       toast({
         title: t('adminCampaigns.validatedTitle'),
@@ -320,6 +325,38 @@ export default function AdminCampaigns() {
         title: t('adminCampaigns.errorTitle'),
         description: t('adminCampaigns.validateError'),
         variant: "destructive"
+      });
+    }
+  };
+
+  const changeCampaignStatus = async (campaignId: string, newStatus: string, currentStatus: string) => {
+    if (newStatus === currentStatus) return;
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ status: newStatus })
+        .eq('id', campaignId);
+      if (error) throw error;
+
+      setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: newStatus } : c));
+
+      // When manually flipped to active, trigger the user confirmation email
+      if (newStatus === 'active' && currentStatus !== 'active') {
+        supabase.functions
+          .invoke('notify-campaign-validated', { body: { campaignId } })
+          .catch((e) => console.error('notify-campaign-validated failed:', e));
+      }
+
+      toast({
+        title: t('adminCampaigns.statusUpdatedTitle', { defaultValue: 'Statut mis à jour' }),
+        description: t(`adminCampaigns.statuses.${newStatus}`, { defaultValue: newStatus }),
+      });
+    } catch (e: any) {
+      console.error('changeCampaignStatus failed:', e);
+      toast({
+        title: t('adminCampaigns.errorTitle'),
+        description: e?.message ?? 'Update failed',
+        variant: 'destructive',
       });
     }
   };
