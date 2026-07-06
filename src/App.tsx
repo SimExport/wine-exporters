@@ -34,6 +34,7 @@ import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
+import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
             <Route path="/interest/:campaignId" element={<CampaignInterestForm />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
             <Route
               path="/register"
