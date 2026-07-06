@@ -2032,6 +2032,21 @@
       "successTitle": "Prospects imported",
       "successDesc": "{{count}} prospect(s) added.",
       "error": "Import error"
+    },
+    "brevoSync": {
+      "label": "Brevo sync",
+      "syncStats": "Sync stats",
+      "importClicks": "Import clickers",
+      "both": "Stats + clickers",
+      "opens": "Opens",
+      "clicks": "Clicks",
+      "imported": "Imported leads",
+      "skipped": "Skipped",
+      "successTitle": "Brevo sync done",
+      "errorTitle": "Brevo sync failed",
+      "setIdTitle": "Missing Brevo campaign id",
+      "setIdDescription": "Enter the numeric Brevo campaign id to link this campaign and run the sync.",
+      "invalidId": "Invalid id"
     }
   },
   "parseAddresses": {
