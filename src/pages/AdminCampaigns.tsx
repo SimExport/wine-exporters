@@ -812,7 +812,24 @@ export default function AdminCampaigns() {
                       {getMarketsBadges(campaign.target_markets)}
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(campaign.status)}
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(campaign.status)}
+                        <Select
+                          value={campaign.status}
+                          onValueChange={(v) => changeCampaignStatus(campaign.id, v, campaign.status)}
+                        >
+                          <SelectTrigger className="h-7 w-[140px] text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(CAMPAIGN_STATUS_COLORS).map((s) => (
+                              <SelectItem key={s} value={s}>
+                                {t(`adminCampaigns.statuses.${s}`, { defaultValue: s })}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <span className="font-medium">{campaign.prospect_count || 0}</span>
