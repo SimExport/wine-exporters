@@ -20,6 +20,7 @@ import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
 import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
+import { BrevoSyncButton } from '@/components/admin/BrevoSyncButton';
 import { formatDate, formatDateTime } from '@/lib/format';
 
 interface Campaign {
@@ -33,6 +34,7 @@ interface Campaign {
   stats_opens: number | null;
   stats_clicks: number | null;
   stats_replies: number | null;
+  brevo_campaign_id?: number | null;
   prospect_count?: number;
   user_settings?: {
     display_name: string | null;
@@ -907,6 +909,11 @@ export default function AdminCampaigns() {
                           <CampaignStatsPopover
                             campaign={campaign}
                             onSaved={fetchCampaigns}
+                          />
+                          <BrevoSyncButton
+                            campaignId={campaign.id}
+                            brevoCampaignId={campaign.brevo_campaign_id}
+                            onSynced={fetchCampaigns}
                           />
                           <Button
                             size="sm"
