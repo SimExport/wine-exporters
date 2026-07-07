@@ -32,6 +32,7 @@ interface Campaign {
   prospect_count?: number;
   stats_opens?: number | null;
   stats_clicks?: number | null;
+  audience_estimate?: number | null;
 }
 
 interface Document {
