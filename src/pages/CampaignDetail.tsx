@@ -32,6 +32,7 @@ interface Campaign {
   prospect_count?: number;
   stats_opens?: number | null;
   stats_clicks?: number | null;
+  audience_estimate?: number | null;
 }
 
 interface Document {
@@ -428,13 +429,27 @@ const CampaignDetail = () => {
               <div>
                 <h5 className="font-medium text-sm">{t('campaigns.detail.openRateLabel')}</h5>
                 <p className="text-2xl font-bold">
-                  {campaign.stats_opens != null ? `${campaign.stats_opens} %` : '—'}
+                  {campaign.stats_opens != null ? campaign.stats_opens : '—'}
+                  {campaign.stats_opens != null && campaign.audience_estimate
+                    ? (
+                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                        ({((campaign.stats_opens / campaign.audience_estimate) * 100).toFixed(1)} %)
+                      </span>
+                    )
+                    : null}
                 </p>
               </div>
               <div>
                 <h5 className="font-medium text-sm">{t('campaigns.detail.interestedClicksLabel')}</h5>
                 <p className="text-2xl font-bold">
                   {campaign.stats_clicks != null ? campaign.stats_clicks : '—'}
+                  {campaign.stats_clicks != null && campaign.audience_estimate
+                    ? (
+                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                        ({((campaign.stats_clicks / campaign.audience_estimate) * 100).toFixed(1)} %)
+                      </span>
+                    )
+                    : null}
                 </p>
               </div>
             </CardContent>
