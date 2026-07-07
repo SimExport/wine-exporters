@@ -1,34 +1,38 @@
 ## Objectif
 
-Le bouton "Voir prospects" du tableau admin renvoie actuellement vers `/prospects?campaign=…`, une page côté user à laquelle l'admin ne peut pas accéder sans le compte du client. Le remplacer par une vue admin qui liste **tous les importateurs qualifiés liés à la campagne**, sans quitter l'admin.
+Quand l'admin clique **"Marquer terminée"** sur une campagne, envoyer automatiquement un email Resend au user propriétaire pour l'informer que sa campagne est terminée et que les résultats/prospects qualifiés sont disponibles dans son espace.
 
-## Comportement
+## Implémentation
 
-Le bouton "Voir prospects" ouvre un **Sheet** (panneau latéral) qui affiche, pour la campagne cliquée :
+### 1. Nouvelle Edge Function `notify-campaign-completed`
 
-**Section 1 — Répondants formulaire** (source: `campaign_interested_contacts`)
-Colonnes : société, contact, email, pays, score /10, description courte.
+Fichier : `supabase/functions/notify-campaign-completed/index.ts` — cloné et adapté depuis `notify-campaign-validated`.
 
-**Section 2 — Cliqueurs importés** (source: `leads` where `campaign_id = X and source = 'click'`)
-Colonnes : email, marché, score /10 (`source_score`), description (`owner_notes`), date de création.
+- Input : `{ campaignId: string }`
+- Fetch campagne (id, name, user_id) + email user + `user_settings.ui_language` pour FR/EN
+- Compte les prospects qualifiés (`campaign_interested_contacts` + `leads where source='click'`) pour les afficher en teaser dans le mail
+- Envoi Resend :
+  - **From** : `WineExporters <notifications@exportvins.fr>` (même que les autres notifs)
+  - **BCC** : `simon@exportvins.fr`
+  - **Sujet FR** : `🎉 Votre campagne "{name}" est terminée — les résultats sont disponibles`
+  - **Sujet EN** : `🎉 Your campaign "{name}" is complete — results are available`
+  - **Corps** : header WineExporters bordeaux, message "Votre campagne est terminée", ligne teaser "{N} prospects qualifiés + {M} cliqueurs intéressés" (si > 0), CTA bouton "Voir mes résultats" → `https://wine-exporters.com/campaigns/{id}`
+- Log dans `campaign_email_logs` avec `event_type: 'campaign_completed'`
+- CORS et gestion d'erreur identiques à `notify-campaign-validated`
 
-En-tête du Sheet :
-- Nom de la campagne
-- 2 compteurs : "Répondants: N" · "Cliqueurs: M"
-- Total combiné
+### 2. Appel depuis l'admin
 
-État vide par section si aucune donnée.
-
-Aucune action d'édition dans ce Sheet (lecture seule, admin voit ce que le user verrait sur son CRM).
+Dans `src/pages/AdminCampaigns.tsx`, fonction `markCampaignCompleted` :
+- Après l'`UPDATE status='results'` réussi, `supabase.functions.invoke('notify-campaign-completed', { body: { campaignId } })`
+- L'erreur d'envoi email ne fait pas échouer l'opération (juste un toast d'avertissement) — la campagne reste marquée terminée
 
 ## Fichiers modifiés
 
-- `src/pages/AdminCampaigns.tsx` : le bouton `viewProspects` déclenche l'ouverture du Sheet au lieu d'un `window.open`. Ajout d'un state `qualifiedOpenId` et fetch à l'ouverture.
-- `src/components/admin/CampaignQualifiedProspectsSheet.tsx` (nouveau) : composant qui fetch et affiche les deux listes.
-- `src/i18n/locales/fr.json` + `en.json` : nouvelles clés `adminCampaigns.qualified.title / respondents / clickers / empty / …`.
+- `supabase/functions/notify-campaign-completed/index.ts` (nouveau)
+- `src/pages/AdminCampaigns.tsx` (appel invoke)
 
 ## Hors périmètre
 
-- Pas de modification de la table `leads` ni `campaign_interested_contacts`.
-- Pas de nouvelle route admin dédiée (un Sheet suffit).
-- Pas de bouton d'export / d'action sur les prospects depuis ce Sheet.
+- Pas de changement de schéma DB
+- Pas de renvoi manuel de l'email depuis l'admin (le mail part une seule fois lors du clic)
+- Pas de modification des autres fonctions notify existantes

@@ -1900,6 +1900,8 @@
     "markCompletedConfirm": "Marquer la campagne \"{{name}}\" comme terminée ?",
     "completedTitle": "Campagne terminée",
     "completedDesc": "La campagne \"{{name}}\" est maintenant marquée comme terminée",
+    "completedEmailWarnTitle": "Email non envoyé",
+    "completedEmailWarnDesc": "La campagne est marquée terminée mais l'email de notification n'a pas pu être envoyé.",
     "markCompletedError": "Impossible de marquer la campagne comme terminée",
     "statuses": {
       "draft": "Brouillon",
