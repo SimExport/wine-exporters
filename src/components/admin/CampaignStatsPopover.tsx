@@ -60,7 +60,6 @@ export function CampaignStatsPopover({ campaign, onSaved }: Props) {
             id={`opens-${campaign.id}`}
             type="number"
             min={0}
-            max={100}
             value={opens}
             onChange={(e) => setOpens(e.target.value)}
           />
