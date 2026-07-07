@@ -1,38 +1,57 @@
 ## Objectif
 
-Quand l'admin clique **"Marquer terminée"** sur une campagne, envoyer automatiquement un email Resend au user propriétaire pour l'informer que sa campagne est terminée et que les résultats/prospects qualifiés sont disponibles dans son espace.
+Sur la page campagne côté user, regrouper dans la carte "Prospects qualifiés" **deux sources** :
+1. **Répondants formulaire** (`campaign_interested_contacts`) — scores 8-10/10, hautement intéressés
+2. **Cliqueurs importés par Claude** (`leads` où `campaign_id = X` et `source = 'click'`) — scores 4-7/10, pertinence variable
 
-## Implémentation
+Aujourd'hui la carte n'affiche que la source 1.
 
-### 1. Nouvelle Edge Function `notify-campaign-completed`
+## Comportement
 
-Fichier : `supabase/functions/notify-campaign-completed/index.ts` — cloné et adapté depuis `notify-campaign-validated`.
+### Fetch
 
-- Input : `{ campaignId: string }`
-- Fetch campagne (id, name, user_id) + email user + `user_settings.ui_language` pour FR/EN
-- Compte les prospects qualifiés (`campaign_interested_contacts` + `leads where source='click'`) pour les afficher en teaser dans le mail
-- Envoi Resend :
-  - **From** : `WineExporters <notifications@exportvins.fr>` (même que les autres notifs)
-  - **BCC** : `simon@exportvins.fr`
-  - **Sujet FR** : `🎉 Votre campagne "{name}" est terminée — les résultats sont disponibles`
-  - **Sujet EN** : `🎉 Your campaign "{name}" is complete — results are available`
-  - **Corps** : header WineExporters bordeaux, message "Votre campagne est terminée", ligne teaser "{N} prospects qualifiés + {M} cliqueurs intéressés" (si > 0), CTA bouton "Voir mes résultats" → `https://wine-exporters.com/campaigns/{id}`
-- Log dans `campaign_email_logs` avec `event_type: 'campaign_completed'`
-- CORS et gestion d'erreur identiques à `notify-campaign-validated`
+Dans `CampaignDetail.tsx`, en plus de `fetchInterested`, fetch les cliqueurs :
+```
+supabase.from('leads')
+  .select('id, email, market, source_score, owner_notes, created_at')
+  .eq('campaign_id', id).eq('source','click')
+```
 
-### 2. Appel depuis l'admin
+### Modèle unifié
 
-Dans `src/pages/AdminCampaigns.tsx`, fonction `markCampaignCompleted` :
-- Après l'`UPDATE status='results'` réussi, `supabase.functions.invoke('notify-campaign-completed', { body: { campaignId } })`
-- L'erreur d'envoi email ne fait pas échouer l'opération (juste un toast d'avertissement) — la campagne reste marquée terminée
+Adapter `InterestedContact` en type union avec un champ discriminant `origin: 'form' | 'click'`. Mapping cliqueur → carte :
+- `company_name` = partie locale de l'email (avant `@`)
+- `email` = email
+- `country` = `market`
+- `score` = `source_score` (4-7)
+- `description` = `owner_notes` (contient l'inférence Claude)
+- `recommended_actions` = null
+- Pas d'`added_to_crm_by` (déjà dans les leads de la campagne)
+
+### Affichage
+
+`InterestedContactsSection` accepte la liste unifiée triée par score décroissant. Sur chaque `ProspectCard` :
+- Badge source en haut à droite : "Formulaire" (`default`) ou "Cliqueur" (`outline`) — visuellement distinct du badge score
+- Filtre score existant ≥ 8 / ≥ 6 conservé (les cliqueurs 4-7 se retrouvent sous "Tous les scores")
+- Nouveau filtre optionnel "Source" : Toutes / Formulaire / Cliqueurs
+- **Bouton "Ajouter au CRM"** :
+  - `origin='form'` → flow existant inchangé
+  - `origin='click'` → pas de bouton, badge d'information "Déjà dans votre CRM" (car les cliqueurs sont insérés directement en tant que leads par la sync admin — ils apparaissent déjà dans le CRM sous la campagne d'origine)
+- Compteur en-tête : total combiné + petit split "X formulaire · Y cliqueurs"
+
+### Ordre
+
+Tri par `score` décroissant par défaut : les 10/10 formulaire en premier, puis les 7/10 cliqueurs, etc.
 
 ## Fichiers modifiés
 
-- `supabase/functions/notify-campaign-completed/index.ts` (nouveau)
-- `src/pages/AdminCampaigns.tsx` (appel invoke)
+- `src/pages/CampaignDetail.tsx` : nouveau fetch cliqueurs, mapping unifié, passage au composant
+- `src/components/campaigns/InterestedContactsSection.tsx` : type union `origin`, badge source, filtre source, adapter le rendu du bouton Add
+- `src/i18n/locales/fr.json` + `en.json` : clés `interestedContacts.origin.form / origin.click / alreadyInCrm / filterSource.*`
 
 ## Hors périmètre
 
-- Pas de changement de schéma DB
-- Pas de renvoi manuel de l'email depuis l'admin (le mail part une seule fois lors du clic)
-- Pas de modification des autres fonctions notify existantes
+- Pas de changement d'edge function `sync-brevo-campaign` (déjà OK avec le fix précédent)
+- Pas de modification du CRM ou de la table `leads`
+- Pas de renommage de la carte (elle s'appelle déjà "Prospects qualifiés")
+- Pas d'action "supprimer un cliqueur" côté user
