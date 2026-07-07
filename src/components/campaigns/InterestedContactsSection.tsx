@@ -26,6 +26,8 @@ export interface InterestedContact {
   description: string | null;
   recommended_actions: string | null;
   added_to_crm_by: string[] | null;
+  /** 'form' = interest form respondent (default). 'click' = imported clicker via Brevo sync. */
+  origin?: 'form' | 'click';
 }
 
 interface Props {
@@ -37,12 +39,14 @@ interface Props {
 
 type SortKey = 'score' | 'name' | 'country';
 type ScoreFilter = 'all' | '8' | '6';
+type SourceFilter = 'all' | 'form' | 'click';
 
 export function InterestedContactsSection({ contacts, currentUserId, addingId, onAdd }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>('all');
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   const isAdded = (c: InterestedContact) =>
     !!currentUserId && (c.added_to_crm_by || []).includes(currentUserId);
@@ -50,6 +54,7 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = contacts.filter((c) => {
+      if (sourceFilter !== 'all' && (c.origin ?? 'form') !== sourceFilter) return false;
       if (scoreFilter !== 'all') {
         const min = parseInt(scoreFilter, 10);
         if ((c.score ?? 0) < min) return false;
@@ -65,10 +70,12 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
       return (b.score ?? -1) - (a.score ?? -1);
     });
     return list;
-  }, [contacts, query, sortBy, scoreFilter]);
+  }, [contacts, query, sortBy, scoreFilter, sourceFilter]);
 
   const addedCount = contacts.filter(isAdded).length;
   const total = contacts.length;
+  const formCount = contacts.filter((c) => (c.origin ?? 'form') === 'form').length;
+  const clickCount = contacts.filter((c) => c.origin === 'click').length;
   const progress = total > 0 ? Math.round((addedCount / total) * 100) : 0;
 
   return (
@@ -79,6 +86,15 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
             <Users className="h-5 w-5" />
             {t('campaigns.detail.interestedContactsCard')}
             <Badge variant="secondary" className="ml-2">{total}</Badge>
+            {clickCount > 0 && (
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                · {t('campaigns.detail.interestedContacts.splitCounts', {
+                  form: formCount,
+                  click: clickCount,
+                  defaultValue: `${formCount} formulaire · ${clickCount} cliqueurs`,
+                })}
+              </span>
+            )}
           </CardTitle>
           <div className="flex items-center gap-3 min-w-[220px]">
             <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -122,6 +138,18 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
               <SelectItem value="6">{t('campaigns.detail.interestedContacts.filter.gte6', { defaultValue: 'Score ≥ 6' })}</SelectItem>
             </SelectContent>
           </Select>
+          {clickCount > 0 && (
+            <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as SourceFilter)}>
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('campaigns.detail.interestedContacts.filterSource.all', { defaultValue: 'Toutes sources' })}</SelectItem>
+                <SelectItem value="form">{t('campaigns.detail.interestedContacts.filterSource.form', { defaultValue: 'Formulaire' })}</SelectItem>
+                <SelectItem value="click">{t('campaigns.detail.interestedContacts.filterSource.click', { defaultValue: 'Cliqueurs' })}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -155,6 +183,7 @@ function ProspectCard({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const flag = getCountryFlag(c.country);
+  const origin = c.origin ?? 'form';
 
   const scoreVariant: 'default' | 'secondary' | 'outline' = c.score != null
     ? (c.score >= 8 ? 'default' : c.score >= 6 ? 'secondary' : 'outline')
@@ -164,7 +193,17 @@ function ProspectCard({
     <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm hover:shadow transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-base truncate">{c.company_name}</h3>
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="font-semibold text-base truncate">{c.company_name}</h3>
+            <Badge
+              variant={origin === 'form' ? 'default' : 'outline'}
+              className="shrink-0 text-[10px] uppercase tracking-wide"
+            >
+              {origin === 'form'
+                ? t('campaigns.detail.interestedContacts.origin.form', { defaultValue: 'Formulaire' })
+                : t('campaigns.detail.interestedContacts.origin.click', { defaultValue: 'Cliqueur' })}
+            </Badge>
+          </div>
           {(c.contact_name || c.email) && (
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {c.contact_name && <span>{c.contact_name}</span>}
@@ -228,7 +267,12 @@ function ProspectCard({
       )}
 
       <div className="mt-auto flex justify-end pt-1">
-        {added ? (
+        {origin === 'click' ? (
+          <Badge variant="secondary" className="gap-1">
+            <Check className="h-3 w-3" />
+            {t('campaigns.detail.interestedContacts.alreadyInCrm', { defaultValue: 'Déjà dans votre CRM' })}
+          </Badge>
+        ) : added ? (
           <Badge variant="secondary" className="gap-1">
             <Check className="h-3 w-3" />
             {t('campaigns.detail.interestedContacts.added')}
