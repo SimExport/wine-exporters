@@ -183,6 +183,7 @@ function ProspectCard({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const flag = getCountryFlag(c.country);
+  const origin = c.origin ?? 'form';
 
   const scoreVariant: 'default' | 'secondary' | 'outline' = c.score != null
     ? (c.score >= 8 ? 'default' : c.score >= 6 ? 'secondary' : 'outline')
@@ -192,7 +193,17 @@ function ProspectCard({
     <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm hover:shadow transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-base truncate">{c.company_name}</h3>
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="font-semibold text-base truncate">{c.company_name}</h3>
+            <Badge
+              variant={origin === 'form' ? 'default' : 'outline'}
+              className="shrink-0 text-[10px] uppercase tracking-wide"
+            >
+              {origin === 'form'
+                ? t('campaigns.detail.interestedContacts.origin.form', { defaultValue: 'Formulaire' })
+                : t('campaigns.detail.interestedContacts.origin.click', { defaultValue: 'Cliqueur' })}
+            </Badge>
+          </div>
           {(c.contact_name || c.email) && (
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {c.contact_name && <span>{c.contact_name}</span>}
@@ -256,7 +267,12 @@ function ProspectCard({
       )}
 
       <div className="mt-auto flex justify-end pt-1">
-        {added ? (
+        {origin === 'click' ? (
+          <Badge variant="secondary" className="gap-1">
+            <Check className="h-3 w-3" />
+            {t('campaigns.detail.interestedContacts.alreadyInCrm', { defaultValue: 'Déjà dans votre CRM' })}
+          </Badge>
+        ) : added ? (
           <Badge variant="secondary" className="gap-1">
             <Check className="h-3 w-3" />
             {t('campaigns.detail.interestedContacts.added')}
