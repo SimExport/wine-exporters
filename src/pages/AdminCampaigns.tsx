@@ -20,6 +20,7 @@ import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignRepor
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
 import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
 import { BrevoSyncButton } from '@/components/admin/BrevoSyncButton';
+import { CampaignQualifiedProspectsSheet } from '@/components/admin/CampaignQualifiedProspectsSheet';
 import { formatDate, formatDateTime } from '@/lib/format';
 
 interface Campaign {
@@ -88,6 +89,7 @@ export default function AdminCampaigns() {
   const [logsLoading, setLogsLoading] = useState(true);
   const [responsesByCampaign, setResponsesByCampaign] = useState<Record<string, InterestResponse[]>>({});
   const [responsesSheetCampaign, setResponsesSheetCampaign] = useState<Campaign | null>(null);
+  const [qualifiedSheetCampaign, setQualifiedSheetCampaign] = useState<Campaign | null>(null);
   const { toast } = useToast();
 
   // Filters
@@ -896,7 +898,7 @@ export default function AdminCampaigns() {
                          <Button
                            size="sm"
                            variant="outline"
-                           onClick={() => window.open(`/prospects?campaign=${campaign.id}`, '_blank')}
+                            onClick={() => setQualifiedSheetCampaign(campaign)}
                          >
                            <Eye className="h-4 w-4 mr-1" />
                            {t('adminCampaigns.table.viewProspects')}
