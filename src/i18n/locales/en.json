@@ -1900,6 +1900,8 @@
     "markCompletedConfirm": "Mark campaign \"{{name}}\" as completed?",
     "completedTitle": "Campaign completed",
     "completedDesc": "Campaign \"{{name}}\" is now marked as completed",
+    "completedEmailWarnTitle": "Email not sent",
+    "completedEmailWarnDesc": "The campaign is marked completed but the notification email could not be sent.",
     "markCompletedError": "Unable to mark campaign as completed",
     "statuses": {
       "draft": "Draft",
