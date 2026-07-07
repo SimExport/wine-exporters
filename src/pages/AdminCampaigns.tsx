@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -1017,15 +1016,15 @@ export default function AdminCampaigns() {
         </CardContent>
       </Card>
 
-      {/* Add Prospect Drawer */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-h-[90vh] overflow-y-auto">
-          <DrawerHeader>
-            <DrawerTitle>
+      {/* Add Prospect Sheet */}
+      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
               {t('adminCampaigns.drawer.title', { name: selectedCampaign?.name ?? '' })}
-            </DrawerTitle>
-          </DrawerHeader>
-          <div className="px-6 pb-6 space-y-6">
+            </SheetTitle>
+          </SheetHeader>
+          <div className="pb-6 pt-4 space-y-6">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1254,8 +1253,8 @@ export default function AdminCampaigns() {
               </Button>
             </div>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </SheetContent>
+      </Sheet>
 
       {/* Interest form responses sheet */}
       <Sheet
