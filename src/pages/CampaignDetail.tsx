@@ -58,6 +58,7 @@ interface InterestedContact {
   description: string | null;
   recommended_actions: string | null;
   added_to_crm_by: string[] | null;
+  origin?: 'form' | 'click';
 }
 
 const CampaignDetail = () => {
