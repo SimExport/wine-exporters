@@ -412,6 +412,20 @@ export default function AdminCampaigns() {
 
       setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: 'results' } : c));
 
+      // Notify the campaign owner by email (non-blocking)
+      supabase.functions
+        .invoke('notify-campaign-completed', { body: { campaignId } })
+        .then(({ error: notifyErr }) => {
+          if (notifyErr) {
+            console.error('notify-campaign-completed failed:', notifyErr);
+            toast({
+              title: t('adminCampaigns.completedEmailWarnTitle'),
+              description: t('adminCampaigns.completedEmailWarnDesc'),
+              variant: 'destructive',
+            });
+          }
+        });
+
       toast({
         title: t('adminCampaigns.completedTitle'),
         description: t('adminCampaigns.completedDesc', { name: campaignName }),
