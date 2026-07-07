@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
-    .select("id, name, user_id, brevo_campaign_id")
+    .select("id, name, user_id, brevo_campaign_id, target_markets")
     .eq("id", campaign_id)
     .maybeSingle();
   if (campErr || !campaign) return json(404, { error: "Campaign not found" });
@@ -277,6 +277,28 @@ Deno.serve(async (req) => {
           (producer_profile?.domain_name as string) || campaign.name || "the producer";
 
         let imported = 0;
+        const failed: string[] = [];
+        const TLD_TO_MARKET: Record<string, string> = {
+          au: "Australia", nz: "New Zealand", uk: "United Kingdom", gb: "United Kingdom",
+          ie: "Ireland", nl: "Netherlands", be: "Belgium", de: "Germany", at: "Austria",
+          ch: "Switzerland", fr: "France", es: "Spain", pt: "Portugal", it: "Italy",
+          dk: "Denmark", se: "Sweden", no: "Norway", fi: "Finland", pl: "Poland",
+          cz: "Czech Republic", gr: "Greece", jp: "Japan", cn: "China", hk: "Hong Kong",
+          sg: "Singapore", kr: "South Korea", tw: "Taiwan", ca: "Canada", us: "United States",
+          mx: "Mexico", br: "Brazil", ae: "United Arab Emirates",
+        };
+        const defaultMarket =
+          (Array.isArray(campaign.target_markets) && campaign.target_markets[0]) || null;
+        const marketFor = (email: string): string => {
+          if (defaultMarket) return String(defaultMarket);
+          const domain = (email.split("@")[1] ?? "").toLowerCase();
+          const parts = domain.split(".");
+          for (let i = parts.length - 1; i >= 0; i--) {
+            const t = parts[i];
+            if (TLD_TO_MARKET[t]) return TLD_TO_MARKET[t];
+          }
+          return "Unknown";
+        };
         for (const email of newEmails) {
           const enriched = await enrichClickerWithAI({
             email,
@@ -289,6 +311,7 @@ Deno.serve(async (req) => {
             campaign_id,
             first_name,
             email,
+            market: marketFor(email),
             buyer_id: `click_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             status: "new",
             source: "click",
@@ -296,11 +319,14 @@ Deno.serve(async (req) => {
             owner_notes: enriched.description,
             last_activity_at: new Date().toISOString(),
           });
-          if (leadErr) console.error("Clicker lead insert failed:", email, leadErr.message);
-          else imported++;
+          if (leadErr) {
+            console.error("Clicker lead insert failed:", email, leadErr.message);
+            failed.push(email);
+          } else imported++;
         }
         result.imported_leads = imported;
         result.skipped = emails.length - newEmails.length;
+        if (failed.length) (result as any).failed = failed.length;
       }
     }
 
