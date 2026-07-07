@@ -1,47 +1,34 @@
-## Contexte
+## Objectif
 
-Sur la campagne "Summer 2026" :
-- **Stats sont bien synchro'd en base** : `stats_opens=387`, `stats_clicks=18` (données Brevo).
-- **Aucun cliqueur importé** (0 leads avec `source='click'`).
+Le bouton "Voir prospects" du tableau admin renvoie actuellement vers `/prospects?campaign=…`, une page côté user à laquelle l'admin ne peut pas accéder sans le compte du client. Le remplacer par une vue admin qui liste **tous les importateurs qualifiés liés à la campagne**, sans quitter l'admin.
 
-## Bugs identifiés
+## Comportement
 
-### 1. Import des cliqueurs échoue silencieusement
+Le bouton "Voir prospects" ouvre un **Sheet** (panneau latéral) qui affiche, pour la campagne cliquée :
 
-Les 18 emails ont bien été récupérés depuis Brevo, mais chaque `INSERT` dans `leads` échoue avec :
-```
-null value in column "market" of relation "leads" violates not-null constraint
-```
-Colonne `leads.market` obligatoire, jamais renseignée par `sync-brevo-campaign`. Résultat renvoyé au front : `imported_leads: 0` sans surfacer l'erreur.
+**Section 1 — Répondants formulaire** (source: `campaign_interested_contacts`)
+Colonnes : société, contact, email, pays, score /10, description courte.
 
-**Correctif** : dans `supabase/functions/sync-brevo-campaign/index.ts`, déduire un `market` par défaut lors de l'insert (dans l'ordre) :
-1. `campaign.target_markets[0]` si présent
-2. sinon domaine TLD de l'email (`.au` → `Australia`, `.nl` → `Netherlands`, `.dk` → `Denmark`, `.com` → `Unknown`, etc.) via petit mapping
-3. fallback `"Unknown"`
+**Section 2 — Cliqueurs importés** (source: `leads` where `campaign_id = X and source = 'click'`)
+Colonnes : email, marché, score /10 (`source_score`), description (`owner_notes`), date de création.
 
-Sélectionner aussi `target_markets` dans la requête campagne. Log + retour d'un compteur `failed` si des inserts échouent encore.
+En-tête du Sheet :
+- Nom de la campagne
+- 2 compteurs : "Répondants: N" · "Cliqueurs: M"
+- Total combiné
 
-### 2. Stats affichées comme pourcentage alors que ce sont des compteurs bruts
+État vide par section si aucune donnée.
 
-Brevo renvoie `uniqueViews`/`clickers` : ce sont des **nombres** d'unique openers/clickers, pas des taux. L'UI les affiche en `%` :
-
-- `src/pages/CampaignDetail.tsx:431` → `${stats_opens} %` (afficherait "387 %")
-- `src/components/admin/CampaignStatsPopover.tsx` → label "Pourcentage d'ouverture (%)"
-- Traductions `campaigns.list.table.opens` à vérifier (Campaigns.tsx utilise `count`)
-
-**Correctif** :
-- CampaignDetail : afficher `stats_opens` et `stats_clicks` comme compteurs, plus le **taux calculé** à côté si `audience_estimate > 0` : `{opens} ({(opens/audience*100).toFixed(1)} %)`.
-- CampaignStatsPopover : renommer le label "Ouvertures uniques" (compteur) au lieu de "Pourcentage d'ouverture (%)", retirer `max={100}`. Mettre à jour i18n `adminCampaigns.table.openRate` en conséquence (FR + EN).
-- Vérifier `campaigns.list.table.opens` : si le libellé dit "% d'ouverture", le passer à "ouvertures".
+Aucune action d'édition dans ce Sheet (lecture seule, admin voit ce que le user verrait sur son CRM).
 
 ## Fichiers modifiés
 
-- `supabase/functions/sync-brevo-campaign/index.ts` (fix insert)
-- `src/pages/CampaignDetail.tsx` (affichage stats)
-- `src/components/admin/CampaignStatsPopover.tsx` (label + validation)
-- `src/i18n/locales/fr.json`, `src/i18n/locales/en.json` (labels stats)
+- `src/pages/AdminCampaigns.tsx` : le bouton `viewProspects` déclenche l'ouverture du Sheet au lieu d'un `window.open`. Ajout d'un state `qualifiedOpenId` et fetch à l'ouverture.
+- `src/components/admin/CampaignQualifiedProspectsSheet.tsx` (nouveau) : composant qui fetch et affiche les deux listes.
+- `src/i18n/locales/fr.json` + `en.json` : nouvelles clés `adminCampaigns.qualified.title / respondents / clickers / empty / …`.
 
 ## Hors périmètre
 
-- Retry automatique des imports cliqueurs déjà loggés (on relancera le bouton Sync après le fix).
-- Modification du schéma `leads` (on garde `market NOT NULL`).
+- Pas de modification de la table `leads` ni `campaign_interested_contacts`.
+- Pas de nouvelle route admin dédiée (un Sheet suffit).
+- Pas de bouton d'export / d'action sur les prospects depuis ce Sheet.

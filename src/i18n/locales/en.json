@@ -2004,6 +2004,17 @@
       "wantsSamples": "Wants samples",
       "empty": "No responses yet."
     },
+    "qualified": {
+      "title": "Qualified importers",
+      "respondents": "Form respondents",
+      "clickers": "Imported clickers",
+      "respondentsCount_one": "{{count}} respondent",
+      "respondentsCount_other": "{{count}} respondents",
+      "clickersCount_one": "{{count}} clicker",
+      "clickersCount_other": "{{count}} clickers",
+      "emptyRespondents": "No form respondents yet.",
+      "emptyClickers": "No imported clickers yet."
+    },
     "upload": {
       "title": "Send a campaign report",
       "client": "Client",

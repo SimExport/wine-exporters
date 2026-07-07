@@ -2004,6 +2004,17 @@
       "wantsSamples": "Souhaite des échantillons",
       "empty": "Aucune réponse pour le moment."
     },
+    "qualified": {
+      "title": "Importateurs qualifiés",
+      "respondents": "Répondants au formulaire",
+      "clickers": "Cliqueurs importés",
+      "respondentsCount_one": "{{count}} répondant",
+      "respondentsCount_other": "{{count}} répondants",
+      "clickersCount_one": "{{count}} cliqueur",
+      "clickersCount_other": "{{count}} cliqueurs",
+      "emptyRespondents": "Aucun répondant au formulaire pour le moment.",
+      "emptyClickers": "Aucun cliqueur importé pour le moment."
+    },
     "upload": {
       "title": "Envoyer un rapport de campagne",
       "client": "Client",
