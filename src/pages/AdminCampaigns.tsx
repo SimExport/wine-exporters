@@ -1322,6 +1322,11 @@ export default function AdminCampaigns() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <CampaignQualifiedProspectsSheet
+        campaign={qualifiedSheetCampaign}
+        onOpenChange={(open) => !open && setQualifiedSheetCampaign(null)}
+      />
     </div>
   );
 }
