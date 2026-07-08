@@ -49,7 +49,8 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   const isAdded = (c: InterestedContact) =>
-    !!currentUserId && (c.added_to_crm_by || []).includes(currentUserId);
+    (c.origin ?? 'form') === 'click' ||
+    (!!currentUserId && (c.added_to_crm_by || []).includes(currentUserId));
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
