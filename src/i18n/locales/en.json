@@ -2344,7 +2344,8 @@
       "emptyDirect": "No direct requests yet.",
       "emptyTender": "No tenders yet.",
       "closed": "Closed",
-      "daysLeft": "{{count}}d left"
+      "daysLeft": "{{count}}d left",
+      "seen": "Seen"
     },
     "commissionNotice": "WineExporters takes no commission on direct requests or tenders. Importer and agent contact details are shared directly with you — the relationship is yours to manage.",
     "dialog": {

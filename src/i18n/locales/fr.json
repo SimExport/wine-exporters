@@ -2344,7 +2344,8 @@
       "emptyDirect": "Aucune demande directe pour le moment.",
       "emptyTender": "Aucun appel d'offres pour le moment.",
       "closed": "Clôturé",
-      "daysLeft": "{{count}}j restants"
+      "daysLeft": "{{count}}j restants",
+      "seen": "Vu"
     },
     "commissionNotice": "WineExporters ne prend aucune commission sur les demandes directes et appels d'offres. Les coordonnées des importateurs et agents vous sont communiquées directement, à vous de mener la relation.",
     "dialog": {
