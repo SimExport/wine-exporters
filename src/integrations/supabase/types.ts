@@ -845,6 +845,30 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunity_views: {
+        Row: {
+          id: string
+          opportunity_id: string
+          opportunity_type: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          opportunity_id: string
+          opportunity_type: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          opportunity_id?: string
+          opportunity_type?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
       pipeline_stages: {
         Row: {
           color: string | null
