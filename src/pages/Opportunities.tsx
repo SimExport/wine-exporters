@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, Phone, MapPin, Plus, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -120,6 +120,7 @@ export default function Opportunities() {
   const [importers, setImporters] = useState<ImporterRequest[]>([]);
   const [tenders, setTenders] = useState<TenderRequest[]>([]);
   const [addedRefs, setAddedRefs] = useState<Set<string>>(new Set());
+  const [viewedKeys, setViewedKeys] = useState<Set<string>>(new Set());
   const [contactDialog, setContactDialog] = useState<
     | { kind: 'importer'; data: ImporterRequest }
     | { kind: 'tender'; data: TenderRequest }
@@ -129,7 +130,7 @@ export default function Opportunities() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [imp, ten, leads] = await Promise.all([
+      const [imp, ten, leads, views] = await Promise.all([
         supabase
           .from('importer_requests')
           .select('*')
@@ -145,16 +146,35 @@ export default function Opportunities() {
           .select('source_ref')
           .eq('created_by', user.id)
           .not('source_ref', 'is', null),
+        supabase
+          .from('opportunity_views')
+          .select('opportunity_type, opportunity_id')
+          .eq('user_id', user.id),
       ]);
       setImporters((imp.data ?? []) as any);
       setTenders((ten.data ?? []) as any);
       setAddedRefs(new Set((leads.data ?? []).map((l: any) => l.source_ref)));
+      setViewedKeys(new Set((views.data ?? []).map((v: any) => `${v.opportunity_type}:${v.opportunity_id}`)));
     })();
   }, [user]);
+
+  const markViewed = async (type: 'importer' | 'tender', id: string) => {
+    if (!user) return;
+    const key = `${type}:${id}`;
+    if (viewedKeys.has(key)) return;
+    setViewedKeys(prev => new Set(prev).add(key));
+    await supabase
+      .from('opportunity_views')
+      .upsert(
+        { user_id: user.id, opportunity_type: type, opportunity_id: id },
+        { onConflict: 'user_id,opportunity_type,opportunity_id', ignoreDuplicates: true }
+      );
+  };
 
   const addImporterToCrm = async (r: ImporterRequest) => {
     if (!user) return;
     try {
+      await markViewed('importer', r.id);
       const campaignId = await getOrCreateManualCampaign(user.id);
       const nameParts = r.full_name.split(' ');
       const { error } = await supabase.from('leads').insert({
@@ -185,6 +205,7 @@ export default function Opportunities() {
   const addTenderToCrm = async (t: TenderRequest) => {
     if (!user || !t.agent) return;
     try {
+      await markViewed('tender', t.id);
       const campaignId = await getOrCreateManualCampaign(user.id);
       const { error } = await supabase.from('leads').insert({
         campaign_id: campaignId,
@@ -258,6 +279,7 @@ export default function Opportunities() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {importers.map(r => {
                 const added = addedRefs.has(r.id);
+                const viewed = viewedKeys.has(`importer:${r.id}`);
                 const req = (pick(r, 'requirements') ?? '').trim();
                 const styles = splitMulti(pick(r, 'wine_styles'));
                 const origins = splitMulti(pick(r, 'origins'));
@@ -270,11 +292,19 @@ export default function Opportunities() {
                           <span className="text-2xl leading-none">{countryFlag(r.country)}</span>
                           <span>{r.country ?? '—'}</span>
                         </div>
-                        {r.submitted_at && (
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(r.submitted_at), 'd MMM yyyy', { locale: dateLocale })}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {viewed && (
+                            <Badge variant="secondary" className="gap-1 text-[10px] px-1.5 py-0">
+                              <Eye className="h-3 w-3" />
+                              {tr('opportunitiesPage.states.seen')}
+                            </Badge>
+                          )}
+                          {r.submitted_at && (
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(r.submitted_at), 'd MMM yyyy', { locale: dateLocale })}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {r.company_name && (
                         <div className="text-sm font-medium">{r.company_name}</div>
@@ -310,7 +340,7 @@ export default function Opportunities() {
                       )}
                     </CardContent>
                     <div className="px-5 pb-5 flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setContactDialog({ kind: 'importer', data: r })}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { markViewed('importer', r.id); setContactDialog({ kind: 'importer', data: r }); }}>
                         {tr('opportunitiesPage.actions.reply')}
                       </Button>
                       <Button size="sm" className="flex-1" disabled={added} onClick={() => addImporterToCrm(r)}>
@@ -331,6 +361,7 @@ export default function Opportunities() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {tenders.map(t => {
                 const added = addedRefs.has(t.id);
+                const viewed = viewedKeys.has(`tender:${t.id}`);
                 const styleProfile = (pick(t, 'style_profile') ?? '').trim();
                 const tReq = (pick(t, 'requirements') ?? '').trim();
                 const tCategory = pick(t, 'category');
@@ -353,7 +384,15 @@ export default function Opportunities() {
                             <div className="text-xs text-muted-foreground font-mono font-normal">{t.reference}</div>
                           </div>
                         </div>
-                        {deadlineBadge(t.deadline_answer)}
+                        <div className="flex items-center gap-2">
+                          {viewed && (
+                            <Badge variant="secondary" className="gap-1 text-[10px] px-1.5 py-0">
+                              <Eye className="h-3 w-3" />
+                              {tr('opportunitiesPage.states.seen')}
+                            </Badge>
+                          )}
+                          {deadlineBadge(t.deadline_answer)}
+                        </div>
                       </div>
                       {t.category && (
                         <Row label={tr('opportunitiesPage.labels.category')}>
@@ -393,7 +432,7 @@ export default function Opportunities() {
                       )}
                     </CardContent>
                     <div className="px-5 pb-5 flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setContactDialog({ kind: 'tender', data: t })}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { markViewed('tender', t.id); setContactDialog({ kind: 'tender', data: t }); }}>
                         {tr('opportunitiesPage.actions.reply')}
                       </Button>
                       <Button size="sm" className="flex-1" disabled={added || !t.agent} onClick={() => addTenderToCrm(t)}>
