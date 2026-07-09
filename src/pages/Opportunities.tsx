@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, Phone, MapPin, Plus, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -120,6 +120,7 @@ export default function Opportunities() {
   const [importers, setImporters] = useState<ImporterRequest[]>([]);
   const [tenders, setTenders] = useState<TenderRequest[]>([]);
   const [addedRefs, setAddedRefs] = useState<Set<string>>(new Set());
+  const [viewedKeys, setViewedKeys] = useState<Set<string>>(new Set());
   const [contactDialog, setContactDialog] = useState<
     | { kind: 'importer'; data: ImporterRequest }
     | { kind: 'tender'; data: TenderRequest }
@@ -129,7 +130,7 @@ export default function Opportunities() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [imp, ten, leads] = await Promise.all([
+      const [imp, ten, leads, views] = await Promise.all([
         supabase
           .from('importer_requests')
           .select('*')
@@ -145,16 +146,35 @@ export default function Opportunities() {
           .select('source_ref')
           .eq('created_by', user.id)
           .not('source_ref', 'is', null),
+        supabase
+          .from('opportunity_views')
+          .select('opportunity_type, opportunity_id')
+          .eq('user_id', user.id),
       ]);
       setImporters((imp.data ?? []) as any);
       setTenders((ten.data ?? []) as any);
       setAddedRefs(new Set((leads.data ?? []).map((l: any) => l.source_ref)));
+      setViewedKeys(new Set((views.data ?? []).map((v: any) => `${v.opportunity_type}:${v.opportunity_id}`)));
     })();
   }, [user]);
+
+  const markViewed = async (type: 'importer' | 'tender', id: string) => {
+    if (!user) return;
+    const key = `${type}:${id}`;
+    if (viewedKeys.has(key)) return;
+    setViewedKeys(prev => new Set(prev).add(key));
+    await supabase
+      .from('opportunity_views')
+      .upsert(
+        { user_id: user.id, opportunity_type: type, opportunity_id: id },
+        { onConflict: 'user_id,opportunity_type,opportunity_id', ignoreDuplicates: true }
+      );
+  };
 
   const addImporterToCrm = async (r: ImporterRequest) => {
     if (!user) return;
     try {
+      await markViewed('importer', r.id);
       const campaignId = await getOrCreateManualCampaign(user.id);
       const nameParts = r.full_name.split(' ');
       const { error } = await supabase.from('leads').insert({
@@ -185,6 +205,7 @@ export default function Opportunities() {
   const addTenderToCrm = async (t: TenderRequest) => {
     if (!user || !t.agent) return;
     try {
+      await markViewed('tender', t.id);
       const campaignId = await getOrCreateManualCampaign(user.id);
       const { error } = await supabase.from('leads').insert({
         campaign_id: campaignId,
