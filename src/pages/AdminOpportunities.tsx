@@ -3,9 +3,10 @@ import { TallyCsvImporter } from '@/components/admin/TallyCsvImporter';
 import { TenderPdfImporter } from '@/components/admin/TenderPdfImporter';
 import { ImporterRequestsList } from '@/components/admin/ImporterRequestsList';
 import { TenderRequestsList } from '@/components/admin/TenderRequestsList';
+import { ImporterRequestCreateDialog } from '@/components/admin/ImporterRequestCreateDialog';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
-import { Mail, Loader2 } from 'lucide-react';
+import { Mail, Loader2, Plus } from 'lucide-react';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -24,6 +25,8 @@ import { useToast } from '@/hooks/use-toast';
 export default function AdminOpportunities() {
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleNotify = async () => {
     setSending(true);
@@ -96,7 +99,18 @@ export default function AdminOpportunities() {
         </TabsList>
         <TabsContent value="tally" className="mt-4 space-y-6">
           <TallyCsvImporter />
-          <ImporterRequestsList />
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter manuellement
+            </Button>
+          </div>
+          <ImporterRequestsList key={refreshKey} />
+          <ImporterRequestCreateDialog
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            onCreated={() => setRefreshKey((k) => k + 1)}
+          />
         </TabsContent>
         <TabsContent value="tender" className="mt-4 space-y-6">
           <TenderPdfImporter />
