@@ -1217,7 +1217,12 @@
       "tag": "Tag",
       "reminder": "Rappel",
       "lastUpdate": "Dernière MAJ",
+      "lastNote": "Dernière note",
       "open": "Ouvrir"
+    },
+    "customize": {
+      "button": "Personnaliser",
+      "title": "Afficher les colonnes"
     },
     "pagination": {
       "show": "Afficher:",
