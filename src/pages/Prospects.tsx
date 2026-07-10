@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock, Mail, Phone } from 'lucide-react'
+import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock, Mail, Phone, Eye } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
 import { subDays, isAfter, differenceInDays } from 'date-fns'
@@ -39,6 +39,7 @@ interface Prospect {
   status?: string | null
   remind_at?: string | null
   remind_note?: string | null
+  last_note?: string | null
   campaigns?: {
     name: string
   }
@@ -59,6 +60,20 @@ interface Campaign {
 
 const PROSPECT_STATUS_KEYS = ['new','samples_requested','samples_sent','received','tasted','negotiation','won','lost'] as const
 const REQUESTED_ACTION_KEYS = ['price_list','samples','video_call','tech_sheets','other'] as const
+
+type ProspectColumn =
+  | 'dateAdded' | 'campaign' | 'company' | 'contact' | 'email' | 'phone'
+  | 'country' | 'actions' | 'status' | 'tag' | 'reminder' | 'lastUpdate' | 'lastNote'
+
+const ALL_COLUMNS: ProspectColumn[] = [
+  'dateAdded','campaign','company','contact','email','phone','country',
+  'actions','status','tag','reminder','lastUpdate','lastNote',
+]
+
+const DEFAULT_COLUMNS: ProspectColumn[] = [
+  'dateAdded','campaign','company','contact','email','phone','country',
+  'actions','status','tag','reminder','lastUpdate',
+]
 
 export default function Prospects() {
   const { t } = useTranslation()
@@ -109,6 +124,34 @@ export default function Prospects() {
     requested_samples: [] as string[]
   })
   const [profileCuvees, setProfileCuvees] = useState<string[]>([])
+
+  const columnsStorageKey = user ? `prospects-list-columns:${user.id}` : null
+  const [visibleColumns, setVisibleColumns] = useState<Set<ProspectColumn>>(new Set(DEFAULT_COLUMNS))
+
+  useEffect(() => {
+    if (!columnsStorageKey) return
+    try {
+      const raw = localStorage.getItem(columnsStorageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw) as ProspectColumn[]
+        setVisibleColumns(new Set(parsed.filter(c => ALL_COLUMNS.includes(c))))
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnsStorageKey])
+
+  const toggleColumn = (col: ProspectColumn) => {
+    setVisibleColumns(prev => {
+      const next = new Set(prev)
+      if (next.has(col)) next.delete(col)
+      else next.add(col)
+      if (columnsStorageKey) {
+        try { localStorage.setItem(columnsStorageKey, JSON.stringify(Array.from(next))) } catch {}
+      }
+      return next
+    })
+  }
+  const isVisible = (col: ProspectColumn) => visibleColumns.has(col)
 
   useEffect(() => {
     if (user) {
