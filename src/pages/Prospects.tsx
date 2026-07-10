@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock, Mail, Phone } from 'lucide-react'
+import { Plus, Download, Search, SearchX, Users, AlertTriangle, Clock, Mail, Phone, Eye } from 'lucide-react'
 import { ReminderPopover } from '@/components/ReminderPopover'
 import { EmptyState } from '@/components/ui/empty-state'
 import { subDays, isAfter, differenceInDays } from 'date-fns'
@@ -39,6 +39,7 @@ interface Prospect {
   status?: string | null
   remind_at?: string | null
   remind_note?: string | null
+  last_note?: string | null
   campaigns?: {
     name: string
   }
@@ -59,6 +60,20 @@ interface Campaign {
 
 const PROSPECT_STATUS_KEYS = ['new','samples_requested','samples_sent','received','tasted','negotiation','won','lost'] as const
 const REQUESTED_ACTION_KEYS = ['price_list','samples','video_call','tech_sheets','other'] as const
+
+type ProspectColumn =
+  | 'dateAdded' | 'campaign' | 'company' | 'contact' | 'email' | 'phone'
+  | 'country' | 'actions' | 'status' | 'tag' | 'reminder' | 'lastUpdate' | 'lastNote'
+
+const ALL_COLUMNS: ProspectColumn[] = [
+  'dateAdded','campaign','company','contact','email','phone','country',
+  'actions','status','tag','reminder','lastUpdate','lastNote',
+]
+
+const DEFAULT_COLUMNS: ProspectColumn[] = [
+  'dateAdded','campaign','company','contact','email','phone','country',
+  'actions','status','tag','reminder','lastUpdate',
+]
 
 export default function Prospects() {
   const { t } = useTranslation()
@@ -109,6 +124,34 @@ export default function Prospects() {
     requested_samples: [] as string[]
   })
   const [profileCuvees, setProfileCuvees] = useState<string[]>([])
+
+  const columnsStorageKey = user ? `prospects-list-columns:${user.id}` : null
+  const [visibleColumns, setVisibleColumns] = useState<Set<ProspectColumn>>(new Set(DEFAULT_COLUMNS))
+
+  useEffect(() => {
+    if (!columnsStorageKey) return
+    try {
+      const raw = localStorage.getItem(columnsStorageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw) as ProspectColumn[]
+        setVisibleColumns(new Set(parsed.filter(c => ALL_COLUMNS.includes(c))))
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnsStorageKey])
+
+  const toggleColumn = (col: ProspectColumn) => {
+    setVisibleColumns(prev => {
+      const next = new Set(prev)
+      if (next.has(col)) next.delete(col)
+      else next.add(col)
+      if (columnsStorageKey) {
+        try { localStorage.setItem(columnsStorageKey, JSON.stringify(Array.from(next))) } catch {}
+      }
+      return next
+    })
+  }
+  const isVisible = (col: ProspectColumn) => visibleColumns.has(col)
 
   useEffect(() => {
     if (user) {
@@ -217,7 +260,23 @@ export default function Prospects() {
 
       if (error) throw error
 
-      setProspects(prospectsData || [])
+      const leadsList = prospectsData || []
+
+      // Fetch latest internal note per lead (same pattern as Kanban)
+      const leadIds = leadsList.map((l: any) => l.id)
+      const lastNoteByLead: Record<string, string> = {}
+      if (leadIds.length > 0) {
+        const { data: notesData } = await supabase
+          .from('prospect_notes')
+          .select('lead_id, content, created_at')
+          .in('lead_id', leadIds)
+          .order('created_at', { ascending: false })
+        ;(notesData || []).forEach((n: any) => {
+          if (!lastNoteByLead[n.lead_id]) lastNoteByLead[n.lead_id] = n.content
+        })
+      }
+
+      setProspects(leadsList.map((l: any) => ({ ...l, last_note: lastNoteByLead[l.id] ?? null })))
       
     } catch (error) {
       console.error('Error loading data:', error)
@@ -451,6 +510,29 @@ export default function Prospects() {
               <Download className="w-4 h-4 mr-2" />
               {t('prospects.exportCSV')}
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Eye className="w-4 h-4 mr-2" />
+                  {t('prospects.customize.button')}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-60">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  {t('prospects.customize.title')}
+                </div>
+                {ALL_COLUMNS.map(col => (
+                  <DropdownMenuItem
+                    key={col}
+                    onSelect={(e) => { e.preventDefault(); toggleColumn(col) }}
+                    className="gap-2"
+                  >
+                    <Checkbox checked={visibleColumns.has(col)} />
+                    <span className="text-sm">{t(`prospects.table.${col}`)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
@@ -655,39 +737,40 @@ export default function Prospects() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('prospects.table.dateAdded')}</TableHead>
-                    <TableHead>{t('prospects.table.campaign')}</TableHead>
-                    <TableHead>{t('prospects.table.company')}</TableHead>
-                    <TableHead>{t('prospects.table.contact')}</TableHead>
-                    <TableHead>{t('prospects.table.email')}</TableHead>
-                    <TableHead>{t('prospects.table.phone')}</TableHead>
-                    <TableHead>{t('prospects.table.country')}</TableHead>
-                    <TableHead>{t('prospects.table.actions')}</TableHead>
-                    <TableHead>{t('prospects.table.status')}</TableHead>
-                    <TableHead>{t('prospects.table.tag')}</TableHead>
-                    <TableHead>{t('prospects.table.reminder')}</TableHead>
-                    <TableHead>{t('prospects.table.lastUpdate')}</TableHead>
+                    {isVisible('dateAdded') && <TableHead>{t('prospects.table.dateAdded')}</TableHead>}
+                    {isVisible('campaign') && <TableHead>{t('prospects.table.campaign')}</TableHead>}
+                    {isVisible('company') && <TableHead>{t('prospects.table.company')}</TableHead>}
+                    {isVisible('contact') && <TableHead>{t('prospects.table.contact')}</TableHead>}
+                    {isVisible('email') && <TableHead>{t('prospects.table.email')}</TableHead>}
+                    {isVisible('phone') && <TableHead>{t('prospects.table.phone')}</TableHead>}
+                    {isVisible('country') && <TableHead>{t('prospects.table.country')}</TableHead>}
+                    {isVisible('actions') && <TableHead>{t('prospects.table.actions')}</TableHead>}
+                    {isVisible('status') && <TableHead>{t('prospects.table.status')}</TableHead>}
+                    {isVisible('tag') && <TableHead>{t('prospects.table.tag')}</TableHead>}
+                    {isVisible('reminder') && <TableHead>{t('prospects.table.reminder')}</TableHead>}
+                    {isVisible('lastUpdate') && <TableHead>{t('prospects.table.lastUpdate')}</TableHead>}
+                    {isVisible('lastNote') && <TableHead>{t('prospects.table.lastNote')}</TableHead>}
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {prospects.map((prospect) => (
                     <TableRow key={prospect.id} className="hover:bg-muted/50">
-                      <TableCell>
+                      {isVisible('dateAdded') && <TableCell>
                         {formatDate(prospect.created_at)}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('campaign') && <TableCell>
                         <Badge variant="outline" className="cursor-pointer">
                           {prospect.campaigns?.name}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">
+                      </TableCell>}
+                      {isVisible('company') && <TableCell className="font-medium">
                         {prospect.company_name}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('contact') && <TableCell>
                         {`${prospect.first_name || ''} ${prospect.last_name || ''}`.trim()}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('email') && <TableCell>
                         {prospect.email ? (
                           <a
                             href={`mailto:${prospect.email}`}
@@ -699,8 +782,8 @@ export default function Prospects() {
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('phone') && <TableCell>
                         {prospect.phone ? (
                           <a
                             href={`tel:${prospect.phone}`}
@@ -712,9 +795,9 @@ export default function Prospects() {
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
-                      </TableCell>
-                      <TableCell>{prospect.country}</TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('country') && <TableCell>{prospect.country}</TableCell>}
+                      {isVisible('actions') && <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {prospect.requested_actions?.map(action => (
                             <Badge key={action} variant="secondary" className="text-xs">
@@ -722,17 +805,17 @@ export default function Prospects() {
                             </Badge>
                           ))}
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('status') && <TableCell>
                         <Badge 
                           variant={prospect.prospect_status === 'won' ? 'default' : 
                                   prospect.prospect_status === 'lost' ? 'destructive' : 'secondary'}
                         >
                           {t(`crm.statuses.${prospect.prospect_status}`)}
                         </Badge>
-                      </TableCell>
+                      </TableCell>}
                       {/* Temperature tag cell */}
-                      <TableCell>
+                      {isVisible('tag') && <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button className="focus:outline-none">
@@ -756,9 +839,9 @@ export default function Prospects() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </TableCell>}
                       {/* Reminder cell */}
-                      <TableCell>
+                      {isVisible('reminder') && <TableCell>
                         <ReminderPopover
                           leadId={prospect.id}
                           remindAt={prospect.remind_at}
@@ -769,9 +852,9 @@ export default function Prospects() {
                             ))
                           }
                         />
-                      </TableCell>
+                      </TableCell>}
                       {/* Inactivity cell */}
-                      <TableCell>
+                      {isVisible('lastUpdate') && <TableCell>
                         {(() => {
                           const info = getInactivityInfo(prospect.last_activity_at)
                           return (
@@ -781,7 +864,19 @@ export default function Prospects() {
                             </span>
                           )
                         })()}
-                      </TableCell>
+                      </TableCell>}
+                      {isVisible('lastNote') && <TableCell className="max-w-[240px]">
+                        {prospect.last_note ? (
+                          <span
+                            className="text-xs text-muted-foreground line-clamp-2 whitespace-pre-wrap"
+                            title={prospect.last_note}
+                          >
+                            {prospect.last_note}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>}
                       <TableCell>
                         <Link to={`/prospects/${prospect.id}`}>
                           <Button variant="ghost" size="sm">

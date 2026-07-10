@@ -1,30 +1,38 @@
-Add a small "Vu" ("Seen") badge on each opportunity card (both direct requests and tenders) once the current user has opened/viewed it, so users can tell at a glance which opportunities they've already reviewed when they come back.
+# Colonnes personnalisables dans la vue Liste du Pipeline
 
-## What to build
+## Problème
+Dans la vue Liste (`/pipeline?view=list` → `src/pages/Prospects.tsx`), les notes internes (dernière note ajoutée à un prospect) ne s'affichent nulle part. Impossible aussi de choisir quelles colonnes afficher — contrairement à la vue Kanban qui a déjà un bouton "Personnaliser" permettant de cocher/décocher les champs affichés sur chaque carte.
 
-1. **New table `opportunity_views`** (per-user, per-opportunity view tracking)
-   - Columns: `id uuid pk`, `user_id uuid`, `opportunity_type text` ('importer' | 'tender'), `opportunity_id uuid`, `viewed_at timestamptz default now()`
-   - Unique constraint on `(user_id, opportunity_type, opportunity_id)`
-   - RLS: users can only select/insert their own rows. Standard GRANTs to `authenticated` + `service_role`.
+## Objectif
+Reproduire, dans la vue Liste, la même expérience que le "Personnaliser" du Kanban : un menu qui permet à l'utilisateur de choisir les colonnes visibles, dont une nouvelle colonne **Dernière note** (note interne la plus récente du prospect).
 
-2. **`Opportunities.tsx`** — track and display views
-   - On load, fetch the user's `opportunity_views` alongside importers/tenders and build a `Set<string>` of viewed keys (`type:id`).
-   - Mark a card as viewed when the user interacts with it in a meaningful way. Two triggers:
-     - Clicking "Répondre" (opens contact dialog) → record view.
-     - Clicking "Ajouter au CRM" → record view.
-   - After successful insert (ignore duplicates with `onConflict`), update local `viewedKeys` set so the badge appears immediately.
-   - Render a small badge in the card header (next to the country/date) when the card is in `viewedKeys`: subtle `variant="secondary"` with an eye icon and label "Vu" / "Seen".
+## Changements
 
-3. **i18n** — add `opportunitiesPage.states.seen` = "Vu" (FR) / "Seen" (EN).
+### 1. `src/pages/Prospects.tsx`
+- Ajouter un bouton **Personnaliser** dans le header de la vue (aligné à droite, même style/placement que dans `Pipeline.tsx`), avec `DropdownMenu` + `Checkbox` par colonne.
+- Définir la liste des colonnes disponibles :
+  `dateAdded, campaign, company, contact, email, phone, country, actions, status, tag, reminder, lastUpdate, lastNote` (nouvelle).
+- Colonnes visibles par défaut = celles déjà affichées aujourd'hui (toutes sauf `lastNote`), pour ne rien changer pour les utilisateurs existants.
+- Persister la sélection dans `localStorage` sous la clé `prospects-list-columns:{user.id}` (même pattern que Kanban).
+- Rendre conditionnellement chaque `TableHead` et `TableCell` selon `visibleColumns.has(col)`. La colonne "actions rapides" (bouton Ouvrir) reste toujours visible.
 
-## Technical notes
+### 2. Nouvelle colonne "Dernière note"
+- Étendre le chargement des prospects (fonction `loadData` autour des lignes 166-260) pour récupérer la dernière `prospect_notes.content` par lead, exactement comme le fait déjà `Pipeline.tsx` (requête `prospect_notes` puis map `lastNoteByLead[l.id]`).
+- Ajouter `last_note?: string | null` sur le type Prospect local.
+- Affichage dans la cellule : texte tronqué sur 2 lignes (`line-clamp-2`), en `text-xs text-muted-foreground`, tooltip natif via `title` pour le contenu complet. Fallback `—` si absent.
 
-- Table lives in `public`; migration includes CREATE TABLE, GRANTs (authenticated + service_role, no anon), ENABLE RLS, and two policies (select own, insert own).
-- Insert uses `.upsert({...}, { onConflict: 'user_id,opportunity_type,opportunity_id', ignoreDuplicates: true })` so repeated views are cheap no-ops.
-- Badge uses existing shadcn `Badge` + `Eye` icon from lucide-react; positioned in the top-right area of each card header alongside the date/deadline.
-- No change to admin flows or notification emails.
+### 3. i18n
+Ajouter dans `src/i18n/locales/fr.json` et `en.json` :
+- `prospects.table.lastNote` = "Dernière note" / "Last note"
+- `prospects.customize.button` / `prospects.customize.title` / `prospects.customize.columns.<col>` pour chaque colonne (réutiliser les libellés existants de `prospects.table.*` quand pertinent).
 
-## Out of scope
+## Hors périmètre
+- Pas de réorganisation (drag & drop) des colonnes — juste show/hide.
+- Pas de modification de la vue Kanban.
+- Pas de nouvelle table SQL ni de RLS : `prospect_notes` est déjà utilisé.
+- Pas de changement des filtres, pagination ou tri existants.
 
-- Auto-marking as viewed on scroll/impression (kept simple: view = user clicked to interact).
-- Filtering/sorting by viewed status (could add later if useful).
+## Détails techniques
+- Réutiliser les composants shadcn déjà présents (`DropdownMenu`, `DropdownMenuItem`, `Checkbox`, icône `Eye` de lucide-react).
+- Le `TableRow` d'en-tête et de contenu doivent avoir le même nombre de `<TableHead>` / `<TableCell>` — utiliser des fragments conditionnels `{visible.has('email') && <TableCell>…</TableCell>}` symétriques dans header et body.
+- La requête `prospect_notes` doit se limiter aux `lead_id` de la page courante (comme dans `Pipeline.tsx`) pour éviter de charger tout l'historique.
