@@ -737,39 +737,40 @@ export default function Prospects() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('prospects.table.dateAdded')}</TableHead>
-                    <TableHead>{t('prospects.table.campaign')}</TableHead>
-                    <TableHead>{t('prospects.table.company')}</TableHead>
-                    <TableHead>{t('prospects.table.contact')}</TableHead>
-                    <TableHead>{t('prospects.table.email')}</TableHead>
-                    <TableHead>{t('prospects.table.phone')}</TableHead>
-                    <TableHead>{t('prospects.table.country')}</TableHead>
-                    <TableHead>{t('prospects.table.actions')}</TableHead>
-                    <TableHead>{t('prospects.table.status')}</TableHead>
-                    <TableHead>{t('prospects.table.tag')}</TableHead>
-                    <TableHead>{t('prospects.table.reminder')}</TableHead>
-                    <TableHead>{t('prospects.table.lastUpdate')}</TableHead>
+                    {isVisible('dateAdded') && <TableHead>{t('prospects.table.dateAdded')}</TableHead>}
+                    {isVisible('campaign') && <TableHead>{t('prospects.table.campaign')}</TableHead>}
+                    {isVisible('company') && <TableHead>{t('prospects.table.company')}</TableHead>}
+                    {isVisible('contact') && <TableHead>{t('prospects.table.contact')}</TableHead>}
+                    {isVisible('email') && <TableHead>{t('prospects.table.email')}</TableHead>}
+                    {isVisible('phone') && <TableHead>{t('prospects.table.phone')}</TableHead>}
+                    {isVisible('country') && <TableHead>{t('prospects.table.country')}</TableHead>}
+                    {isVisible('actions') && <TableHead>{t('prospects.table.actions')}</TableHead>}
+                    {isVisible('status') && <TableHead>{t('prospects.table.status')}</TableHead>}
+                    {isVisible('tag') && <TableHead>{t('prospects.table.tag')}</TableHead>}
+                    {isVisible('reminder') && <TableHead>{t('prospects.table.reminder')}</TableHead>}
+                    {isVisible('lastUpdate') && <TableHead>{t('prospects.table.lastUpdate')}</TableHead>}
+                    {isVisible('lastNote') && <TableHead>{t('prospects.table.lastNote')}</TableHead>}
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {prospects.map((prospect) => (
                     <TableRow key={prospect.id} className="hover:bg-muted/50">
-                      <TableCell>
+                      {isVisible('dateAdded') && <TableCell>
                         {formatDate(prospect.created_at)}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('campaign') && <TableCell>
                         <Badge variant="outline" className="cursor-pointer">
                           {prospect.campaigns?.name}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">
+                      </TableCell>}
+                      {isVisible('company') && <TableCell className="font-medium">
                         {prospect.company_name}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('contact') && <TableCell>
                         {`${prospect.first_name || ''} ${prospect.last_name || ''}`.trim()}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('email') && <TableCell>
                         {prospect.email ? (
                           <a
                             href={`mailto:${prospect.email}`}
@@ -781,8 +782,8 @@ export default function Prospects() {
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('phone') && <TableCell>
                         {prospect.phone ? (
                           <a
                             href={`tel:${prospect.phone}`}
@@ -794,9 +795,9 @@ export default function Prospects() {
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
-                      </TableCell>
-                      <TableCell>{prospect.country}</TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('country') && <TableCell>{prospect.country}</TableCell>}
+                      {isVisible('actions') && <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {prospect.requested_actions?.map(action => (
                             <Badge key={action} variant="secondary" className="text-xs">
@@ -804,17 +805,17 @@ export default function Prospects() {
                             </Badge>
                           ))}
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>}
+                      {isVisible('status') && <TableCell>
                         <Badge 
                           variant={prospect.prospect_status === 'won' ? 'default' : 
                                   prospect.prospect_status === 'lost' ? 'destructive' : 'secondary'}
                         >
                           {t(`crm.statuses.${prospect.prospect_status}`)}
                         </Badge>
-                      </TableCell>
+                      </TableCell>}
                       {/* Temperature tag cell */}
-                      <TableCell>
+                      {isVisible('tag') && <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button className="focus:outline-none">
@@ -838,9 +839,9 @@ export default function Prospects() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </TableCell>}
                       {/* Reminder cell */}
-                      <TableCell>
+                      {isVisible('reminder') && <TableCell>
                         <ReminderPopover
                           leadId={prospect.id}
                           remindAt={prospect.remind_at}
@@ -851,9 +852,9 @@ export default function Prospects() {
                             ))
                           }
                         />
-                      </TableCell>
+                      </TableCell>}
                       {/* Inactivity cell */}
-                      <TableCell>
+                      {isVisible('lastUpdate') && <TableCell>
                         {(() => {
                           const info = getInactivityInfo(prospect.last_activity_at)
                           return (
@@ -863,7 +864,19 @@ export default function Prospects() {
                             </span>
                           )
                         })()}
-                      </TableCell>
+                      </TableCell>}
+                      {isVisible('lastNote') && <TableCell className="max-w-[240px]">
+                        {prospect.last_note ? (
+                          <span
+                            className="text-xs text-muted-foreground line-clamp-2 whitespace-pre-wrap"
+                            title={prospect.last_note}
+                          >
+                            {prospect.last_note}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>}
                       <TableCell>
                         <Link to={`/prospects/${prospect.id}`}>
                           <Button variant="ghost" size="sm">
