@@ -510,6 +510,29 @@ export default function Prospects() {
               <Download className="w-4 h-4 mr-2" />
               {t('prospects.exportCSV')}
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Eye className="w-4 h-4 mr-2" />
+                  {t('prospects.customize.button')}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-60">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  {t('prospects.customize.title')}
+                </div>
+                {ALL_COLUMNS.map(col => (
+                  <DropdownMenuItem
+                    key={col}
+                    onSelect={(e) => { e.preventDefault(); toggleColumn(col) }}
+                    className="gap-2"
+                  >
+                    <Checkbox checked={visibleColumns.has(col)} />
+                    <span className="text-sm">{t(`prospects.table.${col}`)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
