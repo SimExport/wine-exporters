@@ -260,7 +260,23 @@ export default function Prospects() {
 
       if (error) throw error
 
-      setProspects(prospectsData || [])
+      const leadsList = prospectsData || []
+
+      // Fetch latest internal note per lead (same pattern as Kanban)
+      const leadIds = leadsList.map((l: any) => l.id)
+      const lastNoteByLead: Record<string, string> = {}
+      if (leadIds.length > 0) {
+        const { data: notesData } = await supabase
+          .from('prospect_notes')
+          .select('lead_id, content, created_at')
+          .in('lead_id', leadIds)
+          .order('created_at', { ascending: false })
+        ;(notesData || []).forEach((n: any) => {
+          if (!lastNoteByLead[n.lead_id]) lastNoteByLead[n.lead_id] = n.content
+        })
+      }
+
+      setProspects(leadsList.map((l: any) => ({ ...l, last_note: lastNoteByLead[l.id] ?? null })))
       
     } catch (error) {
       console.error('Error loading data:', error)
