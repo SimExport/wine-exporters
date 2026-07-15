@@ -268,11 +268,11 @@ export default function Prospects() {
       if (leadIds.length > 0) {
         const { data: notesData } = await supabase
           .from('prospect_notes')
-          .select('lead_id, content, created_at')
+          .select('lead_id, body, created_at')
           .in('lead_id', leadIds)
           .order('created_at', { ascending: false })
         ;(notesData || []).forEach((n: any) => {
-          if (!lastNoteByLead[n.lead_id]) lastNoteByLead[n.lead_id] = n.content
+          if (!lastNoteByLead[n.lead_id]) lastNoteByLead[n.lead_id] = n.body
         })
       }
 
