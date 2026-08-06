@@ -84,6 +84,7 @@ export default function AdminCampaigns() {
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [completionPreview, setCompletionPreview] = useState<{ id: string; name: string } | null>(null);
   const [wines, setWines] = useState<Wine[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [emailLogs, setEmailLogs] = useState<any[]>([]);
@@ -1334,6 +1335,18 @@ export default function AdminCampaigns() {
       <CampaignQualifiedProspectsSheet
         campaign={qualifiedSheetCampaign}
         onOpenChange={(open) => !open && setQualifiedSheetCampaign(null)}
+      />
+
+      <CampaignCompletionEmailPreview
+        campaignId={completionPreview?.id ?? null}
+        campaignName={completionPreview?.name ?? ''}
+        open={!!completionPreview}
+        onOpenChange={(open) => !open && setCompletionPreview(null)}
+        onConfirm={async () => {
+          if (completionPreview) {
+            await markCampaignCompleted(completionPreview.id, completionPreview.name);
+          }
+        }}
       />
     </div>
   );
