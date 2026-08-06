@@ -58,8 +58,8 @@ async function enrichWithAI(input: {
     .map((s) => `• ${INTEREST_LABELS[s] ?? s}`)
     .join("\n");
   const fallback = {
-    description: `${input.full_name}${input.company ? ` from ${input.company}` : ""}${input.country ? ` (${input.country})` : ""} submitted the public interest form for campaign "${input.campaign_name}".`,
-    recommended_actions: fallbackActions || "• Follow up with the prospect",
+    description: `${input.full_name}${input.company ? ` de ${input.company}` : ""}${input.country ? ` (${input.country})` : ""} a rempli le formulaire d'intérêt de la campagne « ${input.campaign_name} ».`,
+    recommended_actions: fallbackActions || "• Relancer le prospect",
     score: 7,
   };
   if (!key) return fallback;
@@ -79,11 +79,11 @@ Buyer details:
 
 Return STRICT JSON with three keys only:
 {
-  "description": "2-3 sentences in ENGLISH describing the prospect company (business type, likely market fit with the producer). Neutral, professional tone. No greeting.",
-  "recommended_actions": "A short bulleted list (use '• ' as bullet) in ENGLISH with 2-4 concrete next actions the producer should take, tailored to the interests requested.",
+  "description": "2-3 phrases EN FRANÇAIS décrivant la société du prospect (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel, sans formule de politesse. Garder tels quels les noms propres (société, pays, appellations).",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur, adaptées aux demandes du prospect.",
   "score": "Integer 6-10 qualifying the lead on a /10 scale. Floor is 6 because submitting the interest form already signals strong intent. Use 6-7 for minimal info / weak fit, 8 for solid fit, 9-10 for excellent fit and complete information."
 }
-No prose, no code fences.`;
+No prose, no code fences. Les champs texte doivent impérativement être rédigés en français.`;
 
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -98,7 +98,7 @@ No prose, no code fences.`;
         messages: [
           { role: "user", content: prompt },
         ],
-        system: "You output only valid JSON. No commentary, no code fences.",
+        system: "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French.",
       }),
     });
 
@@ -233,32 +233,8 @@ Deno.serve(async (req) => {
     return json(500, { error: "Could not save your submission" });
   }
 
-  // Also create a CRM lead for the campaign owner
-  try {
-    const nameParts = full_name.trim().split(/\s+/);
-    const first_name = nameParts[0] ?? full_name;
-    const last_name = nameParts.slice(1).join(" ") || null;
-    const { error: leadErr } = await supabase.from("leads").insert({
-      campaign_id,
-      first_name,
-      last_name,
-      email,
-      company_name: company,
-      country,
-      phone,
-      market: country,
-      buyer_id: `interest_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      status: "new",
-      source: "interest_form",
-      source_score: enriched.score,
-      owner_notes: enriched.description,
-      requested_actions: interests as unknown as string[],
-      last_activity_at: new Date().toISOString(),
-    });
-    if (leadErr) console.error("Lead insert failed:", leadErr);
-  } catch (e) {
-    console.error("Lead creation error:", e);
-  }
+  // NOTE: no CRM lead is created here on purpose — the producer decides
+  // manually whether to add the prospect to their CRM from the campaign page.
 
   // Fire-and-forget confirmation email to the prospect
   try {
