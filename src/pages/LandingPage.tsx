@@ -505,6 +505,18 @@ const LandingPage = () => {
             </p>
           </FadeIn>
           <TestimonialsGrid />
+          <div className="grid md:grid-cols-2 gap-5 mt-10">
+            {testimonialQuotes.map((q, i) => (
+              <FadeIn key={q.author} delay={i * 0.05}>
+                <Card className="h-full bg-background border border-border">
+                  <CardContent className="p-6 flex flex-col gap-3">
+                    <p className="text-base leading-relaxed italic">« {q.quote} »</p>
+                    <p className="text-sm font-semibold text-primary">{q.author}</p>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            ))}
+          </div>
         </div>
       </section>
 
