@@ -1770,7 +1770,10 @@
         "domains": "wineries supported",
         "importers": "importers found",
         "markets": "markets opened"
-      }
+      },
+      "statsAttribution": "Results achieved through ExportVins support and the WineExporters platform.",
+      "database": "21,000+ verified importers across 140+ countries",
+      "ctaVideo": "Discover the platform in video"
     },
     "pain": {
       "title": "Exporting shouldn't be a battle.",
@@ -1811,8 +1814,10 @@
         "text": "An importer asks for your prices? Never let an opportunity slip away.",
         "bullet1": "Visual pipeline (Kanban CRM) dedicated to wine export sales.",
         "bullet2": "Sample shipment tracking.",
-        "bullet3": "Centralized history so you never forget a follow-up."
-      }
+        "bullet3": "Centralized history so you never forget a follow-up.",
+        "bullet4": "Opportunities: the only channel where inbound demand automatically joins your pipeline."
+      },
+      "databaseCallout": "21,000+ verified importers across 140+ countries."
     },
     "synthesis": {
       "title": "One platform. Zero friction. With real humans.",
@@ -1820,17 +1825,15 @@
     },
     "testimonials": {
       "title": "They trusted us. They got orders.",
-      "subtitle": "These wineries completed an Export Performance Mission with ExportVins.",
-      "viewAll": "View all results ({{count}})"
+      "subtitle": "Results achieved through ExportVins support and the WineExporters platform."
     },
     "pricing": {
       "title": "An investment paid back from the first pallet.",
       "subtitle": "Everything included. No hidden fees.",
       "planName": "WineExporters",
       "priceSuffix": "excl. tax / month",
-      "commitment": "3-month commitment",
+      "commitment": "no commitment, cancel anytime",
       "ctaStart": "Request a demo",
-      "founders": "Founder access available — contact us for preferential pricing.",
       "inclusions": [
         "Unlimited access to databases",
         "1 bespoke search / month",
@@ -1869,7 +1872,7 @@
       "button": "Request a demo"
     },
     "footer": {
-      "copyright": "ExportVins © 2026 — The prospecting tool for winegrowers.",
+      "copyright": "WineExporters by ExportVins © 2026",
       "contact": "Contact",
       "legal": "Legal notice"
     }
