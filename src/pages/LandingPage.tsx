@@ -245,6 +245,19 @@ const testimonials = [
   { name: "Domaine Sibille", result: "Ouverture du marché italien." },
 ];
 
+const testimonialQuotes = [
+  {
+    quote:
+      "La plateforme répond à un vrai besoin pour nous, et nous connaissons la valeur et la pertinence de l'approche de Simon.",
+    author: "Mathilde, vigneronne en Alsace",
+  },
+  {
+    quote:
+      "Ce que j'apprécie le plus : la qualification des leads, tout comme la capacité de la plateforme à s'actualiser pour répondre au plus près de nos besoins.",
+    author: "Arnaud, vigneron à Pessac-Léognan",
+  },
+];
+
 const TestimonialsGrid = () => {
   return (
       <div className="grid md:grid-cols-2 gap-5">
