@@ -4,7 +4,7 @@ import { Play, Download, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import heroImage from "@/assets/decouvrir-hero.jpg";
+import heroImage from "@/assets/decouvrir-export.jpg";
 
 const SUPADEMO_ID = "cmpf98qp62r0bqm8qiqd73xxd";
 const BROCHURE_URL = "/brochure-wineexporters-v2.pdf";
@@ -17,7 +17,7 @@ const COPY = {
     eyebrow: "21 000+ importateurs vérifiés dans 140+ pays",
     title: "Découvrez comment les domaines viticoles trouvent leurs importateurs.",
     subtitle:
-      "Recevez la brochure et la vidéo de la plateforme. Trois minutes suffisent pour voir comment ça marche.",
+      "La brochure et la vidéo de démonstration, dans votre boîte mail en un clic. De quoi voir concrètement comment fonctionne la plateforme avant d'aller plus loin.",
     firstName: "Prénom",
     domain: "Nom du domaine",
     email: "Email professionnel",
@@ -40,7 +40,7 @@ const COPY = {
     eyebrow: "21,000+ verified importers across 140+ countries",
     title: "See how wine estates find their importers.",
     subtitle:
-      "Get the brochure and the platform video. Three minutes is enough to see how it works.",
+      "The brochure and the demo video, in your inbox in one click. Enough to see concretely how the platform works before going further.",
     firstName: "First name",
     domain: "Estate name",
     email: "Work email",
@@ -144,12 +144,12 @@ const Discover = () => {
           <div className="relative mt-12 hidden lg:block">
             <img
               src={heroImage}
-              width={1408}
-              height={1600}
-              alt="Vignoble au crépuscule et caisses de bois prêtes à l'export"
-              className="h-64 w-full rounded-2xl object-cover object-center saturate-[0.85]"
+              width={1400}
+              height={1000}
+              alt="Bouteille de vin dans une caisse en bois tamponnée FRAGILE, passeport et carte du monde"
+              className="w-full rounded-2xl object-contain saturate-[0.85]"
             />
-            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[#59191F]/15" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[#59191F]/10" />
           </div>
         </section>
 
@@ -166,7 +166,7 @@ const Discover = () => {
                   href={BROCHURE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#be2d2d] px-5 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#a52525]"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#59191F] px-5 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#43121a]"
                 >
                   <Download className="h-4 w-4" />
                   {t.brochureCta}
@@ -243,7 +243,7 @@ const Discover = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#be2d2d] px-5 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#a52525] disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#59191F] px-5 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#43121a] disabled:opacity-70"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {loading ? t.submitting : t.submit}
