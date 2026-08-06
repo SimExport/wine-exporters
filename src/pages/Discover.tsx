@@ -4,7 +4,7 @@ import { Play, Download, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import heroImage from "@/assets/decouvrir-export.jpg";
+import heroAsset from "@/assets/decouvrir-export.jpg.asset.json";
 
 const SUPADEMO_ID = "cmpf98qp62r0bqm8qiqd73xxd";
 const BROCHURE_URL = "/brochure-wineexporters-v2.pdf";
