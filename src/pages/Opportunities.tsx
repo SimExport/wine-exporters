@@ -71,6 +71,7 @@ interface ImporterRequest {
   volume: string | null;
   requirements: string | null;
   submitted_at: string | null;
+  created_at: string;
   wine_styles_fr: string | null;
   wine_styles_en: string | null;
   origins_fr: string | null;
@@ -94,6 +95,7 @@ interface TenderRequest {
   deadline_sample: string | null;
   style_profile: string | null;
   requirements: string | null;
+  created_at: string;
   category_fr: string | null;
   category_en: string | null;
   designation_origin_fr: string | null;
@@ -133,14 +135,14 @@ export default function Opportunities() {
       const [imp, ten, leads, views] = await Promise.all([
         supabase
           .from('importer_requests')
-          .select('*')
+          .select('*, created_at')
           .eq('status', 'published')
-          .order('submitted_at', { ascending: false, nullsFirst: false }),
+          .order('created_at', { ascending: false, nullsFirst: false }),
         supabase
           .from('tender_requests')
-          .select('*, agent:tender_agents(name, company, email, phone, address)')
+          .select('*, created_at, agent:tender_agents(name, company, email, phone, address)')
           .eq('status', 'published')
-          .order('deadline_answer', { ascending: true, nullsFirst: false }),
+          .order('created_at', { ascending: false, nullsFirst: false }),
         supabase
           .from('leads')
           .select('source_ref')
@@ -299,9 +301,9 @@ export default function Opportunities() {
                               {tr('opportunitiesPage.states.seen')}
                             </Badge>
                           )}
-                          {r.submitted_at && (
+                          {r.created_at && (
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(r.submitted_at), 'd MMM yyyy', { locale: dateLocale })}
+                              {format(new Date(r.created_at), 'd MMM yyyy', { locale: dateLocale })}
                             </span>
                           )}
                         </div>
@@ -392,6 +394,11 @@ export default function Opportunities() {
                             </Badge>
                           )}
                           {deadlineBadge(t.deadline_answer)}
+                          {t.created_at && (
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(t.created_at), 'd MMM yyyy', { locale: dateLocale })}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {t.category && (
