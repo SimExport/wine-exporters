@@ -233,39 +233,20 @@ const PillarVisual = ({ id }: { id: "step1" | "step2" | "step3" }) => {
 
 /* ─── Testimonials with expand ─── */
 const testimonials = [
-  { name: "Famille Petitjean", result: "Commandes sur la Norvège, les USA (Floride) et l'Autriche" },
-  { name: "Potel-Aviron", result: "Ouverture de 2 marchés : Pays-Bas et Suisse" },
-  { name: "Château Mouresse", result: "3 commandes : Danemark + Pays-Bas" },
-  { name: "Clos des Garands", result: "3 commandes au Danemark" },
-  { name: "Maison des Vins Margnat", result: "3 commandes sur la Grèce et le Royaume-Uni" },
-  { name: "Maison Kieffer", result: "2 commandes sur le Danemark" },
-  { name: "Vignobles Courty", result: "2 commandes aux Pays-Bas et 1 commande en Allemagne" },
-  { name: "Champagne Cordeuil", result: "2 commandes en Estonie" },
-  { name: "Domaine de Naisse", result: "A ouvert la Finlande" },
-  { name: "Domaine Cialhol Gauran", result: "A ouvert le Danemark" },
-  { name: "Château Jalousie Beaulieu", result: "A ouvert la Hongrie" },
-  { name: "Château Paquette", result: "A ouvert le Danemark" },
-  { name: "Vignoble Arbillons", result: "1 commande sur le Canada et 2 commandes à venir sur les USA" },
-  { name: "Domaine Sibille", result: "1 commande en Italie et 1 commande à venir aux USA" },
-  { name: "Château Moulin Caresse", result: "1 commande sur le Royaume-Uni" },
-  { name: "Château la Grave", result: "1 commande sur le Royaume-Uni" },
-  { name: "Domaine Vincent Spannagel", result: "1 commande en Hongrie" },
-  { name: "Domaine François Cartier", result: "1 commande en Pologne et 1 commande à venir en Suède" },
-  { name: "Banjo Vino", result: "1 commande en Suède, 2 commandes à venir au Danemark et en Norvège" },
-  { name: "Affentaler Winzer", result: "1 commande sur le Danemark, 1 commande à venir en Suède et en Norvège" },
-  { name: "Huber & Bléger", result: "2 commandes à venir sur les USA" },
-  { name: "Domaine Maurice Schueller", result: "Commandes à venir en Suède et en Pologne" },
+  { name: "Château de France", result: "Ouverture du marché allemand, première commande dès la première campagne." },
+  { name: "Maison Kieffer", result: "Ouverture du marché danois." },
+  { name: "Potel-Aviron", result: "Ouverture de trois marchés, Pays-Bas, Suisse et Pologne." },
+  { name: "Domaine de Naisse", result: "Ouverture du marché finlandais." },
+  { name: "Famille Petitjean", result: "Ouverture des marchés autrichien et américain." },
+  { name: "Domaine François Cartier", result: "Ouverture du marché polonais." },
+  { name: "Champagne Cordeuil Père & Fille", result: "Ouverture du marché estonien." },
+  { name: "Domaine Sibille", result: "Ouverture du marché italien." },
 ];
 
 const TestimonialsGrid = () => {
-  const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? testimonials : testimonials.slice(0, 6);
-
   return (
-    <>
       <div className="grid md:grid-cols-2 gap-5">
-        {visible.map((t, i) => (
+        {testimonials.map((t, i) => (
           <FadeIn key={t.name} delay={(i % 4) * 0.05}>
             <Card className="h-full bg-background border border-border">
               <CardContent className="p-5 flex flex-col gap-1.5">
@@ -276,14 +257,6 @@ const TestimonialsGrid = () => {
           </FadeIn>
         ))}
       </div>
-      {!expanded && (
-        <div className="flex justify-center mt-8">
-          <Button variant="outline" onClick={() => setExpanded(true)}>
-            {t("landing.testimonials.viewAll", { count: testimonials.length })}
-          </Button>
-        </div>
-      )}
-    </>
   );
 };
 
@@ -294,8 +267,8 @@ const LandingPage = () => {
   const inclusions = t("landing.pricing.inclusions", { returnObjects: true }) as string[];
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
   const heroStats = [
-    { value: "+100", label: t("landing.hero.stats.domains") },
-    { value: "+260", label: t("landing.hero.stats.importers") },
+    { value: "+120", label: t("landing.hero.stats.domains") },
+    { value: "+310", label: t("landing.hero.stats.importers") },
     { value: "+24", label: t("landing.hero.stats.markets") },
   ];
   return (
