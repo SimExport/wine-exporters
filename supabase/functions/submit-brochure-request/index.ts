@@ -9,8 +9,9 @@ const corsHeaders = {
 };
 
 const BROCHURE_URL =
-  "https://wine-exporters.com/__l5e/assets-v1/69dd9595-c0a7-4e4c-a5ef-2d016252e5f3/brochure-wineexporters-v2.pdf";
+  "https://drive.google.com/file/d/1RijngSRBNv7pBxHAU_2ONOPVzEAMH_5V/view?usp=sharing";
 const VIDEO_URL = "https://app.supademo.com/demo/cmpf98qp62r0bqm8qiqd73xxd";
+const BOOKING_URL = "https://calendar.app.google/xPLu8ru2PpdC2uoG8";
 
 function clean(s: unknown, max = 255): string {
   if (typeof s !== "string") return "";
@@ -37,8 +38,17 @@ function buildHtml(firstName: string, locale: string) {
   const intro = fr
     ? `Bonjour ${name}, voici les deux documents demandés.`
     : `Hi ${name}, here are the two documents you asked for.`;
-  const brochureLabel = fr ? "Télécharger la brochure (PDF)" : "Download the brochure (PDF)";
-  const videoLabel = fr ? "Voir la démo en vidéo" : "Watch the video demo";
+  const brochureIntro = fr
+    ? "Vous préférez lire un document ?"
+    : "Prefer to read a document?";
+  const brochureLabel = fr ? "Accéder à la brochure ici" : "Access the brochure here";
+  const videoIntro = fr
+    ? "Vous préférez regarder une démo ?"
+    : "Prefer to watch a demo?";
+  const videoLabel = fr ? "Regarder la démo ici" : "Watch the demo here";
+  const bookingLabel = fr
+    ? "Prendre un rendez-vous avec Simon, le fondateur"
+    : "Book a meeting with Simon, the founder";
   const closing = fr
     ? "Si vous voulez qu'on regarde ensemble votre cas précis, répondez simplement à cet email."
     : "If you want us to look at your specific case together, just reply to this email.";
@@ -56,14 +66,19 @@ function buildHtml(firstName: string, locale: string) {
           <tr><td style="background-color:#ffffff;border:1px solid #e7ddd2;border-radius:14px;padding:36px 32px;">
             <h1 style="margin:0 0 20px 0;font-family:Georgia,serif;font-size:24px;font-weight:600;color:#59191F;">${title}</h1>
             <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;">${intro}</p>
-            <p style="margin:0 0 14px 0;">
-              <a href="${BROCHURE_URL}" style="display:inline-block;background-color:#be2d2d;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:8px;font-size:15px;font-weight:600;">${brochureLabel}</a>
+            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.6;">${brochureIntro}</p>
+            <p style="margin:0 0 22px 0;">
+              <a href="${BROCHURE_URL}" style="display:inline-block;background-color:#59191F;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:8px;font-size:15px;font-weight:600;">${brochureLabel}</a>
             </p>
+            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.6;">${videoIntro}</p>
             <p style="margin:0 0 24px 0;">
               <a href="${VIDEO_URL}" style="display:inline-block;border:1px solid #C9A84C;color:#59191F;text-decoration:none;padding:12px 22px;border-radius:8px;font-size:15px;font-weight:600;">${videoLabel}</a>
             </p>
             <div style="height:1px;background-color:#efe6da;margin:24px 0;"></div>
             <p style="margin:0;font-size:15px;line-height:1.6;">${closing}</p>
+            <p style="margin:14px 0 0 0;font-size:14px;line-height:1.6;">
+              <a href="${BOOKING_URL}" style="color:#59191F;text-decoration:underline;font-weight:600;">${bookingLabel}</a>
+            </p>
             <p style="margin:20px 0 0 0;font-size:15px;line-height:1.6;">
               <strong style="color:#59191F;">Simon Lemonnier</strong><br />
               <span style="color:#8a7a70;font-size:13px;">WineExporters by ExportVins</span>
