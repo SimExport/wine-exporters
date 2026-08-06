@@ -95,6 +95,7 @@ interface TenderRequest {
   deadline_sample: string | null;
   style_profile: string | null;
   requirements: string | null;
+  created_at: string;
   category_fr: string | null;
   category_en: string | null;
   designation_origin_fr: string | null;
