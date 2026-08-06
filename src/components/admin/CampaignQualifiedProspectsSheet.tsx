@@ -51,17 +51,27 @@ export function CampaignQualifiedProspectsSheet({ campaign, onOpenChange }: Prop
           .from('campaign_interested_contacts')
           .select('id, company_name, contact_name, email, country, score, description')
           .eq('campaign_id', campaign.id)
+          .not('contact_name', 'is', null)
           .order('score', { ascending: false, nullsFirst: false }),
         supabase
-          .from('leads')
-          .select('id, email, market, source_score, owner_notes, created_at')
+          .from('campaign_interested_contacts')
+          .select('id, email, country, score, description, created_at')
           .eq('campaign_id', campaign.id)
-          .eq('source', 'click')
+          .is('contact_name', null)
           .order('created_at', { ascending: false }),
       ]);
       if (cancelled) return;
       setRespondents((r as Respondent[]) ?? []);
-      setClickers((c as ClickerLead[]) ?? []);
+      setClickers(
+        ((c as any[]) ?? []).map((row) => ({
+          id: row.id,
+          email: row.email ?? null,
+          market: row.country ?? null,
+          source_score: row.score ?? null,
+          owner_notes: row.description ?? null,
+          created_at: row.created_at,
+        })),
+      );
       setLoading(false);
     })();
     return () => {
