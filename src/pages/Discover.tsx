@@ -143,10 +143,10 @@ const Discover = () => {
 
           <div className="relative mt-12 hidden lg:block">
             <img
-              src={heroImage}
+              src={heroAsset.url}
               width={1400}
               height={1000}
-              alt="Bouteille de vin dans une caisse en bois tamponnée FRAGILE, passeport et carte du monde"
+              alt="Bouteilles de vin soigneusement rangées dans une caisse d'export"
               className="w-full rounded-2xl object-contain saturate-[0.85]"
             />
             <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[#59191F]/10" />
