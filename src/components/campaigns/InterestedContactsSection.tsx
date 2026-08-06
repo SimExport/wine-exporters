@@ -49,8 +49,7 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   const isAdded = (c: InterestedContact) =>
-    (c.origin ?? 'form') === 'click' ||
-    (!!currentUserId && (c.added_to_crm_by || []).includes(currentUserId));
+    !!currentUserId && (c.added_to_crm_by || []).includes(currentUserId);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -268,12 +267,7 @@ function ProspectCard({
       )}
 
       <div className="mt-auto flex justify-end pt-1">
-        {origin === 'click' ? (
-          <Badge variant="secondary" className="gap-1">
-            <Check className="h-3 w-3" />
-            {t('campaigns.detail.interestedContacts.alreadyInCrm', { defaultValue: 'Déjà dans votre CRM' })}
-          </Badge>
-        ) : added ? (
+        {added ? (
           <Badge variant="secondary" className="gap-1">
             <Check className="h-3 w-3" />
             {t('campaigns.detail.interestedContacts.added')}
