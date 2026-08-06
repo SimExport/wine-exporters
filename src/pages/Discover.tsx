@@ -29,6 +29,7 @@ const COPY = {
     successBody:
       "La vidéo de démonstration vient de partir sur votre email. Vous pouvez aussi la découvrir tout de suite.",
     videoCta: "Voir la plateforme en vidéo",
+    bookLink: "Prendre un rendez-vous avec Simon, le fondateur",
     legal: "Vos informations servent uniquement à vous envoyer ces documents et à vous recontacter.",
   },
   en: {
@@ -51,6 +52,7 @@ const COPY = {
     successBody:
       "The demo video has just been sent to your email. You can also watch it right now.",
     videoCta: "Watch the platform video",
+    bookLink: "Book a meeting with Simon, the founder",
     legal: "Your details are only used to send these documents and to get back to you.",
   },
 } as const;
@@ -168,6 +170,16 @@ const Discover = () => {
                   {t.videoCta}
                 </button>
               </div>
+              <p className="mt-4 text-center text-[13px] text-[#6b5346]">
+                <a
+                  href="https://calendar.app.google/xPLu8ru2PpdC2uoG8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-[#C9A84C] underline-offset-4 transition-colors hover:text-[#59191F]"
+                >
+                  {t.bookLink}
+                </a>
+              </p>
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-5">
