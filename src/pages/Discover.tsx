@@ -4,7 +4,7 @@ import { Play, Download, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import heroImage from "@/assets/decouvrir-hero.jpg";
+import heroImage from "@/assets/decouvrir-export.jpg";
 
 const SUPADEMO_ID = "cmpf98qp62r0bqm8qiqd73xxd";
 const BROCHURE_URL = "/brochure-wineexporters-v2.pdf";
@@ -17,7 +17,7 @@ const COPY = {
     eyebrow: "21 000+ importateurs vérifiés dans 140+ pays",
     title: "Découvrez comment les domaines viticoles trouvent leurs importateurs.",
     subtitle:
-      "Recevez la brochure et la vidéo de la plateforme. Trois minutes suffisent pour voir comment ça marche.",
+      "La brochure et la vidéo de démonstration, dans votre boîte mail en un clic. De quoi voir concrètement comment fonctionne la plateforme avant d'aller plus loin.",
     firstName: "Prénom",
     domain: "Nom du domaine",
     email: "Email professionnel",
@@ -40,7 +40,7 @@ const COPY = {
     eyebrow: "21,000+ verified importers across 140+ countries",
     title: "See how wine estates find their importers.",
     subtitle:
-      "Get the brochure and the platform video. Three minutes is enough to see how it works.",
+      "The brochure and the demo video, in your inbox in one click. Enough to see concretely how the platform works before going further.",
     firstName: "First name",
     domain: "Estate name",
     email: "Work email",
