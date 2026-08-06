@@ -63,11 +63,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const appUrl = `https://wine-exporters.com/campaigns/${campaign.id}`;
 
-    const teaserFr = nRespondents + nClickers > 0
-      ? `Vous avez <strong>${nRespondents} prospect${nRespondents > 1 ? "s" : ""} qualifié${nRespondents > 1 ? "s" : ""}</strong> via le formulaire d'intérêt et <strong>${nClickers} cliqueur${nClickers > 1 ? "s" : ""} intéressé${nClickers > 1 ? "s" : ""}</strong> à retrouver dans votre espace.`
+    const nQualified = nRespondents + nClickers;
+    const teaserFr = nQualified > 0
+      ? `Vous avez <strong>${nQualified} prospect${nQualified > 1 ? "s" : ""} qualifié${nQualified > 1 ? "s" : ""}</strong> à retrouver dans votre espace.`
       : "Retrouvez le détail des interactions et les prospects qualifiés dans votre espace.";
-    const teaserEn = nRespondents + nClickers > 0
-      ? `You have <strong>${nRespondents} qualified prospect${nRespondents > 1 ? "s" : ""}</strong> via the interest form and <strong>${nClickers} interested clicker${nClickers > 1 ? "s" : ""}</strong> waiting in your account.`
+    const teaserEn = nQualified > 0
+      ? `You have <strong>${nQualified} qualified prospect${nQualified > 1 ? "s" : ""}</strong> waiting in your account.`
       : "Find the full interaction details and qualified prospects in your account.";
 
     const t = isEn
