@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -279,6 +279,15 @@ const TestimonialsGrid = () => {
 /* ─── Page ─── */
 const LandingPage = () => {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const SRC = "https://script.supademo.com/supademo.js";
+    if (document.querySelector(`script[src="${SRC}"]`)) return;
+    const script = document.createElement("script");
+    script.src = SRC;
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
   const inclusions = t("landing.pricing.inclusions", { returnObjects: true }) as string[];
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
   const heroStats = [
@@ -375,14 +384,13 @@ const LandingPage = () => {
                   <a href="#method">{t("landing.hero.ctaSecondary")}</a>
                 </Button>
               </div>
-              <Button variant="ghost" asChild>
-                <a
-                  href="https://app.supademo.com/demo/cmpf98qp62r0bqm8qiqd73xxd"
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  <PlayCircle className="mr-2 h-5 w-5" />
-                  {t("landing.hero.ctaVideo")}
-                </a>
+              <Button
+                variant="ghost"
+                onClick={() =>
+                (window as any).Supademo?.open?.("cmpf98qp62r0bqm8qiqd73xxd")
+                }>
+                <PlayCircle className="mr-2 h-5 w-5" />
+                {t("landing.hero.ctaVideo")}
               </Button>
               <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("landing.hero.haveAccount")}
