@@ -11,6 +11,8 @@ const corsHeaders = {
 
 interface Payload {
   campaignId: string;
+  /** When true, build the email and return it without sending anything. */
+  preview?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -19,7 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { campaignId }: Payload = await req.json();
+    const { campaignId, preview }: Payload = await req.json();
     if (!campaignId) throw new Error("campaignId required");
 
     const admin = createClient(
@@ -113,6 +115,23 @@ const handler = async (req: Request): Promise<Response> => {
         </div>
       </div>
     `;
+
+    if (preview) {
+      return new Response(
+        JSON.stringify({
+          preview: true,
+          subject: t.subject,
+          html,
+          to: userEmail,
+          bcc: "simon@exportvins.fr",
+          qualifiedCount: nQualified,
+          respondents: nRespondents,
+          clickers: nClickers,
+          language: isEn ? "en" : "fr",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
 
     const sendResult = await resend.emails.send({
       from: "WineExporters <notifications@exportvins.fr>",
