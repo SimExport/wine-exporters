@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, Download, Check, Loader2 } from "lucide-react";
+import { Play, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import heroAsset from "@/assets/decouvrir-export.jpg.asset.json";
-import brochureAsset from "@/assets/brochure-wineexporters-v2.pdf.asset.json";
 
 const SUPADEMO_ID = "cmpf98qp62r0bqm8qiqd73xxd";
-const BROCHURE_URL = brochureAsset.url;
 
 const COPY = {
   fr: {
@@ -29,8 +27,7 @@ const COPY = {
     error: "L'envoi a échoué. Réessayez dans un instant.",
     successTitle: "C'est envoyé.",
     successBody:
-      "La brochure et la vidéo viennent de partir sur votre email. Vous pouvez aussi les ouvrir tout de suite.",
-    brochureCta: "Télécharger la brochure",
+      "La vidéo de démonstration vient de partir sur votre email. Vous pouvez aussi la découvrir tout de suite.",
     videoCta: "Voir la plateforme en vidéo",
     legal: "Vos informations servent uniquement à vous envoyer ces documents et à vous recontacter.",
   },
@@ -52,8 +49,7 @@ const COPY = {
     error: "Sending failed. Please try again in a moment.",
     successTitle: "It's on its way.",
     successBody:
-      "The brochure and the video have just been sent to your email. You can also open them right now.",
-    brochureCta: "Download the brochure",
+      "The demo video has just been sent to your email. You can also watch it right now.",
     videoCta: "Watch the platform video",
     legal: "Your details are only used to send these documents and to get back to you.",
   },
@@ -162,20 +158,11 @@ const Discover = () => {
               </div>
               <h2 className="font-serif text-2xl font-semibold text-[#59191F]">{t.successTitle}</h2>
               <p className="mt-3 text-[15px] leading-relaxed text-[#5c4a41]">{t.successBody}</p>
-              <div className="mt-7 space-y-3">
-                <a
-                  href={BROCHURE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#59191F] px-5 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#43121a]"
-                >
-                  <Download className="h-4 w-4" />
-                  {t.brochureCta}
-                </a>
+              <div className="mt-7">
                 <button
                   type="button"
                   onClick={openVideo}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#C9A84C] px-5 py-3.5 text-[15px] font-semibold text-[#59191F] transition-colors hover:bg-[#C9A84C]/10"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#59191F] px-5 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#43121a]"
                 >
                   <Play className="h-4 w-4" />
                   {t.videoCta}
