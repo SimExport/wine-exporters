@@ -71,6 +71,7 @@ interface ImporterRequest {
   volume: string | null;
   requirements: string | null;
   submitted_at: string | null;
+  created_at: string;
   wine_styles_fr: string | null;
   wine_styles_en: string | null;
   origins_fr: string | null;
