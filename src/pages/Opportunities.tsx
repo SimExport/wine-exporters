@@ -134,14 +134,14 @@ export default function Opportunities() {
       const [imp, ten, leads, views] = await Promise.all([
         supabase
           .from('importer_requests')
-          .select('*')
+          .select('*, created_at')
           .eq('status', 'published')
-          .order('submitted_at', { ascending: false, nullsFirst: false }),
+          .order('created_at', { ascending: false, nullsFirst: false }),
         supabase
           .from('tender_requests')
-          .select('*, agent:tender_agents(name, company, email, phone, address)')
+          .select('*, created_at, agent:tender_agents(name, company, email, phone, address)')
           .eq('status', 'published')
-          .order('deadline_answer', { ascending: true, nullsFirst: false }),
+          .order('created_at', { ascending: false, nullsFirst: false }),
         supabase
           .from('leads')
           .select('source_ref')
