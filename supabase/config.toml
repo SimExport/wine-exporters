@@ -24,6 +24,9 @@ verify_jwt = false
 [functions.submit-demo-request]
 verify_jwt = false
 
+[functions.submit-brochure-request]
+verify_jwt = false
+
 [functions.admin-invite-user]
 verify_jwt = true
 

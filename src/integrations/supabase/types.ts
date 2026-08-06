@@ -85,6 +85,39 @@ export type Database = {
           },
         ]
       }
+      brochure_leads: {
+        Row: {
+          created_at: string
+          domain_name: string
+          email: string
+          first_name: string
+          id: string
+          locale: string
+          phone: string | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          domain_name: string
+          email: string
+          first_name: string
+          id?: string
+          locale?: string
+          phone?: string | null
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          domain_name?: string
+          email?: string
+          first_name?: string
+          id?: string
+          locale?: string
+          phone?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       buyer_contacts: {
         Row: {
           Address: string | null
