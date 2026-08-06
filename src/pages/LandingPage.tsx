@@ -245,6 +245,19 @@ const testimonials = [
   { name: "Domaine Sibille", result: "Ouverture du marché italien." },
 ];
 
+const testimonialQuotes = [
+  {
+    quote:
+      "La plateforme répond à un vrai besoin pour nous, et nous connaissons la valeur et la pertinence de l'approche de Simon.",
+    author: "Mathilde, vigneronne en Alsace",
+  },
+  {
+    quote:
+      "Ce que j'apprécie le plus : la qualification des leads, tout comme la capacité de la plateforme à s'actualiser pour répondre au plus près de nos besoins.",
+    author: "Arnaud, vigneron à Pessac-Léognan",
+  },
+];
+
 const TestimonialsGrid = () => {
   return (
       <div className="grid md:grid-cols-2 gap-5">
@@ -492,6 +505,18 @@ const LandingPage = () => {
             </p>
           </FadeIn>
           <TestimonialsGrid />
+          <div className="grid md:grid-cols-2 gap-5 mt-10">
+            {testimonialQuotes.map((q, i) => (
+              <FadeIn key={q.author} delay={i * 0.05}>
+                <Card className="h-full bg-background border border-border">
+                  <CardContent className="p-6 flex flex-col gap-3">
+                    <p className="text-base leading-relaxed italic">« {q.quote} »</p>
+                    <p className="text-sm font-semibold text-primary">{q.author}</p>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            ))}
+          </div>
         </div>
       </section>
 
