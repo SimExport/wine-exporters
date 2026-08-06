@@ -32,6 +32,8 @@ import {
   Clock,
   KanbanSquare,
   List,
+  PlayCircle,
+  Inbox,
   Megaphone } from
 "lucide-react";
 
