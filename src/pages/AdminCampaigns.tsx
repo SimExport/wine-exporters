@@ -21,6 +21,7 @@ import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInt
 import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
 import { BrevoSyncButton } from '@/components/admin/BrevoSyncButton';
 import { CampaignQualifiedProspectsSheet } from '@/components/admin/CampaignQualifiedProspectsSheet';
+import { CampaignCompletionEmailPreview } from '@/components/admin/CampaignCompletionEmailPreview';
 import { formatDate, formatDateTime } from '@/lib/format';
 
 interface Campaign {
@@ -398,10 +399,6 @@ export default function AdminCampaigns() {
   };
 
   const markCampaignCompleted = async (campaignId: string, campaignName: string) => {
-    if (!confirm(t('adminCampaigns.markCompletedConfirm', { name: campaignName }))) {
-      return;
-    }
-
     try {
       const { error } = await supabase
         .from('campaigns')
@@ -412,19 +409,16 @@ export default function AdminCampaigns() {
 
       setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: 'results' } : c));
 
-      // Notify the campaign owner by email (non-blocking)
-      supabase.functions
-        .invoke('notify-campaign-completed', { body: { campaignId } })
-        .then(({ error: notifyErr }) => {
-          if (notifyErr) {
-            console.error('notify-campaign-completed failed:', notifyErr);
-            toast({
-              title: t('adminCampaigns.completedEmailWarnTitle'),
-              description: t('adminCampaigns.completedEmailWarnDesc'),
-              variant: 'destructive',
-            });
-          }
+      const { error: notifyErr } = await supabase.functions
+        .invoke('notify-campaign-completed', { body: { campaignId } });
+      if (notifyErr) {
+        console.error('notify-campaign-completed failed:', notifyErr);
+        toast({
+          title: t('adminCampaigns.completedEmailWarnTitle'),
+          description: t('adminCampaigns.completedEmailWarnDesc'),
+          variant: 'destructive',
         });
+      }
 
       toast({
         title: t('adminCampaigns.completedTitle'),
@@ -895,7 +889,7 @@ export default function AdminCampaigns() {
                            <Button
                              size="sm"
                              variant="outline"
-                             onClick={() => markCampaignCompleted(campaign.id, campaign.name)}
+                             onClick={() => setCompletionPreview({ id: campaign.id, name: campaign.name })}
                            >
                              <CheckCircle className="h-4 w-4 mr-1" />
                              {t('adminCampaigns.table.markCompleted')}
