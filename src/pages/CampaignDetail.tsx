@@ -143,42 +143,19 @@ const CampaignDetail = () => {
 
   const fetchInterested = async () => {
     try {
-      const [{ data: formData, error: formErr }, { data: clickData, error: clickErr }] = await Promise.all([
-        supabase
-          .from('campaign_interested_contacts')
-          .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by')
-          .eq('campaign_id', id)
-          .order('score', { ascending: false, nullsFirst: false })
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('leads')
-          .select('id, email, market, source_score, owner_notes, created_at')
-          .eq('campaign_id', id)
-          .eq('source', 'click')
-          .order('source_score', { ascending: false, nullsFirst: false }),
-      ]);
-      if (formErr) throw formErr;
-      if (clickErr) throw clickErr;
-      const formList: InterestedContact[] = ((formData as any[]) || []).map((r) => ({
+      const { data, error } = await supabase
+        .from('campaign_interested_contacts')
+        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by')
+        .eq('campaign_id', id)
+        .order('score', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      const list: InterestedContact[] = ((data as any[]) || []).map((r) => ({
         ...(r as InterestedContact),
-        origin: 'form' as const,
+        // Clickers imported from Brevo have no contact name nor recommended actions.
+        origin: r.contact_name ? ('form' as const) : ('click' as const),
       }));
-      const clickList: InterestedContact[] = ((clickData as any[]) || []).map((r) => ({
-        id: `click_${r.id}`,
-        company_name: (r.email?.split('@')[0] as string) || (r.email as string) || '—',
-        email: r.email ?? null,
-        contact_name: null,
-        country: r.market ?? null,
-        score: r.source_score ?? null,
-        description: r.owner_notes ?? null,
-        recommended_actions: null,
-        added_to_crm_by: null,
-        origin: 'click' as const,
-      }));
-      const merged = [...formList, ...clickList].sort(
-        (a, b) => (b.score ?? -1) - (a.score ?? -1),
-      );
-      setInterested(merged);
+      setInterested(list.sort((a, b) => (b.score ?? -1) - (a.score ?? -1)));
     } catch (error) {
       console.error('Error fetching interested contacts:', error);
     }

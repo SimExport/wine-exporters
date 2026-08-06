@@ -53,12 +53,13 @@ const handler = async (req: Request): Promise<Response> => {
       admin
         .from("campaign_interested_contacts")
         .select("id", { count: "exact", head: true })
-        .eq("campaign_id", campaignId),
+        .eq("campaign_id", campaignId)
+        .not("contact_name", "is", null),
       admin
-        .from("leads")
+        .from("campaign_interested_contacts")
         .select("id", { count: "exact", head: true })
         .eq("campaign_id", campaignId)
-        .eq("source", "click"),
+        .is("contact_name", null),
     ]);
     const nRespondents = respondentsCount ?? 0;
     const nClickers = clickersCount ?? 0;

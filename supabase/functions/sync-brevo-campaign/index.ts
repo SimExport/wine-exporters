@@ -93,7 +93,7 @@ async function enrichClickerWithAI(input: {
   const localPart = input.email.split("@")[0] ?? input.email;
   const domain = input.email.split("@")[1] ?? "";
   const fallback = {
-    description: `Clicked on the campaign "${input.campaign_name}" email but did not fill the interest form. Domain: ${domain || "unknown"}.`,
+    description: `A cliqué dans l'email de la campagne « ${input.campaign_name} » sans remplir le formulaire d'intérêt. Domaine : ${domain || "inconnu"}.`,
     score: 5,
   };
   if (!key) return fallback;
@@ -108,10 +108,10 @@ Domain: ${domain}
 
 Return STRICT JSON with two keys only:
 {
-  "description": "2-3 sentences in ENGLISH inferring the likely company from the email domain (business type, likely market fit with the producer). Neutral, professional tone. If domain is generic (gmail, yahoo, hotmail, outlook…), say the company cannot be inferred. No greeting.",
+  "description": "2-3 phrases EN FRANÇAIS déduisant la société probable à partir du domaine de l'email (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel. Si le domaine est générique (gmail, yahoo, hotmail, outlook…), indiquer que la société ne peut pas être déduite. Pas de formule de politesse. Garder les noms propres tels quels.",
   "score": "Integer 4-7 qualifying the lead on a /10 scale. Range is 4-7 because clicking is a passive signal, weaker than a form submission. Use 4 for generic free email, 5 standard, 6 for a plausible professional domain, 7 for a clear pro wine-import domain matching the producer profile."
 }
-No prose, no code fences.`;
+No prose, no code fences. Le champ "description" doit impérativement être rédigé en français.`;
 
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -124,7 +124,7 @@ No prose, no code fences.`;
         model: "claude-sonnet-4-5",
         max_tokens: 600,
         messages: [{ role: "user", content: prompt }],
-        system: "You output only valid JSON. No commentary, no code fences.",
+        system: "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French.",
       }),
     });
     if (!resp.ok) {
@@ -307,20 +307,23 @@ Deno.serve(async (req) => {
             producer_profile,
           });
           const first_name = (email.split("@")[0] ?? email).slice(0, 60);
-          const { error: leadErr } = await admin.from("leads").insert({
-            campaign_id,
-            first_name,
-            email,
-            market: marketFor(email),
-            buyer_id: `click_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-            status: "new",
-            source: "click",
-            source_score: enriched.score,
-            owner_notes: enriched.description,
-            last_activity_at: new Date().toISOString(),
-          });
+          // Clickers stay in the campaign prospect list — the producer decides
+          // manually whether to push them into their CRM.
+          const { error: leadErr } = await admin
+            .from("campaign_interested_contacts")
+            .insert({
+              campaign_id,
+              company_name: first_name,
+              contact_name: null,
+              email,
+              country: marketFor(email),
+              description: enriched.description,
+              recommended_actions: null,
+              score: enriched.score,
+              added_to_crm_by: [],
+            });
           if (leadErr) {
-            console.error("Clicker lead insert failed:", email, leadErr.message);
+            console.error("Clicker prospect insert failed:", email, leadErr.message);
             failed.push(email);
           } else imported++;
         }
