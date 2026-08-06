@@ -329,15 +329,24 @@ const LandingPage = () => {
             </p>
           </FadeIn>
           <FadeIn delay={0.25}>
-            <div className="flex items-center justify-center gap-8 sm:gap-12 border-t border-border pt-8 mb-10">
+            <div className="border-t border-border pt-8 mb-4">
+              <p className="mb-6 text-sm sm:text-base font-semibold text-primary">
+                {t("landing.hero.database")}
+              </p>
+              <div className="flex items-center justify-center gap-8 sm:gap-12">
               {heroStats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-2xl sm:text-3xl font-extrabold text-primary">{stat.value}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                {t("landing.hero.statsAttribution")}
+              </p>
             </div>
           </FadeIn>
+          <div className="mb-10" />
           <FadeIn delay={0.35}>
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -351,6 +360,15 @@ const LandingPage = () => {
                   <a href="#method">{t("landing.hero.ctaSecondary")}</a>
                 </Button>
               </div>
+              <Button variant="ghost" asChild>
+                <a
+                  href="https://app.supademo.com/demo/cmpf98qp62r0bqm8qiqd73xxd"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  <PlayCircle className="mr-2 h-5 w-5" />
+                  {t("landing.hero.ctaVideo")}
+                </a>
+              </Button>
               <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("landing.hero.haveAccount")}
               </Link>
@@ -391,6 +409,11 @@ const LandingPage = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-20">
               {t("landing.method.title")}
             </h2>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="-mt-14 mb-16 text-center text-lg font-semibold text-primary">
+              {t("landing.method.databaseCallout")}
+            </p>
           </FadeIn>
 
           <div className="space-y-28">
@@ -502,9 +525,6 @@ const LandingPage = () => {
                 <Button size="lg" className="w-full text-lg" asChild>
                   <Link to="/demande-demo">{t("landing.pricing.ctaStart")}</Link>
                 </Button>
-                <p className="text-sm text-muted-foreground text-center mt-4">
-                  {t("landing.pricing.founders")}
-                </p>
               </CardContent>
             </Card>
           </FadeIn>
