@@ -8,7 +8,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const BROCHURE_URL = "https://wine-exporters.com/brochure-wineexporters-v2.pdf";
+const BROCHURE_URL =
+  "https://wine-exporters.com/__l5e/assets-v1/69dd9595-c0a7-4e4c-a5ef-2d016252e5f3/brochure-wineexporters-v2.pdf";
 const VIDEO_URL = "https://app.supademo.com/demo/cmpf98qp62r0bqm8qiqd73xxd";
 
 function clean(s: unknown, max = 255): string {
