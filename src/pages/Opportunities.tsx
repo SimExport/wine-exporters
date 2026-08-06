@@ -300,9 +300,9 @@ export default function Opportunities() {
                               {tr('opportunitiesPage.states.seen')}
                             </Badge>
                           )}
-                          {r.submitted_at && (
+                          {r.created_at && (
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(r.submitted_at), 'd MMM yyyy', { locale: dateLocale })}
+                              {format(new Date(r.created_at), 'd MMM yyyy', { locale: dateLocale })}
                             </span>
                           )}
                         </div>
