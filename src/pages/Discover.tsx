@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import heroAsset from "@/assets/decouvrir-export.jpg.asset.json";
+import brochureAsset from "@/assets/brochure-wineexporters-v2.pdf.asset.json";
 
 const SUPADEMO_ID = "cmpf98qp62r0bqm8qiqd73xxd";
-const BROCHURE_URL = "/brochure-wineexporters-v2.pdf";
+const BROCHURE_URL = brochureAsset.url;
 
 const COPY = {
   fr: {
