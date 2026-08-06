@@ -1770,7 +1770,10 @@
         "domains": "domaines accompagnés",
         "importers": "importateurs trouvés",
         "markets": "marchés ouverts"
-      }
+      },
+      "statsAttribution": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters.",
+      "database": "21 000+ importateurs vérifiés dans 140+ pays",
+      "ctaVideo": "Découvrir la plateforme en vidéo"
     },
     "pain": {
       "title": "L'export ne devrait pas être un parcours du combattant.",
@@ -1811,8 +1814,10 @@
         "text": "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
         "bullet1": "Pipeline visuel (CRM Kanban) dédié à la vente de vins à l'export.",
         "bullet2": "Suivi des envois d'échantillons.",
-        "bullet3": "Historique centralisé pour ne jamais oublier une relance."
-      }
+        "bullet3": "Historique centralisé pour ne jamais oublier une relance.",
+        "bullet4": "Opportunités : le seul canal où la demande entrante rejoint automatiquement votre pipeline."
+      },
+      "databaseCallout": "21 000+ importateurs vérifiés dans 140+ pays."
     },
     "synthesis": {
       "title": "Une seule plateforme. Zéro friction. Et de l'humain.",
@@ -1820,17 +1825,15 @@
     },
     "testimonials": {
       "title": "Ils nous ont fait confiance. Ils ont obtenu des commandes.",
-      "subtitle": "Ces domaines ont réalisé une Mission Performance Export avec ExportVins.",
-      "viewAll": "Voir tous les résultats ({{count}})"
+      "subtitle": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters."
     },
     "pricing": {
       "title": "Un investissement rentabilisé dès la première palette.",
       "subtitle": "Tout est inclus. Pas de coûts cachés.",
       "planName": "WineExporters",
       "priceSuffix": "HT / mois",
-      "commitment": "engagement 3 mois",
+      "commitment": "sans engagement, résiliable à tout moment",
       "ctaStart": "Demander une démo",
-      "founders": "Accès fondateur disponible — contactez-nous pour bénéficier du tarif préférentiel.",
       "inclusions": [
         "Accès illimité aux bases de données",
         "1 recherche sur-mesure / mois",
@@ -1869,7 +1872,7 @@
       "button": "Demander une démo"
     },
     "footer": {
-      "copyright": "ExportVins © 2026 — L'outil de prospection des vignerons.",
+      "copyright": "WineExporters by ExportVins © 2026",
       "contact": "Contact",
       "legal": "Mentions légales"
     }
