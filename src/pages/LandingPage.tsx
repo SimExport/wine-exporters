@@ -68,7 +68,7 @@ const painPointsConfig = [
 const pillarsConfig = [
   { id: "step1", bulletIcons: [Filter, Users], bulletKeys: ["bullet1", "bullet2"] },
   { id: "step2", bulletIcons: [Send, Eye], bulletKeys: ["bullet1", "bullet2"] },
-  { id: "step3", bulletIcons: [Kanban, Package, Clock], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
+  { id: "step3", bulletIcons: [Kanban, Package, Clock, Inbox], bulletKeys: ["bullet1", "bullet2", "bullet3", "bullet4"] },
 ] as const;
 
 /* ─── Pillar mockups (real React components, hardcoded data) ─── */
