@@ -393,6 +393,11 @@ export default function Opportunities() {
                             </Badge>
                           )}
                           {deadlineBadge(t.deadline_answer)}
+                          {t.created_at && (
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(t.created_at), 'd MMM yyyy', { locale: dateLocale })}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {t.category && (
