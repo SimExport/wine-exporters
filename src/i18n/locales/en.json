@@ -1759,10 +1759,10 @@
       "requestDemo": "Request a demo"
     },
     "hero": {
-      "badge": "🍷 The all-in-one platform for wineries",
-      "titleLead": "Find your future importers,",
-      "titleHighlight": "grow your export sales.",
-      "subtitle": "The first all-in-one prospecting platform.\nAccess qualified databases, send your campaigns, and track your contacts in one place.",
+      "badge": "🍷 For wine estates looking for buyers, not trade shows.",
+      "titleLead": "Exporting shouldn't feel like",
+      "titleHighlight": "an uphill battle.",
+      "subtitle": "In today's economy, finding export buyers is getting harder and harder.\nWe connect you directly with verified importers — no trade shows, no cold outreach in the dark.",
       "ctaPrimary": "Discover the platform in video",
       "ctaSecondary": "Request a demo",
       "haveAccount": "I already have an account → Sign in",
@@ -1776,60 +1776,60 @@
       "ctaVideo": "Discover the platform in video"
     },
     "pain": {
-      "title": "Exporting shouldn't be a battle.",
+      "title": "Exporting shouldn't feel like an uphill battle.",
       "items": {
         "search": {
           "title": "The endless search",
-          "text": "Finding the right contacts takes hours, and trade fairs cost a fortune for an uncertain ROI."
+          "text": "Hours lost hunting for the right contacts, and overpriced trade shows with uncertain results. We've all been there."
         },
         "silence": {
           "title": "Radio silence",
-          "text": "Your prospecting emails land in spam or get lost in the noise. No one replies."
+          "text": "Your outreach emails land in spam, or get ignored. The silence wears you down."
         },
         "tracking": {
           "title": "Chaotic follow-up",
-          "text": "Sample tracking and follow-ups always end up lost in an endless Excel file."
+          "text": "Samples, follow-ups — everything ends up lost in a spreadsheet no one opens anymore."
         }
       }
     },
     "method": {
       "title": "Our 3-step method to grow your markets.",
       "step1": {
-        "step": "STEP 1",
-        "title": "Stop searching for buyers. Find them.",
-        "text": "Access a global, qualified database of importers and distributors.",
+        "step": "STEP 2",
+        "title": "Stop looking for buyers. We find them for you.",
+        "text": "Targeting a specific market? We analyse your estate and your wines, then deliver a shortlist of relevant importers — not a raw list for you to sort through.",
         "bullet1": "Precise filtering by market and buyer type.",
-        "bullet2": "Bespoke search: Targeting a specific market? Use your monthly credit. Our experts analyze your winery and wines to deliver a relevant selection of importers."
+        "bullet2": "Bespoke search: one credit each month, one targeted market, a shortlist delivered by our experts."
       },
       "step2": {
-        "step": "STEP 2",
-        "title": "Campaigns that finally generate replies.",
-        "text": "No more blind outreach. We help you capture decision-makers' attention with a targeted approach.",
+        "step": "STEP 3",
+        "title": "Campaigns that finally get replies.",
+        "text": "No more emails sent into the void. We write, we send, we optimise deliverability so your message lands in the inbox, not in spam.",
         "bullet1": "Built-in campaign creation tool.",
-        "bullet2": "Managed monthly campaign: You validate, we send. We optimize deliverability so your message lands in the inbox, not in spam."
+        "bullet2": "Managed monthly campaign: you approve, we send."
       },
       "step3": {
-        "step": "STEP 3",
-        "title": "Turn prospects into customers.",
-        "text": "An importer asks for your prices? Never let an opportunity slip away.",
-        "bullet1": "Visual pipeline (Kanban CRM) dedicated to wine export sales.",
+        "step": "STEP 4",
+        "title": "An importer asks for your prices? Never let one slip.",
+        "text": "Visual pipeline, sample tracking, follow-up history — all in one place.",
+        "bullet1": "Visual pipeline (Kanban CRM) built for wine export.",
         "bullet2": "Sample shipment tracking.",
-        "bullet3": "Centralized history so you never forget a follow-up.",
-        "bullet4": "Opportunities: the only channel where inbound demand automatically joins your pipeline."
+        "bullet3": "Centralised history so you never forget a follow-up.",
+        "bullet4": "Opportunities: inbound importer requests land straight in your pipeline, no searching required."
       },
       "databaseCallout": "21,000+ verified importers across 140+ countries.",
       "step0": {
         "step": "STEP 1",
-        "title": "A global, verified database.",
-        "text": "21,000+ verified importers in 140+ countries, continuously updated."
+        "title": "A global database, verified by hand.",
+        "text": "21,000+ importers in 140+ countries. No scraping — real contacts, continuously updated."
       }
     },
     "synthesis": {
-      "title": "One platform. Zero friction. With real humans.",
-      "text": "Our platform replaces your Excel files, complex emailing tools, and Google searches.\n\nMore importantly, it's not just software: behind every bespoke search and prospecting campaign, our team of experts is working to sell your wines."
+      "title": "One platform. Zero friction. And real people.",
+      "text": "We replace your spreadsheets, your complicated emailing tools and your Google searches.\n\nBut it's more than software: behind every bespoke search and every campaign, a team is working to sell your wines — not an algorithm running on its own."
     },
     "testimonials": {
-      "title": "They trusted us. They got orders.",
+      "title": "Estates like yours found their buyers. Here are the markets they opened.",
       "subtitle": "Results achieved through ExportVins support and the WineExporters platform."
     },
     "pricing": {
@@ -1889,8 +1889,8 @@
       ]
     },
     "punchline": {
-      "one": "Every month, a new list of importers ready to contact.",
-      "two": "[PUNCHLINE TO VALIDATE]"
+      "one": "Every month, a new list of importers ready to contact. Not a promise, a list.",
+      "two": "5 years opening markets for estates like yours. Not in theory — in signed orders."
     },
     "bigStats": {
       "items": [
