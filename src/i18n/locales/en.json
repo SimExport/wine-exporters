@@ -1793,7 +1793,7 @@
       }
     },
     "method": {
-      "title": "Our 3-step method to grow your markets.",
+      "title": "Our tools to help you open export markets.",
       "step1": {
         "step": "STEP 2",
         "title": "Stop looking for buyers. We find them for you.",
@@ -1822,6 +1822,14 @@
         "step": "STEP 1",
         "title": "A global database, verified by hand.",
         "text": "21,000+ importers in 140+ countries. No scraping — real contacts, continuously updated."
+      },
+      "step4": {
+        "step": "STEP 5",
+        "title": "Opportunities come to you.",
+        "text": "Direct requests from importers and buyers, published in the platform. You reply, we make the introduction.",
+        "bullet1": "Direct requests from importers and buyers.",
+        "bullet2": "Tenders and partner searches by market.",
+        "bullet3": "Get notified as soon as an opportunity matches your wines."
       }
     },
     "synthesis": {
@@ -1843,6 +1851,7 @@
         "Unlimited access to databases",
         "1 bespoke search / month",
         "1 prospecting campaign / month",
+        "Access to opportunities: direct requests from importers and buyers",
         "Full CRM access",
         "Priority support"
       ]
@@ -1889,7 +1898,7 @@
       ]
     },
     "punchline": {
-      "one": "Every month, a new list of importers ready to contact. Not a promise, a list.",
+      "one": "Every month, qualified buyers interested in your wines.",
       "two": "5 years opening markets for estates like yours. Not in theory — in signed orders."
     },
     "bigStats": {
