@@ -290,11 +290,6 @@ const LandingPage = () => {
   }, []);
   const inclusions = t("landing.pricing.inclusions", { returnObjects: true }) as string[];
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
-  const heroStats = [
-    { value: "+120", label: t("landing.hero.stats.domains") },
-    { value: "+310", label: t("landing.hero.stats.importers") },
-    { value: "+24", label: t("landing.hero.stats.markets") },
-  ];
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
