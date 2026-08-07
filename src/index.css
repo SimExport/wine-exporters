@@ -47,6 +47,10 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     --gold: 42 55% 60%;
     --gold-foreground: 345 50% 15%;
 
+    /* Crème éditoriale #FAF6F0 */
+    --cream: 34 50% 96%;
+    --cream-foreground: 345 45% 22%;
+
     --sidebar-background: 345 45% 22%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
@@ -92,6 +96,9 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
 
     --gold: 42 55% 55%;
     --gold-foreground: 0 0% 98%;
+
+    --cream: 345 30% 12%;
+    --cream-foreground: 0 0% 98%;
 
     --sidebar-background: 345 30% 8%;
     --sidebar-foreground: 0 0% 98%;
