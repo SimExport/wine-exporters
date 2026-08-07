@@ -605,6 +605,9 @@ const LandingPage = () => {
 
       {/* ── D. PUNCHLINE PLEIN ÉCRAN (placeholder à valider) ── */}
       <Punchline text={t("landing.punchline.two")} tone="primary" />
+      <div className="bg-primary pb-24 sm:pb-28 -mt-10 flex justify-center px-6">
+        <VideoCtaButton label={t("landing.hero.ctaVideo")} variant="secondary" />
+      </div>
 
       {/* ── 5. TARIFS ── */}
       <section id="pricing" className="py-24 scroll-mt-20">
@@ -635,8 +638,9 @@ const LandingPage = () => {
                       <span>{item}</span>
                     </li>)}
                 </ul>
-                <Button size="lg" className="w-full text-lg" asChild>
-                  <Link to="/demande-demo">{t("landing.pricing.ctaStart")}</Link>
+                <Button size="lg" className="w-full text-lg" onClick={openDemo}>
+                  <PlayCircle className="mr-2 h-5 w-5" />
+                  {t("landing.hero.ctaVideo")}
                 </Button>
               </CardContent>
             </Card>
@@ -680,12 +684,15 @@ const LandingPage = () => {
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-8">
               {t("landing.finalCta.title")}
             </h2>
-            <Button size="lg" asChild className="text-lg px-10">
-              <Link to="/demande-demo">
-                {t("landing.finalCta.button")}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <VideoCtaButton label={t("landing.hero.ctaVideo")} className="px-10" />
+              <Button size="lg" variant="outline" asChild className="text-lg px-10">
+                <Link to="/demande-demo">
+                  {t("landing.finalCta.button")}
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
           </FadeIn>
         </div>
       </section>
@@ -694,7 +701,7 @@ const LandingPage = () => {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-2">
-            <Grape className="h-4 w-4 text-primary" />
+            <img src={logoMark.url} alt="WineExporters" className="h-6 w-auto" width={24} height={24} />
             {t("landing.footer.copyright")}
           </span>
           <div className="flex gap-6">
