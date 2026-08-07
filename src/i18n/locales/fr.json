@@ -1817,7 +1817,12 @@
         "bullet3": "Historique centralisé pour ne jamais oublier une relance.",
         "bullet4": "Opportunités : le seul canal où la demande entrante rejoint automatiquement votre pipeline."
       },
-      "databaseCallout": "21 000+ importateurs vérifiés dans 140+ pays."
+      "databaseCallout": "21 000+ importateurs vérifiés dans 140+ pays.",
+      "step0": {
+        "step": "ÉTAPE 1",
+        "title": "Une base de données mondiale et vérifiée.",
+        "text": "21 000+ importateurs vérifiés dans 140+ pays, mise à jour en continu."
+      }
     },
     "synthesis": {
       "title": "Une seule plateforme. Zéro friction. Et de l'humain.",
@@ -1875,6 +1880,29 @@
       "copyright": "WineExporters by ExportVins © 2026",
       "contact": "Contact",
       "legal": "Mentions légales"
+    },
+    "marquee": {
+      "items": [
+        "21 000 IMPORTATEURS VÉRIFIÉS",
+        "140 PAYS",
+        "UNE PLATEFORME, TOUT INCLUS"
+      ]
+    },
+    "punchline": {
+      "one": "Chaque mois, une nouvelle liste d'importateurs prête à contacter.",
+      "two": "[PUNCHLINE À VALIDER]"
+    },
+    "bigStats": {
+      "items": [
+        {
+          "value": "21 000+",
+          "label": "importateurs vérifiés dans 140+ pays"
+        },
+        {
+          "value": "15 minutes",
+          "label": "pour lancer une campagne"
+        }
+      ]
     }
   },
   "adminCampaigns": {

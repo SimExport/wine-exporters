@@ -119,4 +119,10 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
   body {
     @apply bg-background text-foreground;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee {
+      animation: none !important;
+    }
+  }
 }
