@@ -59,6 +59,62 @@ const FadeIn = ({
 };
 
 /* ─── Static config (icons + visuals) ─── */
+
+/* ─── Editorial building blocks ─── */
+const Marquee = ({ items }: { items: string[] }) => {
+  const sequence = [...items, ...items, ...items, ...items];
+  return (
+    <div className="bg-primary text-primary-foreground overflow-hidden py-4 sm:py-5 border-y border-primary">
+      <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+        {[0, 1].map((copy) => (
+          <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
+            {sequence.map((item, i) => (
+              <span key={`${copy}-${i}`} className="flex items-center">
+                <span className="px-6 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] whitespace-nowrap">
+                  {item}
+                </span>
+                <span className="h-1.5 w-1.5 rounded-full bg-gold shrink-0" />
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const Punchline = ({ text, tone }: { text: string; tone: "cream" | "primary" }) => (
+  <section
+    className={`py-24 sm:py-32 px-6 ${
+      tone === "cream" ? "bg-cream text-cream-foreground" : "bg-primary text-primary-foreground"
+    }`}>
+    <FadeIn>
+      <p className="font-display max-w-5xl mx-auto text-center text-3xl sm:text-5xl lg:text-6xl leading-[1.15] font-semibold text-balance">
+        {text}
+      </p>
+    </FadeIn>
+  </section>
+);
+
+const BigStats = ({ items }: { items: Array<{ value: string; label: string }> }) => (
+  <section className="py-20 sm:py-28">
+    <div className="max-w-5xl mx-auto px-6 grid gap-14 sm:gap-8 sm:grid-cols-2">
+      {items.map((s, i) => (
+        <FadeIn key={s.value} delay={i * 0.1}>
+          <div className="text-center">
+            <div className="font-display text-gold text-6xl sm:text-8xl lg:text-[7rem] leading-none font-bold">
+              {s.value}
+            </div>
+            <p className="mt-5 text-xs sm:text-sm uppercase tracking-[0.2em] text-primary font-semibold max-w-xs mx-auto">
+              {s.label}
+            </p>
+          </div>
+        </FadeIn>
+      ))}
+    </div>
+  </section>
+);
+
 const painPointsConfig = [
   { id: "search", icon: Search },
   { id: "silence", icon: MailQuestion },
