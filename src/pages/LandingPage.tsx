@@ -290,11 +290,6 @@ const LandingPage = () => {
   }, []);
   const inclusions = t("landing.pricing.inclusions", { returnObjects: true }) as string[];
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
-  const heroStats = [
-    { value: "+120", label: t("landing.hero.stats.domains") },
-    { value: "+310", label: t("landing.hero.stats.importers") },
-    { value: "+24", label: t("landing.hero.stats.markets") },
-  ];
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
@@ -352,46 +347,24 @@ const LandingPage = () => {
               {t("landing.hero.subtitle")}
             </p>
           </FadeIn>
-          <FadeIn delay={0.25}>
-            <div className="border-t border-border pt-8 mb-4">
-              <p className="mb-6 text-sm sm:text-base font-semibold text-primary">
-                {t("landing.hero.database")}
-              </p>
-              <div className="flex items-center justify-center gap-8 sm:gap-12">
-              {heroStats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-2xl sm:text-3xl font-extrabold text-primary">{stat.value}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-              </div>
-              <p className="mt-4 text-xs text-muted-foreground">
-                {t("landing.hero.statsAttribution")}
-              </p>
-            </div>
-          </FadeIn>
-          <div className="mb-10" />
           <FadeIn delay={0.35}>
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button size="lg" asChild className="text-lg px-8">
-                  <Link to="/demande-demo">
-                    {t("landing.hero.ctaPrimary")}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
+                <Button
+                  size="lg"
+                  className="text-lg px-8"
+                  onClick={() =>
+                    (window as any).Supademo?.open?.("cmpf98qp62r0bqm8qiqd73xxd")
+                  }>
+                  <PlayCircle className="mr-2 h-5 w-5" />
+                  {t("landing.hero.ctaPrimary")}
                 </Button>
                 <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                  <a href="#method">{t("landing.hero.ctaSecondary")}</a>
+                  <Link to="/decouvrir">
+                    {t("landing.hero.ctaSecondary")}
+                  </Link>
                 </Button>
               </div>
-              <Button
-                variant="ghost"
-                onClick={() =>
-                (window as any).Supademo?.open?.("cmpf98qp62r0bqm8qiqd73xxd")
-                }>
-                <PlayCircle className="mr-2 h-5 w-5" />
-                {t("landing.hero.ctaVideo")}
-              </Button>
               <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("landing.hero.haveAccount")}
               </Link>
