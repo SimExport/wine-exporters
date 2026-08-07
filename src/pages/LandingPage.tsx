@@ -377,17 +377,24 @@ const LandingPage = () => {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
-              <Grape className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="font-bold text-base text-foreground">WineExporters</span>
-              <span className="text-xs text-muted-foreground">by ExportVins</span>
-            </div>
+            <img
+              src={logoFull.url}
+              alt="WineExporters by ExportVins"
+              className="h-9 sm:h-10 w-auto"
+              width={220}
+              height={40}
+            />
+            <span className="hidden sm:inline text-xs text-muted-foreground border-l border-border pl-2">
+              by ExportVins
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
-            <Button asChild>
+            <Button onClick={openDemo} className="hidden sm:inline-flex">
+              <PlayCircle className="mr-2 h-4 w-4" />
+              {t("landing.hero.ctaVideo")}
+            </Button>
+            <Button variant="outline" asChild>
               <Link to="/demande-demo">{t("landing.nav.requestDemo")}</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
@@ -430,15 +437,7 @@ const LandingPage = () => {
           <FadeIn delay={0.35}>
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  className="text-lg px-8"
-                  onClick={() =>
-                    (window as any).Supademo?.open?.("cmpf98qp62r0bqm8qiqd73xxd")
-                  }>
-                  <PlayCircle className="mr-2 h-5 w-5" />
-                  {t("landing.hero.ctaPrimary")}
-                </Button>
+                <VideoCtaButton label={t("landing.hero.ctaPrimary")} />
                 <Button size="lg" variant="outline" asChild className="text-lg px-8">
                   <Link to="/decouvrir">
                     {t("landing.hero.ctaSecondary")}
