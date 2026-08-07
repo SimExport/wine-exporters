@@ -347,25 +347,6 @@ const LandingPage = () => {
               {t("landing.hero.subtitle")}
             </p>
           </FadeIn>
-          <FadeIn delay={0.25}>
-            <div className="border-t border-border pt-8 mb-4">
-              <p className="mb-6 text-sm sm:text-base font-semibold text-primary">
-                {t("landing.hero.database")}
-              </p>
-              <div className="flex items-center justify-center gap-8 sm:gap-12">
-              {heroStats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-2xl sm:text-3xl font-extrabold text-primary">{stat.value}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-              </div>
-              <p className="mt-4 text-xs text-muted-foreground">
-                {t("landing.hero.statsAttribution")}
-              </p>
-            </div>
-          </FadeIn>
-          <div className="mb-10" />
           <FadeIn delay={0.35}>
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
