@@ -628,7 +628,7 @@ const LandingPage = () => {
       <section className="py-24 bg-muted/50">
         <div className="max-w-2xl mx-auto px-6">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-12">
               {t("landing.faq.title")}
             </h2>
           </FadeIn>
@@ -657,7 +657,7 @@ const LandingPage = () => {
       <section className="py-24">
         <div className="max-w-2xl mx-auto px-6 text-center">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-8">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-8">
               {t("landing.finalCta.title")}
             </h2>
             <Button size="lg" asChild className="text-lg px-10">
