@@ -375,27 +375,21 @@ const LandingPage = () => {
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="max-w-6xl mx-auto px-6 h-20 sm:h-24 flex items-center justify-between">
+          <Link to="/" className="flex items-center">
             <img
               src={logoFull.url}
-              alt="WineExporters by ExportVins"
-              className="h-9 sm:h-10 w-auto"
-              width={220}
-              height={40}
+              alt="WineExporters"
+              className="h-12 sm:h-16 w-auto"
+              width={330}
+              height={64}
             />
-            <span className="hidden sm:inline text-xs text-muted-foreground border-l border-border pl-2">
-              by ExportVins
-            </span>
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Button onClick={openDemo} className="hidden sm:inline-flex">
               <PlayCircle className="mr-2 h-4 w-4" />
               {t("landing.hero.ctaVideo")}
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/demande-demo">{t("landing.nav.requestDemo")}</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/auth" className="text-muted-foreground">{t("landing.nav.signIn")}</Link>
