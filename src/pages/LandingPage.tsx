@@ -36,6 +36,8 @@ import {
   List,
   PlayCircle,
   Inbox,
+  Bell,
+  Globe,
   Megaphone } from
 "lucide-react";
 
@@ -127,6 +129,7 @@ const pillarsConfig = [
   { id: "step1", bulletIcons: [Filter, Users], bulletKeys: ["bullet1", "bullet2"] },
   { id: "step2", bulletIcons: [Send, Eye], bulletKeys: ["bullet1", "bullet2"] },
   { id: "step3", bulletIcons: [Kanban, Package, Clock, Inbox], bulletKeys: ["bullet1", "bullet2", "bullet3", "bullet4"] },
+  { id: "step4", bulletIcons: [Inbox, Globe, Bell], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
 ] as const;
 
 /* ─── Pillar mockups (real React components, hardcoded data) ─── */
@@ -284,9 +287,43 @@ const PipelineMock = () => (
   </div>
 );
 
-const PillarVisual = ({ id }: { id: "step1" | "step2" | "step3" }) => {
+const MOCK_OPPORTUNITIES = [
+  { title: "Recherche de vins rouges bio", country: "Allemagne", flag: "🇩🇪", type: "Demande directe", tone: "bg-blue-500/10 text-blue-600 dark:text-blue-400", volume: "6 000 bouteilles / an" },
+  { title: "Appel d'offres — Crémant & effervescents", country: "Canada", flag: "🇨🇦", type: "Appel d'offres", tone: "bg-amber-500/10 text-amber-600 dark:text-amber-400", volume: "Monopole provincial" },
+  { title: "Importateur cherche Bordeaux AOC", country: "Japon", flag: "🇯🇵", type: "Demande directe", tone: "bg-blue-500/10 text-blue-600 dark:text-blue-400", volume: "Référencement CHR" },
+];
+
+const OpportunitiesMock = () => (
+  <div className="w-full rounded-2xl border bg-card shadow-lg overflow-hidden">
+    <div className="p-4 border-b bg-muted/30 flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <Inbox className="h-4 w-4 text-primary" />
+        Opportunités
+      </div>
+      <Badge variant="secondary" className="gap-1.5"><Bell className="h-3 w-3" />3 nouvelles</Badge>
+    </div>
+    <div className="divide-y">
+      {MOCK_OPPORTUNITIES.map((o, i) => (
+        <div key={i} className={`p-4 space-y-2 ${i >= 2 ? "hidden sm:block" : ""}`}>
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-medium text-sm leading-snug">{o.title}</p>
+            <span className={`shrink-0 text-[10px] font-semibold rounded px-2 py-0.5 ${o.tone}`}>{o.type}</span>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5"><span aria-hidden>{o.flag}</span>{o.country}</span>
+            <span>·</span>
+            <span className="truncate">{o.volume}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const PillarVisual = ({ id }: { id: "step1" | "step2" | "step3" | "step4" }) => {
   if (id === "step1") return <ImportersMock />;
   if (id === "step2") return <CampaignsMock />;
+  if (id === "step4") return <OpportunitiesMock />;
   return <PipelineMock />;
 };
 
@@ -369,7 +406,7 @@ const LandingPage = () => {
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
   const marqueeItems = t("landing.marquee.items", { returnObjects: true }) as string[];
   const bigStats = t("landing.bigStats.items", { returnObjects: true }) as Array<{ value: string; label: string }>;
-  const methodOverview = ["step0", "step1", "step2", "step3"] as const;
+  const methodOverview = ["step0", "step1", "step2", "step3", "step4"] as const;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
@@ -487,7 +524,7 @@ const LandingPage = () => {
           </FadeIn>
 
           {/* Aperçu numéroté 01 → 04 */}
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-24 border-t border-border pt-10">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5 mb-24 border-t border-border pt-10">
             {methodOverview.map((id, i) => (
               <FadeIn key={id} delay={i * 0.08}>
                 <div className="flex flex-col gap-3">
@@ -517,9 +554,6 @@ const LandingPage = () => {
 
                     {/* Text */}
                     <div className="flex-1 space-y-5">
-                      <span className="font-display block text-5xl sm:text-6xl font-bold text-gold leading-none">
-                        {String(i + 2).padStart(2, "0")}
-                      </span>
                       <h3 className="font-display text-2xl sm:text-3xl font-bold leading-tight">
                         {t(`landing.method.${p.id}.title`)}
                       </h3>
