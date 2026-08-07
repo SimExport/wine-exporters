@@ -350,24 +350,21 @@ const LandingPage = () => {
           <FadeIn delay={0.35}>
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button size="lg" asChild className="text-lg px-8">
-                  <Link to="/demande-demo">
-                    {t("landing.hero.ctaPrimary")}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
+                <Button
+                  size="lg"
+                  className="text-lg px-8"
+                  onClick={() =>
+                    (window as any).Supademo?.open?.("cmpf98qp62r0bqm8qiqd73xxd")
+                  }>
+                  <PlayCircle className="mr-2 h-5 w-5" />
+                  {t("landing.hero.ctaPrimary")}
                 </Button>
                 <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                  <a href="#method">{t("landing.hero.ctaSecondary")}</a>
+                  <Link to="/decouvrir">
+                    {t("landing.hero.ctaSecondary")}
+                  </Link>
                 </Button>
               </div>
-              <Button
-                variant="ghost"
-                onClick={() =>
-                (window as any).Supademo?.open?.("cmpf98qp62r0bqm8qiqd73xxd")
-                }>
-                <PlayCircle className="mr-2 h-5 w-5" />
-                {t("landing.hero.ctaVideo")}
-              </Button>
               <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("landing.hero.haveAccount")}
               </Link>
