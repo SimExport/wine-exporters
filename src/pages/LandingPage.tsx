@@ -346,6 +346,9 @@ const LandingPage = () => {
   }, []);
   const inclusions = t("landing.pricing.inclusions", { returnObjects: true }) as string[];
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
+  const marqueeItems = t("landing.marquee.items", { returnObjects: true }) as string[];
+  const bigStats = t("landing.bigStats.items", { returnObjects: true }) as Array<{ value: string; label: string }>;
+  const methodOverview = ["step0", "step1", "step2", "step3"] as const;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
@@ -391,7 +394,7 @@ const LandingPage = () => {
             </Badge>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
               {t("landing.hero.titleLead")}{" "}
               <span className="text-primary underline decoration-primary/40 underline-offset-4">
                 {t("landing.hero.titleHighlight")}
@@ -429,11 +432,14 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ── A. BANDEAU MARQUEE ── */}
+      <Marquee items={marqueeItems} />
+
       {/* ── 2. PROBLÉMATIQUES ── */}
       <section className="py-24 bg-muted/50">
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-14">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-14">
               {t("landing.pain.title")}
             </h2>
           </FadeIn>
@@ -454,19 +460,36 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ── B. PUNCHLINE PLEIN ÉCRAN ── */}
+      <Punchline text={t("landing.punchline.one")} tone="cream" />
+
       {/* ── 3. PILIERS (Zigzag) ── */}
       <section id="method" className="py-24 scroll-mt-20">
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-20">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-16">
               {t("landing.method.title")}
             </h2>
           </FadeIn>
-          <FadeIn delay={0.1}>
-            <p className="-mt-14 mb-16 text-center text-lg font-semibold text-primary">
-              {t("landing.method.databaseCallout")}
-            </p>
-          </FadeIn>
+
+          {/* Aperçu numéroté 01 → 04 */}
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-24 border-t border-border pt-10">
+            {methodOverview.map((id, i) => (
+              <FadeIn key={id} delay={i * 0.08}>
+                <div className="flex flex-col gap-3">
+                  <span className="font-display text-5xl lg:text-6xl font-bold text-gold leading-none">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-display text-xl font-semibold leading-snug">
+                    {t(`landing.method.${id}.title`)}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {t(`landing.method.${id}.text`)}
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
 
           <div className="space-y-28">
             {pillarsConfig.map((p, i) => {
@@ -480,10 +503,10 @@ const LandingPage = () => {
 
                     {/* Text */}
                     <div className="flex-1 space-y-5">
-                      <Badge variant="outline" className="text-xs tracking-widest font-semibold">
-                        {t(`landing.method.${p.id}.step`)}
-                      </Badge>
-                      <h3 className="text-2xl sm:text-3xl font-bold leading-tight">
+                      <span className="font-display block text-5xl sm:text-6xl font-bold text-gold leading-none">
+                        {String(i + 2).padStart(2, "0")}
+                      </span>
+                      <h3 className="font-display text-2xl sm:text-3xl font-bold leading-tight">
                         {t(`landing.method.${p.id}.title`)}
                       </h3>
                       <p className="text-muted-foreground text-lg leading-relaxed">
@@ -514,11 +537,14 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ── C. COMPTEURS STATISTIQUES ── */}
+      <BigStats items={bigStats} />
+
       {/* ── 4. SYNTHÈSE & EXPERTISE ── */}
       <section className="py-24 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
               {t("landing.synthesis.title")}
             </h2>
           </FadeIn>
@@ -534,7 +560,7 @@ const LandingPage = () => {
       <section className="py-24 bg-muted/50">
         <div className="max-w-6xl mx-auto px-6">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-3">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-3">
               {t("landing.testimonials.title")}
             </h2>
             <p className="text-center text-muted-foreground text-lg mb-14">
@@ -557,11 +583,14 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ── D. PUNCHLINE PLEIN ÉCRAN (placeholder à valider) ── */}
+      <Punchline text={t("landing.punchline.two")} tone="primary" />
+
       {/* ── 5. TARIFS ── */}
       <section id="pricing" className="py-24 scroll-mt-20">
         <div className="max-w-2xl mx-auto px-6">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4">
               {t("landing.pricing.title")}
             </h2>
             <p className="text-center text-muted-foreground text-lg mb-14">
