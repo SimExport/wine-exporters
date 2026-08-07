@@ -1759,10 +1759,10 @@
       "requestDemo": "Demander une démo"
     },
     "hero": {
-      "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
-      "titleLead": "Trouvez vos futurs importateurs,",
-      "titleHighlight": "développez vos ventes export.",
-      "subtitle": "La première plateforme de prospection tout-en-un.\nAccédez à des bases de données qualifiées, envoyez vos campagnes et suivez vos contacts au même endroit.",
+      "badge": "🍷 Pour les domaines viticoles qui cherchent des acheteurs, pas des salons.",
+      "titleLead": "L'export ne devrait pas être",
+      "titleHighlight": "un parcours du combattant.",
+      "subtitle": "Dans ce contexte économique, trouver des acheteurs à l'export devient de plus en plus difficile.\nOn vous met en relation directe avec des importateurs vérifiés, sans salon, sans démarchage à l'aveugle.",
       "ctaPrimary": "Découvrir la plateforme en vidéo",
       "ctaSecondary": "Demander une démo",
       "haveAccount": "J'ai déjà un compte → Se connecter",
@@ -1780,56 +1780,56 @@
       "items": {
         "search": {
           "title": "La recherche interminable",
-          "text": "Trouver les bons contacts prend des heures, et les salons coûtent une fortune pour un ROI incertain."
+          "text": "Des heures perdues à chercher les bons contacts, des salons hors de prix pour un résultat incertain. On connaît tous ça."
         },
         "silence": {
           "title": "Le silence radio",
-          "text": "Vos emails de prospection tombent dans les spams ou sont noyés dans la masse. Personne ne vous répond."
+          "text": "Vos mails de prospection finissent dans les spams, ou ignorés. Le silence, ça use."
         },
         "tracking": {
           "title": "Le suivi chaotique",
-          "text": "Le suivi des échantillons et des relances finit toujours par se perdre dans un fichier Excel interminable."
+          "text": "Les échantillons, les relances, tout finit perdu dans un fichier Excel qu'on n'ouvre plus."
         }
       }
     },
     "method": {
       "title": "Notre méthode en 3 étapes pour développer vos marchés.",
       "step1": {
-        "step": "ÉTAPE 1",
-        "title": "Ne cherchez plus les acheteurs. Trouvez-les.",
-        "text": "Accédez à une base de données mondiale et qualifiée d'importateurs et de distributeurs.",
+        "step": "ÉTAPE 2",
+        "title": "Arrêtez de chercher les acheteurs. On les trouve pour vous.",
+        "text": "Vous visez un marché précis ? On analyse votre domaine et vos vins, et on vous livre une sélection d'importateurs pertinents, pas une liste brute à trier vous-même.",
         "bullet1": "Filtrage précis par marché et par type d'acheteur.",
-        "bullet2": "Recherche sur-mesure : Vous visez un marché précis ? Utilisez votre crédit mensuel. Nos experts analysent votre domaine et vos vins afin de vous livrer une sélection d'importateurs pertinents."
+        "bullet2": "Recherche sur-mesure : un crédit chaque mois, un marché ciblé, une sélection livrée par nos experts."
       },
       "step2": {
-        "step": "ÉTAPE 2",
-        "title": "Des campagnes qui génèrent enfin des réponses.",
-        "text": "Fini le démarchage à l'aveugle. Nous vous aidons à capter l'attention des décideurs grâce à une approche ciblée.",
+        "step": "ÉTAPE 3",
+        "title": "Des campagnes qui obtiennent enfin des réponses.",
+        "text": "Fini le mail envoyé dans le vide. On rédige, on envoie, on optimise la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams.",
         "bullet1": "Outil de création de campagnes intégré.",
-        "bullet2": "Campagne Mensuelle gérée : Vous validez, nous envoyons. Nous optimisons la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams."
+        "bullet2": "Campagne mensuelle gérée : vous validez, on envoie."
       },
       "step3": {
-        "step": "ÉTAPE 3",
-        "title": "Transformez vos prospects en clients.",
-        "text": "Un importateur demande vos tarifs ? Ne laissez plus aucune opportunité s'échapper.",
-        "bullet1": "Pipeline visuel (CRM Kanban) dédié à la vente de vins à l'export.",
+        "step": "ÉTAPE 4",
+        "title": "Un importateur demande vos tarifs ? Ne laissez plus rien passer.",
+        "text": "Le pipeline visuel, le suivi des échantillons, l'historique des relances, tout au même endroit.",
+        "bullet1": "Pipeline visuel (CRM Kanban) dédié à l'export de vins.",
         "bullet2": "Suivi des envois d'échantillons.",
         "bullet3": "Historique centralisé pour ne jamais oublier une relance.",
-        "bullet4": "Opportunités : le seul canal où la demande entrante rejoint automatiquement votre pipeline."
+        "bullet4": "Opportunités : les demandes entrantes d'importateurs arrivent directement dans votre pipeline, sans que vous ayez à les chercher."
       },
       "databaseCallout": "21 000+ importateurs vérifiés dans 140+ pays.",
       "step0": {
         "step": "ÉTAPE 1",
-        "title": "Une base de données mondiale et vérifiée.",
-        "text": "21 000+ importateurs vérifiés dans 140+ pays, mise à jour en continu."
+        "title": "Une base mondiale, vérifiée à la main.",
+        "text": "21 000+ importateurs dans 140+ pays. Pas du scraping, des contacts réels, mis à jour en continu."
       }
     },
     "synthesis": {
       "title": "Une seule plateforme. Zéro friction. Et de l'humain.",
-      "text": "Notre plateforme remplace vos fichiers Excel, vos outils d'emailing complexes et vos recherches Google.\n\nSurtout, ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et chaque campagne de prospection, notre équipe d'experts s'active pour vendre vos vins."
+      "text": "On remplace vos fichiers Excel, vos outils d'emailing compliqués et vos recherches Google.\n\nMais ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et chaque campagne, une équipe s'active pour vendre vos vins, pas un algorithme qui tourne tout seul."
     },
     "testimonials": {
-      "title": "Ils nous ont fait confiance. Ils ont obtenu des commandes.",
+      "title": "Des domaines comme le vôtre ont trouvé leurs acheteurs. Voici les marchés qu'ils ont ouverts.",
       "subtitle": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters."
     },
     "pricing": {
@@ -1889,8 +1889,8 @@
       ]
     },
     "punchline": {
-      "one": "Chaque mois, une nouvelle liste d'importateurs prête à contacter.",
-      "two": "[PUNCHLINE À VALIDER]"
+      "one": "Chaque mois, une nouvelle liste d'importateurs prête à contacter. Pas une promesse, une liste.",
+      "two": "5 ans à ouvrir des marchés pour des domaines comme le vôtre. Pas en théorie, en commandes signées."
     },
     "bigStats": {
       "items": [
