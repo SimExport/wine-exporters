@@ -334,6 +334,25 @@ const TestimonialsGrid = () => {
 };
 
 
+const DEMO_ID = "cmsisxkjk2b9wqmaa2mnkakvr";
+
+const openDemo = () => (window as any).Supademo?.open?.(DEMO_ID);
+
+const VideoCtaButton = ({
+  label,
+  className = "",
+  variant,
+}: {
+  label: string;
+  className?: string;
+  variant?: "outline" | "secondary";
+}) => (
+  <Button size="lg" variant={variant} className={`text-lg px-8 ${className}`} onClick={openDemo}>
+    <PlayCircle className="mr-2 h-5 w-5" />
+    {label}
+  </Button>
+);
+
 /* ─── Page ─── */
 const LandingPage = () => {
   const { t } = useTranslation();
