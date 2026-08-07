@@ -10,7 +10,8 @@ const corsHeaders = {
 
 const BROCHURE_URL =
   "https://drive.google.com/file/d/1RijngSRBNv7pBxHAU_2ONOPVzEAMH_5V/view?usp=sharing";
-const VIDEO_URL = "https://app.supademo.com/demo/cmpf98qp62r0bqm8qiqd73xxd";
+const VIDEO_URL =
+  "https://app.supademo.com/demo/cmsisxkjk2b9wqmaa2mnkakvr?utm_source=link";
 const BOOKING_URL = "https://calendar.app.google/xPLu8ru2PpdC2uoG8";
 
 function clean(s: unknown, max = 255): string {

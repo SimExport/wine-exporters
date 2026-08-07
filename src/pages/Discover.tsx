@@ -6,7 +6,7 @@ import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import heroAsset from "@/assets/decouvrir-export.jpg.asset.json";
 
-const SUPADEMO_ID = "cmpf98qp62r0bqm8qiqd73xxd";
+const SUPADEMO_ID = "cmsisxkjk2b9wqmaa2mnkakvr";
 
 const COPY = {
   fr: {
