@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				display: ['"Playfair Display"', 'Georgia', 'serif']
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -77,6 +80,10 @@ export default {
 				gold: {
 					DEFAULT: 'hsl(var(--gold))',
 					foreground: 'hsl(var(--gold-foreground))'
+				},
+				cream: {
+					DEFAULT: 'hsl(var(--cream))',
+					foreground: 'hsl(var(--cream-foreground))'
 				}
 			},
 			borderRadius: {
@@ -105,12 +112,17 @@ export default {
 					'0%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.45)' },
 					'70%': { boxShadow: '0 0 0 10px hsl(var(--primary) / 0)' },
 					'100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0)' }
+				},
+				'marquee': {
+					from: { transform: 'translateX(0)' },
+					to: { transform: 'translateX(-50%)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+				'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'marquee': 'marquee 40s linear infinite'
 			}
 		}
 	},
