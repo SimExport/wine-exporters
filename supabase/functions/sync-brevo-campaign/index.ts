@@ -320,6 +320,7 @@ Deno.serve(async (req) => {
               description: enriched.description,
               recommended_actions: null,
               score: enriched.score,
+              origin: "click",
               added_to_crm_by: [],
             });
           if (leadErr) {

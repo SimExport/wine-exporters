@@ -145,15 +145,20 @@ const CampaignDetail = () => {
     try {
       const { data, error } = await supabase
         .from('campaign_interested_contacts')
-        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by')
+        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by, origin')
         .eq('campaign_id', id)
         .order('score', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: true });
       if (error) throw error;
       const list: InterestedContact[] = ((data as any[]) || []).map((r) => ({
         ...(r as InterestedContact),
-        // Clickers imported from Brevo have no contact name nor recommended actions.
-        origin: r.contact_name ? ('form' as const) : ('click' as const),
+        // Use the stored origin; fall back to the legacy heuristic when absent.
+        origin:
+          r.origin === 'click' || r.origin === 'form'
+            ? (r.origin as 'click' | 'form')
+            : r.contact_name
+              ? ('form' as const)
+              : ('click' as const),
       }));
       setInterested(list.sort((a, b) => (b.score ?? -1) - (a.score ?? -1)));
     } catch (error) {
