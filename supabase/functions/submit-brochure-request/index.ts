@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const BROCHURE_URL =
-  "https://drive.google.com/file/d/1RijngSRBNv7pBxHAU_2ONOPVzEAMH_5V/view?usp=sharing";
+  "https://claude.ai/code/artifact/7e58448f-e160-4746-9273-294b5f673ecd";
 const VIDEO_URL =
   "https://app.supademo.com/demo/cmsisxkjk2b9wqmaa2mnkakvr?utm_source=link";
 const BOOKING_URL = "https://calendar.app.google/xPLu8ru2PpdC2uoG8";
