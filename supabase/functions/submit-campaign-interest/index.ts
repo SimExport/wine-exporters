@@ -226,6 +226,7 @@ Deno.serve(async (req) => {
       description: enriched.description,
       recommended_actions: enriched.recommended_actions,
       score: enriched.score,
+      origin: "form",
     });
 
   if (insertErr) {
