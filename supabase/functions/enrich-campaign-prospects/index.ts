@@ -90,6 +90,7 @@ Deno.serve(async (req) => {
   }
   const campaign_id = typeof body?.campaign_id === "string" ? body.campaign_id : null;
   if (!campaign_id) return json(400, { error: "Missing campaign_id" });
+  const force = body?.force === true;
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
@@ -116,9 +117,9 @@ Deno.serve(async (req) => {
     .eq("campaign_id", campaign_id);
   if (rowsErr) return json(500, { error: rowsErr.message });
 
-  const todo = (rows ?? []).filter(
-    (r: any) => !r.description || String(r.description).trim() === "",
-  );
+  const todo = force
+    ? (rows ?? [])
+    : (rows ?? []).filter((r: any) => !r.description || String(r.description).trim() === "");
 
   let enriched = 0;
   const failed: string[] = [];
