@@ -511,8 +511,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* ── B. PUNCHLINE PLEIN ÉCRAN ── */}
-      <Punchline text={t("landing.punchline.one")} tone="cream" />
 
       {/* ── 3. PILIERS (Zigzag) ── */}
       <section id="method" className="py-24 scroll-mt-20">
