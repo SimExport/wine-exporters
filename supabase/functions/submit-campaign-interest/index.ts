@@ -79,11 +79,13 @@ Buyer details:
 
 Return STRICT JSON with three keys only:
 {
-  "description": "2-3 phrases EN FRANÇAIS décrivant la société du prospect (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel, sans formule de politesse. Garder tels quels les noms propres (société, pays, appellations).",
-  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur, adaptées aux demandes du prospect.",
+  "description": "2-3 phrases EN FRANÇAIS décrivant la société du prospect (type d'activité, adéquation avec le producteur). Ton affirmatif, professionnel, au présent de l'indicatif, sans formule de politesse. Garder tels quels les noms propres (société, pays, appellations).",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur, adaptées aux demandes du prospect. Chaque puce commence par un verbe à l'infinitif directif (Envoyer, Vérifier, Proposer…).",
   "score": "Integer 6-10 qualifying the lead on a /10 scale. Floor is 6 because submitting the interest form already signals strong intent. Use 6-7 for minimal info / weak fit, 8 for solid fit, 9-10 for excellent fit and complete information."
 }
-No prose, no code fences. Les champs texte doivent impérativement être rédigés en français.`;
+No prose, no code fences. Les champs texte doivent impérativement être rédigés en français.
+
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer les faits au présent. Si une information manque, l'écrire de manière factuelle et nette (ex : « La société n'est pas identifiable depuis cette adresse. ») plutôt que par une hypothèse floue.`;
 
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -98,7 +100,8 @@ No prose, no code fences. Les champs texte doivent impérativement être rédig�
         messages: [
           { role: "user", content: prompt },
         ],
-        system: "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French.",
+        system:
+          "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French, in an assertive, directive tone. Never use hedging words (probable, probablement, vraisemblablement, semble, pourrait, peut-être, suggère, a priori, sans doute).",
       }),
     });
 
