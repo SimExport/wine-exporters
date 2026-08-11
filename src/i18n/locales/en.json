@@ -2111,8 +2111,11 @@
     },
     "enrich": {
       "label": "Enrich prospects",
+      "missingLabel": "Enrich missing ones",
+      "forceLabel": "Re-enrich all",
       "successTitle": "Enrichment complete",
-      "successDesc": "{{count}} of {{total}} prospects enriched.",
+      "successDesc": "{{count}} of {{total}} prospects enriched ({{already}} already up to date).",
+      "alreadyDone": "All prospects are already enriched ({{total}}).",
       "errorTitle": "Enrichment failed"
     }
   },
