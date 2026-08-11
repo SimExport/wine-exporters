@@ -15,6 +15,14 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Loader2, FileUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { clampScoreForSource } from '@/lib/score';
 
 interface Props {
   campaignId: string;
@@ -29,6 +37,7 @@ interface ParsedRow {
   score: number | null;
   description: string | null;
   recommended_actions: string | null;
+  origin: 'form' | 'click' | null;
 }
 
 const REQUIRED_HEADERS = ['company_name'];
@@ -40,7 +49,16 @@ const KNOWN_HEADERS = [
   'score',
   'description',
   'recommended_actions',
+  'origin',
 ];
+
+function normalizeOrigin(v: string | null): 'form' | 'click' | null {
+  if (!v) return null;
+  const s = v.trim().toLowerCase();
+  if (['click', 'clic', 'cliqueur', 'cliqueurs', 'clicker'].includes(s)) return 'click';
+  if (['form', 'formulaire', 'interest_form'].includes(s)) return 'form';
+  return null;
+}
 
 // Minimal CSV parser supporting quoted fields and escaped quotes ("")
 function parseCsv(text: string): string[][] {
@@ -93,6 +111,7 @@ export function CampaignInterestedContactsUpload({ campaignId, campaignName }: P
   const [parsed, setParsed] = useState<ParsedRow[]>([]);
   const [parseError, setParseError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [defaultOrigin, setDefaultOrigin] = useState<'form' | 'click'>('form');
 
   const reset = () => {
     setFile(null);
@@ -149,6 +168,7 @@ export function CampaignInterestedContactsUpload({ campaignId, campaignName }: P
           score,
           description: get('description'),
           recommended_actions: get('recommended_actions'),
+          origin: normalizeOrigin(get('origin')),
         });
       }
       if (!out.length) {
@@ -166,7 +186,23 @@ export function CampaignInterestedContactsUpload({ campaignId, campaignName }: P
     if (!parsed.length) return;
     setSubmitting(true);
     try {
-      const payload = parsed.map((r) => ({ ...r, campaign_id: campaignId }));
+      const payload = parsed.map((r) => {
+        const origin = r.origin ?? defaultOrigin;
+        return {
+          company_name: r.company_name,
+          email: r.email,
+          contact_name: r.contact_name,
+          country: r.country,
+          description: r.description,
+          recommended_actions: r.recommended_actions,
+          score:
+            r.score == null
+              ? null
+              : clampScoreForSource(r.score, origin === 'click' ? 'click' : 'interest_form'),
+          origin,
+          campaign_id: campaignId,
+        };
+      });
       const { error } = await supabase.from('campaign_interested_contacts').insert(payload);
       if (error) throw error;
       // Notify campaign owner (non-blocking)
@@ -229,6 +265,28 @@ export function CampaignInterestedContactsUpload({ campaignId, campaignName }: P
             </p>
           </div>
           {parseError && <p className="text-sm text-destructive">{parseError}</p>}
+          <div>
+            <Label>{t('adminCampaigns.interestedContacts.originLabel')}</Label>
+            <Select
+              value={defaultOrigin}
+              onValueChange={(v) => setDefaultOrigin(v as 'form' | 'click')}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="form">
+                  {t('adminCampaigns.interestedContacts.originForm')}
+                </SelectItem>
+                <SelectItem value="click">
+                  {t('adminCampaigns.interestedContacts.originClick')}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('adminCampaigns.interestedContacts.originHint')}
+            </p>
+          </div>
           {parsed.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {t('adminCampaigns.interestedContacts.previewCount', { count: parsed.length })}
