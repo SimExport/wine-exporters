@@ -94,10 +94,13 @@ Deno.serve(async (req) => {
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
-    .select("id, name, user_id")
+    .select("id, name, user_id, target_markets")
     .eq("id", campaign_id)
     .maybeSingle();
   if (campErr || !campaign) return json(404, { error: "Campaign not found" });
+  const defaultMarket =
+    (Array.isArray((campaign as any).target_markets) && (campaign as any).target_markets[0]) ||
+    null;
 
   let producer_profile: Record<string, unknown> = {};
   if (campaign.user_id) {
@@ -138,9 +141,11 @@ A wine importer / distributor clicked on a link in the campaign email "${campaig
 Buyer email: ${email}
 Domain: ${domain}
 
-Return STRICT JSON with two keys only:
+Return STRICT JSON with four keys only:
 {
   "description": "2-3 phrases EN FRANÇAIS déduisant la société probable à partir du domaine de l'email (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel. Si le domaine est générique (gmail, yahoo, hotmail, outlook…), indiquer que la société ne peut pas être déduite. Pas de formule de politesse.",
+  "company_name": "Nom probable de la société déduit du domaine (ex: 'globalfw.com.au' -> 'Global Fine Wines'). Chaîne vide \"\" si le domaine est générique ou si le nom ne peut pas être déduit. Ne jamais utiliser la partie avant le @.",
+  "country": "Pays probable de la société en anglais (ex: 'Australia'). Déduire du TLD ou de la marque. Chaîne vide \"\" si indéterminable.",
   "score": "Integer 4-7 on a /10 scale. Clicking is a passive signal. 4 for generic free email, 5 standard, 6 plausible professional domain, 7 clear pro wine-import domain matching the producer profile."
 }
 No prose, no code fences.`
@@ -181,6 +186,34 @@ No prose, no code fences.`;
     );
 
     const update: Record<string, unknown> = { description, score, origin };
+
+    if (origin === "click") {
+      const localPart = (email.split("@")[0] ?? "").toLowerCase();
+      const currentCompany = String(row.company_name ?? "").trim();
+      const suggestedCompany =
+        typeof parsed?.company_name === "string" ? parsed.company_name.trim() : "";
+      const companyIsBogus =
+        currentCompany === "" || currentCompany.toLowerCase() === localPart;
+      if (suggestedCompany && (force || companyIsBogus)) {
+        update.company_name = suggestedCompany.slice(0, 120);
+      }
+
+      const currentCountry = String(row.country ?? "").trim();
+      const suggestedCountry =
+        typeof parsed?.country === "string" ? parsed.country.trim() : "";
+      const countryIsDefault =
+        currentCountry === "" ||
+        (!!defaultMarket &&
+          currentCountry.toLowerCase() === String(defaultMarket).toLowerCase());
+      if (
+        suggestedCountry &&
+        suggestedCountry.toLowerCase() !== currentCountry.toLowerCase() &&
+        (force || countryIsDefault)
+      ) {
+        update.country = suggestedCountry.slice(0, 80);
+      }
+    }
+
     if (
       origin === "form" &&
       typeof parsed?.recommended_actions === "string" &&
