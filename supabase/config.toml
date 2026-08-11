@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.sync-brevo-campaign]
 verify_jwt = true
+
+[functions.enrich-campaign-prospects]
+verify_jwt = true

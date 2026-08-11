@@ -51,13 +51,13 @@ export function CampaignQualifiedProspectsSheet({ campaign, onOpenChange }: Prop
           .from('campaign_interested_contacts')
           .select('id, company_name, contact_name, email, country, score, description')
           .eq('campaign_id', campaign.id)
-          .not('contact_name', 'is', null)
+          .eq('origin', 'form')
           .order('score', { ascending: false, nullsFirst: false }),
         supabase
           .from('campaign_interested_contacts')
           .select('id, email, country, score, description, created_at')
           .eq('campaign_id', campaign.id)
-          .is('contact_name', null)
+          .eq('origin', 'click')
           .order('created_at', { ascending: false }),
       ]);
       if (cancelled) return;

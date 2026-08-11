@@ -2088,7 +2088,11 @@
       "missingColumns": "Colonnes manquantes : {{columns}}",
       "successTitle": "Prospects importés",
       "successDesc": "{{count}} prospect(s) ajouté(s).",
-      "error": "Erreur lors de l'import"
+      "error": "Erreur lors de l'import",
+      "originLabel": "Origine par défaut",
+      "originForm": "Formulaire",
+      "originClick": "Cliqueur",
+      "originHint": "Utilisée pour les lignes sans colonne « origin » dans le CSV."
     },
     "brevoSync": {
       "label": "Sync Brevo",
@@ -2104,6 +2108,12 @@
       "setIdTitle": "ID de campagne Brevo manquant",
       "setIdDescription": "Saisis l'ID numérique de la campagne dans Brevo pour lier cette campagne et lancer la synchro.",
       "invalidId": "ID invalide"
+    },
+    "enrich": {
+      "label": "Enrichir les prospects",
+      "successTitle": "Enrichissement terminé",
+      "successDesc": "{{count}} prospect(s) enrichi(s) sur {{total}}.",
+      "errorTitle": "Enrichissement échoué"
     }
   },
   "parseAddresses": {
