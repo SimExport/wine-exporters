@@ -116,7 +116,9 @@ Deno.serve(async (req) => {
 
   const { data: rows, error: rowsErr } = await admin
     .from("campaign_interested_contacts")
-    .select("id, company_name, contact_name, email, country, score, description, origin")
+    .select(
+      "id, company_name, contact_name, email, country, score, description, recommended_actions, origin",
+    )
     .eq("campaign_id", campaign_id);
   if (rowsErr) return json(500, { error: rowsErr.message });
 
