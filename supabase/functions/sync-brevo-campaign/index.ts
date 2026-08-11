@@ -290,13 +290,13 @@ Deno.serve(async (req) => {
         const defaultMarket =
           (Array.isArray(campaign.target_markets) && campaign.target_markets[0]) || null;
         const marketFor = (email: string): string => {
-          if (defaultMarket) return String(defaultMarket);
           const domain = (email.split("@")[1] ?? "").toLowerCase();
           const parts = domain.split(".");
           for (let i = parts.length - 1; i >= 0; i--) {
             const t = parts[i];
             if (TLD_TO_MARKET[t]) return TLD_TO_MARKET[t];
           }
+          if (defaultMarket) return String(defaultMarket);
           return "Unknown";
         };
         for (const email of newEmails) {
@@ -306,14 +306,25 @@ Deno.serve(async (req) => {
             campaign_name: campaign.name ?? "",
             producer_profile,
           });
-          const first_name = (email.split("@")[0] ?? email).slice(0, 60);
+          const domain = (email.split("@")[1] ?? "").toLowerCase();
+          const GENERIC = new Set([
+            "gmail.com", "yahoo.com", "yahoo.fr", "hotmail.com", "hotmail.fr",
+            "outlook.com", "live.com", "icloud.com", "aol.com", "gmx.de",
+            "web.de", "naver.com", "seznam.cz", "orange.fr", "free.fr", "wanadoo.fr",
+          ]);
+          // Never use the email local part as a company name — infer from the
+          // domain when it is a real corporate domain, otherwise leave empty.
+          const company_name =
+            domain && !GENERIC.has(domain)
+              ? (enriched as any).company_name?.trim?.() || domain
+              : (enriched as any).company_name?.trim?.() || "";
           // Clickers stay in the campaign prospect list — the producer decides
           // manually whether to push them into their CRM.
           const { error: leadErr } = await admin
             .from("campaign_interested_contacts")
             .insert({
               campaign_id,
-              company_name: first_name,
+              company_name: company_name.slice(0, 120),
               contact_name: null,
               email,
               country: marketFor(email),
