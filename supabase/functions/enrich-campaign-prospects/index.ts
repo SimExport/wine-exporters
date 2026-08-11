@@ -141,11 +141,12 @@ A wine importer / distributor clicked on a link in the campaign email "${campaig
 Buyer email: ${email}
 Domain: ${domain}
 
-Return STRICT JSON with four keys only:
+Return STRICT JSON with five keys only:
 {
   "description": "2-3 phrases EN FRANÇAIS déduisant la société probable à partir du domaine de l'email (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel. Si le domaine est générique (gmail, yahoo, hotmail, outlook…), indiquer que la société ne peut pas être déduite. Pas de formule de politesse.",
   "company_name": "Nom probable de la société déduit du domaine (ex: 'globalfw.com.au' -> 'Global Fine Wines'). Chaîne vide \"\" si le domaine est générique ou si le nom ne peut pas être déduit. Ne jamais utiliser la partie avant le @.",
   "country": "Pays probable de la société en anglais (ex: 'Australia'). Déduire du TLD ou de la marque. Chaîne vide \"\" si indéterminable.",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes et PRUDENTES à mener par le producteur. Le contact a seulement cliqué : privilégier un mail court de qualification, la vérification du positionnement/type d'activité, et n'envoyer échantillons ou tarifs qu'après réponse. Si la société est un grand groupe de distribution ou une adresse non pertinente, le dire et recommander de l'exclure.",
   "score": "Integer 4-7 on a /10 scale. Clicking is a passive signal. 4 for generic free email, 5 standard, 6 plausible professional domain, 7 clear pro wine-import domain matching the producer profile."
 }
 No prose, no code fences.`
@@ -214,12 +215,12 @@ No prose, no code fences.`;
       }
     }
 
-    if (
-      origin === "form" &&
-      typeof parsed?.recommended_actions === "string" &&
-      parsed.recommended_actions.trim()
-    ) {
-      update.recommended_actions = parsed.recommended_actions.trim().slice(0, 2000);
+    const suggestedActions =
+      typeof parsed?.recommended_actions === "string" ? parsed.recommended_actions.trim() : "";
+    if (suggestedActions) {
+      update.recommended_actions = suggestedActions.slice(0, 2000);
+    } else if (origin === "click" && !String(row.recommended_actions ?? "").trim()) {
+      update.recommended_actions = `• Envoyer un mail court de qualification pour confirmer l'activité et le positionnement.\n• Vérifier le site web et le portefeuille avant tout envoi.\n• N'adresser tarifs et échantillons qu'après une réponse positive.`;
     }
 
     const { error: updErr } = await admin
