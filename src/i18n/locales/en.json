@@ -2048,7 +2048,10 @@
       "enriched": "Enriched",
       "pending": "Pending",
       "wantsSamples": "Wants samples",
-      "empty": "No responses yet."
+      "empty": "No responses yet.",
+      "actions": "Recommended actions",
+      "originForm": "Form",
+      "originClick": "Clicker"
     },
     "qualified": {
       "title": "Qualified importers",

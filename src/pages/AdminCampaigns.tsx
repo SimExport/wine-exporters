@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
@@ -1295,6 +1296,7 @@ export default function AdminCampaigns() {
                 r.recommended_actions || '',
               );
               const enriched = !!(r.description && r.description.trim());
+              const origin = r.origin === 'click' ? 'click' : 'form';
               return (
                 <div key={r.id} className="rounded-lg border p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -1305,11 +1307,21 @@ export default function AdminCampaigns() {
                         {r.phone ? ` · ${r.phone}` : ''}
                       </div>
                     </div>
-                    <Badge variant={enriched ? 'default' : 'secondary'}>
-                      {enriched
-                        ? t('adminCampaigns.responsesSheet.enriched')
-                        : t('adminCampaigns.responsesSheet.pending')}
-                    </Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                        {origin === 'click'
+                          ? t('adminCampaigns.responsesSheet.originClick')
+                          : t('adminCampaigns.responsesSheet.originForm')}
+                      </Badge>
+                      {r.score != null && (
+                        <Badge variant="secondary">{r.score}/10</Badge>
+                      )}
+                      <Badge variant={enriched ? 'default' : 'secondary'}>
+                        {enriched
+                          ? t('adminCampaigns.responsesSheet.enriched')
+                          : t('adminCampaigns.responsesSheet.pending')}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="text-sm">
                     <span className="text-muted-foreground">
@@ -1318,6 +1330,25 @@ export default function AdminCampaigns() {
                     {r.company_name || '—'}
                     {r.country ? ` · ${r.country}` : ''}
                   </div>
+                  {r.description && (
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap">
+                      {r.description}
+                    </p>
+                  )}
+                  {r.recommended_actions && (
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground group">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        {t('adminCampaigns.responsesSheet.actions')}
+                        <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <div className="rounded-md bg-muted/50 p-3 text-sm whitespace-pre-wrap">
+                          {r.recommended_actions}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatDateTime(r.created_at)}</span>
                     {wantsSamples && (

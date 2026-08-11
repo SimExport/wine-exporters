@@ -2048,7 +2048,10 @@
       "enriched": "Enrichi",
       "pending": "En attente",
       "wantsSamples": "Souhaite des échantillons",
-      "empty": "Aucune réponse pour le moment."
+      "empty": "Aucune réponse pour le moment.",
+      "actions": "Actions recommandées",
+      "originForm": "Formulaire",
+      "originClick": "Cliqueur"
     },
     "qualified": {
       "title": "Importateurs qualifiés",
