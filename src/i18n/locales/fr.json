@@ -2111,8 +2111,11 @@
     },
     "enrich": {
       "label": "Enrichir les prospects",
+      "missingLabel": "Enrichir les manquants",
+      "forceLabel": "Tout ré-enrichir",
       "successTitle": "Enrichissement terminé",
-      "successDesc": "{{count}} prospect(s) enrichi(s) sur {{total}}.",
+      "successDesc": "{{count}} prospect(s) enrichi(s) sur {{total}} ({{already}} déjà à jour).",
+      "alreadyDone": "Tous les prospects sont déjà enrichis ({{total}}).",
       "errorTitle": "Enrichissement échoué"
     }
   },
