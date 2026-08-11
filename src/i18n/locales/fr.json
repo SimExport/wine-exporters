@@ -1762,7 +1762,7 @@
       "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
       "titleLead": "Trouvez vos futurs importateurs,",
       "titleHighlight": "développez vos ventes export.",
-      "subtitle": "Dans ce contexte économique, trouver des acheteurs à l'export devient de plus en plus difficile.\nOn vous met en relation directe avec des importateurs vérifiés, sans salon, sans démarchage à l'aveugle.",
+      "subtitle": "On vous met en relation directe avec des importateurs vérifiés, sans salon, sans démarchage à l'aveugle.",
       "ctaPrimary": "Découvrir la plateforme en vidéo",
       "ctaSecondary": "Demander une démo",
       "haveAccount": "J'ai déjà un compte → Se connecter",
@@ -1898,7 +1898,6 @@
       ]
     },
     "punchline": {
-      "one": "Chaque mois, des acheteurs qualifiés intéressés par vos vins.",
       "two": "5 ans à ouvrir des marchés pour des domaines comme le vôtre. Pas en théorie, en commandes signées."
     },
     "bigStats": {
