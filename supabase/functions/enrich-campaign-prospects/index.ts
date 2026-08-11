@@ -37,7 +37,7 @@ async function askClaude(prompt: string): Promise<any | null> {
         max_tokens: 800,
         messages: [{ role: "user", content: prompt }],
         system:
-          "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French.",
+          "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French, in an assertive, directive tone. Never use hedging words (probable, probablement, vraisemblablement, semble, paraît, pourrait, peut-être, suggère, il est possible que, a priori, sans doute).",
       }),
     });
     if (!resp.ok) {
