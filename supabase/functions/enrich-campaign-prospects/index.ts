@@ -145,13 +145,15 @@ Domain: ${domain}
 
 Return STRICT JSON with five keys only:
 {
-  "description": "2-3 phrases EN FRANÇAIS déduisant la société probable à partir du domaine de l'email (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel. Si le domaine est générique (gmail, yahoo, hotmail, outlook…), indiquer que la société ne peut pas être déduite. Pas de formule de politesse.",
-  "company_name": "Nom probable de la société déduit du domaine (ex: 'globalfw.com.au' -> 'Global Fine Wines'). Chaîne vide \"\" si le domaine est générique ou si le nom ne peut pas être déduit. Ne jamais utiliser la partie avant le @.",
-  "country": "Pays probable de la société en anglais (ex: 'Australia'). Déduire du TLD ou de la marque. Chaîne vide \"\" si indéterminable.",
-  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes et PRUDENTES à mener par le producteur. Le contact a seulement cliqué : privilégier un mail court de qualification, la vérification du positionnement/type d'activité, et n'envoyer échantillons ou tarifs qu'après réponse. Si la société est un grand groupe de distribution ou une adresse non pertinente, le dire et recommander de l'exclure.",
+  "description": "2-3 phrases EN FRANÇAIS identifiant la société à partir du domaine de l'email (type d'activité, adéquation avec le producteur). Ton affirmatif et professionnel, au présent de l'indicatif. Si le domaine est générique (gmail, yahoo, hotmail, outlook…), écrire une phrase factuelle et nette : « La société n'est pas identifiable depuis cette adresse. ». Pas de formule de politesse.",
+  "company_name": "Nom de la société déduit du domaine (ex: 'globalfw.com.au' -> 'Global Fine Wines'). Chaîne vide \"\" si le domaine est générique ou si le nom ne peut pas être déduit. Ne jamais utiliser la partie avant le @.",
+  "country": "Pays de la société en anglais (ex: 'Australia'), déduit du TLD ou de la marque. Chaîne vide \"\" si indéterminable.",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur, chacune commençant par un verbe à l'infinitif directif (Envoyer, Vérifier, Proposer, Exclure…). Le contact a seulement cliqué : commencer par un mail court de qualification, vérifier le positionnement et le type d'activité, et n'envoyer échantillons ou tarifs qu'après réponse. Si la société est un grand groupe de distribution ou une adresse non pertinente, l'affirmer et recommander de l'exclure.",
   "score": "Integer 4-7 on a /10 scale. Clicking is a passive signal. 4 for generic free email, 5 standard, 6 plausible professional domain, 7 clear pro wine-import domain matching the producer profile."
 }
-No prose, no code fences.`
+No prose, no code fences.
+
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent. Une information manquante s'énonce de manière factuelle et nette, jamais par une hypothèse floue.`
         : `You enrich a CRM record for a wine producer named "${producer_name}".
 Producer profile: ${JSON.stringify(producer_profile)}
 A qualified buyer submitted an interest form for the campaign "${campaign.name}".
@@ -164,17 +166,19 @@ Buyer details:
 
 Return STRICT JSON with three keys only:
 {
-  "description": "2-3 phrases EN FRANÇAIS décrivant la société du prospect (type d'activité, adéquation probable avec le producteur). Ton neutre et professionnel, sans formule de politesse.",
-  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur.",
+  "description": "2-3 phrases EN FRANÇAIS décrivant la société du prospect (type d'activité, adéquation avec le producteur). Ton affirmatif et professionnel, au présent de l'indicatif, sans formule de politesse.",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur, chacune commençant par un verbe à l'infinitif directif (Envoyer, Vérifier, Proposer…).",
   "score": "Integer 6-10 on a /10 scale. Floor is 6 because the form submission signals strong intent."
 }
-No prose, no code fences.`;
+No prose, no code fences.
+
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
 
     const parsed = await askClaude(prompt);
 
     const fallbackDescription =
       origin === "click"
-        ? `A cliqué dans l'email de la campagne « ${campaign.name} » sans remplir le formulaire d'intérêt. Domaine : ${domain || "inconnu"}.`
+        ? `Ce contact a cliqué dans l'email de la campagne « ${campaign.name} » sans remplir le formulaire d'intérêt. Domaine : ${domain || "non renseigné"}.`
         : `${row.contact_name ?? row.company_name ?? "Ce contact"} a rempli le formulaire d'intérêt de la campagne « ${campaign.name} ».`;
 
     const description =
