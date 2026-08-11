@@ -53,6 +53,8 @@ interface InterestResponse {
   phone: string | null;
   description: string | null;
   recommended_actions: string | null;
+  score: number | null;
+  origin: string | null;
   created_at: string;
 }
 
@@ -214,7 +216,7 @@ export default function AdminCampaigns() {
       if (campaignIds.length) {
         const { data: responses } = await supabase
           .from('campaign_interested_contacts')
-          .select('id, campaign_id, contact_name, email, company_name, country, phone, description, recommended_actions, created_at')
+          .select('id, campaign_id, contact_name, email, company_name, country, phone, description, recommended_actions, score, origin, created_at')
           .in('campaign_id', campaignIds)
           .order('created_at', { ascending: false });
         const grouped: Record<string, InterestResponse[]> = {};
