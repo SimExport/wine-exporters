@@ -20,6 +20,7 @@ import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignRepor
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
 import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
 import { BrevoSyncButton } from '@/components/admin/BrevoSyncButton';
+import { EnrichProspectsButton } from '@/components/admin/EnrichProspectsButton';
 import { CampaignQualifiedProspectsSheet } from '@/components/admin/CampaignQualifiedProspectsSheet';
 import { CampaignCompletionEmailPreview } from '@/components/admin/CampaignCompletionEmailPreview';
 import { formatDate, formatDateTime } from '@/lib/format';
@@ -924,6 +925,10 @@ export default function AdminCampaigns() {
                             campaignId={campaign.id}
                             brevoCampaignId={campaign.brevo_campaign_id}
                             onSynced={fetchCampaigns}
+                          />
+                          <EnrichProspectsButton
+                            campaignId={campaign.id}
+                            onDone={fetchCampaigns}
                           />
                           <Button
                             size="sm"

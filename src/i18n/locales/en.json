@@ -2088,7 +2088,11 @@
       "missingColumns": "Missing columns: {{columns}}",
       "successTitle": "Prospects imported",
       "successDesc": "{{count}} prospect(s) added.",
-      "error": "Import error"
+      "error": "Import error",
+      "originLabel": "Default source",
+      "originForm": "Form",
+      "originClick": "Clicker",
+      "originHint": "Used for rows without an \"origin\" column in the CSV."
     },
     "brevoSync": {
       "label": "Brevo sync",
@@ -2104,6 +2108,12 @@
       "setIdTitle": "Missing Brevo campaign id",
       "setIdDescription": "Enter the numeric Brevo campaign id to link this campaign and run the sync.",
       "invalidId": "Invalid id"
+    },
+    "enrich": {
+      "label": "Enrich prospects",
+      "successTitle": "Enrichment complete",
+      "successDesc": "{{count}} of {{total}} prospects enriched.",
+      "errorTitle": "Enrichment failed"
     }
   },
   "parseAddresses": {
