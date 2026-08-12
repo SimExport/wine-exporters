@@ -72,6 +72,8 @@ const CampaignDetail = () => {
   const [loading, setLoading] = useState(true);
   const [interested, setInterested] = useState<InterestedContact[]>([]);
   const [addingId, setAddingId] = useState<string | null>(null);
+  // Map of "email:xxx" / "company:xxx" -> existing CRM lead id for this campaign
+  const [crmLeadMap, setCrmLeadMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (id && user) {
@@ -79,6 +81,7 @@ const CampaignDetail = () => {
       fetchDocuments();
       fetchWines();
       fetchInterested();
+      fetchCrmLeads();
     }
   }, [id, user]);
 
@@ -166,23 +169,51 @@ const CampaignDetail = () => {
     }
   };
 
-  const isAdded = (c: InterestedContact) =>
-    !!(user && c.added_to_crm_by && c.added_to_crm_by.includes(user.id));
+  const fetchCrmLeads = async () => {
+    if (!user || !id) return;
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('id, email, company_name, created_at')
+        .eq('created_by', user.id)
+        .eq('source', 'campaign_interest')
+        .eq('source_ref', id)
+        .is('archived_at', null)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const l of data || []) {
+        if (l.email) map[`email:${l.email.toLowerCase()}`] = l.id;
+        if (l.company_name) map[`company:${l.company_name.toLowerCase()}`] = l.id;
+      }
+      setCrmLeadMap(map);
+    } catch (e) {
+      console.error('Error fetching CRM leads for campaign:', e);
+    }
+  };
 
-  const addInterestedToCrm = async (c: InterestedContact) => {
+  const getLeadId = (c: InterestedContact): string | null =>
+    (c.email ? crmLeadMap[`email:${c.email.toLowerCase()}`] : undefined) ||
+    (c.company_name ? crmLeadMap[`company:${c.company_name.toLowerCase()}`] : undefined) ||
+    null;
+
+  const addInterestedToCrm = async (c: InterestedContact, opts?: { force?: boolean }) => {
     if (!user) return;
     setAddingId(c.id);
     try {
       const manualCampaignId = await getOrCreateManualCampaign(user.id);
-      if (c.email) {
+      let createdId: string | null = null;
+      if (c.email && !opts?.force) {
         const { data: existing } = await supabase
           .from('leads')
           .select('id')
           .eq('campaign_id', manualCampaignId)
           .eq('email', c.email)
           .maybeSingle();
-        if (!existing) {
-          const { error: insErr } = await supabase.from('leads').insert({
+        if (existing) {
+          createdId = existing.id;
+        } else {
+          const { data: ins, error: insErr } = await supabase.from('leads').insert({
             campaign_id: manualCampaignId,
             company_name: c.company_name,
             email: c.email,
@@ -200,15 +231,17 @@ const CampaignDetail = () => {
             source_ref: campaign?.id ?? null,
             source_score: c.score,
             source_relevance: c.description,
-          });
+          }).select('id').single();
           if (insErr) throw insErr;
+          createdId = ins?.id ?? null;
         }
       } else {
-        const { error: insErr } = await supabase.from('leads').insert({
+        const { data: ins, error: insErr } = await supabase.from('leads').insert({
           campaign_id: manualCampaignId,
           company_name: c.company_name,
+          email: c.email,
           country: c.country,
-          buyer_id: c.company_name,
+          buyer_id: c.email || c.company_name,
           market: c.country,
           message_snippet: c.description,
           owner_notes: c.recommended_actions
@@ -221,8 +254,9 @@ const CampaignDetail = () => {
           source_ref: campaign?.id ?? null,
           source_score: c.score,
           source_relevance: c.description,
-        });
+        }).select('id').single();
         if (insErr) throw insErr;
+        createdId = ins?.id ?? null;
       }
       const nextAdded = Array.from(new Set([...(c.added_to_crm_by || []), user.id]));
       const { error: updErr } = await supabase
@@ -231,7 +265,19 @@ const CampaignDetail = () => {
         .eq('id', c.id);
       if (updErr) throw updErr;
       setInterested((prev) => prev.map((x) => (x.id === c.id ? { ...x, added_to_crm_by: nextAdded } : x)));
-      toast({ title: t('campaigns.detail.interestedContacts.addedToast') });
+      if (createdId) {
+        setCrmLeadMap((prev) => {
+          const next = { ...prev };
+          if (c.email) next[`email:${c.email.toLowerCase()}`] = createdId!;
+          if (c.company_name) next[`company:${c.company_name.toLowerCase()}`] = createdId!;
+          return next;
+        });
+      }
+      toast({
+        title: opts?.force
+          ? t('campaigns.detail.interestedContacts.addedAgainToast', { defaultValue: 'Nouvelle fiche créée dans le CRM' })
+          : t('campaigns.detail.interestedContacts.addedToast'),
+      });
     } catch (e: any) {
       console.error(e);
       toast({ title: t('common.error'), description: e?.message, variant: 'destructive' });
