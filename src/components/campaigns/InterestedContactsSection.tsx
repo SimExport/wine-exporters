@@ -196,12 +196,16 @@ export function InterestedContactsSection({
 }
 
 function ProspectCard({
-  c, added, adding, onAdd,
+  c, added, adding, onAdd, leadId, onAddAgain, onOpenLead,
 }: {
   c: InterestedContact; added: boolean; adding: boolean; onAdd: (c: InterestedContact) => void;
+  leadId?: string | null;
+  onAddAgain?: (c: InterestedContact) => void;
+  onOpenLead?: (leadId: string) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const flag = getCountryFlag(c.country);
   const origin = c.origin ?? 'form';
 
@@ -288,10 +292,52 @@ function ProspectCard({
 
       <div className="mt-auto flex justify-end pt-1">
         {added ? (
-          <Badge variant="secondary" className="gap-1">
-            <Check className="h-3 w-3" />
-            {t('campaigns.detail.interestedContacts.added')}
-          </Badge>
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="secondary" className="gap-1 h-7" disabled={adding}>
+                  <Check className="h-3 w-3" />
+                  {t('campaigns.detail.interestedContacts.added')}
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {leadId && onOpenLead && (
+                  <DropdownMenuItem onClick={() => onOpenLead(leadId)}>
+                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                    {t('campaigns.detail.interestedContacts.viewInCrm', { defaultValue: 'Voir dans le CRM' })}
+                  </DropdownMenuItem>
+                )}
+                {onAddAgain && (
+                  <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
+                    <RotateCcw className="h-3.5 w-3.5 mr-2" />
+                    {t('campaigns.detail.interestedContacts.addAgain', { defaultValue: 'Ajouter à nouveau' })}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t('campaigns.detail.interestedContacts.addAgain', { defaultValue: 'Ajouter à nouveau' })}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('campaigns.detail.interestedContacts.addAgainConfirm', {
+                      company: c.company_name,
+                      defaultValue: `Une fiche existe déjà pour ${c.company_name}. Créer une nouvelle fiche dans le CRM ?`,
+                    })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Annuler' })}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onAddAgain?.(c)}>
+                    {t('campaigns.detail.interestedContacts.addToCrm')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         ) : (
           <Button size="sm" variant="outline" disabled={adding} onClick={() => onAdd(c)}>
             <UserPlus className="h-3.5 w-3.5 mr-1" />
