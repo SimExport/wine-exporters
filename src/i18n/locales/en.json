@@ -842,7 +842,11 @@
           "all": "All scores",
           "gte8": "Score ≥ 8",
           "gte6": "Score ≥ 6"
-        }
+        },
+        "viewInCrm": "View in CRM",
+        "addAgain": "Add again",
+        "addAgainConfirm": "A record already exists for {{company}}. Create a new CRM record?",
+        "addedAgainToast": "New CRM record created"
       }
     },
     "banner": {

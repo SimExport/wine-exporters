@@ -12,7 +12,14 @@ import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
-  Users, UserPlus, Check, Mail, Search, ChevronDown, Sparkles,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Users, UserPlus, Check, Mail, Search, ChevronDown, Sparkles, ExternalLink, RotateCcw,
 } from 'lucide-react';
 import { getCountryFlag } from '@/lib/country-flag';
 
@@ -35,21 +42,31 @@ interface Props {
   currentUserId: string | undefined;
   addingId: string | null;
   onAdd: (c: InterestedContact) => void;
+  /** Returns the id of an existing CRM lead for this contact, if any. */
+  getLeadId?: (c: InterestedContact) => string | null;
+  onAddAgain?: (c: InterestedContact) => void;
+  onOpenLead?: (leadId: string) => void;
 }
 
 type SortKey = 'score' | 'name' | 'country';
 type ScoreFilter = 'all' | '8' | '6';
 type SourceFilter = 'all' | 'form' | 'click';
 
-export function InterestedContactsSection({ contacts, currentUserId, addingId, onAdd }: Props) {
+export function InterestedContactsSection({
+  contacts, currentUserId, addingId, onAdd, getLeadId, onAddAgain, onOpenLead,
+}: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>('all');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
+  // Prefer the real CRM state (lead still exists) over the stored flag.
+  const leadIdOf = (c: InterestedContact) => (getLeadId ? getLeadId(c) : null);
   const isAdded = (c: InterestedContact) =>
-    !!currentUserId && (c.added_to_crm_by || []).includes(currentUserId);
+    getLeadId
+      ? !!leadIdOf(c)
+      : !!currentUserId && (c.added_to_crm_by || []).includes(currentUserId);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -164,8 +181,11 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
                 key={c.id}
                 c={c}
                 added={isAdded(c)}
+                leadId={leadIdOf(c)}
                 adding={addingId === c.id}
                 onAdd={onAdd}
+                onAddAgain={onAddAgain}
+                onOpenLead={onOpenLead}
               />
             ))}
           </div>
@@ -176,12 +196,16 @@ export function InterestedContactsSection({ contacts, currentUserId, addingId, o
 }
 
 function ProspectCard({
-  c, added, adding, onAdd,
+  c, added, adding, onAdd, leadId, onAddAgain, onOpenLead,
 }: {
   c: InterestedContact; added: boolean; adding: boolean; onAdd: (c: InterestedContact) => void;
+  leadId?: string | null;
+  onAddAgain?: (c: InterestedContact) => void;
+  onOpenLead?: (leadId: string) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const flag = getCountryFlag(c.country);
   const origin = c.origin ?? 'form';
 
@@ -268,10 +292,52 @@ function ProspectCard({
 
       <div className="mt-auto flex justify-end pt-1">
         {added ? (
-          <Badge variant="secondary" className="gap-1">
-            <Check className="h-3 w-3" />
-            {t('campaigns.detail.interestedContacts.added')}
-          </Badge>
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="secondary" className="gap-1 h-7" disabled={adding}>
+                  <Check className="h-3 w-3" />
+                  {t('campaigns.detail.interestedContacts.added')}
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {leadId && onOpenLead && (
+                  <DropdownMenuItem onClick={() => onOpenLead(leadId)}>
+                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                    {t('campaigns.detail.interestedContacts.viewInCrm', { defaultValue: 'Voir dans le CRM' })}
+                  </DropdownMenuItem>
+                )}
+                {onAddAgain && (
+                  <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
+                    <RotateCcw className="h-3.5 w-3.5 mr-2" />
+                    {t('campaigns.detail.interestedContacts.addAgain', { defaultValue: 'Ajouter à nouveau' })}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t('campaigns.detail.interestedContacts.addAgain', { defaultValue: 'Ajouter à nouveau' })}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('campaigns.detail.interestedContacts.addAgainConfirm', {
+                      company: c.company_name,
+                      defaultValue: `Une fiche existe déjà pour ${c.company_name}. Créer une nouvelle fiche dans le CRM ?`,
+                    })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('common.cancel', { defaultValue: 'Annuler' })}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onAddAgain?.(c)}>
+                    {t('campaigns.detail.interestedContacts.addToCrm')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         ) : (
           <Button size="sm" variant="outline" disabled={adding} onClick={() => onAdd(c)}>
             <UserPlus className="h-3.5 w-3.5 mr-1" />
