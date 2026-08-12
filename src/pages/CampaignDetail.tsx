@@ -531,6 +531,9 @@ const CampaignDetail = () => {
               currentUserId={user?.id}
               addingId={addingId}
               onAdd={addInterestedToCrm}
+              getLeadId={getLeadId}
+              onAddAgain={(c) => addInterestedToCrm(c, { force: true })}
+              onOpenLead={(leadId) => navigate(`/prospects/${leadId}`)}
             />
           )}
         </div>
