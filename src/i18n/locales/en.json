@@ -2124,6 +2124,23 @@
       "successDesc": "{{count}} of {{total}} prospects enriched ({{already}} already up to date).",
       "alreadyDone": "All prospects are already enriched ({{total}}).",
       "errorTitle": "Enrichment failed"
+    },
+    "editContact": {
+      "title": "Edit prospect",
+      "description": "These details are what the user sees.",
+      "company": "Company",
+      "contactName": "Contact name",
+      "email": "Email",
+      "phone": "Phone",
+      "country": "Country",
+      "score": "Score /10",
+      "descriptionField": "Description",
+      "actions": "Recommended actions",
+      "saved": "Prospect updated",
+      "errorTitle": "Error",
+      "invalidTitle": "Invalid field",
+      "companyRequired": "Company is required.",
+      "scoreRange": "Score must be between 0 and 10."
     }
   },
   "parseAddresses": {
