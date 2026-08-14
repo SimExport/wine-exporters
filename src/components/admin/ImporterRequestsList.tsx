@@ -5,7 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pencil, Languages, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Pencil, Languages, Loader2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ImporterRequestEditDialog, ImporterRequestRow } from './ImporterRequestEditDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +24,8 @@ export function ImporterRequestsList() {
   const [editing, setEditing] = useState<ImporterRequestRow | null>(null);
   const [open, setOpen] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -27,6 +34,7 @@ export function ImporterRequestsList() {
     const { data } = await q;
     setRows((data ?? []) as any);
     setPage(0);
+    setSelected([]);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [statusFilter]);
@@ -74,6 +82,27 @@ export function ImporterRequestsList() {
 
   const pageRows = rows.slice(page * PAGE, page * PAGE + PAGE);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE));
+  const allPageSelected = pageRows.length > 0 && pageRows.every(r => selected.includes(r.id));
+
+  const toggleOne = (id: string, checked: boolean) =>
+    setSelected(prev => (checked ? [...prev, id] : prev.filter(x => x !== id)));
+
+  const togglePage = (checked: boolean) =>
+    setSelected(prev => checked
+      ? Array.from(new Set([...prev, ...pageRows.map(r => r.id)]))
+      : prev.filter(id => !pageRows.some(r => r.id === id)));
+
+  const deleteSelected = async () => {
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from('importer_requests').delete().in('id', selected);
+      if (error) throw error;
+      toast({ title: 'Suppression effectuée', description: `${selected.length} entrée(s) supprimée(s)` });
+      load();
+    } catch (e: any) {
+      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+    } finally { setDeleting(false); }
+  };
 
   return (
     <Card>
@@ -81,6 +110,26 @@ export function ImporterRequestsList() {
         <div className="flex items-center justify-between">
           <div className="text-sm font-medium">Entrées publiées ({rows.length})</div>
           <div className="flex items-center gap-2">
+          {selected.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive" disabled={deleting}>
+                  {deleting ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
+                  Supprimer ({selected.length})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer {selected.length} entrée(s) ?</AlertDialogTitle>
+                  <AlertDialogDescription>Cette action est définitive.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={deleteSelected}>Supprimer</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <Button size="sm" variant="outline" onClick={translateMissing} disabled={translating}>
             {translating ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Languages className="h-3.5 w-3.5 mr-1" />}
             Traduire les entrées manquantes
@@ -100,6 +149,9 @@ export function ImporterRequestsList() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox checked={allPageSelected} onCheckedChange={(c) => togglePage(!!c)} aria-label="Tout sélectionner" />
+                </TableHead>
                 <TableHead>Société</TableHead>
                 <TableHead>Pays</TableHead>
                 <TableHead>Email</TableHead>
@@ -109,10 +161,13 @@ export function ImporterRequestsList() {
             </TableHeader>
             <TableBody>
               {pageRows.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center text-xs text-muted-foreground py-6">Aucune entrée</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-6">Aucune entrée</TableCell></TableRow>
               )}
               {pageRows.map(r => (
                 <TableRow key={r.id}>
+                  <TableCell>
+                    <Checkbox checked={selected.includes(r.id)} onCheckedChange={(c) => toggleOne(r.id, !!c)} aria-label="Sélectionner" />
+                  </TableCell>
                   <TableCell className="text-xs">{r.company_name}</TableCell>
                   <TableCell className="text-xs">{r.country}</TableCell>
                   <TableCell className="text-xs">{r.email}</TableCell>
