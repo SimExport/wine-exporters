@@ -2124,6 +2124,23 @@
       "successDesc": "{{count}} prospect(s) enrichi(s) sur {{total}} ({{already}} déjà à jour).",
       "alreadyDone": "Tous les prospects sont déjà enrichis ({{total}}).",
       "errorTitle": "Enrichissement échoué"
+    },
+    "editContact": {
+      "title": "Modifier le prospect",
+      "description": "Ces informations sont celles affichées côté utilisateur.",
+      "company": "Société",
+      "contactName": "Nom du contact",
+      "email": "Email",
+      "phone": "Téléphone",
+      "country": "Pays",
+      "score": "Score /10",
+      "descriptionField": "Description",
+      "actions": "Actions recommandées",
+      "saved": "Prospect mis à jour",
+      "errorTitle": "Erreur",
+      "invalidTitle": "Champ invalide",
+      "companyRequired": "La société est obligatoire.",
+      "scoreRange": "Le score doit être compris entre 0 et 10."
     }
   },
   "parseAddresses": {
