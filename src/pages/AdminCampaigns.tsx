@@ -14,7 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown, Pencil } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
@@ -23,6 +23,7 @@ import { CampaignStatsPopover } from '@/components/admin/CampaignStatsPopover';
 import { BrevoSyncButton } from '@/components/admin/BrevoSyncButton';
 import { EnrichProspectsButton } from '@/components/admin/EnrichProspectsButton';
 import { CampaignQualifiedProspectsSheet } from '@/components/admin/CampaignQualifiedProspectsSheet';
+import { EditInterestedContactDialog } from '@/components/admin/EditInterestedContactDialog';
 import { CampaignCompletionEmailPreview } from '@/components/admin/CampaignCompletionEmailPreview';
 import { formatDate, formatDateTime } from '@/lib/format';
 
@@ -96,6 +97,7 @@ export default function AdminCampaigns() {
   const [responsesByCampaign, setResponsesByCampaign] = useState<Record<string, InterestResponse[]>>({});
   const [responsesSheetCampaign, setResponsesSheetCampaign] = useState<Campaign | null>(null);
   const [qualifiedSheetCampaign, setQualifiedSheetCampaign] = useState<Campaign | null>(null);
+  const [editingResponse, setEditingResponse] = useState<InterestResponse | null>(null);
   const { toast } = useToast();
 
   // Filters
@@ -1308,6 +1310,15 @@ export default function AdminCampaigns() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => setEditingResponse(r)}
+                        aria-label={t('adminCampaigns.editContact.title', { defaultValue: 'Modifier le prospect' })}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
                       <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
                         {origin === 'click'
                           ? t('adminCampaigns.responsesSheet.originClick')
@@ -1373,6 +1384,20 @@ export default function AdminCampaigns() {
       <CampaignQualifiedProspectsSheet
         campaign={qualifiedSheetCampaign}
         onOpenChange={(open) => !open && setQualifiedSheetCampaign(null)}
+      />
+
+      <EditInterestedContactDialog
+        contact={editingResponse}
+        onOpenChange={(open) => !open && setEditingResponse(null)}
+        onSaved={(updated) => {
+          setResponsesByCampaign((prev) => {
+            const next: Record<string, InterestResponse[]> = {};
+            Object.entries(prev).forEach(([cid, list]) => {
+              next[cid] = list.map((r) => (r.id === updated.id ? { ...r, ...updated } : r));
+            });
+            return next;
+          });
+        }}
       />
 
       <CampaignCompletionEmailPreview
