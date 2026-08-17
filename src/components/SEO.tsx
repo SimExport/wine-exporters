@@ -4,11 +4,12 @@ interface SEOProps {
   title: string;
   description: string;
   path: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const BASE_URL = "https://wine-exporters.com";
 
-export const SEO = ({ title, description, path }: SEOProps) => {
+export const SEO = ({ title, description, path, jsonLd }: SEOProps) => {
   const url = `${BASE_URL}${path}`;
   return (
     <Helmet>
@@ -20,6 +21,9 @@ export const SEO = ({ title, description, path }: SEOProps) => {
       <meta property="og:url" content={url} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      {jsonLd && (
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      )}
     </Helmet>
   );
 };
