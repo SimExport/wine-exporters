@@ -407,9 +407,18 @@ const LandingPage = () => {
   const marqueeItems = t("landing.marquee.items", { returnObjects: true }) as string[];
   const bigStats = t("landing.bigStats.items", { returnObjects: true }) as Array<{ value: string; label: string }>;
   const methodOverview = ["step0", "step1", "step2", "step3", "step4"] as const;
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: (faqs || []).map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" />
+      <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" jsonLd={faqJsonLd} />
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-20 sm:h-24 flex items-center justify-between">
