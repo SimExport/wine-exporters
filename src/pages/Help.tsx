@@ -12,9 +12,22 @@ const Help = () => {
   const { t } = useTranslation();
   const steps = (t("help.steps", { returnObjects: true }) as { title: string; description: string }[]) || [];
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_IDS.flatMap((sectionId) => {
+      const qa = (t(`help.sections.${sectionId}.qa`, { returnObjects: true }) as { q: string; a: string }[]) || [];
+      return qa.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      }));
+    }),
+  };
+
   return (
     <div className="p-8 lg:p-10 space-y-12 max-w-4xl">
-      <SEO title={t("seo.help.title")} description={t("seo.help.description")} path="/help" />
+      <SEO title={t("seo.help.title")} description={t("seo.help.description")} path="/help" jsonLd={faqJsonLd} />
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-3">
