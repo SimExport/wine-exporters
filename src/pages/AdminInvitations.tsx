@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, UserPlus, CheckCircle2, XCircle, History, Send } from "lucide-react";
+import { Mail, UserPlus, CheckCircle2, XCircle, History, Send, Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -30,14 +30,44 @@ const AdminInvitations = () => {
   const [rows, setRows] = useState<InvitationRow[]>([]);
   const [loadingRows, setLoadingRows] = useState(true);
   const [resendingId, setResendingId] = useState<string | null>(null);
+  const [linkingId, setLinkingId] = useState<string | null>(null);
 
-  const sendInvite = async (target: string, mode?: "resend") => {
+  const buildRedirect = () => {
     const PROD_ORIGIN = "https://wine-exporters.com";
     const currentOrigin = window.location.origin;
     const isProdHost =
       currentOrigin === PROD_ORIGIN ||
       currentOrigin === "https://wine-exporters.lovable.app";
-    const redirectTo = `${isProdHost ? currentOrigin : PROD_ORIGIN}/set-password`;
+    return `${isProdHost ? currentOrigin : PROD_ORIGIN}/set-password`;
+  };
+
+  const onCopyLink = async (row: InvitationRow) => {
+    setLinkingId(row.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-invite-link", {
+        body: { email: row.email, redirectTo: buildRedirect() },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const link = (data as any)?.link as string;
+      await navigator.clipboard.writeText(link);
+      toast({
+        title: "Lien copié",
+        description: `Lien de création de mot de passe copié pour ${row.email}. Transmettez-le directement.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: t("adminInvitations.errorTitle"),
+        description: err?.message || t("adminInvitations.errorGeneric"),
+        variant: "destructive",
+      });
+    } finally {
+      setLinkingId(null);
+    }
+  };
+
+  const sendInvite = async (target: string, mode?: "resend") => {
+    const redirectTo = buildRedirect();
     const { data, error } = await supabase.functions.invoke("admin-invite-user", {
       body: { email: target, redirectTo, mode },
     });
@@ -178,6 +208,17 @@ const AdminInvitations = () => {
                         {r.invited_user_id ?? "—"}
                       </TableCell>
                       <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onCopyLink(r)}
+                          disabled={linkingId === r.id}
+                          title="Copier le lien de création de mot de passe"
+                        >
+                          <Link2 className="h-3 w-3 mr-1" />
+                          {linkingId === r.id ? "…" : "Lien"}
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -187,6 +228,7 @@ const AdminInvitations = () => {
                           <Send className="h-3 w-3 mr-1" />
                           {resendingId === r.id ? "Envoi…" : "Renvoyer"}
                         </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
