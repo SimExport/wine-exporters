@@ -8,6 +8,8 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { formatRelative } from '@/lib/format';
@@ -47,6 +49,7 @@ export function AppSidebar() {
     toast
   } = useToast();
   const { notifications, unreadCount, markAllRead, clearAll, addNotification } = useNotifications();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -178,8 +181,8 @@ export function AppSidebar() {
 
         {/* Notifications bell */}
         <div className="px-3 py-2">
-          <Popover>
-            <PopoverTrigger asChild>
+          {(() => {
+            const trigger = (
               <button className="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-sidebar-accent/50 transition-colors text-sidebar-foreground">
                 <Bell className="h-4 w-4 shrink-0" />
                 <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">{t('sidebar.notifications')}</span>
@@ -189,57 +192,86 @@ export function AppSidebar() {
                   </span>
                 )}
               </button>
-            </PopoverTrigger>
-            <PopoverContent side="right" align="end" className="w-80 p-0" sideOffset={8}>
-              <div className="flex items-center justify-between border-b px-4 py-3">
-                <span className="text-sm font-semibold">{t('sidebar.notifications')}</span>
-                <div className="flex gap-1">
-                  {unreadCount > 0 && (
-                    <button onClick={markAllRead} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors">
-                      <CheckCheck className="h-3 w-3" />
-                      {t('sidebar.markAllRead')}
-                    </button>
-                  )}
-                  {notifications.length > 0 && (
-                    <button onClick={clearAll} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors">
-                      <Trash2 className="h-3 w-3" />
-                    </button>
+            );
+
+            const panel = (
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="flex items-center justify-between border-b px-4 py-3 shrink-0">
+                  <span className="text-sm font-semibold">{t('sidebar.notifications')}</span>
+                  <div className="flex gap-1">
+                    {unreadCount > 0 && (
+                      <button onClick={markAllRead} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors">
+                        <CheckCheck className="h-3 w-3" />
+                        {t('sidebar.markAllRead')}
+                      </button>
+                    )}
+                    {notifications.length > 0 && (
+                      <button onClick={clearAll} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors">
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <Bell className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                      <p className="text-sm text-muted-foreground">{t('sidebar.noNotifications')}</p>
+                    </div>
+                  ) : (
+                    notifications.map(notif => {
+                      const Icon = notif.type === 'new_lead' ? Users : Megaphone;
+                      return (
+                        <button
+                          key={notif.id}
+                          onClick={() => { markAllRead(); navigate(notif.link); }}
+                          className={`flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors border-b last:border-b-0 ${!notif.read ? 'bg-primary/5' : ''}`}
+                        >
+                          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${notif.type === 'new_lead' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                            <Icon className="h-3.5 w-3.5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-foreground leading-tight">{notif.title}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground leading-snug">{notif.description}</p>
+                            <p className="mt-1 text-[10px] text-muted-foreground/70">
+                              {formatRelative(notif.created_at)}
+                            </p>
+                          </div>
+                          {!notif.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                        </button>
+                      );
+                    })
                   )}
                 </div>
               </div>
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Bell className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                    <p className="text-sm text-muted-foreground">{t('sidebar.noNotifications')}</p>
-                  </div>
-                ) : (
-                  notifications.map(notif => {
-                    const Icon = notif.type === 'new_lead' ? Users : Megaphone;
-                    return (
-                      <button
-                        key={notif.id}
-                        onClick={() => { markAllRead(); navigate(notif.link); }}
-                        className={`flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors border-b last:border-b-0 ${!notif.read ? 'bg-primary/5' : ''}`}
-                      >
-                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${notif.type === 'new_lead' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
-                          <Icon className="h-3.5 w-3.5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-foreground leading-tight">{notif.title}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground leading-snug line-clamp-2">{notif.description}</p>
-                          <p className="mt-1 text-[10px] text-muted-foreground/70">
-                            {formatRelative(notif.created_at)}
-                          </p>
-                        </div>
-                        {!notif.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+            );
+
+            if (isMobile) {
+              return (
+                <Drawer>
+                  <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+                  <DrawerContent className="max-h-[85vh]">
+                    <div className="flex max-h-[calc(85vh-1.5rem)] flex-col overflow-hidden">{panel}</div>
+                  </DrawerContent>
+                </Drawer>
+              );
+            }
+
+            return (
+              <Popover>
+                <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+                <PopoverContent
+                  side="top"
+                  align="start"
+                  sideOffset={8}
+                  collisionPadding={12}
+                  className="w-[min(20rem,calc(100vw-2rem))] p-0 max-h-[min(70vh,32rem)] overflow-hidden flex flex-col"
+                >
+                  {panel}
+                </PopoverContent>
+              </Popover>
+            );
+          })()}
         </div>
 
         {!hasPaidAccess && !subscriptionLoading && <div className="px-3 py-2">

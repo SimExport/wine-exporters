@@ -5,6 +5,8 @@ import { Bell, BellOff, CalendarClock, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/integrations/supabase/client'
@@ -31,6 +33,7 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
   const { t } = useTranslation()
   const dateLocale = getDateFnsLocale()
   const { toast } = useToast()
+  const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(remindAt ? new Date(remindAt) : undefined)
   const [note, setNote] = useState(remindNote || '')
@@ -84,84 +87,107 @@ export function ReminderPopover({ leadId, remindAt, remindNote, onUpdate, size =
     'text-muted-foreground opacity-40 hover:opacity-80': status === 'none',
   })
 
+  const triggerButton = (
+    <button
+      className={cn('focus:outline-none transition-opacity', iconClass)}
+      title={remindAt
+        ? t('reminders.tooltipSet', { date: formatDate(remindAt) })
+        : t('reminders.tooltipAdd')}
+    >
+      <Bell className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+    </button>
+  )
+
+  const panelBody = (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center gap-2 px-4 pt-4 pb-3 shrink-0">
+        <CalendarClock className="w-4 h-4 text-primary" />
+        <span className="font-semibold text-sm">{t('reminders.title')}</span>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 space-y-3">
+        {/* Quick buttons */}
+        <div className="flex gap-2">
+          {[
+            { label: t('reminders.quick3'), days: 3 },
+            { label: t('reminders.quick7'), days: 7 },
+            { label: t('reminders.quick14'), days: 14 },
+          ].map(({ label, days }) => (
+            <Button
+              key={days}
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => handleQuickSet(days)}
+              disabled={saving}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Date picker */}
+        <div className="flex justify-center">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(d) => setDate(d)}
+            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+            initialFocus
+            className={cn('p-0 pointer-events-auto')}
+            locale={dateLocale}
+          />
+        </div>
+
+        {/* Note */}
+        <Textarea
+          placeholder={t('reminders.notePlaceholder')}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="text-sm resize-none"
+          rows={2}
+        />
+      </div>
+
+      <div className="flex gap-2 border-t bg-background px-4 py-3 shrink-0">
+        <Button
+          className="flex-1"
+          size="sm"
+          onClick={() => date && handleSave(date, note)}
+          disabled={!date || saving}
+        >
+          {t('reminders.save')}
+        </Button>
+        {remindAt && (
+          <Button variant="ghost" size="sm" onClick={handleClear} disabled={saving}>
+            <BellOff className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="flex items-center gap-1">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            className={cn('focus:outline-none transition-opacity', iconClass)}
-            title={remindAt
-              ? t('reminders.tooltipSet', { date: formatDate(remindAt) })
-              : t('reminders.tooltipAdd')}
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+          <DrawerContent className="max-h-[90vh]">
+            <div className="flex max-h-[calc(90vh-1.5rem)] flex-col overflow-hidden">{panelBody}</div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+          <PopoverContent
+            align="start"
+            collisionPadding={12}
+            className="w-[min(20rem,calc(100vw-2rem))] p-0 max-h-[min(80vh,34rem)] overflow-hidden flex flex-col"
           >
-            <Bell className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-4" align="start">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <CalendarClock className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-sm">{t('reminders.title')}</span>
-            </div>
-
-            {/* Quick buttons */}
-            <div className="flex gap-2">
-              {[
-                { label: t('reminders.quick3'), days: 3 },
-                { label: t('reminders.quick7'), days: 7 },
-                { label: t('reminders.quick14'), days: 14 },
-              ].map(({ label, days }) => (
-                <Button
-                  key={days}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-xs"
-                  onClick={() => handleQuickSet(days)}
-                  disabled={saving}
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
-
-            {/* Date picker */}
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(d) => setDate(d)}
-              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-              initialFocus
-              className={cn('p-0 pointer-events-auto')}
-              locale={dateLocale}
-            />
-
-            {/* Note */}
-            <Textarea
-              placeholder={t('reminders.notePlaceholder')}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="text-sm resize-none"
-              rows={2}
-            />
-
-            <div className="flex gap-2">
-              <Button
-                className="flex-1"
-                size="sm"
-                onClick={() => date && handleSave(date, note)}
-                disabled={!date || saving}
-              >
-                {t('reminders.save')}
-              </Button>
-              {remindAt && (
-                <Button variant="ghost" size="sm" onClick={handleClear} disabled={saving}>
-                  <BellOff className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+            {panelBody}
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Inline badge */}
       {remindAt && status !== 'none' && (
