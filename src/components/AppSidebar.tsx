@@ -8,6 +8,8 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { formatRelative } from '@/lib/format';
@@ -47,6 +49,7 @@ export function AppSidebar() {
     toast
   } = useToast();
   const { notifications, unreadCount, markAllRead, clearAll, addNotification } = useNotifications();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
