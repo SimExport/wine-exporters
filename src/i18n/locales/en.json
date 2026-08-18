@@ -132,7 +132,18 @@
     "signedIn": "Signed in successfully",
     "welcome": "Welcome to ExportVins!",
     "noAccountQ": "No account yet?",
-    "requestDemo": "Request a demo"
+    "requestDemo": "Request a demo",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "forgot": {
+      "link": "Forgot your password?",
+      "title": "Forgot password",
+      "description": "Enter your email and we'll send you a link to set a new password.",
+      "submit": "Send the link",
+      "sending": "Sending…",
+      "sent": "If an account exists for this address, an email with a reset link has just been sent. Remember to check your spam folder.",
+      "backToSignIn": "Back to sign in"
+    }
   },
   "credits": {
     "nextPeriod": "the next period",

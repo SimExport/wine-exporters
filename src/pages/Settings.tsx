@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -282,21 +283,21 @@ const Settings = () => {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="currentPassword">{t('settings.account.currentPassword')}</Label>
-                      <Input id="currentPassword" type="password" value={passwordForm.currentPassword} onChange={e => setPasswordForm(prev => ({
+                      <PasswordInput id="currentPassword" value={passwordForm.currentPassword} onChange={e => setPasswordForm(prev => ({
                     ...prev,
                     currentPassword: e.target.value
                   }))} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="newPassword">{t('settings.account.newPassword')}</Label>
-                      <Input id="newPassword" type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm(prev => ({
+                      <PasswordInput id="newPassword" value={passwordForm.newPassword} onChange={e => setPasswordForm(prev => ({
                     ...prev,
                     newPassword: e.target.value
                   }))} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">{t('settings.account.confirmPassword')}</Label>
-                      <Input id="confirmPassword" type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(prev => ({
+                      <PasswordInput id="confirmPassword" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(prev => ({
                     ...prev,
                     confirmPassword: e.target.value
                   }))} />

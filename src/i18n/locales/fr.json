@@ -132,7 +132,18 @@
     "signedIn": "Connexion réussie",
     "welcome": "Bienvenue sur ExportVins !",
     "noAccountQ": "Pas encore de compte ?",
-    "requestDemo": "Demander une démo"
+    "requestDemo": "Demander une démo",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "forgot": {
+      "link": "Mot de passe oublié ?",
+      "title": "Mot de passe oublié",
+      "description": "Saisissez votre email, nous vous envoyons un lien pour définir un nouveau mot de passe.",
+      "submit": "Envoyer le lien",
+      "sending": "Envoi…",
+      "sent": "Si un compte existe pour cette adresse, un email vient d'être envoyé avec un lien de réinitialisation. Pensez à vérifier vos spams.",
+      "backToSignIn": "Retour à la connexion"
+    }
   },
   "credits": {
     "nextPeriod": "la prochaine période",
