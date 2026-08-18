@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
@@ -77,7 +78,12 @@ const Auth = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="signin-password">{t('auth.password')}</Label>
-              <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
+              <PasswordInput id="signin-password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
+              <div className="text-right">
+                <Link to="/mot-de-passe-oublie" className="text-sm text-muted-foreground hover:text-primary hover:underline">
+                  {t('auth.forgot.link')}
+                </Link>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? t('auth.signingIn') : t('auth.signInButton')}
