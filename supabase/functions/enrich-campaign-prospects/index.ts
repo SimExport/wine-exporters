@@ -30,6 +30,7 @@ function stripCitations(text: string): string {
 }
 
 import { findBuyerContact } from "../_shared/buyer-match.ts";
+import { normalizeCountry } from "../_shared/country.ts";
 
 async function askClaude(prompt: string, useWebSearch = false): Promise<any | null> {
   const key = Deno.env.get("ANTHROPIC_API_KEY");
@@ -283,20 +284,25 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
         update.company_name = suggestedCompany.slice(0, 120);
       }
 
-      const currentCountry = String(row.country ?? "").trim();
+      const currentCountry = normalizeCountry(row.country) ?? "";
       const suggestedCountry =
-        (matched?.country ?? "").trim() ||
-        (typeof parsed?.country === "string" ? parsed.country.trim() : "");
+        normalizeCountry(matched?.country) ??
+        normalizeCountry(typeof parsed?.country === "string" ? parsed.country : null) ??
+        "";
       const countryIsDefault =
         currentCountry === "" ||
         (!!defaultMarket &&
-          currentCountry.toLowerCase() === String(defaultMarket).toLowerCase());
+          currentCountry.toLowerCase() ===
+            (normalizeCountry(defaultMarket) ?? String(defaultMarket)).toLowerCase());
       if (
         suggestedCountry &&
         suggestedCountry.toLowerCase() !== currentCountry.toLowerCase() &&
         (force || countryIsDefault)
       ) {
         update.country = suggestedCountry.slice(0, 80);
+      } else if (currentCountry && currentCountry !== String(row.country ?? "")) {
+        // Same country, inconsistent label: store the canonical form.
+        update.country = currentCountry;
       }
     }
 
