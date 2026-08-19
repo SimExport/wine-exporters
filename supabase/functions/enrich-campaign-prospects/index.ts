@@ -320,11 +320,35 @@ Deno.serve(async (req) => {
     const email = row.email ?? "";
     const domain = email.split("@")[1] ?? "";
 
-    const prompt =
-      origin === "click"
-        ? `You enrich a CRM record for a wine producer named "${producer_name}".
+    const matched =
+      origin === "click" && email
+        ? await findBuyerContact(admin, email, row.company_name ?? null)
+        : null;
+
+    const clickMatchedPrompt = `You enrich a CRM record for a wine producer named "${producer_name}".
+Producer profile: ${JSON.stringify(producer_profile)}
+A wine importer / distributor clicked on a link in the campaign email "${campaign.name}" but did NOT fill the interest form.
+This contact has been matched with a verified record in our own importer database. Use ONLY these factual data, do not invent anything and do NOT search the web.
+
+Buyer email: ${email}
+Verified record: ${JSON.stringify(matched ?? {})}
+
+Return STRICT JSON with five keys only:
+{
+  "description": "2-3 phrases EN FRANÇAIS décrivant la société à partir des données vérifiées ci-dessus (activité, localisation, présence en ligne, adéquation avec le producteur). Ton affirmatif et professionnel, au présent de l'indicatif. Pas de formule de politesse.",
+  "company_name": "Nom exact de la société tel qu'il figure dans la fiche vérifiée.",
+  "country": "Pays de la société en anglais, tel qu'il figure dans la fiche vérifiée (ou déduit de l'adresse). Chaîne vide \\"\\" si absent.",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes, chacune commençant par un verbe à l'infinitif directif (Envoyer, Vérifier, Proposer, Appeler…), en exploitant les coordonnées disponibles (téléphone, site, réseaux).",
+  "score": "Integer 5-8 on a /10 scale. Base 5 because the contact is verified in our database, +1 to +3 depending on how well the company fits the producer profile (type d'activité, marché, gamme)."
+}
+No prose, no code fences.
+
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
+
+    const clickWebPrompt = `You enrich a CRM record for a wine producer named "${producer_name}".
 Producer profile: ${JSON.stringify(producer_profile)}
 A wine importer / distributor clicked on a link in the campaign email "${campaign.name}" but did NOT fill the interest form. Only the email address is known.
+Use the web_search tool (max 3 searches) on the email domain to identify the company before writing.
 
 Buyer email: ${email}
 Domain: ${domain}
@@ -339,7 +363,13 @@ Return STRICT JSON with five keys only:
 }
 No prose, no code fences.
 
-STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent. Une information manquante s'énonce de manière factuelle et nette, jamais par une hypothèse floue.`
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent. Une information manquante s'énonce de manière factuelle et nette, jamais par une hypothèse floue.`;
+
+    const prompt =
+      origin === "click"
+        ? matched
+          ? clickMatchedPrompt
+          : clickWebPrompt
         : `You enrich a CRM record for a wine producer named "${producer_name}".
 Producer profile: ${JSON.stringify(producer_profile)}
 A qualified buyer submitted an interest form for the campaign "${campaign.name}".
@@ -360,7 +390,7 @@ No prose, no code fences.
 
 STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
 
-    const parsed = await askClaude(prompt);
+    const parsed = await askClaude(prompt, origin === "click" && !matched);
 
     const fallbackDescription =
       origin === "click"
@@ -376,6 +406,7 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
     const score = clampScore(
       Number.isFinite(parsedScore) ? parsedScore : (row.score ?? (origin === "click" ? 5 : 7)),
       origin,
+      !!matched,
     );
 
     const update: Record<string, unknown> = { description, score, origin };
@@ -384,7 +415,8 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
       const localPart = (email.split("@")[0] ?? "").toLowerCase();
       const currentCompany = String(row.company_name ?? "").trim();
       const suggestedCompany =
-        typeof parsed?.company_name === "string" ? parsed.company_name.trim() : "";
+        (matched?.company_name ?? "").trim() ||
+        (typeof parsed?.company_name === "string" ? parsed.company_name.trim() : "");
       const companyIsBogus =
         currentCompany === "" || currentCompany.toLowerCase() === localPart;
       if (suggestedCompany && (force || companyIsBogus)) {
@@ -393,7 +425,8 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
 
       const currentCountry = String(row.country ?? "").trim();
       const suggestedCountry =
-        typeof parsed?.country === "string" ? parsed.country.trim() : "";
+        (matched?.country ?? "").trim() ||
+        (typeof parsed?.country === "string" ? parsed.country.trim() : "");
       const countryIsDefault =
         currentCountry === "" ||
         (!!defaultMarket &&
