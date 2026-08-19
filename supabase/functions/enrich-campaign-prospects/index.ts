@@ -103,6 +103,12 @@ Deno.serve(async (req) => {
   const campaign_id = typeof body?.campaign_id === "string" ? body.campaign_id : null;
   if (!campaign_id) return json(400, { error: "Missing campaign_id" });
   const force = body?.force === true;
+  const limit = Number.isFinite(Number(body?.limit))
+    ? Math.min(20, Math.max(1, Math.round(Number(body.limit))))
+    : 5;
+  const offset = Number.isFinite(Number(body?.offset))
+    ? Math.max(0, Math.round(Number(body.offset)))
+    : 0;
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
@@ -138,10 +144,16 @@ Deno.serve(async (req) => {
     ? (rows ?? [])
     : (rows ?? []).filter((r: any) => !r.description || String(r.description).trim() === "");
 
+  const batch = todo.slice(offset, offset + limit);
+  const startedAt = Date.now();
+  const TIME_BUDGET_MS = 60_000;
+
   let enriched = 0;
   const failed: string[] = [];
+  let processed = 0;
+  let stoppedEarly = false;
 
-  for (const row of todo) {
+  const processRow = async (row: any) => {
     const origin = row.origin === "click" ? "click" : "form";
     const email = row.email ?? "";
     const domain = email.split("@")[1] ?? "";
@@ -217,6 +229,11 @@ No prose, no code fences.
 STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
 
     const parsed = await askClaude(prompt, origin === "click" && !matched);
+    console.log(
+      `enriched contact ${row.id} <${email || "no-email"}> origin=${origin} source=${
+        origin === "click" ? (matched ? "buyer_contacts" : "web_search") : "form"
+      } ai=${parsed ? "ok" : "fallback"}`,
+    );
 
     const fallbackDescription =
       origin === "click"
@@ -282,7 +299,31 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
       console.error("Enrichment update failed:", row.id, updErr.message);
       failed.push(row.id);
     } else enriched++;
+  };
+
+  for (let i = 0; i < batch.length; i += 3) {
+    if (Date.now() - startedAt > TIME_BUDGET_MS) {
+      stoppedEarly = true;
+      break;
+    }
+    const slice = batch.slice(i, i + 3);
+    await Promise.all(
+      slice.map(async (row: any) => {
+        try {
+          await processRow(row);
+        } catch (e) {
+          console.error("Enrichment failed for", row.id, e);
+          failed.push(row.id);
+        }
+      }),
+    );
+    processed += slice.length;
   }
+
+  // When not forcing, enriched rows drop out of the `todo` filter on the next
+  // call, so paging always restarts at 0. When forcing, page forward.
+  const remaining = Math.max(0, todo.length - offset - processed);
+  const next_offset = force ? offset + processed : 0;
 
   return json(200, {
     ok: true,
@@ -290,5 +331,9 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
     candidates: todo.length,
     enriched,
     failed: failed.length,
+    processed,
+    remaining,
+    next_offset,
+    stopped_early: stoppedEarly,
   });
 });
