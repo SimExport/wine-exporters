@@ -20,23 +20,41 @@ export function EnrichProspectsButton({ campaignId, onDone }: Props) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   const run = async (force: boolean) => {
     setLoading(true);
+    setProgress(null);
+    let doneCount = 0;
     try {
-      const { data, error } = await supabase.functions.invoke('enrich-campaign-prospects', {
-        body: { campaign_id: campaignId, force },
-      });
-      if (error) throw error;
-      const total = data?.total ?? 0;
-      const candidates = data?.candidates ?? 0;
+      let offset = 0;
+      let total = 0;
+      let candidates = 0;
+      let guard = 0;
+
+      // The Edge Function processes a small batch per invocation to stay within
+      // its execution time limit; loop until nothing is left.
+      while (guard < 40) {
+        guard++;
+        const { data, error } = await supabase.functions.invoke('enrich-campaign-prospects', {
+          body: { campaign_id: campaignId, force, limit: 5, offset },
+        });
+        if (error) throw error;
+        total = data?.total ?? total;
+        if (guard === 1) candidates = data?.candidates ?? 0;
+        doneCount += data?.enriched ?? 0;
+        offset = data?.next_offset ?? 0;
+        setProgress({ done: doneCount, total: candidates });
+        if (!data?.remaining || (data?.processed ?? 0) === 0) break;
+      }
+
       toast({
         title: t('adminCampaigns.enrich.successTitle'),
         description:
           candidates === 0
             ? t('adminCampaigns.enrich.alreadyDone', { total })
             : t('adminCampaigns.enrich.successDesc', {
-                count: data?.enriched ?? 0,
+                count: doneCount,
                 total,
                 already: Math.max(0, total - candidates),
               }),
@@ -46,11 +64,15 @@ export function EnrichProspectsButton({ campaignId, onDone }: Props) {
       console.error('enrich-campaign-prospects failed', err);
       toast({
         title: t('adminCampaigns.enrich.errorTitle'),
-        description: err?.message ?? String(err),
+        description: `${doneCount} contact(s) traité(s) avant l'erreur. ${
+          err?.message ?? String(err)
+        }`,
         variant: 'destructive',
       });
+      onDone?.();
     } finally {
       setLoading(false);
+      setProgress(null);
     }
   };
 
@@ -63,7 +85,9 @@ export function EnrichProspectsButton({ campaignId, onDone }: Props) {
           ) : (
             <Sparkles className="h-4 w-4 mr-1" />
           )}
-          {t('adminCampaigns.enrich.label')}
+          {loading && progress
+            ? `${progress.done}/${progress.total || '?'}`
+            : t('adminCampaigns.enrich.label')}
           <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
