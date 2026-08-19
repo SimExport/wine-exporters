@@ -8,7 +8,12 @@ Avant d'appeler Claude pour un cliqueur, chercher la société dans la base `buy
 
 1. **Email exact** — ligne de `buyer_contacts` dont l'email est identique (insensible à la casse).
 2. **Même domaine** — si le domaine n'est pas générique (gmail, yahoo, hotmail, outlook, icloud, aol) : toutes les lignes du même domaine, on garde la plus complète (nombre de champs renseignés parmi company_name, phone, website_url, full_address).
-3. **Nom de société** — correspondance partielle, insensible à la casse et aux accents, avec le nom de société déjà connu pour ce contact. Retenu uniquement s'il n'y a aucune ambiguïté (un seul résultat plausible).
+3. **Nom de société** — correspondance avec le nom de société déjà connu pour ce contact, insensible à la casse et aux accents. Les extensions Postgres `unaccent` et `pg_trgm` ne sont pas installées sur ce projet (vérifié), donc l'insensibilité aux accents se fait en TypeScript, pas en SQL :
+   - l'étape n'est tentée que si le nom connu, une fois nettoyé (mots vides retirés : wine, wines, vins, sarl, ltd, inc, co, company, the…), fait au moins 5 caractères ;
+   - shortlist SQL volontairement permissive : `ilike '%fragment%'` sur `company_name`, avec `.limit(50)`, où `fragment` est le mot significatif le plus long. Si ce mot porte un accent, on lance en plus une seconde requête sur son plus long fragment sans accent (« Château » → `%teau%`), pour que la vérification TypeScript puisse retrouver « Chateau » comme « Château » ;
+   - filtrage final en TypeScript avec `normalizeCompany()` (minuscules, accents supprimés, ponctuation et mots vides retirés). Un candidat est retenu si sa chaîne normalisée est **égale** au nom normalisé, ou si l'une **contient entièrement** l'autre.
+
+**Règle « un seul résultat plausible »** : on dédoublonne les candidats retenus sur leur nom normalisé. Exactement un nom distinct → match accepté (si plusieurs lignes portent ce nom, on garde la plus complète, comme à l'étape 2). Zéro, ou deux noms distincts ou plus → l'étape 3 échoue et on bascule sur la recherche web.
 
 Champs récupérés : email, company_name, phone, website_url, country, state, city, full_address, Facebook, Instagram, LinkedIn.
 
