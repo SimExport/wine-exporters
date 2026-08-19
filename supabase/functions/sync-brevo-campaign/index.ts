@@ -250,7 +250,16 @@ Deno.serve(async (req) => {
         result.imported_leads = 0;
         result.skipped = 0;
       } else {
-        // Exclude already-known emails
+        // Exclude already-known emails AND already-known corporate domains:
+        // the same company often clicks with a different mailbox than the one
+        // used for the interest form (info@ vs alex@), which used to create a
+        // duplicate prospect row with a different inferred country.
+        const GENERIC_DOMAINS = new Set([
+          "gmail.com", "yahoo.com", "yahoo.fr", "hotmail.com", "hotmail.fr",
+          "outlook.com", "live.com", "icloud.com", "aol.com", "gmx.de",
+          "web.de", "naver.com", "seznam.cz", "orange.fr", "free.fr", "wanadoo.fr",
+        ]);
+        const domainOf = (email: string) => (email.split("@")[1] ?? "").toLowerCase();
         const [{ data: interested }, { data: existingLeads }] = await Promise.all([
           admin
             .from("campaign_interested_contacts")
@@ -259,9 +268,23 @@ Deno.serve(async (req) => {
           admin.from("leads").select("email").eq("campaign_id", campaign_id),
         ]);
         const known = new Set<string>();
-        for (const r of interested ?? []) if (r?.email) known.add(String(r.email).toLowerCase());
-        for (const r of existingLeads ?? []) if (r?.email) known.add(String(r.email).toLowerCase());
-        const newEmails = emails.filter((e) => !known.has(e));
+        const knownDomains = new Set<string>();
+        for (const r of [...(interested ?? []), ...(existingLeads ?? [])]) {
+          if (!r?.email) continue;
+          const e = String(r.email).toLowerCase();
+          known.add(e);
+          const d = domainOf(e);
+          if (d && !GENERIC_DOMAINS.has(d)) knownDomains.add(d);
+        }
+        const seenDomains = new Set<string>();
+        const newEmails = emails.filter((e) => {
+          if (known.has(e)) return false;
+          const d = domainOf(e);
+          if (!d || GENERIC_DOMAINS.has(d)) return true;
+          if (knownDomains.has(d) || seenDomains.has(d)) return false;
+          seenDomains.add(d);
+          return true;
+        });
 
         // Producer profile for AI context
         let producer_profile: Record<string, unknown> = {};
@@ -287,17 +310,16 @@ Deno.serve(async (req) => {
           sg: "Singapore", kr: "South Korea", tw: "Taiwan", ca: "Canada", us: "United States",
           mx: "Mexico", br: "Brazil", ae: "United Arab Emirates",
         };
-        const defaultMarket =
-          (Array.isArray(campaign.target_markets) && campaign.target_markets[0]) || null;
-        const marketFor = (email: string): string => {
+        const marketFor = (email: string): string | null => {
           const domain = (email.split("@")[1] ?? "").toLowerCase();
           const parts = domain.split(".");
           for (let i = parts.length - 1; i >= 0; i--) {
             const t = parts[i];
             if (TLD_TO_MARKET[t]) return TLD_TO_MARKET[t];
           }
-          if (defaultMarket) return String(defaultMarket);
-          return "Unknown";
+          // No country TLD (.com, .net…): leave it to AI enrichment rather than
+          // wrongly stamping the campaign's first target market.
+          return null;
         };
         for (const email of newEmails) {
           const enriched = await enrichClickerWithAI({
@@ -306,12 +328,8 @@ Deno.serve(async (req) => {
             campaign_name: campaign.name ?? "",
             producer_profile,
           });
-          const domain = (email.split("@")[1] ?? "").toLowerCase();
-          const GENERIC = new Set([
-            "gmail.com", "yahoo.com", "yahoo.fr", "hotmail.com", "hotmail.fr",
-            "outlook.com", "live.com", "icloud.com", "aol.com", "gmx.de",
-            "web.de", "naver.com", "seznam.cz", "orange.fr", "free.fr", "wanadoo.fr",
-          ]);
+          const domain = domainOf(email);
+          const GENERIC = GENERIC_DOMAINS;
           // Never use the email local part as a company name — infer from the
           // domain when it is a real corporate domain, otherwise leave empty.
           const company_name =
