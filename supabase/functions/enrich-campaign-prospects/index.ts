@@ -259,7 +259,7 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
 
     const description =
       typeof parsed?.description === "string" && parsed.description.trim()
-        ? parsed.description.trim().slice(0, 2000)
+        ? stripCitations(parsed.description).slice(0, 2000)
         : fallbackDescription;
 
     const parsedScore = Number(parsed?.score);
@@ -301,7 +301,9 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
     }
 
     const suggestedActions =
-      typeof parsed?.recommended_actions === "string" ? parsed.recommended_actions.trim() : "";
+      typeof parsed?.recommended_actions === "string"
+        ? stripCitations(parsed.recommended_actions)
+        : "";
     if (suggestedActions) {
       update.recommended_actions = suggestedActions.slice(0, 2000);
     } else if (origin === "click" && !String(row.recommended_actions ?? "").trim()) {
@@ -334,23 +336,22 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
         }
       }),
     );
+    for (const row of slice) processedIds.push(row.id);
     processed += slice.length;
   }
 
-  // When not forcing, enriched rows drop out of the `todo` filter on the next
-  // call, so paging always restarts at 0. When forcing, page forward.
-  const remaining = Math.max(0, todo.length - offset - processed);
-  const next_offset = force ? offset + processed : 0;
+  const remaining = Math.max(0, todo.length - processed);
 
   return json(200, {
     ok: true,
     total: (rows ?? []).length,
-    candidates: todo.length,
+    candidates: allTodo.length,
     enriched,
     failed: failed.length,
     processed,
+    processed_ids: processedIds,
     remaining,
-    next_offset,
+    next_offset: offset,
     stopped_early: stoppedEarly,
   });
 });
