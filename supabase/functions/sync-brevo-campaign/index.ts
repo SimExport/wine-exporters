@@ -368,19 +368,23 @@ Deno.serve(async (req) => {
         };
         for (const email of newEmails) {
           const enriched = await enrichClickerWithAI({
+            admin,
             email,
             producer_name,
             campaign_name: campaign.name ?? "",
             producer_profile,
+            known_company_name: null,
           });
           const domain = domainOf(email);
           const GENERIC = GENERIC_DOMAINS;
           // Never use the email local part as a company name — infer from the
           // domain when it is a real corporate domain, otherwise leave empty.
+          const matchedCompany = (enriched.matched_company?.company_name ?? "").trim();
           const company_name =
-            domain && !GENERIC.has(domain)
+            matchedCompany ||
+            (domain && !GENERIC.has(domain)
               ? (enriched as any).company_name?.trim?.() || domain
-              : (enriched as any).company_name?.trim?.() || "";
+              : (enriched as any).company_name?.trim?.() || "");
           // Clickers stay in the campaign prospect list — the producer decides
           // manually whether to push them into their CRM.
           const { error: leadErr } = await admin
@@ -390,7 +394,10 @@ Deno.serve(async (req) => {
               company_name: company_name.slice(0, 120),
               contact_name: null,
               email,
-              country: marketFor(email),
+              country:
+                marketFor(email) ||
+                (enriched.matched_company?.country ?? null) ||
+                null,
               description: enriched.description,
               recommended_actions: null,
               score: enriched.score,
