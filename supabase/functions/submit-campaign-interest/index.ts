@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { normalizeCountry } from "../_shared/country.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -224,7 +225,7 @@ Deno.serve(async (req) => {
       company_name: company || full_name,
       contact_name: full_name,
       email,
-      country,
+      country: normalizeCountry(country),
       phone,
       description: enriched.description,
       recommended_actions: enriched.recommended_actions,
