@@ -395,9 +395,8 @@ Deno.serve(async (req) => {
               contact_name: null,
               email,
               country:
-                marketFor(email) ||
-                (enriched.matched_company?.country ?? null) ||
-                null,
+                normalizeCountry(marketFor(email)) ??
+                normalizeCountry(enriched.matched_company?.country ?? null),
               description: enriched.description,
               recommended_actions: null,
               score: enriched.score,
