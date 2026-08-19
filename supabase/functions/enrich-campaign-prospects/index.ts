@@ -15,13 +15,189 @@ function json(status: number, body: unknown) {
   });
 }
 
-function clampScore(score: number, origin: string): number {
-  const min = origin === "click" ? 4 : 6;
-  const max = origin === "click" ? 7 : 10;
+function clampScore(score: number, origin: string, matched = false): number {
+  const min = origin === "click" ? (matched ? 5 : 4) : 6;
+  const max = origin === "click" ? (matched ? 8 : 7) : 10;
   return Math.min(max, Math.max(min, Math.round(score)));
 }
 
-async function askClaude(prompt: string): Promise<any | null> {
+const GENERIC_DOMAINS = new Set([
+  "gmail.com",
+  "yahoo.com",
+  "hotmail.com",
+  "outlook.com",
+  "icloud.com",
+  "aol.com",
+]);
+
+const COMPANY_STOPWORDS = new Set([
+  "wine",
+  "wines",
+  "vin",
+  "vins",
+  "sarl",
+  "sas",
+  "ltd",
+  "limited",
+  "llc",
+  "inc",
+  "co",
+  "company",
+  "the",
+  "and",
+  "et",
+  "de",
+  "du",
+  "des",
+  "la",
+  "le",
+  "les",
+  "gmbh",
+  "bv",
+  "pty",
+  "srl",
+  "spa",
+]);
+
+function stripAccents(s: string): string {
+  return s.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}
+
+function companyWords(raw: string): string[] {
+  return stripAccents(String(raw ?? "").toLowerCase())
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((w) => w && !COMPANY_STOPWORDS.has(w));
+}
+
+function normalizeCompany(raw: string): string {
+  return companyWords(raw).join(" ");
+}
+
+type BuyerContact = {
+  email: string | null;
+  company_name: string | null;
+  phone: string | null;
+  website_url: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  full_address: string | null;
+  Facebook: string | null;
+  Instagram: string | null;
+  LinkedIn: string | null;
+};
+
+const BUYER_FIELDS =
+  'email, company_name, phone, website_url, country, state, city, full_address, "Facebook", "Instagram", "LinkedIn"';
+
+function completeness(c: BuyerContact): number {
+  return [c.company_name, c.phone, c.website_url, c.full_address].filter(
+    (v) => typeof v === "string" && v.trim() !== "",
+  ).length;
+}
+
+function mostComplete(rows: BuyerContact[]): BuyerContact | null {
+  if (!rows.length) return null;
+  return [...rows].sort((a, b) => completeness(b) - completeness(a))[0];
+}
+
+/** Escape the LIKE wildcards / PostgREST separators in a filter fragment. */
+function likeFragment(s: string): string {
+  return s.replace(/[%_,()]/g, " ").trim();
+}
+
+async function findBuyerContact(
+  admin: any,
+  email: string,
+  knownCompanyName: string | null,
+): Promise<BuyerContact | null> {
+  const cleanEmail = String(email ?? "").trim();
+  const domain = cleanEmail.split("@")[1]?.toLowerCase() ?? "";
+
+  // Step 1 — exact email (case-insensitive)
+  if (cleanEmail) {
+    const { data } = await admin
+      .from("buyer_contacts")
+      .select(BUYER_FIELDS)
+      .ilike("email", likeFragment(cleanEmail))
+      .limit(10);
+    const hit = mostComplete((data ?? []) as BuyerContact[]);
+    if (hit) return hit;
+  }
+
+  // Step 2 — same corporate domain
+  if (domain && !GENERIC_DOMAINS.has(domain)) {
+    const { data } = await admin
+      .from("buyer_contacts")
+      .select(BUYER_FIELDS)
+      .ilike("email", `%@${likeFragment(domain)}`)
+      .limit(50);
+    const hit = mostComplete((data ?? []) as BuyerContact[]);
+    if (hit) return hit;
+  }
+
+  // Step 3 — company name (accent-insensitive, verified in TS)
+  const known = String(knownCompanyName ?? "").trim();
+  const normalizedKnown = normalizeCompany(known);
+  if (normalizedKnown.length < 5) return null;
+
+  const words = companyWords(known).sort((a, b) => b.length - a.length);
+  const longest = words[0];
+  if (!longest || longest.length < 5) return null;
+
+  // Original (possibly accented) counterpart of the longest word, so that we can
+  // also probe its longest accent-free fragment (Château -> "teau").
+  const rawWords = String(known)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
+  const rawMatch = rawWords.find((w) => stripAccents(w).toLowerCase() === longest);
+  const fragments = new Set<string>([longest]);
+  if (rawMatch && stripAccents(rawMatch) !== rawMatch) {
+    const plainRuns = rawMatch
+      .split(/[^\p{L}\p{N}]/u)
+      .join("")
+      .split("")
+      .reduce<string[]>((acc, ch) => {
+        if (stripAccents(ch) === ch) {
+          acc[acc.length - 1] = (acc[acc.length - 1] ?? "") + ch;
+        } else {
+          acc.push("");
+        }
+        return acc;
+      }, [""]);
+    const longestPlain = plainRuns.sort((a, b) => b.length - a.length)[0] ?? "";
+    if (longestPlain.length >= 4) fragments.add(longestPlain.toLowerCase());
+  }
+
+  const candidates: BuyerContact[] = [];
+  for (const frag of fragments) {
+    const { data } = await admin
+      .from("buyer_contacts")
+      .select(BUYER_FIELDS)
+      .ilike("company_name", `%${likeFragment(frag)}%`)
+      .limit(50);
+    candidates.push(...((data ?? []) as BuyerContact[]));
+  }
+
+  const kept = candidates.filter((c) => {
+    const n = normalizeCompany(c.company_name ?? "");
+    if (!n) return false;
+    return (
+      n === normalizedKnown || n.includes(normalizedKnown) || normalizedKnown.includes(n)
+    );
+  });
+
+  const byName = new Map<string, BuyerContact[]>();
+  for (const c of kept) {
+    const n = normalizeCompany(c.company_name ?? "");
+    byName.set(n, [...(byName.get(n) ?? []), c]);
+  }
+  if (byName.size !== 1) return null;
+  return mostComplete([...byName.values()][0]);
+}
+
+async function askClaude(prompt: string, useWebSearch = false): Promise<any | null> {
   const key = Deno.env.get("ANTHROPIC_API_KEY");
   if (!key) return null;
   try {
@@ -34,8 +210,15 @@ async function askClaude(prompt: string): Promise<any | null> {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 800,
+        max_tokens: 2000,
         messages: [{ role: "user", content: prompt }],
+        ...(useWebSearch
+          ? {
+              tools: [
+                { type: "web_search_20250305", name: "web_search", max_uses: 3 },
+              ],
+            }
+          : {}),
         system:
           "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French, in an assertive, directive tone. Never use hedging words (probable, probablement, vraisemblablement, semble, paraît, pourrait, peut-être, suggère, il est possible que, a priori, sans doute).",
       }),
@@ -45,7 +228,10 @@ async function askClaude(prompt: string): Promise<any | null> {
       return null;
     }
     const data = await resp.json();
-    const raw = data?.content?.[0]?.text;
+    const textBlocks = Array.isArray(data?.content)
+      ? data.content.filter((b: any) => b?.type === "text" && typeof b?.text === "string")
+      : [];
+    const raw = textBlocks.length ? textBlocks[textBlocks.length - 1].text : undefined;
     if (typeof raw !== "string") return null;
     const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
     return JSON.parse(cleaned);
@@ -134,11 +320,35 @@ Deno.serve(async (req) => {
     const email = row.email ?? "";
     const domain = email.split("@")[1] ?? "";
 
-    const prompt =
-      origin === "click"
-        ? `You enrich a CRM record for a wine producer named "${producer_name}".
+    const matched =
+      origin === "click" && email
+        ? await findBuyerContact(admin, email, row.company_name ?? null)
+        : null;
+
+    const clickMatchedPrompt = `You enrich a CRM record for a wine producer named "${producer_name}".
+Producer profile: ${JSON.stringify(producer_profile)}
+A wine importer / distributor clicked on a link in the campaign email "${campaign.name}" but did NOT fill the interest form.
+This contact has been matched with a verified record in our own importer database. Use ONLY these factual data, do not invent anything and do NOT search the web.
+
+Buyer email: ${email}
+Verified record: ${JSON.stringify(matched ?? {})}
+
+Return STRICT JSON with five keys only:
+{
+  "description": "2-3 phrases EN FRANÇAIS décrivant la société à partir des données vérifiées ci-dessus (activité, localisation, présence en ligne, adéquation avec le producteur). Ton affirmatif et professionnel, au présent de l'indicatif. Pas de formule de politesse.",
+  "company_name": "Nom exact de la société tel qu'il figure dans la fiche vérifiée.",
+  "country": "Pays de la société en anglais, tel qu'il figure dans la fiche vérifiée (ou déduit de l'adresse). Chaîne vide \\"\\" si absent.",
+  "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes, chacune commençant par un verbe à l'infinitif directif (Envoyer, Vérifier, Proposer, Appeler…), en exploitant les coordonnées disponibles (téléphone, site, réseaux).",
+  "score": "Integer 5-8 on a /10 scale. Base 5 because the contact is verified in our database, +1 to +3 depending on how well the company fits the producer profile (type d'activité, marché, gamme)."
+}
+No prose, no code fences.
+
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
+
+    const clickWebPrompt = `You enrich a CRM record for a wine producer named "${producer_name}".
 Producer profile: ${JSON.stringify(producer_profile)}
 A wine importer / distributor clicked on a link in the campaign email "${campaign.name}" but did NOT fill the interest form. Only the email address is known.
+Use the web_search tool (max 3 searches) on the email domain to identify the company before writing.
 
 Buyer email: ${email}
 Domain: ${domain}
@@ -153,7 +363,13 @@ Return STRICT JSON with five keys only:
 }
 No prose, no code fences.
 
-STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent. Une information manquante s'énonce de manière factuelle et nette, jamais par une hypothèse floue.`
+STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent. Une information manquante s'énonce de manière factuelle et nette, jamais par une hypothèse floue.`;
+
+    const prompt =
+      origin === "click"
+        ? matched
+          ? clickMatchedPrompt
+          : clickWebPrompt
         : `You enrich a CRM record for a wine producer named "${producer_name}".
 Producer profile: ${JSON.stringify(producer_profile)}
 A qualified buyer submitted an interest form for the campaign "${campaign.name}".
@@ -174,7 +390,7 @@ No prose, no code fences.
 
 STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
 
-    const parsed = await askClaude(prompt);
+    const parsed = await askClaude(prompt, origin === "click" && !matched);
 
     const fallbackDescription =
       origin === "click"
@@ -190,6 +406,7 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
     const score = clampScore(
       Number.isFinite(parsedScore) ? parsedScore : (row.score ?? (origin === "click" ? 5 : 7)),
       origin,
+      !!matched,
     );
 
     const update: Record<string, unknown> = { description, score, origin };
@@ -198,7 +415,8 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
       const localPart = (email.split("@")[0] ?? "").toLowerCase();
       const currentCompany = String(row.company_name ?? "").trim();
       const suggestedCompany =
-        typeof parsed?.company_name === "string" ? parsed.company_name.trim() : "";
+        (matched?.company_name ?? "").trim() ||
+        (typeof parsed?.company_name === "string" ? parsed.company_name.trim() : "");
       const companyIsBogus =
         currentCompany === "" || currentCompany.toLowerCase() === localPart;
       if (suggestedCompany && (force || companyIsBogus)) {
@@ -207,7 +425,8 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
 
       const currentCountry = String(row.country ?? "").trim();
       const suggestedCountry =
-        typeof parsed?.country === "string" ? parsed.country.trim() : "";
+        (matched?.country ?? "").trim() ||
+        (typeof parsed?.country === "string" ? parsed.country.trim() : "");
       const countryIsDefault =
         currentCountry === "" ||
         (!!defaultMarket &&
