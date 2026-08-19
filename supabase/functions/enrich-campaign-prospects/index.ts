@@ -21,6 +21,14 @@ function clampScore(score: number, origin: string, matched = false): number {
   return Math.min(max, Math.max(min, Math.round(score)));
 }
 
+// Claude returns inline citation markup when web_search is used.
+function stripCitations(text: string): string {
+  return text
+    .replace(/<\/?cite[^>]*>/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
 import { findBuyerContact } from "../_shared/buyer-match.ts";
 
 async function askClaude(prompt: string, useWebSearch = false): Promise<any | null> {
