@@ -2,6 +2,7 @@
 // Requires admin role. Body: { campaign_id: string, mode: 'stats' | 'clicks' | 'both' }
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { findBuyerContact } from "../_shared/buyer-match.ts";
+import { normalizeCountry } from "../_shared/country.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -395,9 +396,8 @@ Deno.serve(async (req) => {
               contact_name: null,
               email,
               country:
-                marketFor(email) ||
-                (enriched.matched_company?.country ?? null) ||
-                null,
+                normalizeCountry(marketFor(email)) ??
+                normalizeCountry(enriched.matched_company?.country ?? null),
               description: enriched.description,
               recommended_actions: null,
               score: enriched.score,
