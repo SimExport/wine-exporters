@@ -1,6 +1,7 @@
 // Sync Brevo campaign: pull global stats and/or import clickers as CRM leads.
 // Requires admin role. Body: { campaign_id: string, mode: 'stats' | 'clicks' | 'both' }
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { findBuyerContact } from "../_shared/buyer-match.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,23 +85,52 @@ function parseEmailsFromCsv(csv: string): string[] {
 }
 
 async function enrichClickerWithAI(input: {
+  admin: any;
   email: string;
   producer_name: string;
   campaign_name: string;
   producer_profile: Record<string, unknown>;
-}): Promise<{ description: string; score: number }> {
+  known_company_name?: string | null;
+}): Promise<{ description: string; score: number; matched_company: any | null }> {
   const key = Deno.env.get("ANTHROPIC_API_KEY");
   const localPart = input.email.split("@")[0] ?? input.email;
   const domain = input.email.split("@")[1] ?? "";
   const fallback = {
     description: `A cliqué dans l'email de la campagne « ${input.campaign_name} » sans remplir le formulaire d'intérêt. Domaine : ${domain || "inconnu"}.`,
     score: 5,
+    matched_company: null as any,
   };
-  if (!key) return fallback;
+
+  // Match against our own importer database before asking Claude.
+  let matched: any = null;
   try {
-    const prompt = `You enrich a CRM record for a wine producer named "${input.producer_name}".
+    matched = input.email
+      ? await findBuyerContact(input.admin, input.email, input.known_company_name ?? null)
+      : null;
+  } catch (e) {
+    console.error("buyer_contacts matching failed:", e);
+  }
+  if (!key) return { ...fallback, matched_company: matched };
+  try {
+    const matchedPrompt = `You enrich a CRM record for a wine producer named "${input.producer_name}".
+Producer profile: ${JSON.stringify(input.producer_profile)}
+A wine importer / distributor clicked on a link in the campaign email "${input.campaign_name}" but did NOT fill the interest form yet.
+This contact has been matched with a verified record in our own importer database. Use ONLY these factual data, do not invent anything and do NOT search the web.
+
+Buyer email: ${input.email}
+Verified record: ${JSON.stringify(matched ?? {})}
+
+Return STRICT JSON with two keys only:
+{
+  "description": "2-3 phrases EN FRANÇAIS décrivant la société à partir des données vérifiées ci-dessus (activité, localisation, présence en ligne, adéquation avec le producteur). Ton neutre et professionnel. Pas de formule de politesse. Garder les noms propres tels quels.",
+  "score": "Integer 5-7 qualifying the lead on a /10 scale. Base 5 because the contact is verified in our database, +1 or +2 depending on how well the company fits the producer profile."
+}
+No prose, no code fences. Le champ "description" doit impérativement être rédigé en français.`;
+
+    const webPrompt = `You enrich a CRM record for a wine producer named "${input.producer_name}".
 Producer profile: ${JSON.stringify(input.producer_profile)}
 A wine importer / distributor clicked on a link in the campaign email "${input.campaign_name}" but did NOT fill the interest form yet. Only the email address is known.
+Use the web_search tool (max 3 searches) on the email domain to identify the company before writing.
 
 Buyer email: ${input.email}
 Local part: ${localPart}
@@ -113,6 +143,9 @@ Return STRICT JSON with two keys only:
 }
 No prose, no code fences. Le champ "description" doit impérativement être rédigé en français.`;
 
+    const prompt = matched ? matchedPrompt : webPrompt;
+    const useWebSearch = !matched;
+
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -122,33 +155,45 @@ No prose, no code fences. Le champ "description" doit impérativement être réd
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 600,
+        max_tokens: 2000,
         messages: [{ role: "user", content: prompt }],
+        ...(useWebSearch
+          ? {
+              tools: [
+                { type: "web_search_20250305", name: "web_search", max_uses: 3 },
+              ],
+            }
+          : {}),
         system: "You output only valid JSON. No commentary, no code fences. All human-readable text fields must be written in French.",
       }),
     });
     if (!resp.ok) {
       console.error("Anthropic clicker error", resp.status, await resp.text().catch(() => ""));
-      return fallback;
+      return { ...fallback, matched_company: matched };
     }
     const data = await resp.json();
-    const raw = data?.content?.[0]?.text;
-    if (typeof raw !== "string") return fallback;
+    const textBlocks = Array.isArray(data?.content)
+      ? data.content.filter((b: any) => b?.type === "text" && typeof b?.text === "string")
+      : [];
+    const raw = textBlocks.length ? textBlocks[textBlocks.length - 1].text : undefined;
+    if (typeof raw !== "string") return { ...fallback, matched_company: matched };
     const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
     const parsed = JSON.parse(cleaned);
     const parsedScore = Number(parsed?.score);
+    const minScore = matched ? 5 : 4;
     return {
       description:
         typeof parsed?.description === "string" && parsed.description.trim()
           ? parsed.description.trim().slice(0, 2000)
           : fallback.description,
       score: Number.isFinite(parsedScore)
-        ? Math.min(7, Math.max(4, Math.round(parsedScore)))
+        ? Math.min(7, Math.max(minScore, Math.round(parsedScore)))
         : fallback.score,
+      matched_company: matched,
     };
   } catch (e) {
     console.error("Clicker enrichment failed:", e);
-    return fallback;
+    return { ...fallback, matched_company: matched };
   }
 }
 
