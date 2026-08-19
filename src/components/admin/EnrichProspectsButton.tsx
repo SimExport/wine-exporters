@@ -27,23 +27,23 @@ export function EnrichProspectsButton({ campaignId, onDone }: Props) {
     setProgress(null);
     let doneCount = 0;
     try {
-      let offset = 0;
       let total = 0;
       let candidates = 0;
       let guard = 0;
+      const processedIds: string[] = [];
 
       // The Edge Function processes a small batch per invocation to stay within
       // its execution time limit; loop until nothing is left.
       while (guard < 40) {
         guard++;
         const { data, error } = await supabase.functions.invoke('enrich-campaign-prospects', {
-          body: { campaign_id: campaignId, force, limit: 5, offset },
+          body: { campaign_id: campaignId, force, limit: 5, exclude_ids: processedIds },
         });
         if (error) throw error;
         total = data?.total ?? total;
         if (guard === 1) candidates = data?.candidates ?? 0;
         doneCount += data?.enriched ?? 0;
-        offset = data?.next_offset ?? 0;
+        if (Array.isArray(data?.processed_ids)) processedIds.push(...data.processed_ids);
         setProgress({ done: doneCount, total: candidates });
         if (!data?.remaining || (data?.processed ?? 0) === 0) break;
       }
