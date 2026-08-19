@@ -28,8 +28,9 @@ Dans les deux cas, la sortie JSON garde exactement les mêmes 5 clés : `descrip
 
 Fichier modifié : `supabase/functions/enrich-campaign-prospects/index.ts` uniquement.
 
-- Nouvelle constante `GENERIC_DOMAINS` et helper `normalize()` (minuscule + suppression des accents via `normalize("NFD")`).
-- Nouvelle fonction `findBuyerContact(admin, email, knownCompanyName)` implémentant les 3 étapes ci-dessus (`ilike` sur email, `ilike '%@domain'` pour l'étape 2, `ilike` sur company_name pour l'étape 3), avec tri par complétude en TypeScript.
+- Nouvelles constantes `GENERIC_DOMAINS` et `COMPANY_STOPWORDS`, helper `normalizeCompany()` (minuscule, `normalize("NFD").replace(/\p{Diacritic}/gu, "")`, ponctuation et mots vides retirés).
+- Nouvelle fonction `findBuyerContact(admin, email, knownCompanyName)` implémentant les 3 étapes ci-dessus (`ilike` sur email ; `ilike '%@domain'` pour l'étape 2 ; une ou deux requêtes `ilike '%fragment%'` sur `company_name` avec `.limit(50)` puis filtrage `normalizeCompany()` en TypeScript pour l'étape 3), avec tri par complétude en TypeScript.
+- Aucune extension Postgres ajoutée : `unaccent` et `pg_trgm` sont absentes de la base, l'insensibilité aux accents reste côté TypeScript.
 - `askClaude(prompt, useWebSearch)` : ajoute `tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 3 }]` quand `useWebSearch` est vrai.
 - Parsing adapté : filtrer `data.content` sur `type === "text"` et prendre le **dernier** bloc texte avant le nettoyage des fences et le `JSON.parse` — fonctionne aussi sans web search.
 - `clampScore` : plage 4-7 en mode web search, 5-8 en mode matché ; les formulaires restent 6-10.
