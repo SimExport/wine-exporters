@@ -117,6 +117,10 @@ Deno.serve(async (req) => {
   const offset = Number.isFinite(Number(body?.offset))
     ? Math.max(0, Math.round(Number(body.offset)))
     : 0;
+  const excludeIds: string[] = Array.isArray(body?.exclude_ids)
+    ? body.exclude_ids.filter((v: unknown) => typeof v === "string")
+    : [];
+  const excluded = new Set(excludeIds);
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
@@ -145,19 +149,24 @@ Deno.serve(async (req) => {
     .select(
       "id, company_name, contact_name, email, country, score, description, recommended_actions, origin",
     )
-    .eq("campaign_id", campaign_id);
+    .eq("campaign_id", campaign_id)
+    .order("id", { ascending: true });
   if (rowsErr) return json(500, { error: rowsErr.message });
 
-  const todo = force
+  const allTodo = force
     ? (rows ?? [])
     : (rows ?? []).filter((r: any) => !r.description || String(r.description).trim() === "");
+  // Track progress by id, not by offset: rows change between calls, so a
+  // numeric offset can skip or repeat rows.
+  const todo = allTodo.filter((r: any) => !excluded.has(r.id));
 
-  const batch = todo.slice(offset, offset + limit);
+  const batch = todo.slice(0, limit);
   const startedAt = Date.now();
   const TIME_BUDGET_MS = 60_000;
 
   let enriched = 0;
   const failed: string[] = [];
+  const processedIds: string[] = [];
   let processed = 0;
   let stoppedEarly = false;
 
