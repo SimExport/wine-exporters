@@ -21,6 +21,14 @@ function clampScore(score: number, origin: string, matched = false): number {
   return Math.min(max, Math.max(min, Math.round(score)));
 }
 
+// Claude returns inline citation markup when web_search is used.
+function stripCitations(text: string): string {
+  return text
+    .replace(/<\/?cite[^>]*>/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
 import { findBuyerContact } from "../_shared/buyer-match.ts";
 
 async function askClaude(prompt: string, useWebSearch = false): Promise<any | null> {
@@ -109,6 +117,10 @@ Deno.serve(async (req) => {
   const offset = Number.isFinite(Number(body?.offset))
     ? Math.max(0, Math.round(Number(body.offset)))
     : 0;
+  const excludeIds: string[] = Array.isArray(body?.exclude_ids)
+    ? body.exclude_ids.filter((v: unknown) => typeof v === "string")
+    : [];
+  const excluded = new Set(excludeIds);
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
@@ -137,19 +149,24 @@ Deno.serve(async (req) => {
     .select(
       "id, company_name, contact_name, email, country, score, description, recommended_actions, origin",
     )
-    .eq("campaign_id", campaign_id);
+    .eq("campaign_id", campaign_id)
+    .order("id", { ascending: true });
   if (rowsErr) return json(500, { error: rowsErr.message });
 
-  const todo = force
+  const allTodo = force
     ? (rows ?? [])
     : (rows ?? []).filter((r: any) => !r.description || String(r.description).trim() === "");
+  // Track progress by id, not by offset: rows change between calls, so a
+  // numeric offset can skip or repeat rows.
+  const todo = allTodo.filter((r: any) => !excluded.has(r.id));
 
-  const batch = todo.slice(offset, offset + limit);
+  const batch = todo.slice(0, limit);
   const startedAt = Date.now();
   const TIME_BUDGET_MS = 60_000;
 
   let enriched = 0;
   const failed: string[] = [];
+  const processedIds: string[] = [];
   let processed = 0;
   let stoppedEarly = false;
 
@@ -242,7 +259,7 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
 
     const description =
       typeof parsed?.description === "string" && parsed.description.trim()
-        ? parsed.description.trim().slice(0, 2000)
+        ? stripCitations(parsed.description).slice(0, 2000)
         : fallbackDescription;
 
     const parsedScore = Number(parsed?.score);
@@ -284,7 +301,9 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
     }
 
     const suggestedActions =
-      typeof parsed?.recommended_actions === "string" ? parsed.recommended_actions.trim() : "";
+      typeof parsed?.recommended_actions === "string"
+        ? stripCitations(parsed.recommended_actions)
+        : "";
     if (suggestedActions) {
       update.recommended_actions = suggestedActions.slice(0, 2000);
     } else if (origin === "click" && !String(row.recommended_actions ?? "").trim()) {
@@ -317,23 +336,22 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
         }
       }),
     );
+    for (const row of slice) processedIds.push(row.id);
     processed += slice.length;
   }
 
-  // When not forcing, enriched rows drop out of the `todo` filter on the next
-  // call, so paging always restarts at 0. When forcing, page forward.
-  const remaining = Math.max(0, todo.length - offset - processed);
-  const next_offset = force ? offset + processed : 0;
+  const remaining = Math.max(0, todo.length - processed);
 
   return json(200, {
     ok: true,
     total: (rows ?? []).length,
-    candidates: todo.length,
+    candidates: allTodo.length,
     enriched,
     failed: failed.length,
     processed,
+    processed_ids: processedIds,
     remaining,
-    next_offset,
+    next_offset: offset,
     stopped_early: stoppedEarly,
   });
 });
