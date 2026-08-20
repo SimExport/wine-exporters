@@ -99,7 +99,6 @@ const CreateCampaign = () => {
   const [techsLink, setTechsLink] = useState('');
   const [clientNote, setClientNote] = useState('');
   const [campaignId, setCampaignId] = useState<string | null>(editId);
-  const [initialStatus, setInitialStatus] = useState<string>('draft');
   const [loadingDraft, setLoadingDraft] = useState(!!editId);
   useEffect(() => {
     if (user) {
@@ -130,7 +129,6 @@ const CreateCampaign = () => {
         return;
       }
       setCampaignId(data.id);
-      setInitialStatus(data.status || 'draft');
       setCampaignName(data.name || '');
       setSelectedMarkets(data.target_markets || []);
       setOpenToOtherMarkets(!!data.open_to_other_markets);
