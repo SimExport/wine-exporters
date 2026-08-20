@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
@@ -66,6 +66,8 @@ const MIN_MARKETS = 5;
 const CreateCampaign = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('id');
   const {
     user
   } = useAuth();
@@ -96,12 +98,60 @@ const CreateCampaign = () => {
   const [techDocs, setTechDocs] = useState<string[]>([]);
   const [techsLink, setTechsLink] = useState('');
   const [clientNote, setClientNote] = useState('');
+  const [campaignId, setCampaignId] = useState<string | null>(editId);
+  const [initialStatus, setInitialStatus] = useState<string>('draft');
+  const [loadingDraft, setLoadingDraft] = useState(!!editId);
   useEffect(() => {
     if (user) {
       fetchWines();
       fetchDocuments();
     }
   }, [user]);
+  useEffect(() => {
+    if (user && editId) loadCampaign(editId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, editId]);
+  const loadCampaign = async (id: string) => {
+    setLoadingDraft(true);
+    try {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) {
+        navigate('/campaigns');
+        return;
+      }
+      if (data.status !== 'draft') {
+        navigate(`/campaigns/${id}`);
+        return;
+      }
+      setCampaignId(data.id);
+      setInitialStatus(data.status || 'draft');
+      setCampaignName(data.name || '');
+      setSelectedMarkets(data.target_markets || []);
+      setOpenToOtherMarkets(!!data.open_to_other_markets);
+      setSelectedWines(data.selected_wines || []);
+      setPresentationDoc(data.doc_presentation || '');
+      setPricelistDoc(data.doc_pricelist || '');
+      setTechDocs(data.doc_techs || []);
+      setTechsLink(data.techs_link || '');
+      setClientNote(data.client_note || '');
+    } catch (error) {
+      console.error('Error loading campaign:', error);
+      toast({
+        title: t('createCampaign.toasts.draftError.title'),
+        description: t('createCampaign.toasts.draftError.description'),
+        variant: 'destructive',
+      });
+      navigate('/campaigns');
+    } finally {
+      setLoadingDraft(false);
+    }
+  };
   const fetchWines = async () => {
     try {
       const {
@@ -197,11 +247,18 @@ const CreateCampaign = () => {
         techs_link: techsLink || null,
         client_note: clientNote || null
       };
-      const {
-        data,
-        error
-      } = await supabase.from('campaigns').insert(campaignData).select().single();
-      if (error) throw error;
+      if (campaignId) {
+        const { error } = await supabase
+          .from('campaigns')
+          .update(campaignData)
+          .eq('id', campaignId)
+          .eq('user_id', user?.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.from('campaigns').insert(campaignData).select('id').single();
+        if (error) throw error;
+        setCampaignId(data.id);
+      }
       toast({
         title: t('createCampaign.toasts.draftSaved.title'),
         description: t('createCampaign.toasts.draftSaved.description')
@@ -255,13 +312,24 @@ const CreateCampaign = () => {
         client_note: clientNote || null,
         validation_requested_at: new Date().toISOString()
       };
-      const { data: insertedCampaign, error: campaignError } = await supabase
-        .from('campaigns')
-        .insert(campaignData)
-        .select('id')
-        .single();
-      
-      if (campaignError) throw campaignError;
+      let savedId = campaignId;
+      if (campaignId) {
+        const { error: campaignError } = await supabase
+          .from('campaigns')
+          .update(campaignData)
+          .eq('id', campaignId)
+          .eq('user_id', user?.id);
+        if (campaignError) throw campaignError;
+      } else {
+        const { data: insertedCampaign, error: campaignError } = await supabase
+          .from('campaigns')
+          .insert(campaignData)
+          .select('id')
+          .single();
+        if (campaignError) throw campaignError;
+        savedId = insertedCampaign?.id ?? null;
+        setCampaignId(savedId);
+      }
 
       // Consume one campaign credit via RPC (admins bypass)
       if (!isAdmin) {
@@ -282,7 +350,7 @@ const CreateCampaign = () => {
             campaignName,
             userEmail: user?.email || 'Unknown',
             markets: selectedMarkets,
-            campaignId: insertedCampaign?.id || '',
+            campaignId: savedId || '',
           },
         });
         console.log('Notification sent successfully');
@@ -318,6 +386,11 @@ const CreateCampaign = () => {
     const doc = documents.find(d => d.id === docId);
     return doc ? doc.title : '';
   };
+  if (loadingDraft) {
+    return <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>;
+  }
   return <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
