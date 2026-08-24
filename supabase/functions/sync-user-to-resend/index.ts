@@ -91,6 +91,13 @@ serve(async (req) => {
     const result = await addContact(email, firstName);
     console.log("sync-user-to-resend", email, result.status, result.data);
 
+    if (result.ok) {
+      const eventResult = await triggerAddedToAudienceEvent(email);
+      console.log("sync-user-to-resend:event", email, eventResult.status, eventResult.data);
+    }
+
+
+
     return new Response(JSON.stringify({ success: result.ok, ...result }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
