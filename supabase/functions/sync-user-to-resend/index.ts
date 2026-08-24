@@ -29,6 +29,22 @@ async function addContact(email: string, firstName: string | null) {
   return { ok: res.ok, status: res.status, data };
 }
 
+async function triggerAddedToAudienceEvent(email: string) {
+  const res = await fetch("https://api.resend.com/events/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      event: "contact.added_to_audience",
+      email,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -74,6 +90,13 @@ serve(async (req) => {
 
     const result = await addContact(email, firstName);
     console.log("sync-user-to-resend", email, result.status, result.data);
+
+    if (result.ok) {
+      const eventResult = await triggerAddedToAudienceEvent(email);
+      console.log("sync-user-to-resend:event", email, eventResult.status, eventResult.data);
+    }
+
+
 
     return new Response(JSON.stringify({ success: result.ok, ...result }), {
       status: 200,
