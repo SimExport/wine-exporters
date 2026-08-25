@@ -56,6 +56,18 @@ serve(async (req) => {
 
     const cleanEmail = email.trim().toLowerCase();
 
+    // Log the invitation BEFORE creating the user so the handle_new_user_role
+    // trigger finds it and assigns the 'paid' role at signup time.
+    const { data: logRow } = await admin
+      .from("admin_invitations")
+      .insert({
+        email: cleanEmail,
+        status: "sent",
+        invited_by: userData.user.id,
+      })
+      .select("id")
+      .maybeSingle();
+
     const sendMagicLinkEmail = async () => {
       return await admin.auth.signInWithOtp({
         email: cleanEmail,
@@ -92,27 +104,59 @@ serve(async (req) => {
       const friendly = code === "email_exists"
         ? "Cet email est déjà enregistré."
         : error.message;
-      await admin.from("admin_invitations").insert({
-        email: cleanEmail,
-        status: "failed",
-        error_message: friendly,
-        invited_by: userData.user.id,
-      });
+      if (logRow?.id) {
+        await admin
+          .from("admin_invitations")
+          .update({ status: "failed", error_message: friendly })
+          .eq("id", logRow.id);
+      }
       return new Response(JSON.stringify({ error: friendly, code }), {
         status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    await admin.from("admin_invitations").insert({
-      email: cleanEmail,
-      status: "sent",
-      invited_user_id: data.user?.id ?? null,
-      invited_by: userData.user.id,
-    });
+    // Resolve the invited user id (invite returns it; resend/magic link does not)
+    let invitedUserId: string | null = data?.user?.id ?? null;
+    if (!invitedUserId) {
+      const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+      invitedUserId = list?.users?.find(
+        (u: any) => (u.email || "").toLowerCase() === cleanEmail,
+      )?.id ?? null;
+    }
+
+    if (logRow?.id) {
+      await admin
+        .from("admin_invitations")
+        .update({ invited_user_id: invitedUserId })
+        .eq("id", logRow.id);
+    }
+
+    // Belt & braces: force paid access for invited users (never override admins)
+    if (invitedUserId) {
+      const { data: existingRole } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", invitedUserId)
+        .maybeSingle();
+
+      if (existingRole?.role !== "admin") {
+        const { error: roleErr } = await admin
+          .from("user_roles")
+          .upsert({ user_id: invitedUserId, role: "paid" }, { onConflict: "user_id" });
+        if (roleErr) console.error("role upsert error:", roleErr);
+      }
+
+      const { error: profErr } = await admin
+        .from("profiles")
+        .update({ subscription_plan: "paid" })
+        .eq("user_id", invitedUserId);
+      if (profErr) console.error("profile update error:", profErr);
+    }
 
     return new Response(JSON.stringify({ success: true, user: data.user }), {
       status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
     });
+
   } catch (e: any) {
     console.error("admin-invite-user error:", e);
     return new Response(JSON.stringify({ error: e?.message || "server_error" }), {
