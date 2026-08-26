@@ -74,7 +74,7 @@ export function AppSidebar() {
       });
     }
   };
-  return <Sidebar collapsible="icon">
+  return <Sidebar collapsible="icon" className="hidden md:flex">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
