@@ -94,6 +94,10 @@
     "opportunities": "Opportunités",
     "adminOpportunities": "Opportunités Admin"
   },
+  "mobileNav": {
+    "menu": "Menu",
+    "title": "Navigation"
+  },
   "sidebar": {
     "notifications": "Notifications",
     "noNotifications": "Aucune notification",
