@@ -45,10 +45,11 @@ export default function AdminUsers() {
   const [filter, setFilter] = useState<'all' | 'inconsistent'>('all');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [emailDialog, setEmailDialog] = useState<UserRow | null>(null);
+  const [creditsDialog, setCreditsDialog] = useState<UserRow | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes, settingsRes, emailsRes] = await Promise.all([
+    const [profilesRes, rolesRes, settingsRes, emailsRes, creditsRes] = await Promise.all([
       supabase
         .from('profiles')
         .select('user_id, domain_name, subscription_plan, stripe_customer_id, created_at')
@@ -56,6 +57,9 @@ export default function AdminUsers() {
       supabase.from('user_roles').select('user_id, role'),
       supabase.from('user_settings').select('user_id, display_name'),
       supabase.rpc('get_users_emails_for_admin'),
+      supabase
+        .from('user_credits')
+        .select('user_id, campaign_credits, search_credits, export_credits, next_reset_date'),
     ]);
 
     if (profilesRes.error) {
@@ -70,6 +74,15 @@ export default function AdminUsers() {
     (settingsRes.data || []).forEach((s: any) => settingsMap.set(s.user_id, s.display_name));
     const emailsMap = new Map<string, string | null>();
     (emailsRes.data || []).forEach((e: any) => emailsMap.set(e.user_id, e.email));
+    const creditsMap = new Map<string, UserCreditsRow>();
+    (creditsRes.data || []).forEach((c: any) =>
+      creditsMap.set(c.user_id, {
+        campaign_credits: c.campaign_credits ?? 0,
+        search_credits: c.search_credits ?? 0,
+        export_credits: c.export_credits ?? 0,
+        next_reset_date: c.next_reset_date ?? null,
+      })
+    );
 
     const merged: UserRow[] = (profilesRes.data || []).map((p: any) => ({
       user_id: p.user_id,
@@ -80,6 +93,7 @@ export default function AdminUsers() {
       role: rolesMap.get(p.user_id) ?? null,
       display_name: settingsMap.get(p.user_id) ?? null,
       email: emailsMap.get(p.user_id) ?? null,
+      credits: creditsMap.get(p.user_id) ?? null,
     }));
 
     setRows(merged);
