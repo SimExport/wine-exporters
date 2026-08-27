@@ -311,6 +311,23 @@ export default function AdminUsers() {
                           </Select>
                         </TableCell>
                         <TableCell>
+                          <button
+                            onClick={() => setCreditsDialog(row)}
+                            className="group inline-flex items-center gap-1.5 text-xs font-mono hover:text-foreground text-muted-foreground"
+                            title="Modifier les crédits"
+                          >
+                            <Coins className="h-3.5 w-3.5" />
+                            <span className="text-foreground">
+                              {row.credits?.campaign_credits ?? 0}
+                            </span>
+                            /
+                            <span className="text-foreground">{row.credits?.search_credits ?? 0}</span>
+                            /
+                            <span className="text-foreground">{row.credits?.export_credits ?? 0}</span>
+                            <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100" />
+                          </button>
+                        </TableCell>
+                        <TableCell>
                           {row.stripe_customer_id ? (
                             <Badge variant="secondary" className="font-mono text-[10px]">
                               {row.stripe_customer_id.slice(0, 12)}…
