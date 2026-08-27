@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Users, Search, Copy, Pencil, Eye } from 'lucide-react';
+import { AlertTriangle, Users, Search, Copy, Pencil, Eye, Coins } from 'lucide-react';
 import { ChangeUserEmailDialog } from '@/components/admin/ChangeUserEmailDialog';
+import { EditUserCreditsDialog, type UserCreditsRow } from '@/components/admin/EditUserCreditsDialog';
 import { useNavigate } from 'react-router-dom';
 
 type AppRole = 'admin' | 'user' | 'free' | 'paid';
