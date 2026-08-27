@@ -148,7 +148,7 @@ const CampaignDetail = () => {
     try {
       const { data, error } = await supabase
         .from('campaign_interested_contacts')
-        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by, origin')
+        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by, origin, message')
         .eq('campaign_id', id)
         .order('score', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: true });

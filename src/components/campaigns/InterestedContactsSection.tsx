@@ -32,6 +32,8 @@ export interface InterestedContact {
   score: number | null;
   description: string | null;
   recommended_actions: string | null;
+  /** Free-text message submitted by the prospect via the interest form. */
+  message?: string | null;
   added_to_crm_by: string[] | null;
   /** 'form' = interest form respondent (default). 'click' = imported clicker via Brevo sync. */
   origin?: 'form' | 'click';
