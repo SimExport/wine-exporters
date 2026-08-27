@@ -57,6 +57,7 @@ interface InterestedContact {
   score: number | null;
   description: string | null;
   recommended_actions: string | null;
+  message?: string | null;
   added_to_crm_by: string[] | null;
   origin?: 'form' | 'click';
 }
