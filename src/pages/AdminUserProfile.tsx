@@ -64,6 +64,7 @@ export default function AdminUserProfile() {
   const [campaigns, setCampaigns] = useState<AnyRow[]>([]);
   const [leadsSummary, setLeadsSummary] = useState<Record<string, number>>({});
   const [credits, setCredits] = useState<AnyRow | null>(null);
+  const [creditsOpen, setCreditsOpen] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
