@@ -55,6 +55,7 @@ interface InterestResponse {
   phone: string | null;
   description: string | null;
   recommended_actions: string | null;
+  message: string | null;
   score: number | null;
   origin: string | null;
   created_at: string;
@@ -219,7 +220,7 @@ export default function AdminCampaigns() {
       if (campaignIds.length) {
         const { data: responses } = await supabase
           .from('campaign_interested_contacts')
-          .select('id, campaign_id, contact_name, email, company_name, country, phone, description, recommended_actions, score, origin, created_at')
+          .select('id, campaign_id, contact_name, email, company_name, country, phone, description, recommended_actions, message, score, origin, created_at')
           .in('campaign_id', campaignIds)
           .order('created_at', { ascending: false });
         const grouped: Record<string, InterestResponse[]> = {};
@@ -1341,6 +1342,14 @@ export default function AdminCampaigns() {
                     {r.company_name || '—'}
                     {r.country ? ` · ${r.country}` : ''}
                   </div>
+                  {r.message && (
+                    <div className="rounded-md border-l-2 border-primary/40 bg-muted/40 px-3 py-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t('adminCampaigns.responsesSheet.prospectMessage', { defaultValue: 'Message du prospect' })}
+                      </p>
+                      <p className="mt-1 text-sm text-foreground/80 whitespace-pre-wrap">{r.message}</p>
+                    </div>
+                  )}
                   {r.description && (
                     <p className="text-sm text-foreground/80 whitespace-pre-wrap">
                       {r.description}
