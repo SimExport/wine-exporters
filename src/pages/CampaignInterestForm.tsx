@@ -41,6 +41,7 @@ export default function CampaignInterestForm() {
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
   const [interests, setInterests] = useState<InterestSlug[]>([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!campaignId) {
@@ -81,6 +82,7 @@ export default function CampaignInterestForm() {
             phone: phone.trim().slice(0, 40) || null,
             country: country.trim().slice(0, 100) || null,
             interests,
+            message: message.trim().slice(0, 1000) || null,
           },
         },
       );
