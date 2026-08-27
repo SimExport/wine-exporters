@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export default function CampaignInterestForm() {
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
   const [interests, setInterests] = useState<InterestSlug[]>([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!campaignId) {
@@ -81,6 +83,7 @@ export default function CampaignInterestForm() {
             phone: phone.trim().slice(0, 40) || null,
             country: country.trim().slice(0, 100) || null,
             interests,
+            message: message.trim().slice(0, 1000) || null,
           },
         },
       );
@@ -208,6 +211,18 @@ export default function CampaignInterestForm() {
                         </label>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Additional information</Label>
+                    <Textarea
+                      id="message"
+                      rows={4}
+                      maxLength={1000}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="What makes you interested in these wines? Volumes, needs, timeline…"
+                    />
                   </div>
 
                   {error && (

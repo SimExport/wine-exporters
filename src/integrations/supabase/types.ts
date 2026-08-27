@@ -260,6 +260,7 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          message: string | null
           origin: string
           phone: string | null
           recommended_actions: string | null
@@ -276,6 +277,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          message?: string | null
           origin?: string
           phone?: string | null
           recommended_actions?: string | null
@@ -292,6 +294,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          message?: string | null
           origin?: string
           phone?: string | null
           recommended_actions?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.campaign_interested_contacts ADD COLUMN IF NOT EXISTS message text;

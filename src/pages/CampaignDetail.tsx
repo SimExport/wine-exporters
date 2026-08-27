@@ -57,6 +57,7 @@ interface InterestedContact {
   score: number | null;
   description: string | null;
   recommended_actions: string | null;
+  message?: string | null;
   added_to_crm_by: string[] | null;
   origin?: 'form' | 'click';
 }
@@ -148,7 +149,7 @@ const CampaignDetail = () => {
     try {
       const { data, error } = await supabase
         .from('campaign_interested_contacts')
-        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by, origin')
+        .select('id, company_name, email, contact_name, country, score, description, recommended_actions, added_to_crm_by, origin, message')
         .eq('campaign_id', id)
         .order('score', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: true });
@@ -221,9 +222,11 @@ const CampaignDetail = () => {
             buyer_id: c.email || c.company_name,
             market: c.country,
             message_snippet: c.description,
-            owner_notes: c.recommended_actions
-              ? `Issu de la campagne « ${campaign?.name ?? ''} »\n\nActions recommandées : ${c.recommended_actions}`
-              : `Issu de la campagne « ${campaign?.name ?? ''} »`,
+            owner_notes: [
+              `Issu de la campagne « ${campaign?.name ?? ''} »`,
+              c.message ? `Message du prospect : ${c.message}` : null,
+              c.recommended_actions ? `Actions recommandées : ${c.recommended_actions}` : null,
+            ].filter(Boolean).join('\n\n'),
             prospect_status: 'new' as any,
             last_activity_at: new Date().toISOString(),
             created_by: user.id,
@@ -244,9 +247,11 @@ const CampaignDetail = () => {
           buyer_id: c.email || c.company_name,
           market: c.country,
           message_snippet: c.description,
-          owner_notes: c.recommended_actions
-            ? `Issu de la campagne « ${campaign?.name ?? ''} »\n\nActions recommandées : ${c.recommended_actions}`
-            : `Issu de la campagne « ${campaign?.name ?? ''} »`,
+          owner_notes: [
+            `Issu de la campagne « ${campaign?.name ?? ''} »`,
+            c.message ? `Message du prospect : ${c.message}` : null,
+            c.recommended_actions ? `Actions recommandées : ${c.recommended_actions}` : null,
+          ].filter(Boolean).join('\n\n'),
           prospect_status: 'new' as any,
           last_activity_at: new Date().toISOString(),
           created_by: user.id,

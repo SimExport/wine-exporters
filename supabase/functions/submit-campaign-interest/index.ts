@@ -50,6 +50,7 @@ async function enrichWithAI(input: {
   country: string | null;
   phone: string | null;
   interests: string[];
+  message: string | null;
   producer_name: string;
   campaign_name: string;
   producer_profile: Record<string, unknown>;
@@ -77,12 +78,13 @@ Buyer details:
 - Country: ${input.country ?? "n/a"}
 - Phone: ${input.phone ?? "n/a"}
 - Interests requested: ${input.interests.map((s) => INTEREST_LABELS[s] ?? s).join(", ") || "none specified"}
+- Free-text message from the buyer: ${input.message ?? "none"}
 
 Return STRICT JSON with three keys only:
 {
   "description": "2-3 phrases EN FRANÇAIS décrivant la société du prospect (type d'activité, adéquation avec le producteur). Ton affirmatif, professionnel, au présent de l'indicatif, sans formule de politesse. Garder tels quels les noms propres (société, pays, appellations).",
   "recommended_actions": "Une courte liste à puces (utiliser '• ') EN FRANÇAIS avec 2 à 4 actions concrètes à mener par le producteur, adaptées aux demandes du prospect. Chaque puce commence par un verbe à l'infinitif directif (Envoyer, Vérifier, Proposer…).",
-  "score": "Integer 6-10 qualifying the lead on a /10 scale. Floor is 6 because submitting the interest form already signals strong intent. Use 6-7 for minimal info / weak fit, 8 for solid fit, 9-10 for excellent fit and complete information."
+  "score": "Integer 6-10 qualifying the lead on a /10 scale. Floor is 6 because submitting the interest form already signals strong intent. Use 6-7 for minimal info / weak fit, 8 for solid fit, 9-10 for excellent fit and complete information. A detailed free-text message (volumes, needs, timeline) raises the score."
 }
 No prose, no code fences. Les champs texte doivent impérativement être rédigés en français.
 
@@ -161,6 +163,7 @@ Deno.serve(async (req) => {
     (s: unknown): s is string =>
       typeof s === "string" && (ALLOWED_INTERESTS as readonly string[]).includes(s),
   );
+  const message = clean(body?.message, 1000);
 
   if (!campaign_id || !full_name || !emailRaw) {
     return json(400, { error: "Missing required fields" });
@@ -213,6 +216,7 @@ Deno.serve(async (req) => {
     country,
     phone,
     interests,
+    message,
     producer_name,
     campaign_name,
     producer_profile,
@@ -227,6 +231,7 @@ Deno.serve(async (req) => {
       email,
       country: normalizeCountry(country),
       phone,
+      message,
       description: enriched.description,
       recommended_actions: enriched.recommended_actions,
       score: enriched.score,

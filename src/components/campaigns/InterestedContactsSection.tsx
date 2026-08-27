@@ -32,6 +32,8 @@ export interface InterestedContact {
   score: number | null;
   description: string | null;
   recommended_actions: string | null;
+  /** Free-text message submitted by the prospect via the interest form. */
+  message?: string | null;
   added_to_crm_by: string[] | null;
   /** 'form' = interest form respondent (default). 'click' = imported clicker via Brevo sync. */
   origin?: 'form' | 'click';
@@ -77,7 +79,7 @@ export function InterestedContactsSection({
         if ((c.score ?? 0) < min) return false;
       }
       if (!q) return true;
-      return [c.company_name, c.contact_name, c.email, c.country, c.description]
+      return [c.company_name, c.contact_name, c.email, c.country, c.description, c.message]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q));
     });
@@ -255,6 +257,15 @@ function ProspectCard({
           )}
         </div>
       </div>
+
+      {c.message && (
+        <div className="rounded-md border-l-2 border-primary/40 bg-muted/40 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t('campaigns.detail.interestedContacts.prospectMessage', { defaultValue: 'Message du prospect' })}
+          </p>
+          <p className="mt-1 text-sm text-foreground/80 whitespace-pre-wrap">{c.message}</p>
+        </div>
+      )}
 
       {c.description && (
         <div className="text-sm text-foreground/80">

@@ -20,6 +20,7 @@ export interface EditableInterestedContact {
   phone: string | null;
   description: string | null;
   recommended_actions: string | null;
+  message: string | null;
   score: number | null;
 }
 
@@ -70,6 +71,7 @@ export function EditInterestedContactDialog({ contact, onOpenChange, onSaved }: 
       phone: form.phone?.trim() || null,
       description: form.description?.trim() || null,
       recommended_actions: form.recommended_actions?.trim() || null,
+      message: form.message?.trim() || null,
       score,
     };
 
@@ -142,6 +144,16 @@ export function EditInterestedContactDialog({ contact, onOpenChange, onSaved }: 
                   }
                 />
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('adminCampaigns.editContact.message', { defaultValue: 'Message du prospect' })}</Label>
+              <Textarea
+                rows={4}
+                value={form.message ?? ''}
+                onChange={(e) => set('message', e.target.value)}
+                maxLength={1000}
+              />
             </div>
 
             <div className="space-y-1.5">
