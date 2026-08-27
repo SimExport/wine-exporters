@@ -846,6 +846,7 @@
         "searchPlaceholder": "Search company, contact, email…",
         "seeMore": "See more",
         "seeLess": "See less",
+        "prospectMessage": "Prospect message",
         "progress": "{{added}} / {{total}} added",
         "noResults": "No prospect matches your search.",
         "sort": {
@@ -2069,6 +2070,7 @@
       "wantsSamples": "Wants samples",
       "empty": "No responses yet.",
       "actions": "Recommended actions",
+      "prospectMessage": "Prospect message",
       "originForm": "Form",
       "originClick": "Clicker"
     },
@@ -2150,6 +2152,7 @@
       "country": "Country",
       "score": "Score /10",
       "descriptionField": "Description",
+      "message": "Prospect message",
       "actions": "Recommended actions",
       "saved": "Prospect updated",
       "errorTitle": "Error",
