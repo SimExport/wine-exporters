@@ -374,6 +374,21 @@ export default function AdminUsers() {
           }}
         />
       )}
+
+      {creditsDialog && (
+        <EditUserCreditsDialog
+          open={!!creditsDialog}
+          onOpenChange={(o) => !o && setCreditsDialog(null)}
+          userId={creditsDialog.user_id}
+          userLabel={creditsDialog.display_name || creditsDialog.email}
+          credits={creditsDialog.credits}
+          onSaved={(c) => {
+            setRows((prev) =>
+              prev.map((r) => (r.user_id === creditsDialog.user_id ? { ...r, credits: c } : r)),
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
