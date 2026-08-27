@@ -50,6 +50,7 @@ async function enrichWithAI(input: {
   country: string | null;
   phone: string | null;
   interests: string[];
+  message: string | null;
   producer_name: string;
   campaign_name: string;
   producer_profile: Record<string, unknown>;
@@ -77,6 +78,7 @@ Buyer details:
 - Country: ${input.country ?? "n/a"}
 - Phone: ${input.phone ?? "n/a"}
 - Interests requested: ${input.interests.map((s) => INTEREST_LABELS[s] ?? s).join(", ") || "none specified"}
+- Free-text message from the buyer: ${input.message ?? "none"}
 
 Return STRICT JSON with three keys only:
 {
