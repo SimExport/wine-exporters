@@ -11,6 +11,7 @@ import {
   ArrowLeft, Copy, Download, FileJson, Package, ExternalLink, User, Grape,
   FileText, Image as ImageIcon, Megaphone, Wallet, Loader2,
 } from 'lucide-react';
+import { EditUserCreditsDialog } from '@/components/admin/EditUserCreditsDialog';
 
 type AnyRow = Record<string, any>;
 
