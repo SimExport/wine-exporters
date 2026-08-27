@@ -846,6 +846,7 @@
         "searchPlaceholder": "Rechercher société, contact, email…",
         "seeMore": "Voir plus",
         "seeLess": "Voir moins",
+        "prospectMessage": "Message du prospect",
         "progress": "{{added}} / {{total}} ajoutés",
         "noResults": "Aucun prospect ne correspond à votre recherche.",
         "sort": {
@@ -2069,6 +2070,7 @@
       "wantsSamples": "Souhaite des échantillons",
       "empty": "Aucune réponse pour le moment.",
       "actions": "Actions recommandées",
+      "prospectMessage": "Message du prospect",
       "originForm": "Formulaire",
       "originClick": "Cliqueur"
     },
@@ -2150,6 +2152,7 @@
       "country": "Pays",
       "score": "Score /10",
       "descriptionField": "Description",
+      "message": "Message du prospect",
       "actions": "Actions recommandées",
       "saved": "Prospect mis à jour",
       "errorTitle": "Erreur",
