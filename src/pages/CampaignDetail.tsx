@@ -222,9 +222,11 @@ const CampaignDetail = () => {
             buyer_id: c.email || c.company_name,
             market: c.country,
             message_snippet: c.description,
-            owner_notes: c.recommended_actions
-              ? `Issu de la campagne « ${campaign?.name ?? ''} »\n\nActions recommandées : ${c.recommended_actions}`
-              : `Issu de la campagne « ${campaign?.name ?? ''} »`,
+            owner_notes: [
+              `Issu de la campagne « ${campaign?.name ?? ''} »`,
+              c.message ? `Message du prospect : ${c.message}` : null,
+              c.recommended_actions ? `Actions recommandées : ${c.recommended_actions}` : null,
+            ].filter(Boolean).join('\n\n'),
             prospect_status: 'new' as any,
             last_activity_at: new Date().toISOString(),
             created_by: user.id,
