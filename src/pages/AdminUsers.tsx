@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Users, Search, Copy, Pencil, Eye } from 'lucide-react';
+import { AlertTriangle, Users, Search, Copy, Pencil, Eye, Coins } from 'lucide-react';
 import { ChangeUserEmailDialog } from '@/components/admin/ChangeUserEmailDialog';
+import { EditUserCreditsDialog, type UserCreditsRow } from '@/components/admin/EditUserCreditsDialog';
 import { useNavigate } from 'react-router-dom';
 
 type AppRole = 'admin' | 'user' | 'free' | 'paid';
@@ -22,6 +23,7 @@ interface UserRow {
   subscription_plan: string | null;
   stripe_customer_id: string | null;
   created_at: string;
+  credits: UserCreditsRow | null;
 }
 
 const ROLE_OPTIONS: AppRole[] = ['admin', 'paid', 'free', 'user'];
@@ -43,10 +45,11 @@ export default function AdminUsers() {
   const [filter, setFilter] = useState<'all' | 'inconsistent'>('all');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [emailDialog, setEmailDialog] = useState<UserRow | null>(null);
+  const [creditsDialog, setCreditsDialog] = useState<UserRow | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const [profilesRes, rolesRes, settingsRes, emailsRes] = await Promise.all([
+    const [profilesRes, rolesRes, settingsRes, emailsRes, creditsRes] = await Promise.all([
       supabase
         .from('profiles')
         .select('user_id, domain_name, subscription_plan, stripe_customer_id, created_at')
@@ -54,6 +57,9 @@ export default function AdminUsers() {
       supabase.from('user_roles').select('user_id, role'),
       supabase.from('user_settings').select('user_id, display_name'),
       supabase.rpc('get_users_emails_for_admin'),
+      supabase
+        .from('user_credits')
+        .select('user_id, campaign_credits, search_credits, export_credits, next_reset_date'),
     ]);
 
     if (profilesRes.error) {
@@ -68,6 +74,15 @@ export default function AdminUsers() {
     (settingsRes.data || []).forEach((s: any) => settingsMap.set(s.user_id, s.display_name));
     const emailsMap = new Map<string, string | null>();
     (emailsRes.data || []).forEach((e: any) => emailsMap.set(e.user_id, e.email));
+    const creditsMap = new Map<string, UserCreditsRow>();
+    (creditsRes.data || []).forEach((c: any) =>
+      creditsMap.set(c.user_id, {
+        campaign_credits: c.campaign_credits ?? 0,
+        search_credits: c.search_credits ?? 0,
+        export_credits: c.export_credits ?? 0,
+        next_reset_date: c.next_reset_date ?? null,
+      })
+    );
 
     const merged: UserRow[] = (profilesRes.data || []).map((p: any) => ({
       user_id: p.user_id,
@@ -78,6 +93,7 @@ export default function AdminUsers() {
       role: rolesMap.get(p.user_id) ?? null,
       display_name: settingsMap.get(p.user_id) ?? null,
       email: emailsMap.get(p.user_id) ?? null,
+      credits: creditsMap.get(p.user_id) ?? null,
     }));
 
     setRows(merged);
@@ -216,6 +232,7 @@ export default function AdminUsers() {
                     <TableHead>Domaine</TableHead>
                     <TableHead>Rôle</TableHead>
                     <TableHead>Plan</TableHead>
+                    <TableHead>Crédits</TableHead>
                     <TableHead>Stripe</TableHead>
                     <TableHead>Inscrit</TableHead>
                     <TableHead className="text-right">Action</TableHead>
@@ -294,6 +311,23 @@ export default function AdminUsers() {
                           </Select>
                         </TableCell>
                         <TableCell>
+                          <button
+                            onClick={() => setCreditsDialog(row)}
+                            className="group inline-flex items-center gap-1.5 text-xs font-mono hover:text-foreground text-muted-foreground"
+                            title="Modifier les crédits"
+                          >
+                            <Coins className="h-3.5 w-3.5" />
+                            <span className="text-foreground">
+                              {row.credits?.campaign_credits ?? 0}
+                            </span>
+                            /
+                            <span className="text-foreground">{row.credits?.search_credits ?? 0}</span>
+                            /
+                            <span className="text-foreground">{row.credits?.export_credits ?? 0}</span>
+                            <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100" />
+                          </button>
+                        </TableCell>
+                        <TableCell>
                           {row.stripe_customer_id ? (
                             <Badge variant="secondary" className="font-mono text-[10px]">
                               {row.stripe_customer_id.slice(0, 12)}…
@@ -336,6 +370,21 @@ export default function AdminUsers() {
           onChanged={(newEmail) => {
             setRows((prev) =>
               prev.map((r) => (r.user_id === emailDialog.user_id ? { ...r, email: newEmail } : r)),
+            );
+          }}
+        />
+      )}
+
+      {creditsDialog && (
+        <EditUserCreditsDialog
+          open={!!creditsDialog}
+          onOpenChange={(o) => !o && setCreditsDialog(null)}
+          userId={creditsDialog.user_id}
+          userLabel={creditsDialog.display_name || creditsDialog.email}
+          credits={creditsDialog.credits}
+          onSaved={(c) => {
+            setRows((prev) =>
+              prev.map((r) => (r.user_id === creditsDialog.user_id ? { ...r, credits: c } : r)),
             );
           }}
         />

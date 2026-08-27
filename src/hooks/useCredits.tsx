@@ -60,6 +60,21 @@ export const useCredits = () => {
     fetchCredits();
   }, [fetchCredits]);
 
+  // Keep credits in sync when an admin adjusts them while the tab is open.
+  useEffect(() => {
+    if (!user) return;
+    const onFocus = () => fetchCredits();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') fetchCredits();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [user, fetchCredits]);
+
   const consumeCampaignCredit = useCallback(async (): Promise<{
     ok: boolean;
     remaining: number;

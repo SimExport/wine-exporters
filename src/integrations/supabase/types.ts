@@ -1535,6 +1535,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_user_credits: {
+        Args: {
+          _campaign: number
+          _export: number
+          _search: number
+          _user_id: string
+        }
+        Returns: {
+          campaign_credits: number
+          export_credits: number
+          id: string
+          next_reset_date: string
+          search_credits: number
+          subscription_start_date: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_credits"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }

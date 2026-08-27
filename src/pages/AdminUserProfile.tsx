@@ -11,6 +11,7 @@ import {
   ArrowLeft, Copy, Download, FileJson, Package, ExternalLink, User, Grape,
   FileText, Image as ImageIcon, Megaphone, Wallet, Loader2,
 } from 'lucide-react';
+import { EditUserCreditsDialog } from '@/components/admin/EditUserCreditsDialog';
 
 type AnyRow = Record<string, any>;
 
@@ -63,6 +64,7 @@ export default function AdminUserProfile() {
   const [campaigns, setCampaigns] = useState<AnyRow[]>([]);
   const [leadsSummary, setLeadsSummary] = useState<Record<string, number>>({});
   const [credits, setCredits] = useState<AnyRow | null>(null);
+  const [creditsOpen, setCreditsOpen] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -511,16 +513,42 @@ export default function AdminUserProfile() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle className="text-base">Crédits & abonnement</CardTitle></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Crédits & abonnement</CardTitle>
+              <Button variant="outline" size="sm" className="h-8" onClick={() => setCreditsOpen(true)}>
+                <Wallet className="h-3.5 w-3.5 mr-1.5" />
+                Modifier
+              </Button>
+            </CardHeader>
             <CardContent className="space-y-3">
               <Field label="Crédits campagnes" value={credits?.campaign_credits ?? 0} />
               <Field label="Crédits recherche" value={credits?.search_credits ?? 0} />
+              <Field label="Crédits export" value={credits?.export_credits ?? 0} />
               <Field label="Début abonnement" value={credits?.subscription_start_date} />
               <Field label="Prochain reset" value={credits?.next_reset_date} />
               <Field label="Plan" value={profile?.subscription_plan} />
               <Field label="Stripe customer ID" value={profile?.stripe_customer_id} />
             </CardContent>
           </Card>
+          {userId && (
+            <EditUserCreditsDialog
+              open={creditsOpen}
+              onOpenChange={setCreditsOpen}
+              userId={userId}
+              userLabel={displayName || email}
+              credits={
+                credits
+                  ? {
+                      campaign_credits: credits.campaign_credits ?? 0,
+                      search_credits: credits.search_credits ?? 0,
+                      export_credits: credits.export_credits ?? 0,
+                      next_reset_date: credits.next_reset_date ?? null,
+                    }
+                  : null
+              }
+              onSaved={(c) => setCredits({ ...(credits || {}), ...c })}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>
