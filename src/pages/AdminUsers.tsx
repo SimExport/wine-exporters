@@ -232,6 +232,7 @@ export default function AdminUsers() {
                     <TableHead>Domaine</TableHead>
                     <TableHead>Rôle</TableHead>
                     <TableHead>Plan</TableHead>
+                    <TableHead>Crédits</TableHead>
                     <TableHead>Stripe</TableHead>
                     <TableHead>Inscrit</TableHead>
                     <TableHead className="text-right">Action</TableHead>
