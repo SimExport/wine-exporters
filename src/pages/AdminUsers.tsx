@@ -23,6 +23,7 @@ interface UserRow {
   subscription_plan: string | null;
   stripe_customer_id: string | null;
   created_at: string;
+  credits: UserCreditsRow | null;
 }
 
 const ROLE_OPTIONS: AppRole[] = ['admin', 'paid', 'free', 'user'];
