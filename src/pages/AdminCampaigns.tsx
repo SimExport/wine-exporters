@@ -14,7 +14,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown, Pencil } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown, Pencil, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
@@ -99,6 +109,8 @@ export default function AdminCampaigns() {
   const [responsesSheetCampaign, setResponsesSheetCampaign] = useState<Campaign | null>(null);
   const [qualifiedSheetCampaign, setQualifiedSheetCampaign] = useState<Campaign | null>(null);
   const [editingResponse, setEditingResponse] = useState<InterestResponse | null>(null);
+  const [deletingResponse, setDeletingResponse] = useState<InterestResponse | null>(null);
+  const [deletingResponseBusy, setDeletingResponseBusy] = useState(false);
   const { toast } = useToast();
 
   // Filters
