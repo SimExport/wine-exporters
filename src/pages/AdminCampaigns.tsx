@@ -1430,6 +1430,67 @@ export default function AdminCampaigns() {
         }}
       />
 
+      <AlertDialog
+        open={!!deletingResponse}
+        onOpenChange={(open) => !open && !deletingResponseBusy && setDeletingResponse(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('adminCampaigns.responsesSheet.deleteConfirmTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('adminCampaigns.responsesSheet.deleteConfirmDescription', {
+                name:
+                  deletingResponse?.company_name ||
+                  deletingResponse?.contact_name ||
+                  deletingResponse?.email ||
+                  '—',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingResponseBusy}>
+              {t('common.cancel', { defaultValue: 'Annuler' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deletingResponseBusy}
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!deletingResponse) return;
+                setDeletingResponseBusy(true);
+                const { error } = await supabase
+                  .from('campaign_interested_contacts')
+                  .delete()
+                  .eq('id', deletingResponse.id);
+                setDeletingResponseBusy(false);
+                if (error) {
+                  toast({
+                    title: t('adminCampaigns.responsesSheet.deleteError'),
+                    description: error.message,
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+                const deletedId = deletingResponse.id;
+                setResponsesByCampaign((prev) => {
+                  const next: Record<string, InterestResponse[]> = {};
+                  Object.entries(prev).forEach(([cid, list]) => {
+                    next[cid] = list.filter((r) => r.id !== deletedId);
+                  });
+                  return next;
+                });
+                setDeletingResponse(null);
+                toast({ title: t('adminCampaigns.responsesSheet.deleted') });
+              }}
+            >
+              {deletingResponseBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('adminCampaigns.responsesSheet.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <CampaignCompletionEmailPreview
         campaignId={completionPreview?.id ?? null}
         campaignName={completionPreview?.name ?? ''}
