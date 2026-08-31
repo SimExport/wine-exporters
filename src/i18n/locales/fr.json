@@ -2072,7 +2072,12 @@
       "actions": "Actions recommandées",
       "prospectMessage": "Message du prospect",
       "originForm": "Formulaire",
-      "originClick": "Cliqueur"
+      "originClick": "Cliqueur",
+      "delete": "Supprimer le prospect",
+      "deleteConfirmTitle": "Supprimer ce prospect ?",
+      "deleteConfirmDescription": "{{name}} sera définitivement supprimé de cette campagne. Cette action est irréversible.",
+      "deleted": "Prospect supprimé",
+      "deleteError": "Impossible de supprimer ce prospect"
     },
     "qualified": {
       "title": "Importateurs qualifiés",

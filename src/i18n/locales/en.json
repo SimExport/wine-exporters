@@ -2072,7 +2072,12 @@
       "actions": "Recommended actions",
       "prospectMessage": "Prospect message",
       "originForm": "Form",
-      "originClick": "Clicker"
+      "originClick": "Clicker",
+      "delete": "Delete prospect",
+      "deleteConfirmTitle": "Delete this prospect?",
+      "deleteConfirmDescription": "{{name}} will be permanently removed from this campaign. This action cannot be undone.",
+      "deleted": "Prospect deleted",
+      "deleteError": "Could not delete this prospect"
     },
     "qualified": {
       "title": "Qualified importers",

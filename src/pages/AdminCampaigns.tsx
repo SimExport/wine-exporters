@@ -14,7 +14,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown, Pencil } from 'lucide-react';
+import { Eye, Plus, RotateCcw, ExternalLink, CheckCircle, X, Clock, Copy, SearchX, MapPin, Loader2, Mail, BarChart3, ClipboardList, Sparkles, ChevronDown, Pencil, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
@@ -99,6 +109,8 @@ export default function AdminCampaigns() {
   const [responsesSheetCampaign, setResponsesSheetCampaign] = useState<Campaign | null>(null);
   const [qualifiedSheetCampaign, setQualifiedSheetCampaign] = useState<Campaign | null>(null);
   const [editingResponse, setEditingResponse] = useState<InterestResponse | null>(null);
+  const [deletingResponse, setDeletingResponse] = useState<InterestResponse | null>(null);
+  const [deletingResponseBusy, setDeletingResponseBusy] = useState(false);
   const { toast } = useToast();
 
   // Filters
@@ -1320,6 +1332,15 @@ export default function AdminCampaigns() {
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        onClick={() => setDeletingResponse(r)}
+                        aria-label={t('adminCampaigns.responsesSheet.delete')}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                       <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
                         {origin === 'click'
                           ? t('adminCampaigns.responsesSheet.originClick')
@@ -1408,6 +1429,67 @@ export default function AdminCampaigns() {
           });
         }}
       />
+
+      <AlertDialog
+        open={!!deletingResponse}
+        onOpenChange={(open) => !open && !deletingResponseBusy && setDeletingResponse(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('adminCampaigns.responsesSheet.deleteConfirmTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('adminCampaigns.responsesSheet.deleteConfirmDescription', {
+                name:
+                  deletingResponse?.company_name ||
+                  deletingResponse?.contact_name ||
+                  deletingResponse?.email ||
+                  '—',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingResponseBusy}>
+              {t('common.cancel', { defaultValue: 'Annuler' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deletingResponseBusy}
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!deletingResponse) return;
+                setDeletingResponseBusy(true);
+                const { error } = await supabase
+                  .from('campaign_interested_contacts')
+                  .delete()
+                  .eq('id', deletingResponse.id);
+                setDeletingResponseBusy(false);
+                if (error) {
+                  toast({
+                    title: t('adminCampaigns.responsesSheet.deleteError'),
+                    description: error.message,
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+                const deletedId = deletingResponse.id;
+                setResponsesByCampaign((prev) => {
+                  const next: Record<string, InterestResponse[]> = {};
+                  Object.entries(prev).forEach(([cid, list]) => {
+                    next[cid] = list.filter((r) => r.id !== deletedId);
+                  });
+                  return next;
+                });
+                setDeletingResponse(null);
+                toast({ title: t('adminCampaigns.responsesSheet.deleted') });
+              }}
+            >
+              {deletingResponseBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('adminCampaigns.responsesSheet.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CampaignCompletionEmailPreview
         campaignId={completionPreview?.id ?? null}
