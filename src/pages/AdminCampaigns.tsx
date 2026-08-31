@@ -1332,6 +1332,15 @@ export default function AdminCampaigns() {
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        onClick={() => setDeletingResponse(r)}
+                        aria-label={t('adminCampaigns.responsesSheet.delete')}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                       <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
                         {origin === 'click'
                           ? t('adminCampaigns.responsesSheet.originClick')
