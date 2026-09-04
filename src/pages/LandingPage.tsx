@@ -4,6 +4,8 @@ import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
+import { SaasHeader } from "@/components/ui/saas-header";
+
 import { Button } from "@/components/ui/button";
 const logoFull = { url: "/logo-wineexporters.png" };
 const logoMark = { url: "/logo-mark.png" };
