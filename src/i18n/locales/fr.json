@@ -1776,11 +1776,7 @@
     "nav": {
       "signIn": "Se connecter",
       "start": "Démarrer",
-      "requestDemo": "Demander une démo",
-      "method": "Méthode",
-      "pricing": "Tarif",
-      "faq": "FAQ",
-      "toggleMenu": "Ouvrir le menu"
+      "requestDemo": "Demander une démo"
     },
     "hero": {
       "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
