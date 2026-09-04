@@ -19,7 +19,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				display: ['"Playfair Display"', 'Georgia', 'serif']
+				display: ['"Caacupe One"', 'Georgia', 'serif']
 			},
 			colors: {
 				border: 'hsl(var(--border))',
