@@ -665,7 +665,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── 6. FAQ ── */}
-      <section className="py-24 bg-muted/50">
+      <section id="faq" className="py-24 bg-muted/50 scroll-mt-20">
         <div className="max-w-2xl mx-auto px-6">
           <FadeIn>
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-12">
