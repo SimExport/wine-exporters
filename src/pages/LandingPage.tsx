@@ -4,6 +4,8 @@ import { motion, useInView } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
+import { SaasHeader } from "@/components/ui/saas-header";
+
 import { Button } from "@/components/ui/button";
 const logoFull = { url: "/logo-wineexporters.png" };
 const logoMark = { url: "/logo-mark.png" };
@@ -420,29 +422,8 @@ const LandingPage = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" jsonLd={faqJsonLd} />
       {/* ── Header ── */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 h-20 sm:h-24 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img
-              src={logoFull.url}
-              alt="WineExporters"
-              className="h-12 sm:h-16 w-auto"
-              width={330}
-              height={64}
-            />
-          </Link>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <Button onClick={openDemo} className="hidden sm:inline-flex">
-              <PlayCircle className="mr-2 h-4 w-4" />
-              {t("landing.hero.ctaVideo")}
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/auth" className="text-muted-foreground">{t("landing.nav.signIn")}</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <SaasHeader logoSrc={logoFull.url} onWatchVideo={openDemo} />
+
 
       <main>
       {/* ── 1. HERO ── */}
@@ -684,7 +665,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── 6. FAQ ── */}
-      <section className="py-24 bg-muted/50">
+      <section id="faq" className="py-24 bg-muted/50 scroll-mt-20">
         <div className="max-w-2xl mx-auto px-6">
           <FadeIn>
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-12">

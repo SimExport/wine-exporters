@@ -1776,7 +1776,11 @@
     "nav": {
       "signIn": "Sign in",
       "start": "Get started",
-      "requestDemo": "Request a demo"
+      "requestDemo": "Request a demo",
+      "method": "Method",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "toggleMenu": "Toggle menu"
     },
     "hero": {
       "badge": "🍷 For wine estates looking for buyers, not trade shows.",
