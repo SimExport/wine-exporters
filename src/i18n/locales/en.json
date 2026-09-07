@@ -665,7 +665,13 @@
     "countPlural": "{{count}} cuvées",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {{current}} of {{total}}"
+    "pageOf": "Page {{current}} of {{total}}",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete this cuvée?",
+    "deleteConfirmDescription": "“{{name}}” will be permanently deleted. This action cannot be undone.",
+    "deleteSuccess": "Cuvée deleted",
+    "deleteError": "Could not delete the cuvée",
+    "cancel": "Cancel"
   },
   "campaigns": {
     "list": {
