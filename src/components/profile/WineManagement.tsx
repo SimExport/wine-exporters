@@ -183,6 +183,22 @@ const WineManagement = () => {
     setModalOpen(true);
   };
 
+  const handleDelete = async () => {
+    if (!deletingWine) return;
+    setDeleteBusy(true);
+    const { error } = await supabase.from('wines').delete().eq('id', deletingWine.id);
+    setDeleteBusy(false);
+    if (error) {
+      toast({ title: t('common.error'), description: t('wines.deleteError'), variant: 'destructive' });
+      return;
+    }
+    setWines((prev) => prev.filter((w) => w.id !== deletingWine.id));
+    setDeletingWine(null);
+    toast({ title: t('common.success'), description: t('wines.deleteSuccess') });
+  };
+
+
+
   const resetForm = () => {
     setFormData({
       name: '',
