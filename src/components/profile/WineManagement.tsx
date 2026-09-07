@@ -52,6 +52,8 @@ const WineManagement = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingWine, setEditingWine] = useState<Wine | null>(null);
+  const [deletingWine, setDeletingWine] = useState<Wine | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [colorFilter, setColorFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
