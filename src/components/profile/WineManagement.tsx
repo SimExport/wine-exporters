@@ -263,6 +263,7 @@ const WineManagement = () => {
   }
 
   return (
+    <>
     <Card id="vins">
       <CardHeader>
         <div className="flex items-center justify-between">
