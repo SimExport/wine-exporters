@@ -552,6 +552,15 @@ const WineManagement = () => {
                           <Button variant="ghost" size="sm" onClick={() => handleDuplicate(wine)}>
                             <Copy className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeletingWine(wine)}
+                            aria-label={t('wines.delete')}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
