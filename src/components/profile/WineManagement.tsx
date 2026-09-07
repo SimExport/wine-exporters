@@ -590,6 +590,31 @@ const WineManagement = () => {
         </div>
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!deletingWine} onOpenChange={(open) => !open && !deleteBusy && setDeletingWine(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('wines.deleteConfirmTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('wines.deleteConfirmDescription', { name: deletingWine?.name ?? '' })}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleteBusy}>{t('wines.cancel')}</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={deleteBusy}
+            onClick={(e) => {
+              e.preventDefault();
+              handleDelete();
+            }}
+          >
+            {deleteBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t('wines.delete')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
