@@ -12,7 +12,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Copy, Search, Loader2 } from 'lucide-react';
+import { Plus, Edit, Copy, Search, Loader2, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/format';
 
@@ -42,6 +52,8 @@ const WineManagement = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingWine, setEditingWine] = useState<Wine | null>(null);
+  const [deletingWine, setDeletingWine] = useState<Wine | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [colorFilter, setColorFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,6 +183,22 @@ const WineManagement = () => {
     setModalOpen(true);
   };
 
+  const handleDelete = async () => {
+    if (!deletingWine) return;
+    setDeleteBusy(true);
+    const { error } = await supabase.from('wines').delete().eq('id', deletingWine.id);
+    setDeleteBusy(false);
+    if (error) {
+      toast({ title: t('common.error'), description: t('wines.deleteError'), variant: 'destructive' });
+      return;
+    }
+    setWines((prev) => prev.filter((w) => w.id !== deletingWine.id));
+    setDeletingWine(null);
+    toast({ title: t('common.success'), description: t('wines.deleteSuccess') });
+  };
+
+
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -251,6 +279,7 @@ const WineManagement = () => {
   }
 
   return (
+    <>
     <Card id="vins">
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -523,6 +552,15 @@ const WineManagement = () => {
                           <Button variant="ghost" size="sm" onClick={() => handleDuplicate(wine)}>
                             <Copy className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeletingWine(wine)}
+                            aria-label={t('wines.delete')}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -578,6 +616,31 @@ const WineManagement = () => {
         </div>
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!deletingWine} onOpenChange={(open) => !open && !deleteBusy && setDeletingWine(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('wines.deleteConfirmTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('wines.deleteConfirmDescription', { name: deletingWine?.name ?? '' })}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleteBusy}>{t('wines.cancel')}</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={deleteBusy}
+            onClick={(e) => {
+              e.preventDefault();
+              handleDelete();
+            }}
+          >
+            {deleteBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t('wines.delete')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
