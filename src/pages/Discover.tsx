@@ -156,7 +156,7 @@ const Discover = () => {
           <p className="mb-6 inline-flex items-center gap-2 border-l-2 border-[#C9A84C] pl-3 text-[13px] font-medium uppercase tracking-[0.12em] text-[#8a6b3e]">
             {t.eyebrow}
           </p>
-          <h1 className="font-serif text-[2.4rem] font-semibold leading-[1.12] text-[#59191F] sm:text-[3.1rem]">
+          <h1 className="font-display text-[2.4rem] font-semibold leading-[1.12] text-[#59191F] sm:text-[3.1rem]">
             {t.title}
           </h1>
           <p className="mt-6 max-w-md text-[17px] leading-relaxed text-[#5c4a41]">{t.subtitle}</p>
