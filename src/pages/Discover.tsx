@@ -13,15 +13,15 @@ const COPY = {
     seoTitle: "Trouvez vos importateurs de vin | WineExporters",
     seoDesc:
       "Recevez la brochure WineExporters et la vidéo de la plateforme utilisée par les domaines viticoles pour trouver leurs importateurs.",
-    eyebrow: "21 000+ importateurs vérifiés dans 140+ pays",
-    title: "Découvrez comment les domaines viticoles trouvent leurs importateurs.",
+    eyebrow: "23 000+ importateurs vérifiés dans 146 pays",
+    title: "Trouvez vos importateurs, sans attendre qu'une agence le fasse pour vous.",
     subtitle:
-      "La brochure et la vidéo de démonstration, dans votre boîte mail en un clic. De quoi voir concrètement comment fonctionne la plateforme avant d'aller plus loin.",
+      "Recevez la brochure et la vidéo de démo par email, pour voir concrètement comment ça marche avant de vous engager.",
     firstName: "Prénom",
     domain: "Nom du domaine",
     email: "Email professionnel",
     phone: "Téléphone",
-    optional: "facultatif",
+    required: "Ce champ est obligatoire",
     submit: "Recevoir la brochure et la vidéo",
     submitting: "Envoi en cours",
     error: "L'envoi a échoué. Réessayez dans un instant.",
@@ -36,15 +36,15 @@ const COPY = {
     seoTitle: "Find your wine importers | WineExporters",
     seoDesc:
       "Get the WineExporters brochure and the platform video used by wine estates to find their importers.",
-    eyebrow: "21,000+ verified importers across 140+ countries",
-    title: "See how wine estates find their importers.",
+    eyebrow: "23,000+ verified importers across 146 countries",
+    title: "Find your importers, without waiting for an agency to do it for you.",
     subtitle:
-      "The brochure and the demo video, in your inbox in one click. Enough to see concretely how the platform works before going further.",
+      "Get the brochure and demo video by email, to see exactly how it works before you commit.",
     firstName: "First name",
     domain: "Estate name",
     email: "Work email",
     phone: "Phone",
-    optional: "optional",
+    required: "This field is required",
     submit: "Get the brochure and the video",
     submitting: "Sending",
     error: "Sending failed. Please try again in a moment.",
@@ -63,6 +63,13 @@ declare global {
   }
 }
 
+type FieldErrors = {
+  firstName?: string;
+  domainName?: string;
+  email?: string;
+  phone?: string;
+};
+
 const Discover = () => {
   const { i18n } = useTranslation();
   const lang = (i18n.resolvedLanguage || i18n.language || "fr").startsWith("en") ? "en" : "fr";
@@ -74,6 +81,7 @@ const Discover = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -92,9 +100,20 @@ const Discover = () => {
     }
   };
 
+  const validate = (): boolean => {
+    const errors: FieldErrors = {};
+    if (!firstName.trim()) errors.firstName = t.required;
+    if (!domainName.trim()) errors.domainName = t.required;
+    if (!email.trim()) errors.email = t.required;
+    if (!phone.trim()) errors.phone = t.required;
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!validate()) return;
     setLoading(true);
     const { error: fnError } = await supabase.functions.invoke("submit-brochure-request", {
       body: {
@@ -116,6 +135,8 @@ const Discover = () => {
 
   const fieldClass =
     "w-full rounded-lg border border-[#e0d3c2] bg-[#fffdfa] px-4 py-3 text-[15px] text-[#1a1a1a] placeholder-[#a89685] outline-none transition-colors focus:border-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C]/25";
+  const fieldErrorClass =
+    "w-full rounded-lg border border-[#be2d2d] bg-[#fffdfa] px-4 py-3 text-[15px] text-[#1a1a1a] placeholder-[#a89685] outline-none transition-colors focus:border-[#be2d2d] focus:ring-2 focus:ring-[#be2d2d]/25";
   const labelClass = "mb-1.5 block text-[13px] font-medium tracking-wide text-[#6b5346]";
 
   return (
@@ -182,19 +203,24 @@ const Discover = () => {
               </p>
             </div>
           ) : (
-            <form onSubmit={onSubmit} className="space-y-5">
+            <form onSubmit={onSubmit} className="space-y-5" noValidate>
               <div>
                 <label className={labelClass} htmlFor="firstName">
                   {t.firstName}
                 </label>
                 <input
                   id="firstName"
-                  className={fieldClass}
+                  className={fieldErrors.firstName ? fieldErrorClass : fieldClass}
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    if (fieldErrors.firstName) setFieldErrors((prev) => ({ ...prev, firstName: undefined }));
+                  }}
                   maxLength={100}
-                  required
                 />
+                {fieldErrors.firstName && (
+                  <p className="mt-1.5 text-[13px] font-medium text-[#be2d2d]">{fieldErrors.firstName}</p>
+                )}
               </div>
               <div>
                 <label className={labelClass} htmlFor="domainName">
@@ -202,12 +228,17 @@ const Discover = () => {
                 </label>
                 <input
                   id="domainName"
-                  className={fieldClass}
+                  className={fieldErrors.domainName ? fieldErrorClass : fieldClass}
                   value={domainName}
-                  onChange={(e) => setDomainName(e.target.value)}
+                  onChange={(e) => {
+                    setDomainName(e.target.value);
+                    if (fieldErrors.domainName) setFieldErrors((prev) => ({ ...prev, domainName: undefined }));
+                  }}
                   maxLength={200}
-                  required
                 />
+                {fieldErrors.domainName && (
+                  <p className="mt-1.5 text-[13px] font-medium text-[#be2d2d]">{fieldErrors.domainName}</p>
+                )}
               </div>
               <div>
                 <label className={labelClass} htmlFor="email">
@@ -216,26 +247,36 @@ const Discover = () => {
                 <input
                   id="email"
                   type="email"
-                  className={fieldClass}
+                  className={fieldErrors.email ? fieldErrorClass : fieldClass}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
                   maxLength={255}
-                  required
                 />
+                {fieldErrors.email && (
+                  <p className="mt-1.5 text-[13px] font-medium text-[#be2d2d]">{fieldErrors.email}</p>
+                )}
               </div>
               <div>
                 <label className={labelClass} htmlFor="phone">
-                  {t.phone}{" "}
-                  <span className="font-normal normal-case text-[#a89685]">({t.optional})</span>
+                  {t.phone}
                 </label>
                 <input
                   id="phone"
                   type="tel"
-                  className={fieldClass}
+                  className={fieldErrors.phone ? fieldErrorClass : fieldClass}
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: undefined }));
+                  }}
                   maxLength={40}
                 />
+                {fieldErrors.phone && (
+                  <p className="mt-1.5 text-[13px] font-medium text-[#be2d2d]">{fieldErrors.phone}</p>
+                )}
               </div>
 
               {error && <p className="text-[13px] font-medium text-[#be2d2d]">{error}</p>}
