@@ -79,7 +79,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex h-16 items-center px-1 group-data-[collapsible=icon]:justify-center">
           <BrandLogo variant="markCream" className="hidden h-10 w-10 group-data-[collapsible=icon]:block" />
-          <BrandLogo variant="white" className="h-14 w-auto max-w-[230px] group-data-[collapsible=icon]:hidden" />
+          <BrandLogo variant="whiteTransparent" className="h-14 w-auto max-w-[230px] group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
 
