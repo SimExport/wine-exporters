@@ -3,14 +3,16 @@ import logoFull from "@/assets/wineexporters-burgundy.png.asset.json";
 import logoMark from "@/assets/we-burgundy.png.asset.json";
 import logoMarkCream from "@/assets/we-cream.png.asset.json";
 import logoWhite from "@/assets/wineexporters-white-burgundy.png.asset.json";
+import logoWhiteTransparent from "@/assets/wineexporters-white-transparent.png.asset.json";
 
-type BrandLogoVariant = "full" | "mark" | "markCream" | "white";
+type BrandLogoVariant = "full" | "mark" | "markCream" | "white" | "whiteTransparent";
 
 const logos = {
   full: logoFull,
   mark: logoMark,
   markCream: logoMarkCream,
   white: logoWhite,
+  whiteTransparent: logoWhiteTransparent,
 };
 
 interface BrandLogoProps {
