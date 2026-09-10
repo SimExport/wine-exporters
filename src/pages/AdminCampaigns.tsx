@@ -45,6 +45,7 @@ interface Campaign {
   schedule_at: string | null;
   user_id: string;
   created_at: string;
+  validated_at: string | null;
   stats_opens: number | null;
   stats_clicks: number | null;
   stats_replies: number | null;
@@ -810,7 +811,13 @@ export default function AdminCampaigns() {
                 {filteredCampaigns.map((campaign) => (
                   <TableRow key={campaign.id} className="hover:bg-muted/50">
                     <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(campaign.created_at)}
+                      <div>{formatDate(campaign.created_at)}</div>
+                      {campaign.validated_at && (
+                        <div className="text-xs text-green-700 flex items-center gap-1 mt-0.5">
+                          <CheckCircle className="h-3 w-3" />
+                          {t('adminCampaigns.table.validatedAt', { defaultValue: 'Validée le' })} {formatDate(campaign.validated_at)}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Button 

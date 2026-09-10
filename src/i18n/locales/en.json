@@ -2020,6 +2020,7 @@
     },
     "table": {
       "date": "Date",
+      "validatedAt": "Validated on",
       "campaign": "Campaign",
       "client": "Client",
       "markets": "Markets",
