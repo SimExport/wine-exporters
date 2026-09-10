@@ -422,7 +422,7 @@ const LandingPage = () => {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-24 sm:h-28 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <BrandLogo className="h-14 sm:h-16 w-auto max-w-[270px] sm:max-w-[340px]" />
+            <BrandLogo className="w-[140px] sm:w-[155px] h-auto" />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
