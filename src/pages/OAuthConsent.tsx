@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Grape } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 // Minimal typed wrapper for the beta supabase.auth.oauth namespace.
 type OAuthNs = {
@@ -56,15 +56,7 @@ export default function OAuthConsent() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
-                <Grape className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div className="flex flex-col leading-tight text-left">
-                <span className="font-bold text-base text-foreground">WineExporters</span>
-                <span className="text-xs text-muted-foreground">by ExportVins</span>
-              </div>
-            </div>
+            <BrandLogo className="h-11 w-auto max-w-[260px]" />
           </div>
           <CardTitle>
             {details?.client?.name ? `Connect ${details.client.name}` : "Authorize access"}

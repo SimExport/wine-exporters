@@ -13,7 +13,8 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Grape, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const REGIONS = [
   "Alsace", "Beaujolais", "Bordeaux", "Bourgogne", "Champagne",
@@ -95,14 +96,8 @@ const DemoRequest = () => {
       <SEO title={t("seo.demo.title")} description={t("seo.demo.description")} path="/demande-demo" />
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
-              <Grape className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="font-bold text-base text-foreground">WineExporters</span>
-              <span className="text-xs text-muted-foreground">by ExportVins</span>
-            </div>
+          <Link to="/" className="flex items-center">
+            <BrandLogo className="h-9 w-auto max-w-[210px]" />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />

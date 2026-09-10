@@ -5,8 +5,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-const logoFull = { url: "/logo-wineexporters.png" };
-const logoMark = { url: "/logo-mark.png" };
+import { BrandLogo } from "@/components/BrandLogo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -423,13 +422,7 @@ const LandingPage = () => {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-20 sm:h-24 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <img
-              src={logoFull.url}
-              alt="WineExporters"
-              className="h-12 sm:h-16 w-auto"
-              width={330}
-              height={64}
-            />
+            <BrandLogo className="h-10 sm:h-12 w-auto max-w-[210px] sm:max-w-[270px]" />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
@@ -736,7 +729,7 @@ const LandingPage = () => {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-2">
-            <img src={logoMark.url} alt="WineExporters" className="h-6 w-auto" width={24} height={24} />
+            <BrandLogo variant="mark" className="h-7 w-7" />
             {t("landing.footer.copyright")}
           </span>
           <div className="flex gap-6">
