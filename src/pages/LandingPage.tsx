@@ -420,9 +420,9 @@ const LandingPage = () => {
       <SEO title={t("seo.landing.title")} description={t("seo.landing.description")} path="/" jsonLd={faqJsonLd} />
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 h-20 sm:h-24 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-24 sm:h-28 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <BrandLogo className="h-10 sm:h-12 w-auto max-w-[210px] sm:max-w-[270px]" />
+            <BrandLogo className="h-14 sm:h-16 w-auto max-w-[270px] sm:max-w-[340px]" />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
@@ -729,7 +729,7 @@ const LandingPage = () => {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-2">
-            <BrandLogo variant="mark" className="h-7 w-7" />
+            <BrandLogo variant="mark" className="h-10 w-10" />
             {t("landing.footer.copyright")}
           </span>
           <div className="flex gap-6">

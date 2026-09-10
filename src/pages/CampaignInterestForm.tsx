@@ -111,8 +111,8 @@ export default function CampaignInterestForm() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <header className="py-6 px-4 flex items-center justify-center">
-        <BrandLogo className="h-10 w-auto max-w-[240px]" />
+      <header className="py-7 px-4 flex items-center justify-center">
+        <BrandLogo className="h-16 w-auto max-w-[320px]" />
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 pb-16">

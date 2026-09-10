@@ -77,9 +77,9 @@ export function AppSidebar() {
   };
   return <Sidebar collapsible="icon" className="hidden md:flex">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex h-10 items-center px-1 group-data-[collapsible=icon]:justify-center">
-          <BrandLogo variant="mark" className="hidden h-7 w-7 group-data-[collapsible=icon]:block" />
-          <BrandLogo className="h-8 w-auto max-w-[190px] group-data-[collapsible=icon]:hidden" />
+        <div className="flex h-16 items-center px-1 group-data-[collapsible=icon]:justify-center">
+          <BrandLogo variant="markCream" className="hidden h-10 w-10 group-data-[collapsible=icon]:block" />
+          <BrandLogo variant="white" className="h-14 w-auto max-w-[230px] group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
 

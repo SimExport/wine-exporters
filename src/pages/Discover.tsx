@@ -145,7 +145,7 @@ const Discover = () => {
       <SEO title={t.seoTitle} description={t.seoDesc} path="/decouvrir" />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-7">
-        <BrandLogo className="h-10 w-auto max-w-[230px]" />
+        <BrandLogo className="h-16 w-auto max-w-[320px]" />
         <LanguageSwitcher />
       </header>
 
@@ -294,7 +294,7 @@ const Discover = () => {
       </main>
 
       <footer className="flex flex-col items-center gap-3 border-t border-[#e7dccd] bg-[#faf6f0] px-6 py-6 text-center text-[12px] text-[#9c8877]">
-        <BrandLogo className="h-8 w-auto max-w-[220px]" />
+        <BrandLogo className="h-12 w-auto max-w-[280px]" />
         <span>© 2026</span>
       </footer>
     </div>

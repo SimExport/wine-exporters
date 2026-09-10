@@ -95,9 +95,9 @@ const DemoRequest = () => {
     <div className="min-h-screen bg-background">
       <SEO title={t("seo.demo.title")} description={t("seo.demo.description")} path="/demande-demo" />
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-6 h-24 flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <BrandLogo className="h-9 w-auto max-w-[210px]" />
+            <BrandLogo className="h-14 w-auto max-w-[280px]" />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
