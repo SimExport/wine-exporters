@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Grape } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { SEO } from '@/components/SEO';
+import { BrandLogo } from '@/components/BrandLogo';
 const Auth = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -57,15 +57,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
-                <Grape className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div className="flex flex-col leading-tight text-left">
-                <span className="font-bold text-base text-foreground">WineExporters</span>
-                <span className="text-xs text-muted-foreground">by ExportVins</span>
-              </div>
-            </div>
+            <BrandLogo className="h-11 w-auto max-w-[260px]" />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">{t('auth.title')}</CardTitle>
           <CardDescription className="text-muted-foreground">{t('auth.description')}</CardDescription>

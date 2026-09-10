@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import heroAsset from "@/assets/decouvrir-export.jpg.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const SUPADEMO_ID = "cmsisxkjk2b9wqmaa2mnkakvr";
 
@@ -144,10 +145,7 @@ const Discover = () => {
       <SEO title={t.seoTitle} description={t.seoDesc} path="/decouvrir" />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-7">
-        <div className="leading-tight">
-          <div className="font-serif text-xl font-bold text-[#59191F]">WineExporters</div>
-          <div className="text-[11px] uppercase tracking-[0.18em] text-[#9c8877]">by ExportVins</div>
-        </div>
+        <BrandLogo className="h-10 w-auto max-w-[230px]" />
         <LanguageSwitcher />
       </header>
 
@@ -295,8 +293,9 @@ const Discover = () => {
         </section>
       </main>
 
-      <footer className="bg-[#2a0d0f] px-6 py-6 text-center text-[12px] text-[#d8c6b6]">
-        WineExporters by ExportVins © 2026
+      <footer className="flex flex-col items-center gap-3 bg-[#2a0d0f] px-6 py-6 text-center text-[12px] text-[#d8c6b6]">
+        <BrandLogo variant="white" className="h-8 w-auto max-w-[220px]" />
+        <span>© 2026</span>
       </footer>
     </div>
   );

@@ -30,8 +30,8 @@ import {
   UserPlus,
   UsersRound,
   LogOut,
-  Grape,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
 
 const navigationItems = [
   { key: 'dashboard', url: '/dashboard', icon: Target },
@@ -98,15 +98,7 @@ export function MobileNav() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b bg-background px-4 py-3 md:hidden">
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Grape className="h-4 w-4" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-semibold leading-tight">WineExporters</span>
-          <span className="text-[10px] text-muted-foreground">by ExportVins</span>
-        </div>
-      </div>
+      <BrandLogo className="h-8 w-auto max-w-[180px]" />
 
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>

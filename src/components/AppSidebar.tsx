@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, Grape, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch, UsersRound, Sparkles } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch, UsersRound, Sparkles } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -13,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { formatRelative } from '@/lib/format';
+import { BrandLogo } from '@/components/BrandLogo';
 
 const navigationItems = [
   { key: "dashboard", url: "/dashboard", icon: Target },
@@ -76,18 +77,9 @@ export function AppSidebar() {
   };
   return <Sidebar collapsible="icon" className="hidden md:flex">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Grape className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-sidebar-foreground leading-tight">
-              WineExporters
-            </span>
-            <span className="text-[10px] text-secondary">
-              by ExportVins
-            </span>
-          </div>
+        <div className="flex h-10 items-center px-1 group-data-[collapsible=icon]:justify-center">
+          <BrandLogo variant="mark" className="hidden h-7 w-7 group-data-[collapsible=icon]:block" />
+          <BrandLogo className="h-8 w-auto max-w-[190px] group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
 

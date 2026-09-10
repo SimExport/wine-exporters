@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { Grape, MailCheck } from "lucide-react";
+import { MailCheck } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const ForgotPassword = () => {
   const { t } = useTranslation();
@@ -40,15 +41,7 @@ const ForgotPassword = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
-                <Grape className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div className="flex flex-col leading-tight text-left">
-                <span className="font-bold text-base text-foreground">WineExporters</span>
-                <span className="text-xs text-muted-foreground">by ExportVins</span>
-              </div>
-            </div>
+            <BrandLogo className="h-11 w-auto max-w-[260px]" />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">{t("auth.forgot.title")}</CardTitle>
           <CardDescription className="text-muted-foreground">{t("auth.forgot.description")}</CardDescription>

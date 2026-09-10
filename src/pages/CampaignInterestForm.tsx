@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Grape, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const INTEREST_OPTIONS = [
   { slug: "samples", label: "Receive samples" },
@@ -110,9 +111,8 @@ export default function CampaignInterestForm() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <header className="py-6 px-4 flex items-center justify-center gap-2 text-primary">
-        <Grape className="h-6 w-6" />
-        <span className="font-bold text-lg tracking-tight">WineExporters</span>
+      <header className="py-6 px-4 flex items-center justify-center">
+        <BrandLogo className="h-10 w-auto max-w-[240px]" />
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
