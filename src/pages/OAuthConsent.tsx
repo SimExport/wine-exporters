@@ -56,7 +56,7 @@ export default function OAuthConsent() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <BrandLogo className="h-11 w-auto max-w-[260px]" />
+            <BrandLogo className="h-16 w-auto max-w-[320px]" />
           </div>
           <CardTitle>
             {details?.client?.name ? `Connect ${details.client.name}` : "Authorize access"}

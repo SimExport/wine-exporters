@@ -57,7 +57,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <BrandLogo className="h-11 w-auto max-w-[260px]" />
+            <BrandLogo className="h-16 w-auto max-w-[320px]" />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">{t('auth.title')}</CardTitle>
           <CardDescription className="text-muted-foreground">{t('auth.description')}</CardDescription>

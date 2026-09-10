@@ -98,7 +98,7 @@ export function MobileNav() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b bg-background px-4 py-3 md:hidden">
-      <BrandLogo className="h-8 w-auto max-w-[180px]" />
+      <BrandLogo className="h-11 w-auto max-w-[220px]" />
 
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
