@@ -293,8 +293,8 @@ const Discover = () => {
         </section>
       </main>
 
-      <footer className="flex flex-col items-center gap-3 bg-[#2a0d0f] px-6 py-6 text-center text-[12px] text-[#d8c6b6]">
-        <BrandLogo variant="white" className="h-8 w-auto max-w-[220px]" />
+      <footer className="flex flex-col items-center gap-3 border-t border-[#e7dccd] bg-[#faf6f0] px-6 py-6 text-center text-[12px] text-[#9c8877]">
+        <BrandLogo className="h-8 w-auto max-w-[220px]" />
         <span>© 2026</span>
       </footer>
     </div>
