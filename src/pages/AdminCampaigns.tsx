@@ -46,6 +46,7 @@ interface Campaign {
   user_id: string;
   created_at: string;
   validated_at: string | null;
+  stats_opens: number | null;
   stats_clicks: number | null;
   stats_replies: number | null;
   brevo_campaign_id?: number | null;
