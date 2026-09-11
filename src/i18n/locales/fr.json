@@ -1785,10 +1785,10 @@
       "requestDemo": "Demander une démo"
     },
     "hero": {
-      "badge": "🍷 La plateforme tout-en-un pour les domaines viticoles",
-      "titleLead": "Trouvez vos futurs importateurs,",
-      "titleHighlight": "développez vos ventes export.",
-      "subtitle": "On vous met en relation directe avec des importateurs vérifiés, sans salon, sans démarchage à l'aveugle.",
+      "badge": "La plateforme export des domaines viticoles",
+      "titleLead": "Trouvez les bons importateurs.\n",
+      "titleHighlight": "Développez vos ventes à l'export.",
+      "subtitle": "Accédez à 23 000+ importateurs vérifiés, ciblez les bons acheteurs et confiez-nous vos campagnes de prospection — le tout depuis une seule plateforme.",
       "ctaPrimary": "Découvrir la plateforme en vidéo",
       "ctaSecondary": "Demander une démo",
       "haveAccount": "J'ai déjà un compte → Se connecter",
@@ -1798,88 +1798,90 @@
         "markets": "marchés ouverts"
       },
       "statsAttribution": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters.",
-      "database": "21 000+ importateurs vérifiés dans 140+ pays",
+      "database": "23 000+ importateurs vérifiés dans 145+ pays",
       "ctaVideo": "Découvrir la plateforme en vidéo"
     },
     "pain": {
-      "title": "L'export ne devrait pas être un parcours du combattant.",
+      "title": "Vous savez produire vos vins. Trouver les bons importateurs est une autre histoire.",
+      "transition": "WineExporters réunit la recherche, la prospection et le suivi export dans une seule plateforme.",
       "items": {
         "search": {
-          "title": "La recherche interminable",
-          "text": "Des heures perdues à chercher les bons contacts, des salons hors de prix pour un résultat incertain. On connaît tous ça."
+          "title": "Des heures à chercher les bons contacts",
+          "text": "Salons, Google, LinkedIn, fichiers achetés : beaucoup de temps investi pour peu de certitudes sur la qualité des contacts."
         },
         "silence": {
-          "title": "Le silence radio",
-          "text": "Vos mails de prospection finissent dans les spams, ou ignorés. Le silence, ça use."
+          "title": "Une prospection qui reste sans réponse",
+          "text": "Ciblage, message, langue, délivrabilité : il suffit qu'un élément soit mauvais pour que votre campagne disparaisse dans le bruit."
         },
         "tracking": {
-          "title": "Le suivi chaotique",
-          "text": "Les échantillons, les relances, tout finit perdu dans un fichier Excel qu'on n'ouvre plus."
+          "title": "Des opportunités difficiles à suivre",
+          "text": "Échantillons, relances, tarifs et négociations se retrouvent vite dispersés entre emails, Excel et notes."
         }
       }
     },
     "method": {
-      "title": "Nos outils pour vous permettre d'ouvrir des marchés export.",
+      "title": "Tout ce qu'il faut pour développer vos marchés export.",
       "step1": {
         "step": "ÉTAPE 2",
-        "title": "Arrêtez de chercher les acheteurs. On les trouve pour vous.",
-        "text": "Vous visez un marché précis ? On analyse votre domaine et vos vins, et on vous livre une sélection d'importateurs pertinents, pas une liste brute à trier vous-même.",
-        "bullet1": "Filtrage précis par marché et par type d'acheteur.",
-        "bullet2": "Recherche sur-mesure : un crédit chaque mois, un marché ciblé, une sélection livrée par nos experts."
+        "title": "Vous choisissez le marché. Nous faisons le tri.",
+        "text": "Chaque mois, demandez une recherche sur un marché précis. WineExporters analyse votre profil et vos vins, identifie les importateurs correspondants, puis notre équipe vérifie et enrichit la sélection avant de vous la livrer.",
+        "bullet1": "Filtrage par marché et par profil d'acheteur.",
+        "bullet2": "Une recherche ciblée incluse chaque mois, livrée par notre équipe."
       },
       "step2": {
         "step": "ÉTAPE 3",
-        "title": "Des campagnes qui obtiennent enfin des réponses.",
-        "text": "Fini le mail envoyé dans le vide. On rédige, on envoie, on optimise la délivrabilité pour que votre message arrive en boîte de réception, pas dans les spams.",
-        "bullet1": "Outil de création de campagnes intégré.",
-        "bullet2": "Campagne mensuelle gérée : vous validez, on envoie."
+        "title": "Choisissez vos marchés et vos vins. Nous gérons la campagne.",
+        "text": "Vous sélectionnez les pays à cibler et les cuvées à mettre en avant. WineExporters prend en charge la rédaction, l'envoi, la délivrabilité et le reporting.",
+        "bullet1": "Rédaction adaptée au marché.",
+        "bullet2": "Envoi et délivrabilité gérés.",
+        "bullet3": "Résultats centralisés dans votre espace."
       },
       "step3": {
         "step": "ÉTAPE 4",
-        "title": "Un importateur demande vos tarifs ? Ne laissez plus rien passer.",
-        "text": "Le pipeline visuel, le suivi des échantillons, l'historique des relances, tout au même endroit.",
-        "bullet1": "Pipeline visuel (CRM Kanban) dédié à l'export de vins.",
-        "bullet2": "Suivi des envois d'échantillons.",
-        "bullet3": "Historique centralisé pour ne jamais oublier une relance.",
-        "bullet4": "Opportunités : les demandes entrantes d'importateurs arrivent directement dans votre pipeline, sans que vous ayez à les chercher."
+        "title": "De la première prise de contact à la commande, gardez chaque opportunité sous les yeux.",
+        "text": "Contacts, réponses, échantillons, relances et négociations avancent dans un pipeline conçu pour l'export de vins.",
+        "bullet1": "Pipeline visuel.",
+        "bullet2": "Suivi des échantillons.",
+        "bullet3": "Historique des échanges.",
+        "bullet4": "Relances centralisées."
       },
-      "databaseCallout": "21 000+ importateurs vérifiés dans 140+ pays.",
+      "databaseCallout": "23 000+ importateurs vérifiés dans 145+ pays.",
       "step0": {
         "step": "ÉTAPE 1",
-        "title": "Une base mondiale, vérifiée à la main.",
-        "text": "21 000+ importateurs dans 140+ pays. Pas du scraping, des contacts réels, mis à jour en continu."
+        "title": "23 000+ importateurs. Pas 23 000 lignes scrapées.",
+        "text": "Explorez une base spécialisée dans le vin, construite au fil de plusieurs années de prospection et continuellement vérifiée, enrichie et mise à jour. 145+ pays, coordonnées directes, filtres par marché et profil."
       },
       "step4": {
         "step": "ÉTAPE 5",
-        "title": "Les opportunités viennent à vous.",
-        "text": "Des demandes directes d'importateurs et d'acheteurs, publiées dans la plateforme. Vous répondez, on vous met en relation.",
-        "bullet1": "Demandes directes d'importateurs et d'acheteurs.",
-        "bullet2": "Appels d'offres et recherches de partenaires par marché.",
-        "bullet3": "Notification dès qu'une opportunité correspond à vos vins."
+        "title": "Ne vous contentez pas de prospecter. Profitez aussi de la demande entrante.",
+        "text": "Retrouvez les demandes directes d'importateurs et les appels d'offres correspondant à vos vins, puis ajoutez les opportunités pertinentes à votre pipeline.",
+        "bullet1": "Demandes directes d'importateurs.",
+        "bullet2": "Appels d'offres et monopoles.",
+        "bullet3": "Ajout au CRM en un clic."
       }
     },
     "synthesis": {
-      "title": "Une seule plateforme. Zéro friction. Et de l'humain.",
-      "text": "On remplace vos fichiers Excel, vos outils d'emailing compliqués et vos recherches Google.\n\nMais ce n'est pas qu'un logiciel : derrière chaque recherche sur-mesure et chaque campagne, une équipe s'active pour vendre vos vins, pas un algorithme qui tourne tout seul."
+      "title": "Autonome quand vous le voulez. Accompagné quand vous en avez besoin.",
+      "text": "Explorez la base, consultez vos opportunités et pilotez votre pipeline en autonomie. Pour les tâches les plus chronophages, comme la recherche ciblée et les campagnes, notre équipe prend le relais."
     },
     "testimonials": {
-      "title": "Des domaines comme le vôtre ont trouvé leurs acheteurs. Voici les marchés qu'ils ont ouverts.",
-      "subtitle": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters."
+      "title": "De nouveaux marchés. Pas seulement de nouveaux contacts.",
+      "subtitle": "Quelques exemples de marchés ouverts grâce à notre accompagnement ExportVins et aux outils aujourd'hui réunis dans WineExporters."
     },
     "pricing": {
-      "title": "Un investissement rentabilisé dès la première palette.",
-      "subtitle": "Tout est inclus. Pas de coûts cachés.",
+      "title": "Un abonnement. Toute la plateforme.",
+      "subtitle": "Tout votre développement export pour 199 € HT / mois.",
       "planName": "WineExporters",
       "priceSuffix": "HT / mois",
-      "commitment": "sans engagement, résiliable à tout moment",
+      "commitment": "Sans engagement. Résiliable à tout moment.",
       "ctaStart": "Demander une démo",
       "inclusions": [
-        "Accès illimité aux bases de données",
+        "Accès illimité à 23 000+ importateurs vérifiés",
         "1 recherche sur-mesure / mois",
-        "1 campagne de prospection / mois",
-        "Accès aux opportunités : demandes directes d'importateurs et d'acheteurs",
-        "Accès complet au CRM",
-        "Support prioritaire"
+        "1 campagne de prospection gérée / mois",
+        "Accès aux opportunités",
+        "CRM export complet",
+        "Support dédié"
       ]
     },
     "faq": {
@@ -1908,7 +1910,8 @@
       ]
     },
     "finalCta": {
-      "title": "Prêt à conquérir de nouveaux marchés ?",
+      "title": "Votre prochain marché commence par le bon importateur.",
+      "subtitle": "Découvrez comment WineExporters peut vous aider à cibler, contacter et suivre de nouveaux acheteurs à l'international.",
       "button": "Demander une démo"
     },
     "footer": {
@@ -1918,23 +1921,30 @@
     },
     "marquee": {
       "items": [
-        "21 000 IMPORTATEURS VÉRIFIÉS",
-        "140 PAYS",
-        "UNE PLATEFORME, TOUT INCLUS"
+        "23 000+ IMPORTATEURS VÉRIFIÉS",
+        "145+ PAYS",
+        "1 RECHERCHE CIBLÉE / MOIS",
+        "1 CAMPAGNE GÉRÉE / MOIS"
       ]
     },
     "punchline": {
       "two": "5 ans à ouvrir des marchés pour des domaines comme le vôtre. Pas en théorie, en commandes signées."
     },
     "bigStats": {
+      "title": "Une plateforme construite sur plusieurs années de prospection export.",
+      "text": "WineExporters transforme l'expérience terrain d'ExportVins en un outil accessible aux domaines qui veulent structurer et accélérer leur développement international.",
       "items": [
         {
-          "value": "21 000+",
-          "label": "importateurs vérifiés dans 140+ pays"
+          "value": "23 000+",
+          "label": "Importateurs vérifiés"
         },
         {
-          "value": "15 minutes",
-          "label": "pour lancer une campagne"
+          "value": "145+",
+          "label": "Pays couverts"
+        },
+        {
+          "value": "1 + 1",
+          "label": "Recherche ciblée + campagne gérée chaque mois"
         }
       ]
     }
