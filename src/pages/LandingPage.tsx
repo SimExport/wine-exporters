@@ -99,10 +99,25 @@ const Punchline = ({ text, tone }: { text: string; tone: "cream" | "primary" }) 
   </section>
 );
 
-const BigStats = ({ items }: { items: Array<{ value: string; label: string }> }) => (
+const BigStats = ({
+  items,
+  title,
+  text
+}: {items: Array<{ value: string; label: string }>;title?: string;text?: string;}) => (
   <section className="py-20 sm:py-28">
-    <div className="max-w-5xl mx-auto px-6 grid gap-14 sm:gap-8 sm:grid-cols-2">
-      {items.map((s, i) => (
+    <div className="max-w-5xl mx-auto px-6">
+      {title &&
+      <FadeIn>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4">
+            {title}
+          </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto leading-relaxed">
+            {text}
+          </p>
+        </FadeIn>
+      }
+      <div className="grid gap-14 sm:gap-8 sm:grid-cols-3">
+        {items.map((s, i) => (
         <FadeIn key={s.value} delay={i * 0.1}>
           <div className="text-center">
             <div className="font-display text-gold text-6xl sm:text-8xl lg:text-[7rem] leading-none font-bold">
@@ -113,7 +128,8 @@ const BigStats = ({ items }: { items: Array<{ value: string; label: string }> })
             </p>
           </div>
         </FadeIn>
-      ))}
+        ))}
+      </div>
     </div>
   </section>
 );
@@ -126,7 +142,7 @@ const painPointsConfig = [
 
 const pillarsConfig = [
   { id: "step1", bulletIcons: [Filter, Users], bulletKeys: ["bullet1", "bullet2"] },
-  { id: "step2", bulletIcons: [Send, Eye], bulletKeys: ["bullet1", "bullet2"] },
+  { id: "step2", bulletIcons: [Send, Eye, Eye], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
   { id: "step3", bulletIcons: [Kanban, Package, Clock, Inbox], bulletKeys: ["bullet1", "bullet2", "bullet3", "bullet4"] },
   { id: "step4", bulletIcons: [Inbox, Globe, Bell], bulletKeys: ["bullet1", "bullet2", "bullet3"] },
 ] as const;
@@ -455,7 +471,7 @@ const LandingPage = () => {
             </Badge>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 whitespace-pre-line">
               {t("landing.hero.titleLead")}{" "}
               <span className="text-primary underline decoration-primary/40 underline-offset-4">
                 {t("landing.hero.titleHighlight")}
@@ -510,7 +526,12 @@ const LandingPage = () => {
               </FadeIn>
             )}
           </div>
-        </div>
+          </div>
+          <FadeIn delay={0.3}>
+            <p className="text-center text-muted-foreground text-lg mt-14 max-w-2xl mx-auto leading-relaxed">
+              {t("landing.pain.transition")}
+            </p>
+          </FadeIn>
       </section>
 
 
@@ -586,7 +607,11 @@ const LandingPage = () => {
       </section>
 
       {/* ── C. COMPTEURS STATISTIQUES ── */}
-      <BigStats items={bigStats} />
+      <BigStats
+        items={bigStats}
+        title={t("landing.bigStats.title")}
+        text={t("landing.bigStats.text")}
+      />
 
       {/* ── 4. SYNTHÈSE & EXPERTISE ── */}
       <section className="py-24 bg-primary text-primary-foreground">
@@ -709,9 +734,12 @@ const LandingPage = () => {
       <section className="py-24">
         <div className="max-w-2xl mx-auto px-6 text-center">
           <FadeIn>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-8">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
               {t("landing.finalCta.title")}
             </h2>
+            <p className="text-muted-foreground text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+              {t("landing.finalCta.subtitle")}
+            </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <VideoCtaButton label={t("landing.hero.ctaVideo")} className="px-10" />
               <Button size="lg" variant="outline" asChild className="text-lg px-10">
