@@ -421,7 +421,6 @@ const LandingPage = () => {
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
   const marqueeItems = t("landing.marquee.items", { returnObjects: true }) as string[];
   const bigStats = t("landing.bigStats.items", { returnObjects: true }) as Array<{ value: string; label: string }>;
-  const methodOverview = ["step0", "step1", "step2", "step3", "step4"] as const;
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
