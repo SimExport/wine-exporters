@@ -1785,10 +1785,10 @@
       "requestDemo": "Request a demo"
     },
     "hero": {
-      "badge": "🍷 For wine estates looking for buyers, not trade shows.",
-      "titleLead": "Find your future importers,",
-      "titleHighlight": "grow your export sales.",
-      "subtitle": "We connect you directly with verified importers — no trade shows, no cold outreach in the dark.",
+      "badge": "The export platform for wine estates",
+      "titleLead": "Find the right importers.\n",
+      "titleHighlight": "Grow your export sales.",
+      "subtitle": "Access 23,000+ verified importers, target the right buyers and let us run your outreach campaigns — all in one platform.",
       "ctaPrimary": "Discover the platform in video",
       "ctaSecondary": "Request a demo",
       "haveAccount": "I already have an account → Sign in",
@@ -1798,88 +1798,90 @@
         "markets": "markets opened"
       },
       "statsAttribution": "Results achieved through ExportVins support and the WineExporters platform.",
-      "database": "21,000+ verified importers across 140+ countries",
+      "database": "23,000+ verified importers across 145+ countries",
       "ctaVideo": "Discover the platform in video"
     },
     "pain": {
-      "title": "Exporting shouldn't feel like an uphill battle.",
+      "title": "You know how to make your wines. Finding the right importers is another story.",
+      "transition": "WineExporters brings sourcing, outreach and export follow-up together in a single platform.",
       "items": {
         "search": {
-          "title": "The endless search",
-          "text": "Hours lost hunting for the right contacts, and overpriced trade shows with uncertain results. We've all been there."
+          "title": "Hours spent looking for the right contacts",
+          "text": "Trade shows, Google, LinkedIn, purchased lists: a lot of time invested for very little certainty about contact quality."
         },
         "silence": {
-          "title": "Radio silence",
-          "text": "Your outreach emails land in spam, or get ignored. The silence wears you down."
+          "title": "Outreach that gets no reply",
+          "text": "Targeting, message, language, deliverability: one weak link is enough for your campaign to disappear into the noise."
         },
         "tracking": {
-          "title": "Chaotic follow-up",
-          "text": "Samples, follow-ups — everything ends up lost in a spreadsheet no one opens anymore."
+          "title": "Opportunities that are hard to follow",
+          "text": "Samples, follow-ups, prices and negotiations quickly end up scattered across emails, spreadsheets and notes."
         }
       }
     },
     "method": {
-      "title": "Our tools to help you open export markets.",
+      "title": "Everything you need to grow your export markets.",
       "step1": {
         "step": "STEP 2",
-        "title": "Stop looking for buyers. We find them for you.",
-        "text": "Targeting a specific market? We analyse your estate and your wines, then deliver a shortlist of relevant importers — not a raw list for you to sort through.",
-        "bullet1": "Precise filtering by market and buyer type.",
-        "bullet2": "Bespoke search: one credit each month, one targeted market, a shortlist delivered by our experts."
+        "title": "You choose the market. We do the sorting.",
+        "text": "Every month, request a search on a specific market. WineExporters analyses your estate and your wines, identifies matching importers, then our team verifies and enriches the selection before delivering it to you.",
+        "bullet1": "Filtering by market and buyer profile.",
+        "bullet2": "One targeted search included every month, delivered by our team."
       },
       "step2": {
         "step": "STEP 3",
-        "title": "Campaigns that finally get replies.",
-        "text": "No more emails sent into the void. We write, we send, we optimise deliverability so your message lands in the inbox, not in spam.",
-        "bullet1": "Built-in campaign creation tool.",
-        "bullet2": "Managed monthly campaign: you approve, we send."
+        "title": "Choose your markets and your wines. We run the campaign.",
+        "text": "You select the countries to target and the cuvées to promote. WineExporters handles the copywriting, the sending, the deliverability and the reporting.",
+        "bullet1": "Copy adapted to each market.",
+        "bullet2": "Sending and deliverability handled.",
+        "bullet3": "Results centralised in your account."
       },
       "step3": {
         "step": "STEP 4",
-        "title": "An importer asks for your prices? Never let one slip.",
-        "text": "Visual pipeline, sample tracking, follow-up history — all in one place.",
-        "bullet1": "Visual pipeline (Kanban CRM) built for wine export.",
-        "bullet2": "Sample shipment tracking.",
-        "bullet3": "Centralised history so you never forget a follow-up.",
-        "bullet4": "Opportunities: inbound importer requests land straight in your pipeline, no searching required."
+        "title": "From first contact to order, keep every opportunity in sight.",
+        "text": "Contacts, replies, samples, follow-ups and negotiations move through a pipeline built for wine export.",
+        "bullet1": "Visual pipeline.",
+        "bullet2": "Sample tracking.",
+        "bullet3": "Full exchange history.",
+        "bullet4": "Centralised follow-ups."
       },
-      "databaseCallout": "21,000+ verified importers across 140+ countries.",
+      "databaseCallout": "23,000+ verified importers across 145+ countries.",
       "step0": {
         "step": "STEP 1",
-        "title": "A global database, verified by hand.",
-        "text": "21,000+ importers in 140+ countries. No scraping — real contacts, continuously updated."
+        "title": "23,000+ importers. Not 23,000 scraped rows.",
+        "text": "Explore a database dedicated to wine, built over several years of export prospecting and continuously verified, enriched and updated. 145+ countries, direct contact details, filters by market and profile."
       },
       "step4": {
         "step": "STEP 5",
-        "title": "Opportunities come to you.",
-        "text": "Direct requests from importers and buyers, published in the platform. You reply, we make the introduction.",
-        "bullet1": "Direct requests from importers and buyers.",
-        "bullet2": "Tenders and partner searches by market.",
-        "bullet3": "Get notified as soon as an opportunity matches your wines."
+        "title": "Don't just prospect. Take advantage of inbound demand too.",
+        "text": "Find direct importer requests and tenders matching your wines, then add the relevant opportunities to your pipeline.",
+        "bullet1": "Direct requests from importers.",
+        "bullet2": "Tenders and monopolies.",
+        "bullet3": "Add to your CRM in one click."
       }
     },
     "synthesis": {
-      "title": "One platform. Zero friction. And real people.",
-      "text": "We replace your spreadsheets, your complicated emailing tools and your Google searches.\n\nBut it's more than software: behind every bespoke search and every campaign, a team is working to sell your wines — not an algorithm running on its own."
+      "title": "Independent when you want. Supported when you need it.",
+      "text": "Explore the database, review your opportunities and run your pipeline on your own. For the most time-consuming work, such as targeted searches and campaigns, our team takes over."
     },
     "testimonials": {
-      "title": "Estates like yours found their buyers. Here are the markets they opened.",
-      "subtitle": "Results achieved through ExportVins support and the WineExporters platform."
+      "title": "New markets. Not just new contacts.",
+      "subtitle": "A few examples of markets opened through our ExportVins support and the tools now brought together in WineExporters."
     },
     "pricing": {
-      "title": "An investment paid back from the first pallet.",
-      "subtitle": "Everything included. No hidden fees.",
+      "title": "One subscription. The whole platform.",
+      "subtitle": "Your entire export development for €199 excl. VAT / month.",
       "planName": "WineExporters",
-      "priceSuffix": "excl. tax / month",
-      "commitment": "no commitment, cancel anytime",
+      "priceSuffix": "excl. VAT / month",
+      "commitment": "No commitment. Cancel anytime.",
       "ctaStart": "Request a demo",
       "inclusions": [
-        "Unlimited access to databases",
+        "Unlimited access to 23,000+ verified importers",
         "1 bespoke search / month",
-        "1 prospecting campaign / month",
-        "Access to opportunities: direct requests from importers and buyers",
-        "Full CRM access",
-        "Priority support"
+        "1 managed prospecting campaign / month",
+        "Access to opportunities",
+        "Full export CRM",
+        "Dedicated support"
       ]
     },
     "faq": {
@@ -1908,7 +1910,8 @@
       ]
     },
     "finalCta": {
-      "title": "Ready to conquer new markets?",
+      "title": "Your next market starts with the right importer.",
+      "subtitle": "See how WineExporters helps you target, contact and follow up with new buyers around the world.",
       "button": "Request a demo"
     },
     "footer": {
@@ -1918,23 +1921,30 @@
     },
     "marquee": {
       "items": [
-        "21,000 VERIFIED IMPORTERS",
-        "140 COUNTRIES",
-        "ONE PLATFORM, ALL INCLUDED"
+        "23,000+ VERIFIED IMPORTERS",
+        "145+ COUNTRIES",
+        "1 TARGETED SEARCH / MONTH",
+        "1 MANAGED CAMPAIGN / MONTH"
       ]
     },
     "punchline": {
       "two": "5 years opening markets for estates like yours. Not in theory — in signed orders."
     },
     "bigStats": {
+      "title": "A platform built on years of export prospecting.",
+      "text": "WineExporters turns ExportVins' field experience into a tool available to estates that want to structure and accelerate their international development.",
       "items": [
         {
-          "value": "21,000+",
-          "label": "verified importers in 140+ countries"
+          "value": "23,000+",
+          "label": "Verified importers"
         },
         {
-          "value": "15 minutes",
-          "label": "to launch a campaign"
+          "value": "145+",
+          "label": "Countries covered"
+        },
+        {
+          "value": "1 + 1",
+          "label": "One targeted search + one managed campaign every month"
         }
       ]
     }
