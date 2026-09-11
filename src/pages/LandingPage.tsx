@@ -421,7 +421,6 @@ const LandingPage = () => {
   const faqs = t("landing.faq.items", { returnObjects: true }) as Array<{ q: string; a: string }>;
   const marqueeItems = t("landing.marquee.items", { returnObjects: true }) as string[];
   const bigStats = t("landing.bigStats.items", { returnObjects: true }) as Array<{ value: string; label: string }>;
-  const methodOverview = ["step0", "step1", "step2", "step3", "step4"] as const;
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -544,24 +543,6 @@ const LandingPage = () => {
             </h2>
           </FadeIn>
 
-          {/* Aperçu numéroté 01 → 04 */}
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5 mb-24 border-t border-border pt-10">
-            {methodOverview.map((id, i) => (
-              <FadeIn key={id} delay={i * 0.08}>
-                <div className="flex flex-col gap-3">
-                  <span className="font-display text-5xl lg:text-6xl font-bold text-gold leading-none">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="font-display text-xl font-semibold leading-snug">
-                    {t(`landing.method.${id}.title`)}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {t(`landing.method.${id}.text`)}
-                  </p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
 
           <div className="space-y-28">
             {pillarsConfig.map((p, i) => {
