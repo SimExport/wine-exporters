@@ -146,7 +146,9 @@ const Discover = () => {
       <SEO title={t.seoTitle} description={t.seoDesc} path="/decouvrir" />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-7">
-        <BrandLogo className="h-16 w-auto max-w-[320px]" />
+        <Link to="/" className="inline-block">
+          <BrandLogo className="h-20 w-auto max-w-[360px] sm:h-24" />
+        </Link>
         <LanguageSwitcher />
       </header>
 
