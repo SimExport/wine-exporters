@@ -17,6 +17,7 @@ import CountryMultiSelect, { parseMarketString } from '@/components/profile/Coun
 import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
 import { resumableUpload } from '@/lib/resumable-upload';
+import { TechSheetRow } from '@/components/profile/TechSheetRow';
 
 const sanitizeStorageKey = (name: string) => {
   const dot = name.lastIndexOf('.');
