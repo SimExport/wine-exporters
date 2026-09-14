@@ -540,6 +540,7 @@
       "add": "Add tech sheets",
       "addedTitle": "Tech sheets added",
       "tableHeaders": {
+        "name": "Sheet name",
         "cuvee": "Cuvée",
         "vintage": "Vintage",
         "format": "Format",
@@ -550,8 +551,11 @@
         "cuvee": "Cuvée",
         "vintage": "2023",
         "format": "75cl",
-        "language": "EN"
-      }
+        "language": "EN",
+        "name": "Sheet name"
+      },
+      "open": "Open",
+      "saved": "Saved"
     },
     "media": {
       "photosTitle": "Photos",

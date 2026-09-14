@@ -540,6 +540,7 @@
       "add": "Ajouter des fiches techniques",
       "addedTitle": "Fiches techniques ajoutées",
       "tableHeaders": {
+        "name": "Nom de la fiche",
         "cuvee": "Cuvée",
         "vintage": "Millésime",
         "format": "Format",
@@ -550,8 +551,11 @@
         "cuvee": "Cuvée",
         "vintage": "2023",
         "format": "75cl",
-        "language": "FR"
-      }
+        "language": "FR",
+        "name": "Nom de la fiche"
+      },
+      "open": "Ouvrir",
+      "saved": "Enregistré"
     },
     "media": {
       "photosTitle": "Photos",
