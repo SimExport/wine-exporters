@@ -1296,6 +1296,7 @@ const Profile = () => {
                         <table className="w-full border-collapse border border-border">
                           <thead>
                             <tr className="bg-muted">
+                              <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.name')}</th>
                               <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.cuvee')}</th>
                               <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.vintage')}</th>
                               <th className="border border-border p-2 text-left">{t('profile.techSheets.tableHeaders.format')}</th>
@@ -1304,33 +1305,16 @@ const Profile = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {documents.filter(d => d.category === 'tech_sheet').map(doc => <tr key={doc.id}>
-                                <td className="border border-border p-2">
-                                  <Input value={doc.cuvee || ''} placeholder={t('profile.techSheets.placeholders.cuvee')} className="w-full" onChange={e => handleUpdateDocument(doc.id, {
-                              cuvee: e.target.value
-                            })} />
-                                </td>
-                                <td className="border border-border p-2">
-                                  <Input value={doc.vintage || ''} placeholder={t('profile.techSheets.placeholders.vintage')} type="number" className="w-full" onChange={e => handleUpdateDocument(doc.id, {
-                              vintage: e.target.value ? parseInt(e.target.value) : undefined
-                            })} />
-                                </td>
-                                <td className="border border-border p-2">
-                                  <Input value={doc.format || ''} placeholder={t('profile.techSheets.placeholders.format')} className="w-full" onChange={e => handleUpdateDocument(doc.id, {
-                              format: e.target.value
-                            })} />
-                                </td>
-                                <td className="border border-border p-2">
-                                  <Input value={doc.language || ''} placeholder={t('profile.techSheets.placeholders.language')} className="w-full" onChange={e => handleUpdateDocument(doc.id, {
-                              language: e.target.value
-                            })} />
-                                </td>
-                                <td className="border border-border p-2">
-                                  <Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteDocument(doc.id, doc.file_url)}>
-                                    {t('profile.documents.delete')}
-                                  </Button>
-                                </td>
-                              </tr>)}
+                            {documents
+                              .filter(d => d.category === 'tech_sheet')
+                              .slice()
+                              .sort((a, b) => (a.title || a.file_name).localeCompare(b.title || b.file_name, undefined, { numeric: true }))
+                              .map(doc => <TechSheetRow
+                                key={doc.id}
+                                doc={doc}
+                                onSave={handleUpdateDocument}
+                                onDelete={handleDeleteDocument}
+                              />)}
                           </tbody>
                         </table>
                       </div>
