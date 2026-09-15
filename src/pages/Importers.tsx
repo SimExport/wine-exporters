@@ -394,6 +394,8 @@ const Importers = () => {
     }
   };
 
+  const [exportFormat, setExportFormat] = useState<'xlsx' | 'csv'>('xlsx');
+
   const handleDownloadClick = () => {
     if (!hasPaidAccess) {
       toast({ title: t('common.error'), description: t('importers.exportCredits.paidOnly'), variant: 'destructive' });
@@ -414,7 +416,7 @@ const Importers = () => {
         return;
       }
       // selectAllAcrossPages → fetch via country; otherwise via ids
-      performExport(count, selectAllAcrossPages ? 'country' : 'selection');
+      performExport(count, selectAllAcrossPages ? 'country' : 'selection', exportFormat);
       return;
     }
     // No selection → export the full country
@@ -422,7 +424,7 @@ const Importers = () => {
       setPartialOpen(true);
       return;
     }
-    performExport(totalCount, 'country');
+    performExport(totalCount, 'country', exportFormat);
   };
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = (currentPage - 1) * itemsPerPage + 1;
