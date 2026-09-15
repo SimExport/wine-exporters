@@ -361,6 +361,9 @@
     "exportCredits": {
       "balance": "{{remaining}} / 500 export credits available this month",
       "download": "Download list",
+      "chooseFormat": "Choose format",
+      "formatXlsx": "Excel (.xlsx) — recommended",
+      "formatCsv": "CSV (.csv)",
       "paidOnly": "CSV export is reserved for paid subscribers.",
       "quotaExhausted": "Export quota reached. Your credits will reset on {{date}}.",
       "partialTitle": "Partial download",

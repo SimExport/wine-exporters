@@ -8,7 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download, ChevronDown } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -282,7 +289,7 @@ const Importers = () => {
       });
     }
   }, [selectedCountry]);
-  const performExport = async (limit: number, mode: 'country' | 'selection' = 'country') => {
+  const performExport = async (limit: number, mode: 'country' | 'selection' = 'country', format: 'csv' | 'xlsx' = 'xlsx') => {
     if (!selectedCountry || limit <= 0) return;
     const country = COUNTRIES.find(c => c.code === selectedCountry);
     if (!country) return;
@@ -336,27 +343,40 @@ const Importers = () => {
       }
 
       const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
-      const DELIM = ';';
-      const csvContent = [
-        'sep=;',
-        headers.join(DELIM),
-        ...(data || []).map(contact =>
-          headers.map(header => {
-            const value = (contact as any)[header] || '';
-            return `"${value.toString().replace(/"/g, '""')}"`;
-          }).join(DELIM)
-        ),
-      ].join('\r\n');
+      const fileBase = `contacts_${selectedCountry}_${new Date().toISOString().split('T')[0]}`;
 
-      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `contacts_${selectedCountry}_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (format === 'xlsx') {
+        const rows = (data || []).map(contact =>
+          headers.map(header => ((contact as any)[header] ?? '').toString())
+        );
+        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        worksheet['!cols'] = headers.map(h => ({ wch: Math.max(h.length + 2, 18) }));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts');
+        XLSX.writeFile(workbook, `${fileBase}.xlsx`);
+      } else {
+        const DELIM = ';';
+        const csvContent = [
+          'sep=;',
+          headers.join(DELIM),
+          ...(data || []).map(contact =>
+            headers.map(header => {
+              const value = (contact as any)[header] || '';
+              return `"${value.toString().replace(/"/g, '""')}"`;
+            }).join(DELIM)
+          ),
+        ].join('\r\n');
+
+        const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${fileBase}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
 
       toast({
         title: t('common.success'),
@@ -373,6 +393,8 @@ const Importers = () => {
       setExporting(false);
     }
   };
+
+  const [exportFormat, setExportFormat] = useState<'xlsx' | 'csv'>('xlsx');
 
   const handleDownloadClick = () => {
     if (!hasPaidAccess) {
@@ -394,7 +416,7 @@ const Importers = () => {
         return;
       }
       // selectAllAcrossPages → fetch via country; otherwise via ids
-      performExport(count, selectAllAcrossPages ? 'country' : 'selection');
+      performExport(count, selectAllAcrossPages ? 'country' : 'selection', exportFormat);
       return;
     }
     // No selection → export the full country
@@ -402,7 +424,7 @@ const Importers = () => {
       setPartialOpen(true);
       return;
     }
-    performExport(totalCount, 'country');
+    performExport(totalCount, 'country', exportFormat);
   };
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = (currentPage - 1) * itemsPerPage + 1;
@@ -505,18 +527,42 @@ const Importers = () => {
               <span className="text-xs text-muted-foreground">
                 {t('importers.exportCredits.balance', { remaining: exportCredits })}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadClick}
-                disabled={exporting || exportCredits <= 0}
-                title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
-              >
-                {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                {effectiveSelectionCount > 0
-                  ? t('importers.exportCredits.downloadWithCount', { count: effectiveSelectionCount })
-                  : t('importers.exportCredits.download')}
-              </Button>
+              <div className="flex items-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadClick}
+                  disabled={exporting || exportCredits <= 0}
+                  title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
+                  className="rounded-r-none"
+                >
+                  {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                  {(effectiveSelectionCount > 0
+                    ? t('importers.exportCredits.downloadWithCount', { count: effectiveSelectionCount })
+                    : t('importers.exportCredits.download'))} ({exportFormat.toUpperCase()})
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={exporting || exportCredits <= 0}
+                      className="rounded-l-none border-l-0 px-2"
+                      aria-label={t('importers.exportCredits.chooseFormat')}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setExportFormat('xlsx')}>
+                      {t('importers.exportCredits.formatXlsx')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setExportFormat('csv')}>
+                      {t('importers.exportCredits.formatCsv')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           )}
         </div>
@@ -699,7 +745,7 @@ const Importers = () => {
               onClick={() => {
                 setPartialOpen(false);
                 const mode = effectiveSelectionCount > 0 && !selectAllAcrossPages ? 'selection' : 'country';
-                performExport(exportCredits, mode);
+                performExport(exportCredits, mode, exportFormat);
               }}
             >
               {t('importers.exportCredits.partialConfirm', { remaining: exportCredits })}
