@@ -196,14 +196,16 @@
         "sendSamples": {
           "category": "Suivi commercial",
           "title": "Envoyer des échantillons à un importateur",
-          "type": "Vidéo · durée à compléter",
+          "type": "Vidéo",
+          "duration": "",
           "description": "Comment préparer votre envoi et donner à l’importateur toutes les informations utiles pour la dégustation.",
           "cta": "Voir la vidéo"
         },
         "followUpTasting": {
           "category": "Suivi commercial",
           "title": "Comment relancer après une dégustation",
-          "type": "Vidéo + guide · durée à compléter",
+          "type": "Vidéo + guide",
+          "duration": "",
           "description": "Quand reprendre contact après dégustation et comment faire avancer l’échange vers une prochaine étape concrète.",
           "cta": "Voir la ressource"
         }
