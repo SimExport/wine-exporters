@@ -17,7 +17,7 @@ Créer une nouvelle page « Ressources » accessible depuis la navigation du das
      - un titre de carte en `font-display` / `text-lg` / `font-semibold` ;
      - une description en `text-muted-foreground` ;
      - une ligne de « sujets » en petit texte (séparés par un point médian ·) ;
-     - un CTA discret visuel / non fonctionnel pour l’instant.
+     - un CTA discret visuel / non fonctionnel pour l’instant, structuré (champ `href` optionnel dans la config de carte) pour accueillir un lien ou une action à la prochaine itération sans refactor.
    - SEO : balise `<title>` et meta description via le composant `SEO` existant.
 
 3. **Traductions i18n**
@@ -25,7 +25,7 @@ Créer une nouvelle page « Ressources » accessible depuis la navigation du das
      - `nav.resources`
      - `seo.resources.title` / `seo.resources.description`
      - `resources.title` / `resources.subtitle`
-     - `resources.cards` : tableau d’objets `{ title, description, topics, cta }` pour les 4 cartes.
+     - `resources.cards.<slug>.{title,description,topics,cta}` : clés explicites par carte (`contactImporter`, `followCampaign`, `followProspect`, `moveOpportunity`), `topics` en tableau de chaînes.
    - Les textes anglais fournis par l’utilisateur sont utilisés tels quels.
 
 4. **Design system**
