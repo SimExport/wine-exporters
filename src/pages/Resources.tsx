@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, FileText, Mail, Megaphone, RefreshCw, TrendingUp, Video, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpen, FileText, Mail, Megaphone, Play, RefreshCw, TrendingUp, Video, type LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SEO } from "@/components/SEO";
 
 type ResourceCardKey = "contactImporter" | "followCampaign" | "followProspect" | "moveOpportunity";
@@ -57,6 +59,26 @@ const TYPE_ICONS: Record<EssentialResourceType, LucideIcon> = {
   template: FileText,
   video: Video,
 };
+
+type PracticalVideoSlug =
+  | "sendSamples"
+  | "confirmReceipt"
+  | "tastingFeedback"
+  | "negotiateFirstOrder"
+  | "postOrderFollowUp";
+
+interface PracticalVideo {
+  slug: PracticalVideoSlug;
+  loomEmbedUrl: string;
+}
+
+const PRACTICAL_VIDEOS: PracticalVideo[] = [
+  { slug: "sendSamples", loomEmbedUrl: "https://www.loom.com/embed/4ac94b14e65843afaa809fefc112a4cb" },
+  { slug: "confirmReceipt", loomEmbedUrl: "https://www.loom.com/embed/b4be1b5d48564a51b22fbee48cbff7e8" },
+  { slug: "tastingFeedback", loomEmbedUrl: "https://www.loom.com/embed/761b4b30c0e94adab177128083dc4013" },
+  { slug: "negotiateFirstOrder", loomEmbedUrl: "https://www.loom.com/embed/ec5f43b2902e408aa91279651c61efd9" },
+  { slug: "postOrderFollowUp", loomEmbedUrl: "https://www.loom.com/embed/870ad90a86ae4410ac71bdcf70553b4e" },
+];
 
 const Resources = () => {
   const { t } = useTranslation();
