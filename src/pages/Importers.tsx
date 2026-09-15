@@ -527,18 +527,42 @@ const Importers = () => {
               <span className="text-xs text-muted-foreground">
                 {t('importers.exportCredits.balance', { remaining: exportCredits })}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadClick}
-                disabled={exporting || exportCredits <= 0}
-                title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
-              >
-                {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                {effectiveSelectionCount > 0
-                  ? t('importers.exportCredits.downloadWithCount', { count: effectiveSelectionCount })
-                  : t('importers.exportCredits.download')}
-              </Button>
+              <div className="flex items-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadClick}
+                  disabled={exporting || exportCredits <= 0}
+                  title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
+                  className="rounded-r-none"
+                >
+                  {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                  {(effectiveSelectionCount > 0
+                    ? t('importers.exportCredits.downloadWithCount', { count: effectiveSelectionCount })
+                    : t('importers.exportCredits.download'))} ({exportFormat.toUpperCase()})
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={exporting || exportCredits <= 0}
+                      className="rounded-l-none border-l-0 px-2"
+                      aria-label={t('importers.exportCredits.chooseFormat')}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setExportFormat('xlsx')}>
+                      {t('importers.exportCredits.formatXlsx')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setExportFormat('csv')}>
+                      {t('importers.exportCredits.formatCsv')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           )}
         </div>
