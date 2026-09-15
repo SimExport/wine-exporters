@@ -210,6 +210,33 @@
           "cta": "View resource"
         }
       }
+    },
+    "videos": {
+      "title": "Practical videos",
+      "subtitle": "Practical advice to help you move importer conversations forward, from sending samples to post-order follow-up.",
+      "cta": "Watch video",
+      "items": {
+        "sendSamples": {
+          "title": "Sending samples to an importer",
+          "description": "How to prepare the shipment, what to include and how to provide all the useful information for the tasting."
+        },
+        "confirmReceipt": {
+          "title": "Confirm receipt and stay in touch",
+          "description": "How to confirm that the samples arrived safely and keep the conversation active before the tasting."
+        },
+        "tastingFeedback": {
+          "title": "Get feedback after a tasting",
+          "description": "When to follow up after the tasting and how to get concrete feedback without applying unnecessary pressure."
+        },
+        "negotiateFirstOrder": {
+          "title": "Negotiate and secure the first order",
+          "description": "How to move the commercial discussion forward, address the final sticking points and turn interest into a first order."
+        },
+        "postOrderFollowUp": {
+          "title": "Post-order follow-up and customer retention",
+          "description": "How to follow up after the first order and build a long-term relationship with the importer."
+        }
+      }
     }
   },
   "mobileNav": {
