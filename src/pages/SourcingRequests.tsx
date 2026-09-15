@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, Loader2, Download, Clock, CheckCircle2, Archive, FileSearch, Eye } from 'lucide-react';
+import { Target, Loader2, Clock, CheckCircle2, Archive, FileSearch, Eye } from 'lucide-react';
 import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
