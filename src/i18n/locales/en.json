@@ -237,6 +237,93 @@
           "description": "How to follow up after the first order and build a long-term relationship with the importer."
         }
       }
+    },
+    "articles": {
+      "firstEmail": {
+        "title": "How to write your first email to an importer",
+        "meta": {
+          "category": "First contact",
+          "type": "Guide",
+          "duration": "5 min"
+        },
+        "intro": "Your first email should make the importer want to know more, not tell them the whole story of your winery. The goal is simple: be understood quickly, show why your wines could be relevant to their portfolio and get a reply.",
+        "when": {
+          "title": "When to use this method",
+          "body": [
+            "Use this format when you contact an importer directly, identified in the WineExporters database or through a bespoke search, with no prior exchange with them.",
+            "If the importer has already received a WineExporters campaign or shown interest, use the resource dedicated to campaign follow-up instead."
+          ]
+        },
+        "recommend": {
+          "title": "What we recommend",
+          "intro": "Your first email should be short, personalised and easy to scan. Within a few seconds, the importer should understand:",
+          "points": [
+            "who you are;",
+            "where your wines come from;",
+            "what could make them relevant to their market;",
+            "why you are contacting them specifically;",
+            "what next step you are proposing."
+          ],
+          "outro": "Avoid presenting your entire range in the first message. Focus instead on 1 to 3 wines maximum that fit their positioning."
+        },
+        "structure": {
+          "title": "Structure of a good first email",
+          "steps": [
+            {
+              "title": "A simple introduction",
+              "body": "Introduce yourself, your winery and your region in one sentence."
+            },
+            {
+              "title": "A clear reason for contacting them",
+              "body": "Show that you know who you are writing to. A reference to their portfolio, market or positioning is enough."
+            },
+            {
+              "title": "A clear proposition",
+              "body": "Briefly present the wines that could fit their business."
+            },
+            {
+              "title": "One concrete proof point",
+              "body": "Certification, appellation, price range, existing export markets, award or another genuinely relevant point."
+            },
+            {
+              "title": "A simple next step",
+              "body": "Offer to send more information, a wine selection or samples."
+            }
+          ]
+        },
+        "template": {
+          "title": "Email template",
+          "subjectLabel": "Subject",
+          "subject": "French wines from [Region] – [Winery name]",
+          "body": "Hi [First name],\n\nMy name is [Name], [role] at [Winery name], based in [region / appellation].\n\nI’m reaching out because I noticed that you work with [relevant wine style / region / positioning], and I believe some of our wines could be a good fit for your portfolio.\n\nWe produce [1 to 3 key points: appellations, grape varieties or wine styles], with export prices starting from [price, if relevant]. We are already working in [relevant markets / references, if relevant].\n\nI’d be happy to send you our presentation, technical sheets and a selection adapted to your market. Would you be open to taking a look?\n\nBest regards,\n[Name]\n[Winery]\n[Email]\n[Phone]\n[Website]",
+          "copy": "Copy template",
+          "copied": "Template copied"
+        },
+        "avoid": {
+          "title": "What to avoid",
+          "points": [
+            "sending an email that is too long;",
+            "attaching 8 or 10 documents in the first message;",
+            "talking only about the history of the winery without explaining the relevance for the importer;",
+            "using a generic message sent to everyone;",
+            "asking for an order immediately;",
+            "using too many superlatives without concrete proof."
+          ]
+        },
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "Keep it short.",
+            "Lead with relevance, not only with your winery story.",
+            "Highlight a few wines, not your full range.",
+            "Always finish with a simple next step."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "What should you attach to a first email?"
+        }
+      }
     }
   },
   "mobileNav": {
