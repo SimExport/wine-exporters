@@ -12,15 +12,15 @@ type ResourceCardKey = "contactImporter" | "followCampaign" | "followProspect" |
 interface ResourceCardConfig {
   key: ResourceCardKey;
   icon: LucideIcon;
-  /** Optionnel : ajouter un lien dans une prochaine itération sans changer la structure. */
-  href?: string;
+  /** Ancre vers la partie pertinente de la page. */
+  anchor: string;
 }
 
 const RESOURCE_CARDS: ResourceCardConfig[] = [
-  { key: "contactImporter", icon: Mail },
-  { key: "followCampaign", icon: Megaphone },
-  { key: "followProspect", icon: RefreshCw },
-  { key: "moveOpportunity", icon: TrendingUp },
+  { key: "contactImporter", icon: Mail, anchor: "#ressources-essentielles" },
+  { key: "followCampaign", icon: Megaphone, anchor: "#resource-followCampaign" },
+  { key: "followProspect", icon: RefreshCw, anchor: "#resource-followUpStructure" },
+  { key: "moveOpportunity", icon: TrendingUp, anchor: "#resource-respondOpportunity" },
 ];
 
 type EssentialResourceSlug =
@@ -38,20 +38,19 @@ type EssentialResourceType = "guide" | "template" | "video";
 interface EssentialResource {
   slug: EssentialResourceSlug;
   type: EssentialResourceType;
-  /** Optionnel : ajouter un lien dans une prochaine itération sans changer la structure. */
-  href?: string;
+  href: string;
   recommended?: boolean;
 }
 
 const ESSENTIAL_RESOURCES: EssentialResource[] = [
   { slug: "firstEmail", type: "guide", href: "/ressources/premier-email-importateur" },
-  { slug: "followCampaign", type: "guide", recommended: true },
-  { slug: "firstEmailAttachments", type: "guide" },
-  { slug: "followUpStructure", type: "guide" },
-  { slug: "followUpTemplates", type: "template" },
-  { slug: "respondOpportunity", type: "guide" },
-  { slug: "sendSamples", type: "video" },
-  { slug: "followUpTasting", type: "video" },
+  { slug: "followCampaign", type: "guide", href: "/ressources/suivi-campagne-wineexporters", recommended: true },
+  { slug: "firstEmailAttachments", type: "guide", href: "/ressources/documents-premier-email" },
+  { slug: "followUpStructure", type: "guide", href: "/ressources/structurer-relances" },
+  { slug: "followUpTemplates", type: "template", href: "/ressources/modeles-relance" },
+  { slug: "respondOpportunity", type: "guide", href: "/ressources/repondre-opportunite" },
+  { slug: "sendSamples", type: "video", href: "/ressources/envoi-echantillons" },
+  { slug: "followUpTasting", type: "video", href: "/ressources/relance-apres-degustation" },
 ];
 
 const TYPE_ICONS: Record<EssentialResourceType, LucideIcon> = {
@@ -117,29 +116,29 @@ const Resources = () => {
           );
 
           return (
-            <Card key={card.key} className="border hover:shadow-md transition-shadow">
-              <CardContent className="flex h-full flex-col p-5">
-                <div className="mb-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-4 w-4 text-primary" />
-                </div>
-                <h2 className="mb-1 text-base font-semibold text-foreground">
-                  {t(`resources.cards.${card.key}.title`)}
-                </h2>
-                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-                  {t(`resources.cards.${card.key}.description`)}
-                </p>
-                <p className="mb-4 text-xs text-muted-foreground/80">{topics.join(" · ")}</p>
-                <div className="mt-auto">
-                  {card.href ? <Link to={card.href}>{cta}</Link> : cta}
-                </div>
-              </CardContent>
-            </Card>
+            <a key={card.key} href={card.anchor} className="block">
+              <Card className="h-full border hover:shadow-md transition-shadow">
+                <CardContent className="flex h-full flex-col p-5">
+                  <div className="mb-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <h2 className="mb-1 text-base font-semibold text-foreground">
+                    {t(`resources.cards.${card.key}.title`)}
+                  </h2>
+                  <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+                    {t(`resources.cards.${card.key}.description`)}
+                  </p>
+                  <p className="mb-4 text-xs text-muted-foreground/80">{topics.join(" · ")}</p>
+                  <div className="mt-auto">{cta}</div>
+                </CardContent>
+              </Card>
+            </a>
           );
         })}
       </div>
 
       {/* Ressources essentielles */}
-      <div>
+      <div id="ressources-essentielles" className="scroll-mt-8">
         <h2 className="mb-1 text-2xl font-bold text-foreground">
           {t("resources.essential.title")}
         </h2>
@@ -158,8 +157,14 @@ const Resources = () => {
           );
 
           return (
-            <Card key={resource.slug} className="border hover:shadow-md transition-shadow">
-              <CardContent className="flex h-full flex-col p-4">
+            <Link
+              key={resource.slug}
+              to={resource.href}
+              id={`resource-${resource.slug}`}
+              className="block scroll-mt-8"
+            >
+              <Card className="h-full border hover:shadow-md transition-shadow">
+                <CardContent className="flex h-full flex-col p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <Badge variant="secondary" className="font-normal">
                     {t(`${base}.category`)}
@@ -184,11 +189,10 @@ const Resources = () => {
                 <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
                   {t(`${base}.description`)}
                 </p>
-                <div className="mt-auto">
-                  {resource.href ? <Link to={resource.href}>{cta}</Link> : cta}
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="mt-auto">{cta}</div>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>

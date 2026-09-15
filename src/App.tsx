@@ -37,6 +37,13 @@ import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
 import Resources from "./pages/Resources";
 import FirstEmailImporter from "./pages/resources/FirstEmailImporter";
+import CampaignFollowUp from "./pages/resources/CampaignFollowUp";
+import FirstEmailAttachments from "./pages/resources/FirstEmailAttachments";
+import FollowUpStructure from "./pages/resources/FollowUpStructure";
+import FollowUpTemplates from "./pages/resources/FollowUpTemplates";
+import RespondOpportunity from "./pages/resources/RespondOpportunity";
+import SendSamples from "./pages/resources/SendSamples";
+import TastingFollowUp from "./pages/resources/TastingFollowUp";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
@@ -106,6 +113,13 @@ const App = () => (
             <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
             <Route path="/ressources" element={<DashboardLayout><Resources /></DashboardLayout>} />
             <Route path="/ressources/premier-email-importateur" element={<DashboardLayout><FirstEmailImporter /></DashboardLayout>} />
+            <Route path="/ressources/suivi-campagne-wineexporters" element={<DashboardLayout><CampaignFollowUp /></DashboardLayout>} />
+            <Route path="/ressources/documents-premier-email" element={<DashboardLayout><FirstEmailAttachments /></DashboardLayout>} />
+            <Route path="/ressources/structurer-relances" element={<DashboardLayout><FollowUpStructure /></DashboardLayout>} />
+            <Route path="/ressources/modeles-relance" element={<DashboardLayout><FollowUpTemplates /></DashboardLayout>} />
+            <Route path="/ressources/repondre-opportunite" element={<DashboardLayout><RespondOpportunity /></DashboardLayout>} />
+            <Route path="/ressources/envoi-echantillons" element={<DashboardLayout><SendSamples /></DashboardLayout>} />
+            <Route path="/ressources/relance-apres-degustation" element={<DashboardLayout><TastingFollowUp /></DashboardLayout>} />
             <Route path="/recherches" element={<DashboardLayout><SourcingRequests /></DashboardLayout>} />
             <Route path="/opportunites" element={<DashboardLayout><Opportunities /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
