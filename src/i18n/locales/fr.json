@@ -323,7 +323,338 @@
           "title": "Étape suivante",
           "label": "Que joindre à un premier email ?"
         }
+      },
+      "followCampaign": {
+        "title": "Comment reprendre contact après une campagne WineExporters",
+        "meta": {
+          "category": "Campagne WineExporters",
+          "type": "Guide + modèle",
+          "duration": "5 min"
+        },
+        "intro": "Lorsqu'un importateur a reçu une campagne WineExporters concernant vos vins, votre premier message direct doit créer le lien avec cet échange précédent. L'importateur doit immédiatement comprendre pourquoi vous le contactez et reconnaître les vins auxquels il a déjà été exposé.",
+        "when": {
+          "title": "Quand utiliser cette méthode",
+          "body": [
+            "Utilisez cette approche lorsqu'un importateur a reçu une campagne envoyée via WineExporters concernant votre domaine, notamment lorsqu'il a manifesté son intérêt, cliqué sur le contenu ou demandé davantage d'informations."
+          ]
+        },
+        "recommend": {
+          "title": "Ce que nous recommandons",
+          "intro": "Ne repartez pas de zéro comme s'il s'agissait d'un contact froid. Rappelez simplement :",
+          "points": [
+            "qu'il a récemment reçu une présentation de vos vins via WineExporters ;",
+            "qui vous êtes ;",
+            "pourquoi vous reprenez personnellement contact ;",
+            "quelle prochaine étape vous proposez."
+          ],
+          "outro": "À partir de ce moment, la relation doit devenir directe entre votre domaine et l'importateur."
+        },
+        "templates": [
+          {
+            "title": "Modèle d'email",
+            "subjectLabel": "Objet",
+            "subject": "Following up on our wines – [Winery name]",
+            "body": "Hi [First name],\n\nMy name is [Name] from [Winery name].\n\nYou recently received an email through WineExporters regarding our wines, and I wanted to follow up personally.\n\nI understand that our range caught your attention, so I'd be happy to send you any additional information you may need, including technical sheets, export pricing or a selection of wines adapted to your portfolio.\n\nPlease let me know if there are any specific wines or styles you would like to explore.\n\nBest regards,\n[Name]\n[Winery]\n[Email]\n[Phone]"
+          }
+        ],
+        "avoid": {
+          "title": "À éviter",
+          "points": [
+            "envoyer exactement le même message que la campagne ;",
+            "ne pas rappeler le contexte WineExporters ;",
+            "faire croire à l'importateur qu'il échange encore avec un intermédiaire ;",
+            "surcharger le message d'informations."
+          ]
+        },
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Rappelez le contexte de la campagne.",
+            "Présentez-vous personnellement.",
+            "Passez rapidement à une relation directe.",
+            "Proposez une prochaine étape simple."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "Comment structurer vos relances"
+        }
+      },
+      "firstEmailAttachments": {
+        "title": "Que joindre à un premier email ?",
+        "meta": {
+          "category": "Premier contact",
+          "type": "Guide",
+          "duration": "3 min"
+        },
+        "intro": "Un premier email ne doit pas ressembler à un dossier de candidature. L'objectif est de donner suffisamment d'informations pour susciter l'intérêt, sans demander à l'importateur d'ouvrir dix documents.",
+        "recommend": {
+          "title": "Ce que nous recommandons",
+          "intro": "Dans la majorité des cas, envoyez :",
+          "points": [
+            "une présentation courte du domaine ;",
+            "les fiches techniques des 1 à 3 vins mis en avant ;",
+            "votre tarif export si cela est pertinent à ce stade ;",
+            "un lien vers votre site internet."
+          ],
+          "outro": "Si vos documents sont volumineux, privilégiez un lien plutôt que plusieurs grosses pièces jointes."
+        },
+        "sections": [
+          {
+            "title": "Ce qu'il n'est pas nécessaire d'envoyer immédiatement",
+            "points": [
+              "toute votre gamme ;",
+              "toutes les fiches techniques ;",
+              "l'historique complet du domaine ;",
+              "de nombreux diplômes ou médailles ;",
+              "plusieurs dizaines de photos."
+            ]
+          }
+        ],
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Moins de documents, mais plus pertinents.",
+            "Adaptez ce que vous envoyez au profil de l'importateur.",
+            "Facilitez la lecture sur mobile.",
+            "Gardez des éléments supplémentaires pour la suite de l'échange."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "Comment structurer vos relances"
+        }
+      },
+      "followUpStructure": {
+        "title": "Comment structurer vos relances",
+        "meta": {
+          "category": "Relance",
+          "type": "Guide",
+          "duration": "5 min"
+        },
+        "intro": "L'absence de réponse ne signifie pas nécessairement l'absence d'intérêt. Les importateurs reçoivent énormément de sollicitations. Une relance structurée fait donc partie intégrante de la prospection export.",
+        "sections": [
+          {
+            "title": "Calendrier recommandé",
+            "steps": [
+              {
+                "title": "J0 — Premier email",
+                "body": "Envoyez votre présentation initiale."
+              },
+              {
+                "title": "J+5 à J+7 — Première relance",
+                "body": "Message très court. Rappelez simplement votre premier email et proposez de renvoyer les informations utiles."
+              },
+              {
+                "title": "J+12 à J+15 — Deuxième relance",
+                "body": "Apportez un élément nouveau : vin particulièrement adapté, tarif, certification, disponibilité, nouveau millésime ou information marché."
+              },
+              {
+                "title": "J+25 à J+30 — Dernière relance",
+                "body": "Faites une dernière tentative courte et laissez la porte ouverte."
+              },
+              {
+                "title": "Plus tard — Réactivation",
+                "body": "Un prospect silencieux peut être recontacté plusieurs mois plus tard à l'occasion d'un nouveau millésime, d'un déplacement sur son marché ou d'une évolution de votre gamme."
+              }
+            ]
+          },
+          {
+            "title": "Ce que nous recommandons",
+            "body": [
+              "Chaque relance doit apporter une raison valable de reprendre contact. Évitez de simplement écrire « avez-vous vu mon email ? » plusieurs fois."
+            ]
+          }
+        ],
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Relancer fait partie du processus.",
+            "Espacez vos messages.",
+            "Apportez progressivement de nouvelles informations.",
+            "Après plusieurs tentatives, laissez respirer le prospect."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "3 modèles de mails de relance"
+        }
+      },
+      "followUpTemplates": {
+        "title": "3 modèles de mails de relance",
+        "meta": {
+          "category": "Relance",
+          "type": "Modèles",
+          "duration": "3 min"
+        },
+        "intro": "Une bonne relance est courte. Son objectif n'est pas de refaire votre présentation, mais de remettre la conversation en haut de la boîte mail de l'importateur.",
+        "templates": [
+          {
+            "title": "Relance 1 — J+5 à J+7",
+            "subject": "Re: [previous subject]",
+            "body": "Hi [First name],\n\nJust following up on my previous email regarding [Winery name].\n\nI'd be happy to send you any additional information or a selection of wines that could fit your portfolio.\n\nPlease let me know if this could be of interest.\n\nBest regards,\n[Name]"
+          },
+          {
+            "title": "Relance 2 — J+12 à J+15",
+            "subject": "[Wine/Appellation] – [Winery name]",
+            "body": "Hi [First name],\n\nI wanted to follow up and highlight one wine that could be particularly relevant for your portfolio: [wine + short relevant detail].\n\nOur export price is [price if relevant], and the wine is currently available for [market / distribution].\n\nI'd be happy to send you the technical sheet or organise samples if useful.\n\nBest regards,\n[Name]"
+          },
+          {
+            "title": "Relance 3 — J+25 à J+30",
+            "subject": "Re: [previous subject]",
+            "body": "Hi [First name],\n\nJust one final follow-up regarding our wines.\n\nI understand the timing may not be right at the moment, so I'll leave it here for now.\n\nIf you are looking for [region / style / appellation] in the future, I'd be very happy to reconnect.\n\nBest regards,\n[Name]"
+          }
+        ],
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Première relance : courte.",
+            "Deuxième : apportez quelque chose de nouveau.",
+            "Troisième : laissez la porte ouverte."
+          ]
+        }
+      },
+      "respondOpportunity": {
+        "title": "Comment répondre à une opportunité WineExporters",
+        "meta": {
+          "category": "Opportunités",
+          "type": "Guide + modèle",
+          "duration": "5 min"
+        },
+        "intro": "Une opportunité WineExporters correspond à une demande exprimée par un importateur ou un acheteur. Votre réponse doit donc être différente d'un email de prospection à froid : vous répondez à un besoin déjà identifié.",
+        "recommend": {
+          "title": "Ce que nous recommandons",
+          "intro": "Commencez par rappeler précisément la demande à laquelle vous répondez. Expliquez ensuite :",
+          "points": [
+            "pourquoi votre domaine correspond ;",
+            "quelles cuvées sont pertinentes ;",
+            "vos éléments différenciants utiles ;",
+            "vos disponibilités ou tarifs lorsque cela est demandé ;",
+            "la prochaine étape proposée."
+          ]
+        },
+        "templates": [
+          {
+            "title": "Modèle",
+            "subject": "WineExporters request – [Wine / region]",
+            "body": "Hi [First name],\n\nI saw your request on WineExporters regarding [brief description of the request].\n\nI'm [Name] from [Winery], based in [region/appellation], and I believe our wines could match what you are looking for.\n\nWe currently offer [relevant wines / grapes / appellations], including [specific wine] at an export price of [price if relevant].\n\nI'd be happy to send you our technical sheets, pricing and any additional information you need.\n\nPlease let me know if you would also like to receive samples.\n\nBest regards,\n[Name]\n[Winery]"
+          }
+        ],
+        "avoid": {
+          "title": "À éviter",
+          "points": [
+            "répondre avec un message générique ;",
+            "présenter des vins qui ne correspondent pas à la demande ;",
+            "ne pas mentionner l'opportunité WineExporters ;",
+            "envoyer votre catalogue complet sans sélection."
+          ]
+        },
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "L'importateur a déjà exprimé un besoin.",
+            "Répondez directement à ce besoin.",
+            "Soyez précis et concret.",
+            "Facilitez la prochaine étape."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "Envoyer des échantillons à un importateur"
+        }
+      },
+      "sendSamples": {
+        "title": "Envoyer des échantillons à un importateur",
+        "meta": {
+          "category": "Suivi commercial",
+          "type": "Vidéo + guide",
+          "duration": ""
+        },
+        "intro": "L'envoi d'échantillons est une étape importante : l'objectif n'est pas seulement que les bouteilles arrivent, mais que l'importateur sache exactement ce qu'il reçoit et pourquoi ces vins ont été sélectionnés.",
+        "sections": [
+          {
+            "title": "Avant l'envoi",
+            "points": [
+              "confirmez les vins avec l'importateur ;",
+              "vérifiez l'adresse et le contact de livraison ;",
+              "prévenez-le de la date d'expédition ;",
+              "envoyez les fiches techniques correspondantes."
+            ]
+          },
+          {
+            "title": "Après l'envoi",
+            "body": [
+              "Envoyez le numéro de suivi et informez l'importateur de la date de livraison estimée.",
+              "Une fois les échantillons livrés, confirmez la bonne réception avant de parler immédiatement de dégustation."
+            ]
+          }
+        ],
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Toujours confirmer l'envoi.",
+            "Fournir les informations nécessaires à la dégustation.",
+            "Suivre la livraison.",
+            "Préparer la prochaine étape avant même l'arrivée des bouteilles."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "Comment relancer après une dégustation"
+        }
+      },
+      "followUpTasting": {
+        "title": "Comment relancer après une dégustation",
+        "meta": {
+          "category": "Suivi commercial",
+          "type": "Vidéo + guide",
+          "duration": ""
+        },
+        "intro": "Après une dégustation, l'objectif n'est pas seulement d'obtenir « un avis ». Il faut comprendre ce qui a plu, ce qui bloque éventuellement et quelle prochaine étape peut faire avancer la discussion.",
+        "sections": [
+          {
+            "title": "Quand relancer",
+            "body": [
+              "Sauf indication contraire de l'importateur, laissez quelques jours après la dégustation avant de reprendre contact."
+            ]
+          },
+          {
+            "title": "Ce qu'il faut chercher à comprendre",
+            "points": [
+              "Quels vins ont été préférés ?",
+              "Les prix correspondent-ils au marché ?",
+              "Existe-t-il une place dans le portefeuille ?",
+              "Y a-t-il un timing particulier pour une décision ?",
+              "Quelle est la prochaine étape ?"
+            ]
+          }
+        ],
+        "templates": [
+          {
+            "title": "Exemple",
+            "body": "Hi [First name],\n\nI hope you had a chance to taste the samples.\n\nI'd be very interested to hear your feedback, particularly on [wine 1] and [wine 2].\n\nDo you feel one of these wines could fit your portfolio?\n\nI'd be happy to discuss pricing, availability or any other information you may need.\n\nBest regards,\n[Name]"
+          }
+        ],
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Ne demandez pas seulement « avez-vous dégusté ? ».",
+            "Posez des questions qui permettent d'avancer.",
+            "Cherchez une prochaine étape concrète.",
+            "Un retour négatif est aussi une information utile."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "Négocier et sécuriser une première commande"
+        }
       }
+    },
+    "backToResources": "Retour aux ressources",
+    "template": {
+      "subjectLabel": "Objet",
+      "copy": "Copier le modèle",
+      "copied": "Modèle copié"
     }
   },
   "mobileNav": {

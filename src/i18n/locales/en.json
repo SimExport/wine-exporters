@@ -323,7 +323,338 @@
           "title": "Next step",
           "label": "What should you attach to a first email?"
         }
+      },
+      "followCampaign": {
+        "title": "How to follow up after a WineExporters campaign",
+        "meta": {
+          "category": "WineExporters campaign",
+          "type": "Guide + template",
+          "duration": "5 min"
+        },
+        "intro": "When an importer has received a WineExporters campaign about your wines, your first direct message should clearly connect with that previous contact. The importer should immediately understand why you are reaching out and recognise the wines they have already seen.",
+        "when": {
+          "title": "When to use this approach",
+          "body": [
+            "Use this approach when an importer has received a WineExporters campaign about your winery, especially if they have shown interest, clicked on the content or requested additional information."
+          ]
+        },
+        "recommend": {
+          "title": "What we recommend",
+          "intro": "Do not start again as if this were a completely cold contact. Simply remind them:",
+          "points": [
+            "that they recently received information about your wines through WineExporters;",
+            "who you are;",
+            "why you are personally following up;",
+            "what next step you are suggesting."
+          ],
+          "outro": "From this point forward, the relationship should become direct between your winery and the importer."
+        },
+        "templates": [
+          {
+            "title": "Email template",
+            "subjectLabel": "Subject",
+            "subject": "Following up on our wines – [Winery name]",
+            "body": "Hi [First name],\n\nMy name is [Name] from [Winery name].\n\nYou recently received an email through WineExporters regarding our wines, and I wanted to follow up personally.\n\nI understand that our range caught your attention, so I'd be happy to send you any additional information you may need, including technical sheets, export pricing or a selection of wines adapted to your portfolio.\n\nPlease let me know if there are any specific wines or styles you would like to explore.\n\nBest regards,\n[Name]\n[Winery]\n[Email]\n[Phone]"
+          }
+        ],
+        "avoid": {
+          "title": "What to avoid",
+          "points": [
+            "sending the exact same message as the campaign;",
+            "failing to mention the WineExporters context;",
+            "making the importer feel they are still dealing with an intermediary;",
+            "overloading the message with information."
+          ]
+        },
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "Remind them of the campaign context.",
+            "Introduce yourself personally.",
+            "Move quickly to a direct relationship.",
+            "Suggest a simple next step."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "How to structure your follow-ups"
+        }
+      },
+      "firstEmailAttachments": {
+        "title": "What should you attach to a first email?",
+        "meta": {
+          "category": "First contact",
+          "type": "Guide",
+          "duration": "3 min"
+        },
+        "intro": "A first email should not feel like an application file. The goal is to provide enough information to generate interest without asking the importer to open ten different documents.",
+        "recommend": {
+          "title": "What we recommend",
+          "intro": "In most cases, send:",
+          "points": [
+            "a short winery presentation;",
+            "technical sheets for the 1 to 3 wines you are highlighting;",
+            "export pricing when relevant at this stage;",
+            "a link to your website."
+          ],
+          "outro": "If your files are large, prefer a link rather than several heavy attachments."
+        },
+        "sections": [
+          {
+            "title": "What you do not need to send immediately",
+            "points": [
+              "your entire range;",
+              "every technical sheet;",
+              "the full history of the winery;",
+              "numerous awards or certificates;",
+              "dozens of photographs."
+            ]
+          }
+        ],
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "Fewer documents, but more relevant ones.",
+            "Adapt what you send to the importer.",
+            "Make it easy to read on mobile.",
+            "Keep additional material for later in the conversation."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "How to structure your follow-ups"
+        }
+      },
+      "followUpStructure": {
+        "title": "How to structure your follow-ups",
+        "meta": {
+          "category": "Follow-up",
+          "type": "Guide",
+          "duration": "5 min"
+        },
+        "intro": "No reply does not necessarily mean no interest. Importers receive many approaches every day. Structured follow-up is therefore a normal part of export prospecting.",
+        "sections": [
+          {
+            "title": "Recommended schedule",
+            "steps": [
+              {
+                "title": "Day 0 — First email",
+                "body": "Send your initial introduction."
+              },
+              {
+                "title": "Day 5 to 7 — First follow-up",
+                "body": "Keep it very short. Refer to your previous email and offer to resend any useful information."
+              },
+              {
+                "title": "Day 12 to 15 — Second follow-up",
+                "body": "Add something new: a particularly relevant wine, pricing, certification, availability, a new vintage or useful market information."
+              },
+              {
+                "title": "Day 25 to 30 — Final follow-up",
+                "body": "Make one final short attempt and leave the door open."
+              },
+              {
+                "title": "Later — Reactivation",
+                "body": "A silent prospect can be contacted again several months later when you have a new vintage, are travelling to their market or have something genuinely new to share."
+              }
+            ]
+          },
+          {
+            "title": "What we recommend",
+            "body": [
+              "Every follow-up should give a valid reason to get back in touch. Avoid simply writing “did you see my email?” several times."
+            ]
+          }
+        ],
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "Follow-up is part of the process.",
+            "Give prospects time between emails.",
+            "Add new information when possible.",
+            "After several attempts, give the prospect space."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "3 follow-up email templates"
+        }
+      },
+      "followUpTemplates": {
+        "title": "3 follow-up email templates",
+        "meta": {
+          "category": "Follow-up",
+          "type": "Templates",
+          "duration": "3 min"
+        },
+        "intro": "A good follow-up email is short. Its purpose is not to introduce your winery all over again, but to bring the conversation back to the importer's attention.",
+        "templates": [
+          {
+            "title": "Follow-up 1 — Day 5 to 7",
+            "subject": "Re: [previous subject]",
+            "body": "Hi [First name],\n\nJust following up on my previous email regarding [Winery name].\n\nI'd be happy to send you any additional information or a selection of wines that could fit your portfolio.\n\nPlease let me know if this could be of interest.\n\nBest regards,\n[Name]"
+          },
+          {
+            "title": "Follow-up 2 — Day 12 to 15",
+            "subject": "[Wine/Appellation] – [Winery name]",
+            "body": "Hi [First name],\n\nI wanted to follow up and highlight one wine that could be particularly relevant for your portfolio: [wine + short relevant detail].\n\nOur export price is [price if relevant], and the wine is currently available for [market / distribution].\n\nI'd be happy to send you the technical sheet or organise samples if useful.\n\nBest regards,\n[Name]"
+          },
+          {
+            "title": "Follow-up 3 — Day 25 to 30",
+            "subject": "Re: [previous subject]",
+            "body": "Hi [First name],\n\nJust one final follow-up regarding our wines.\n\nI understand the timing may not be right at the moment, so I'll leave it here for now.\n\nIf you are looking for [region / style / appellation] in the future, I'd be very happy to reconnect.\n\nBest regards,\n[Name]"
+          }
+        ],
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "First follow-up: keep it short.",
+            "Second follow-up: add something new.",
+            "Final follow-up: leave the door open."
+          ]
+        }
+      },
+      "respondOpportunity": {
+        "title": "How to respond to a WineExporters opportunity",
+        "meta": {
+          "category": "Opportunities",
+          "type": "Guide + template",
+          "duration": "5 min"
+        },
+        "intro": "A WineExporters opportunity reflects a request expressed by an importer or buyer. Your response should therefore be different from a cold prospecting email: you are responding to an identified need.",
+        "recommend": {
+          "title": "What we recommend",
+          "intro": "Start by restating precisely the request you are responding to. Then explain:",
+          "points": [
+            "why your winery is a good match;",
+            "which wines are relevant;",
+            "your useful differentiating points;",
+            "your availability or pricing when requested;",
+            "the next step you suggest."
+          ]
+        },
+        "templates": [
+          {
+            "title": "Template",
+            "subject": "WineExporters request – [Wine / region]",
+            "body": "Hi [First name],\n\nI saw your request on WineExporters regarding [brief description of the request].\n\nI'm [Name] from [Winery], based in [region/appellation], and I believe our wines could match what you are looking for.\n\nWe currently offer [relevant wines / grapes / appellations], including [specific wine] at an export price of [price if relevant].\n\nI'd be happy to send you our technical sheets, pricing and any additional information you need.\n\nPlease let me know if you would also like to receive samples.\n\nBest regards,\n[Name]\n[Winery]"
+          }
+        ],
+        "avoid": {
+          "title": "What to avoid",
+          "points": [
+            "replying with a generic message;",
+            "presenting wines that do not match the request;",
+            "failing to mention the WineExporters opportunity;",
+            "sending your full catalogue without a selection."
+          ]
+        },
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "The importer has already expressed a need.",
+            "Respond directly to that need.",
+            "Be specific and concrete.",
+            "Make the next step easy."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "Sending samples to an importer"
+        }
+      },
+      "sendSamples": {
+        "title": "Sending samples to an importer",
+        "meta": {
+          "category": "Sales follow-up",
+          "type": "Video + guide",
+          "duration": ""
+        },
+        "intro": "Sending samples is an important step: the goal is not only for the bottles to arrive, but for the importer to understand exactly what they are receiving and why these wines were selected.",
+        "sections": [
+          {
+            "title": "Before shipping",
+            "points": [
+              "confirm the wines with the importer;",
+              "verify the delivery address and contact;",
+              "inform them of the shipping date;",
+              "send the corresponding technical sheets."
+            ]
+          },
+          {
+            "title": "After shipping",
+            "body": [
+              "Send the tracking number and estimated delivery date.",
+              "Once the samples arrive, confirm receipt before immediately asking for tasting feedback."
+            ]
+          }
+        ],
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "Always confirm shipment.",
+            "Provide useful tasting information.",
+            "Track delivery.",
+            "Prepare the next step before the bottles even arrive."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "How to follow up after a tasting"
+        }
+      },
+      "followUpTasting": {
+        "title": "How to follow up after a tasting",
+        "meta": {
+          "category": "Sales follow-up",
+          "type": "Video + guide",
+          "duration": ""
+        },
+        "intro": "After a tasting, the objective is not simply to get “feedback”. You want to understand what worked, what may be blocking the discussion and what next step could move the opportunity forward.",
+        "sections": [
+          {
+            "title": "When to follow up",
+            "body": [
+              "Unless the importer says otherwise, leave a few days after the tasting before getting back in touch."
+            ]
+          },
+          {
+            "title": "What you want to understand",
+            "points": [
+              "Which wines were preferred?",
+              "Do the prices match the market?",
+              "Is there room in the portfolio?",
+              "Is there a particular timing for a decision?",
+              "What is the next step?"
+            ]
+          }
+        ],
+        "templates": [
+          {
+            "title": "Example",
+            "body": "Hi [First name],\n\nI hope you had a chance to taste the samples.\n\nI'd be very interested to hear your feedback, particularly on [wine 1] and [wine 2].\n\nDo you feel one of these wines could fit your portfolio?\n\nI'd be happy to discuss pricing, availability or any other information you may need.\n\nBest regards,\n[Name]"
+          }
+        ],
+        "takeaways": {
+          "title": "Key takeaways",
+          "points": [
+            "Do not simply ask whether they tasted the wines.",
+            "Ask questions that move the conversation forward.",
+            "Look for a concrete next step.",
+            "Negative feedback is useful information too."
+          ]
+        },
+        "next": {
+          "title": "Next step",
+          "label": "Negotiate and secure the first order"
+        }
       }
+    },
+    "backToResources": "Back to resources",
+    "template": {
+      "subjectLabel": "Subject",
+      "copy": "Copy template",
+      "copied": "Template copied"
     }
   },
   "mobileNav": {
