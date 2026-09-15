@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch, UsersRound, Sparkles } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch, UsersRound, Sparkles, BookOpen } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -24,6 +24,7 @@ const navigationItems = [
   { key: "opportunities", url: "/opportunites", icon: Sparkles },
   { key: "crm", url: "/pipeline", icon: Kanban },
   { key: "roadmap", url: "/roadmap", icon: Rocket },
+  { key: "resources", url: "/ressources", icon: BookOpen },
   { key: "help", url: "/help", icon: HelpCircle },
 ] as const;
 

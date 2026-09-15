@@ -16,6 +16,10 @@
       "title": "Help Center — WineExporters",
       "description": "Guides, FAQs and resources to get the most out of WineExporters."
     },
+    "resources": {
+      "title": "Resources — WineExporters",
+      "description": "Practical guides, email templates and advice to contact importers and move your export opportunities forward."
+    },
     "roadmap": {
       "title": "Roadmap — WineExporters",
       "description": "Discover upcoming WineExporters features and vote for your favorites."
@@ -83,6 +87,7 @@
     "campaigns": "Campaigns",
     "crm": "CRM",
     "roadmap": "Roadmap",
+    "resources": "Resources",
     "help": "Help",
     "settings": "Settings",
     "billing": "Billing",
@@ -93,6 +98,36 @@
     "sourcing": "Bespoke Searches",
     "opportunities": "Opportunities",
     "adminOpportunities": "Admin Opportunities"
+  },
+  "resources": {
+    "title": "Resources",
+    "subtitle": "Practical guides, email templates and advice to help you contact importers, follow up and move your export opportunities forward.",
+    "cards": {
+      "contactImporter": {
+        "title": "Contact an importer",
+        "description": "You have identified an importer and want to contact them directly.",
+        "topics": ["First email", "Winery introduction", "Documents to send"],
+        "cta": "View resources"
+      },
+      "followCampaign": {
+        "title": "Follow up after a WineExporters campaign",
+        "description": "An importer has received a campaign about your wines or has shown interest.",
+        "topics": ["Personal follow-up", "Follow-up after interest", "Campaign follow-up"],
+        "cta": "View resources"
+      },
+      "followProspect": {
+        "title": "Follow up with a prospect",
+        "description": "You have already contacted an importer but the conversation is no longer moving forward.",
+        "topics": ["Follow-up schedule", "Email templates", "Follow-up after tasting"],
+        "cta": "View resources"
+      },
+      "moveOpportunity": {
+        "title": "Move an opportunity forward",
+        "description": "An importer is interested or an opportunity matches your winery.",
+        "topics": ["Reply to an opportunity", "Samples", "Negotiation"],
+        "cta": "View resources"
+      }
+    }
   },
   "mobileNav": {
     "menu": "Menu",
