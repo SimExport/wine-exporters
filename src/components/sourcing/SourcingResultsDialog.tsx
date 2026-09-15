@@ -6,7 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, ExternalLink, Mail, Phone, UserPlus, Check } from 'lucide-react';
+import { Download, ExternalLink, Mail, Phone, UserPlus, Check, ChevronDown } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -139,18 +146,35 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
     }
   };
 
+  const headers = ['company_name', 'email', 'phone', 'website_url', 'score', 'reason'];
+
+  const exportXlsx = () => {
+    const aoa = [
+      headers,
+      ...shortlist.map(r => headers.map(h => (r as any)[h] ?? '')),
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = headers.map((h, i) => ({
+      wch: Math.min(60, Math.max(h.length + 2, ...aoa.slice(1).map(row => String(row[i] ?? '').length + 2))),
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Shortlist');
+    XLSX.writeFile(wb, `shortlist-${marketLabel}.xlsx`);
+  };
+
   const exportCsv = () => {
-    const headers = ['company_name', 'email', 'phone', 'website_url', 'score', 'reason'];
-    const lines = [headers.join(',')];
+    const delimiter = ';';
+    const lines = [headers.join(delimiter)];
     for (const r of shortlist) {
       const row = headers.map(h => {
         const v = (r as any)[h] ?? '';
         const s = String(v).replace(/"/g, '""');
         return `"${s}"`;
       });
-      lines.push(row.join(','));
+      lines.push(row.join(delimiter));
     }
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const content = `sep=${delimiter}\r\n` + lines.join('\r\n');
+    const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -173,10 +197,38 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
               </TabsTrigger>
               <TabsTrigger value="summary">{t('sourcing.results.summaryTab')}</TabsTrigger>
             </TabsList>
-            <Button variant="outline" size="sm" onClick={exportCsv} disabled={!shortlist.length}>
-              <Download className="h-4 w-4 mr-2" />
-              {t('sourcing.results.exportCsv')}
-            </Button>
+            <div className="flex items-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-r-none"
+                onClick={exportXlsx}
+                disabled={!shortlist.length}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {t('sourcing.results.exportCsv')}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-l-none border-l-0 px-2"
+                    disabled={!shortlist.length}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportXlsx}>
+                    {t('importers.exportCredits.formatXlsx')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportCsv}>
+                    {t('importers.exportCredits.formatCsv')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           <TabsContent value="contacts" className="flex-1 overflow-auto">
             <Table>
