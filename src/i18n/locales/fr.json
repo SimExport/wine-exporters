@@ -214,6 +214,7 @@
     "videos": {
       "title": "Vidéos pratiques",
       "subtitle": "Des conseils concrets pour faire avancer vos échanges avec les importateurs, de l’envoi des échantillons jusqu’au suivi après commande.",
+      "languageNote": "Pour l’instant, ces vidéos sont en français uniquement. Version anglaise à venir.",
       "cta": "Voir la vidéo",
       "items": {
         "sendSamples": {
