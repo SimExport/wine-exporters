@@ -289,7 +289,7 @@ const Importers = () => {
       });
     }
   }, [selectedCountry]);
-  const performExport = async (limit: number, mode: 'country' | 'selection' = 'country') => {
+  const performExport = async (limit: number, mode: 'country' | 'selection' = 'country', format: 'csv' | 'xlsx' = 'xlsx') => {
     if (!selectedCountry || limit <= 0) return;
     const country = COUNTRIES.find(c => c.code === selectedCountry);
     if (!country) return;
