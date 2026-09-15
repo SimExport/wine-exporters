@@ -203,6 +203,9 @@ const Resources = () => {
           {t("resources.videos.title")}
         </h2>
         <p className="text-muted-foreground">{t("resources.videos.subtitle")}</p>
+        <p className="mt-1 text-xs text-muted-foreground/80">
+          {t("resources.videos.languageNote")}
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

@@ -214,6 +214,7 @@
     "videos": {
       "title": "Practical videos",
       "subtitle": "Practical advice to help you move importer conversations forward, from sending samples to post-order follow-up.",
+      "languageNote": "These videos are currently in French only. English version coming soon.",
       "cta": "Watch video",
       "items": {
         "sendSamples": {
