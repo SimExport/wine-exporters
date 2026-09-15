@@ -197,10 +197,38 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
               </TabsTrigger>
               <TabsTrigger value="summary">{t('sourcing.results.summaryTab')}</TabsTrigger>
             </TabsList>
-            <Button variant="outline" size="sm" onClick={exportCsv} disabled={!shortlist.length}>
-              <Download className="h-4 w-4 mr-2" />
-              {t('sourcing.results.exportCsv')}
-            </Button>
+            <div className="flex items-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-r-none"
+                onClick={exportXlsx}
+                disabled={!shortlist.length}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {t('sourcing.results.exportCsv')}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-l-none border-l-0 px-2"
+                    disabled={!shortlist.length}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportXlsx}>
+                    {t('importers.exportCredits.formatXlsx')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportCsv}>
+                    {t('importers.exportCredits.formatCsv')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           <TabsContent value="contacts" className="flex-1 overflow-auto">
             <Table>
