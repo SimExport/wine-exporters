@@ -336,17 +336,19 @@ const Importers = () => {
       }
 
       const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
+      const DELIM = ';';
       const csvContent = [
-        headers.join(','),
+        'sep=;',
+        headers.join(DELIM),
         ...(data || []).map(contact =>
           headers.map(header => {
             const value = (contact as any)[header] || '';
             return `"${value.toString().replace(/"/g, '""')}"`;
-          }).join(',')
+          }).join(DELIM)
         ),
-      ].join('\n');
+      ].join('\r\n');
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
