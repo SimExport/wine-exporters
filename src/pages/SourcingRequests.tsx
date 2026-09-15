@@ -392,26 +392,23 @@ export default function SourcingRequests() {
                       <p className="text-xs mt-2 p-2 bg-muted rounded">{req.admin_note}</p>
                     )}
                   </div>
-                  {req.status === 'validated' && req.result_json && (
+                  {req.status === 'validated' && (req.result_json || req.result_file_url) && (
                     <Button
                       size="sm"
-                      onClick={() => { setActiveReq(req); setResultsOpen(true); }}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      {t('sourcing.results.viewBtn')}
-                    </Button>
-                  )}
-                  {req.status === 'validated' && req.result_file_url && !req.result_json && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(req)}
                       disabled={downloadingId === req.id}
+                      onClick={() => {
+                        if (req.result_json) {
+                          setActiveReq(req);
+                          setResultsOpen(true);
+                        } else {
+                          handleDownload(req);
+                        }
+                      }}
                     >
                       {downloadingId === req.id
                         ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        : <Download className="h-4 w-4 mr-2" />}
-                      {t('sourcing.download')}
+                        : <Eye className="h-4 w-4 mr-2" />}
+                      {t('sourcing.results.viewBtn')}
                     </Button>
                   )}
                 </div>
