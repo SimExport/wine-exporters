@@ -343,27 +343,40 @@ const Importers = () => {
       }
 
       const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
-      const DELIM = ';';
-      const csvContent = [
-        'sep=;',
-        headers.join(DELIM),
-        ...(data || []).map(contact =>
-          headers.map(header => {
-            const value = (contact as any)[header] || '';
-            return `"${value.toString().replace(/"/g, '""')}"`;
-          }).join(DELIM)
-        ),
-      ].join('\r\n');
+      const fileBase = `contacts_${selectedCountry}_${new Date().toISOString().split('T')[0]}`;
 
-      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `contacts_${selectedCountry}_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (format === 'xlsx') {
+        const rows = (data || []).map(contact =>
+          headers.map(header => ((contact as any)[header] ?? '').toString())
+        );
+        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        worksheet['!cols'] = headers.map(h => ({ wch: Math.max(h.length + 2, 18) }));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts');
+        XLSX.writeFile(workbook, `${fileBase}.xlsx`);
+      } else {
+        const DELIM = ';';
+        const csvContent = [
+          'sep=;',
+          headers.join(DELIM),
+          ...(data || []).map(contact =>
+            headers.map(header => {
+              const value = (contact as any)[header] || '';
+              return `"${value.toString().replace(/"/g, '""')}"`;
+            }).join(DELIM)
+          ),
+        ].join('\r\n');
+
+        const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${fileBase}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
 
       toast({
         title: t('common.success'),
