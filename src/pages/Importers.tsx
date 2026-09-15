@@ -721,7 +721,7 @@ const Importers = () => {
               onClick={() => {
                 setPartialOpen(false);
                 const mode = effectiveSelectionCount > 0 && !selectAllAcrossPages ? 'selection' : 'country';
-                performExport(exportCredits, mode);
+                performExport(exportCredits, mode, exportFormat);
               }}
             >
               {t('importers.exportCredits.partialConfirm', { remaining: exportCredits })}
