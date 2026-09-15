@@ -126,16 +126,22 @@ export type Database = {
           country: string
           created_at: string
           email: string
+          email_status: string | null
           Facebook: string | null
           full_address: string | null
           id: string
+          import_batch_id: string | null
           Instagram: string | null
+          last_verified_at: string | null
           LinkedIn: string | null
           phone: string | null
           postal_code: string | null
+          source: string | null
+          source_record_id: string | null
           state: string | null
           street: string | null
           updated_at: string
+          vat_number: string | null
           website_url: string | null
         }
         Insert: {
@@ -145,16 +151,22 @@ export type Database = {
           country: string
           created_at?: string
           email: string
+          email_status?: string | null
           Facebook?: string | null
           full_address?: string | null
           id?: string
+          import_batch_id?: string | null
           Instagram?: string | null
+          last_verified_at?: string | null
           LinkedIn?: string | null
           phone?: string | null
           postal_code?: string | null
+          source?: string | null
+          source_record_id?: string | null
           state?: string | null
           street?: string | null
           updated_at?: string
+          vat_number?: string | null
           website_url?: string | null
         }
         Update: {
@@ -164,19 +176,91 @@ export type Database = {
           country?: string
           created_at?: string
           email?: string
+          email_status?: string | null
           Facebook?: string | null
           full_address?: string | null
           id?: string
+          import_batch_id?: string | null
           Instagram?: string | null
+          last_verified_at?: string | null
           LinkedIn?: string | null
           phone?: string | null
           postal_code?: string | null
+          source?: string | null
+          source_record_id?: string | null
           state?: string | null
           street?: string | null
           updated_at?: string
+          vat_number?: string | null
           website_url?: string | null
         }
         Relationships: []
+      }
+      buyer_contacts_import_staging: {
+        Row: {
+          batch_id: string
+          company_name: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          email_normalized: string | null
+          email_status: string | null
+          id: string
+          match_status: string | null
+          matched_buyer_contact_id: string | null
+          notes: string | null
+          phone: string | null
+          source_record_id: string | null
+          vat_number: string | null
+        }
+        Insert: {
+          batch_id: string
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          email_normalized?: string | null
+          email_status?: string | null
+          id?: string
+          match_status?: string | null
+          matched_buyer_contact_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          source_record_id?: string | null
+          vat_number?: string | null
+        }
+        Update: {
+          batch_id?: string
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          email_normalized?: string | null
+          email_status?: string | null
+          id?: string
+          match_status?: string | null
+          matched_buyer_contact_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          source_record_id?: string | null
+          vat_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contacts_import_staging_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buyer_contacts_import_staging_matched_buyer_contact_id_fkey"
+            columns: ["matched_buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaign_email_logs: {
         Row: {
@@ -615,6 +699,51 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vintage?: number | null
+        }
+        Relationships: []
+      }
+      import_batches: {
+        Row: {
+          committed_at: string | null
+          country: string
+          created_at: string
+          filename: string | null
+          id: string
+          matched_rows: number
+          new_rows: number
+          no_email_rows: number
+          review_rows: number
+          source: string | null
+          status: string
+          total_rows: number
+        }
+        Insert: {
+          committed_at?: string | null
+          country: string
+          created_at?: string
+          filename?: string | null
+          id?: string
+          matched_rows?: number
+          new_rows?: number
+          no_email_rows?: number
+          review_rows?: number
+          source?: string | null
+          status?: string
+          total_rows?: number
+        }
+        Update: {
+          committed_at?: string | null
+          country?: string
+          created_at?: string
+          filename?: string | null
+          id?: string
+          matched_rows?: number
+          new_rows?: number
+          no_email_rows?: number
+          review_rows?: number
+          source?: string | null
+          status?: string
+          total_rows?: number
         }
         Relationships: []
       }
