@@ -16,6 +16,10 @@
       "title": "Centre d'aide — WineExporters",
       "description": "Guides, FAQ et ressources pour exploiter WineExporters au maximum."
     },
+    "resources": {
+      "title": "Ressources — WineExporters",
+      "description": "Guides, modèles d’emails et conseils pratiques pour contacter les importateurs et faire avancer vos opportunités export."
+    },
     "roadmap": {
       "title": "Roadmap — WineExporters",
       "description": "Découvrez les prochaines fonctionnalités de WineExporters et votez pour vos préférées."
@@ -83,6 +87,7 @@
     "campaigns": "Campagnes",
     "crm": "CRM",
     "roadmap": "À venir",
+    "resources": "Ressources",
     "help": "Aide",
     "settings": "Paramètres",
     "billing": "Facturation",
@@ -93,6 +98,36 @@
     "sourcing": "Recherches sur-mesure",
     "opportunities": "Opportunités",
     "adminOpportunities": "Opportunités Admin"
+  },
+  "resources": {
+    "title": "Ressources",
+    "subtitle": "Des guides, modèles d’emails et conseils pratiques pour contacter les importateurs, les relancer et faire avancer vos opportunités export.",
+    "cards": {
+      "contactImporter": {
+        "title": "Contacter un importateur",
+        "description": "Vous avez identifié un importateur et souhaitez prendre contact directement.",
+        "topics": ["Premier email", "Présentation du domaine", "Documents à envoyer"],
+        "cta": "Voir les ressources"
+      },
+      "followCampaign": {
+        "title": "Suivre une campagne WineExporters",
+        "description": "Un importateur a reçu une campagne concernant vos vins ou a manifesté son intérêt.",
+        "topics": ["Reprise de contact", "Suivi après intérêt", "Relance de campagne"],
+        "cta": "Voir les ressources"
+      },
+      "followProspect": {
+        "title": "Relancer un prospect",
+        "description": "Vous avez déjà contacté un importateur mais la discussion n’avance plus.",
+        "topics": ["Calendrier de relance", "Modèles d’emails", "Relance après dégustation"],
+        "cta": "Voir les ressources"
+      },
+      "moveOpportunity": {
+        "title": "Faire avancer une opportunité",
+        "description": "Un importateur est intéressé ou une opportunité correspond à votre domaine.",
+        "topics": ["Répondre à une opportunité", "Échantillons", "Négociation"],
+        "cta": "Voir les ressources"
+      }
+    }
   },
   "mobileNav": {
     "menu": "Menu",

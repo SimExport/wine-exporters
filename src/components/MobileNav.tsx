@@ -30,6 +30,7 @@ import {
   UserPlus,
   UsersRound,
   LogOut,
+  BookOpen,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
 
@@ -42,6 +43,7 @@ const navigationItems = [
   { key: 'opportunities', url: '/opportunites', icon: Sparkles },
   { key: 'crm', url: '/pipeline', icon: Kanban },
   { key: 'roadmap', url: '/roadmap', icon: Rocket },
+  { key: 'resources', url: '/ressources', icon: BookOpen },
   { key: 'help', url: '/help', icon: HelpCircle },
 ] as const;
 
