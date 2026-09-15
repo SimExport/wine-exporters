@@ -152,7 +152,11 @@ const Resources = () => {
                 </h3>
                 <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <TypeIcon className="h-3.5 w-3.5" />
-                  {t(`${base}.type`)}
+                  {(() => {
+                    const type = t(`${base}.type`);
+                    const duration = t(`${base}.duration`, { defaultValue: "" });
+                    return duration ? `${type} · ${duration}` : type;
+                  })()}
                 </p>
                 <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
                   {t(`${base}.description`)}

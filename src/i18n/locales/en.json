@@ -196,14 +196,16 @@
         "sendSamples": {
           "category": "Sales follow-up",
           "title": "Sending samples to an importer",
-          "type": "Video · duration to be added",
+          "type": "Video",
+          "duration": "",
           "description": "How to prepare your shipment and give the importer all the useful information for the tasting.",
           "cta": "Watch video"
         },
         "followUpTasting": {
           "category": "Sales follow-up",
           "title": "How to follow up after a tasting",
-          "type": "Video + guide · duration to be added",
+          "type": "Video + guide",
+          "duration": "",
           "description": "When to get back in touch after a tasting and how to move the conversation toward a clear next step.",
           "cta": "View resource"
         }
