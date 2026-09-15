@@ -82,6 +82,7 @@ const PRACTICAL_VIDEOS: PracticalVideo[] = [
 
 const Resources = () => {
   const { t } = useTranslation();
+  const [activeVideo, setActiveVideo] = useState<PracticalVideo | null>(null);
 
   return (
     <div className="p-8 lg:p-10 space-y-10 max-w-6xl">
@@ -191,6 +192,73 @@ const Resources = () => {
           );
         })}
       </div>
+
+      {/* Vidéos pratiques */}
+      <div>
+        <h2 className="mb-1 text-2xl font-bold text-foreground">
+          {t("resources.videos.title")}
+        </h2>
+        <p className="text-muted-foreground">{t("resources.videos.subtitle")}</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {PRACTICAL_VIDEOS.map((video) => {
+          const base = `resources.videos.items.${video.slug}`;
+          return (
+            <Card key={video.slug} className="border hover:shadow-md transition-shadow">
+              <CardContent className="flex h-full flex-col p-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveVideo(video)}
+                  className="mb-3 flex aspect-video w-full items-center justify-center rounded-md bg-primary/10 cursor-pointer"
+                  aria-label={t("resources.videos.cta")}
+                >
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-background/80">
+                    <Play className="h-5 w-5 text-primary" />
+                  </span>
+                </button>
+                <h3 className="mb-1 text-sm font-semibold text-foreground">
+                  {t(`${base}.title`)}
+                </h3>
+                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+                  {t(`${base}.description`)}
+                </p>
+                <div className="mt-auto">
+                  <button
+                    type="button"
+                    onClick={() => setActiveVideo(video)}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary"
+                  >
+                    {t("resources.videos.cta")}
+                    <Play className="h-4 w-4" />
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Modal vidéo Loom */}
+      <Dialog open={!!activeVideo} onOpenChange={(open) => !open && setActiveVideo(null)}>
+        <DialogContent className="max-w-3xl">
+          {activeVideo && (
+            <>
+              <DialogTitle className="text-base font-semibold">
+                {t(`resources.videos.items.${activeVideo.slug}.title`)}
+              </DialogTitle>
+              <div className="aspect-video w-full">
+                <iframe
+                  src={activeVideo.loomEmbedUrl}
+                  title={t(`resources.videos.items.${activeVideo.slug}.title`)}
+                  allowFullScreen
+                  className="h-full w-full rounded-md"
+                />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
