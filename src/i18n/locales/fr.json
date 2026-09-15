@@ -106,26 +106,107 @@
       "contactImporter": {
         "title": "Contacter un importateur",
         "description": "Vous avez identifié un importateur et souhaitez prendre contact directement.",
-        "topics": ["Premier email", "Présentation du domaine", "Documents à envoyer"],
+        "topics": [
+          "Premier email",
+          "Présentation du domaine",
+          "Documents à envoyer"
+        ],
         "cta": "Voir les ressources"
       },
       "followCampaign": {
         "title": "Suivre une campagne WineExporters",
         "description": "Un importateur a reçu une campagne concernant vos vins ou a manifesté son intérêt.",
-        "topics": ["Reprise de contact", "Suivi après intérêt", "Relance de campagne"],
+        "topics": [
+          "Reprise de contact",
+          "Suivi après intérêt",
+          "Relance de campagne"
+        ],
         "cta": "Voir les ressources"
       },
       "followProspect": {
         "title": "Relancer un prospect",
         "description": "Vous avez déjà contacté un importateur mais la discussion n’avance plus.",
-        "topics": ["Calendrier de relance", "Modèles d’emails", "Relance après dégustation"],
+        "topics": [
+          "Calendrier de relance",
+          "Modèles d’emails",
+          "Relance après dégustation"
+        ],
         "cta": "Voir les ressources"
       },
       "moveOpportunity": {
         "title": "Faire avancer une opportunité",
         "description": "Un importateur est intéressé ou une opportunité correspond à votre domaine.",
-        "topics": ["Répondre à une opportunité", "Échantillons", "Négociation"],
+        "topics": [
+          "Répondre à une opportunité",
+          "Échantillons",
+          "Négociation"
+        ],
         "cta": "Voir les ressources"
+      }
+    },
+    "essential": {
+      "title": "Ressources essentielles",
+      "subtitle": "Les guides et modèles les plus utiles pour vos échanges avec les importateurs.",
+      "badges": {
+        "recommended": "Recommandé"
+      },
+      "items": {
+        "firstEmail": {
+          "category": "Premier contact",
+          "title": "Comment écrire un premier email à un importateur",
+          "type": "Guide · 5 min",
+          "description": "Les informations à inclure, la longueur recommandée et un modèle simple à adapter à votre domaine.",
+          "cta": "Lire la ressource"
+        },
+        "followCampaign": {
+          "category": "Campagne WineExporters",
+          "title": "Comment reprendre contact après une campagne WineExporters",
+          "type": "Guide + modèle · 5 min",
+          "description": "Comment vous présenter lorsqu’un importateur a reçu une campagne sur vos vins ou a manifesté son intérêt.",
+          "cta": "Lire la ressource"
+        },
+        "firstEmailAttachments": {
+          "category": "Premier contact",
+          "title": "Que joindre à un premier email ?",
+          "type": "Guide · 3 min",
+          "description": "Présentation du domaine, fiches techniques, tarifs : ce qu’il est utile d’envoyer dès le premier contact.",
+          "cta": "Lire la ressource"
+        },
+        "followUpStructure": {
+          "category": "Relance",
+          "title": "Comment structurer vos relances",
+          "type": "Guide · 5 min",
+          "description": "Quand relancer, combien de fois et comment faire avancer la discussion sans multiplier les emails inutiles.",
+          "cta": "Lire la ressource"
+        },
+        "followUpTemplates": {
+          "category": "Relance",
+          "title": "3 modèles de mails de relance",
+          "type": "Modèles · 3 min",
+          "description": "Trois exemples prêts à adapter pour votre première, deuxième et dernière relance.",
+          "cta": "Voir les modèles"
+        },
+        "respondOpportunity": {
+          "category": "Opportunités",
+          "title": "Comment répondre à une opportunité WineExporters",
+          "type": "Guide + modèle · 5 min",
+          "description": "Comment répondre efficacement à une demande d’importateur publiée sur la plateforme.",
+          "cta": "Lire la ressource"
+        },
+        "sendSamples": {
+          "category": "Suivi commercial",
+          "title": "Envoyer des échantillons à un importateur",
+          "type": "Vidéo · durée à compléter",
+          "description": "Comment préparer votre envoi et donner à l’importateur toutes les informations utiles pour la dégustation.",
+          "cta": "Voir la vidéo"
+        },
+        "followUpTasting": {
+          "category": "Suivi commercial",
+          "title": "Comment relancer après une dégustation",
+          "type": "Vidéo + guide · durée à compléter",
+          "description": "Quand reprendre contact après dégustation et comment faire avancer l’échange vers une prochaine étape concrète.",
+          "cta": "Voir la ressource"
+        }
       }
     }
   },

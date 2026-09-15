@@ -106,26 +106,107 @@
       "contactImporter": {
         "title": "Contact an importer",
         "description": "You have identified an importer and want to contact them directly.",
-        "topics": ["First email", "Winery introduction", "Documents to send"],
+        "topics": [
+          "First email",
+          "Winery introduction",
+          "Documents to send"
+        ],
         "cta": "View resources"
       },
       "followCampaign": {
         "title": "Follow up after a WineExporters campaign",
         "description": "An importer has received a campaign about your wines or has shown interest.",
-        "topics": ["Personal follow-up", "Follow-up after interest", "Campaign follow-up"],
+        "topics": [
+          "Personal follow-up",
+          "Follow-up after interest",
+          "Campaign follow-up"
+        ],
         "cta": "View resources"
       },
       "followProspect": {
         "title": "Follow up with a prospect",
         "description": "You have already contacted an importer but the conversation is no longer moving forward.",
-        "topics": ["Follow-up schedule", "Email templates", "Follow-up after tasting"],
+        "topics": [
+          "Follow-up schedule",
+          "Email templates",
+          "Follow-up after tasting"
+        ],
         "cta": "View resources"
       },
       "moveOpportunity": {
         "title": "Move an opportunity forward",
         "description": "An importer is interested or an opportunity matches your winery.",
-        "topics": ["Reply to an opportunity", "Samples", "Negotiation"],
+        "topics": [
+          "Reply to an opportunity",
+          "Samples",
+          "Negotiation"
+        ],
         "cta": "View resources"
+      }
+    },
+    "essential": {
+      "title": "Essential resources",
+      "subtitle": "The most useful guides and templates for your conversations with importers.",
+      "badges": {
+        "recommended": "Recommended"
+      },
+      "items": {
+        "firstEmail": {
+          "category": "First contact",
+          "title": "How to write your first email to an importer",
+          "type": "Guide · 5 min",
+          "description": "What to include, the recommended length and a simple template you can adapt to your winery.",
+          "cta": "Read resource"
+        },
+        "followCampaign": {
+          "category": "WineExporters campaign",
+          "title": "How to follow up after a WineExporters campaign",
+          "type": "Guide + template · 5 min",
+          "description": "How to introduce yourself when an importer has received a campaign about your wines or shown interest.",
+          "cta": "Read resource"
+        },
+        "firstEmailAttachments": {
+          "category": "First contact",
+          "title": "What should you attach to a first email?",
+          "type": "Guide · 3 min",
+          "description": "Winery presentation, technical sheets and pricing: what is useful to send from the first contact.",
+          "cta": "Read resource"
+        },
+        "followUpStructure": {
+          "category": "Follow-up",
+          "title": "How to structure your follow-ups",
+          "type": "Guide · 5 min",
+          "description": "When to follow up, how often and how to move the conversation forward without sending unnecessary emails.",
+          "cta": "Read resource"
+        },
+        "followUpTemplates": {
+          "category": "Follow-up",
+          "title": "3 follow-up email templates",
+          "type": "Templates · 3 min",
+          "description": "Three examples ready to adapt for your first, second and final follow-up.",
+          "cta": "View templates"
+        },
+        "respondOpportunity": {
+          "category": "Opportunities",
+          "title": "How to respond to a WineExporters opportunity",
+          "type": "Guide + template · 5 min",
+          "description": "How to respond effectively to an importer request published on the platform.",
+          "cta": "Read resource"
+        },
+        "sendSamples": {
+          "category": "Sales follow-up",
+          "title": "Sending samples to an importer",
+          "type": "Video · duration to be added",
+          "description": "How to prepare your shipment and give the importer all the useful information for the tasting.",
+          "cta": "Watch video"
+        },
+        "followUpTasting": {
+          "category": "Sales follow-up",
+          "title": "How to follow up after a tasting",
+          "type": "Video + guide · duration to be added",
+          "description": "When to get back in touch after a tasting and how to move the conversation toward a clear next step.",
+          "cta": "View resource"
+        }
       }
     }
   },

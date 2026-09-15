@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Mail, Megaphone, RefreshCw, TrendingUp, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpen, FileText, Mail, Megaphone, RefreshCw, TrendingUp, Video, type LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { SEO } from "@/components/SEO";
 
 type ResourceCardKey = "contactImporter" | "followCampaign" | "followProspect" | "moveOpportunity";
@@ -19,6 +20,43 @@ const RESOURCE_CARDS: ResourceCardConfig[] = [
   { key: "followProspect", icon: RefreshCw },
   { key: "moveOpportunity", icon: TrendingUp },
 ];
+
+type EssentialResourceSlug =
+  | "firstEmail"
+  | "followCampaign"
+  | "firstEmailAttachments"
+  | "followUpStructure"
+  | "followUpTemplates"
+  | "respondOpportunity"
+  | "sendSamples"
+  | "followUpTasting";
+
+type EssentialResourceType = "guide" | "template" | "video";
+
+interface EssentialResource {
+  slug: EssentialResourceSlug;
+  type: EssentialResourceType;
+  /** Optionnel : ajouter un lien dans une prochaine itération sans changer la structure. */
+  href?: string;
+  recommended?: boolean;
+}
+
+const ESSENTIAL_RESOURCES: EssentialResource[] = [
+  { slug: "firstEmail", type: "guide" },
+  { slug: "followCampaign", type: "guide", recommended: true },
+  { slug: "firstEmailAttachments", type: "guide" },
+  { slug: "followUpStructure", type: "guide" },
+  { slug: "followUpTemplates", type: "template" },
+  { slug: "respondOpportunity", type: "guide" },
+  { slug: "sendSamples", type: "video" },
+  { slug: "followUpTasting", type: "video" },
+];
+
+const TYPE_ICONS: Record<EssentialResourceType, LucideIcon> = {
+  guide: BookOpen,
+  template: FileText,
+  video: Video,
+};
 
 const Resources = () => {
   const { t } = useTranslation();
@@ -70,6 +108,57 @@ const Resources = () => {
                 <p className="mb-4 text-xs text-muted-foreground/80">{topics.join(" · ")}</p>
                 <div className="mt-auto">
                   {card.href ? <Link to={card.href}>{cta}</Link> : cta}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Ressources essentielles */}
+      <div>
+        <h2 className="mb-1 text-2xl font-bold text-foreground">
+          {t("resources.essential.title")}
+        </h2>
+        <p className="text-muted-foreground">{t("resources.essential.subtitle")}</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {ESSENTIAL_RESOURCES.map((resource) => {
+          const TypeIcon = TYPE_ICONS[resource.type];
+          const base = `resources.essential.items.${resource.slug}`;
+          const cta = (
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+              {t(`${base}.cta`)}
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          );
+
+          return (
+            <Card key={resource.slug} className="border hover:shadow-md transition-shadow">
+              <CardContent className="flex h-full flex-col p-4">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary" className="font-normal">
+                    {t(`${base}.category`)}
+                  </Badge>
+                  {resource.recommended && (
+                    <Badge variant="outline" className="border-primary/40 text-primary font-normal">
+                      {t("resources.essential.badges.recommended")}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="mb-1 text-sm font-semibold text-foreground">
+                  {t(`${base}.title`)}
+                </h3>
+                <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <TypeIcon className="h-3.5 w-3.5" />
+                  {t(`${base}.type`)}
+                </p>
+                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+                  {t(`${base}.description`)}
+                </p>
+                <div className="mt-auto">
+                  {resource.href ? <Link to={resource.href}>{cta}</Link> : cta}
                 </div>
               </CardContent>
             </Card>
