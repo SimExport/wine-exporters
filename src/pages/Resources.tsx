@@ -116,29 +116,29 @@ const Resources = () => {
           );
 
           return (
-            <Card key={card.key} className="border hover:shadow-md transition-shadow">
-              <CardContent className="flex h-full flex-col p-5">
-                <div className="mb-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-4 w-4 text-primary" />
-                </div>
-                <h2 className="mb-1 text-base font-semibold text-foreground">
-                  {t(`resources.cards.${card.key}.title`)}
-                </h2>
-                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-                  {t(`resources.cards.${card.key}.description`)}
-                </p>
-                <p className="mb-4 text-xs text-muted-foreground/80">{topics.join(" · ")}</p>
-                <div className="mt-auto">
-                  {card.href ? <Link to={card.href}>{cta}</Link> : cta}
-                </div>
-              </CardContent>
-            </Card>
+            <a key={card.key} href={card.anchor} className="block">
+              <Card className="h-full border hover:shadow-md transition-shadow">
+                <CardContent className="flex h-full flex-col p-5">
+                  <div className="mb-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <h2 className="mb-1 text-base font-semibold text-foreground">
+                    {t(`resources.cards.${card.key}.title`)}
+                  </h2>
+                  <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+                    {t(`resources.cards.${card.key}.description`)}
+                  </p>
+                  <p className="mb-4 text-xs text-muted-foreground/80">{topics.join(" · ")}</p>
+                  <div className="mt-auto">{cta}</div>
+                </CardContent>
+              </Card>
+            </a>
           );
         })}
       </div>
 
       {/* Ressources essentielles */}
-      <div>
+      <div id="ressources-essentielles" className="scroll-mt-8">
         <h2 className="mb-1 text-2xl font-bold text-foreground">
           {t("resources.essential.title")}
         </h2>
@@ -157,8 +157,14 @@ const Resources = () => {
           );
 
           return (
-            <Card key={resource.slug} className="border hover:shadow-md transition-shadow">
-              <CardContent className="flex h-full flex-col p-4">
+            <Link
+              key={resource.slug}
+              to={resource.href}
+              id={`resource-${resource.slug}`}
+              className="block scroll-mt-8"
+            >
+              <Card className="h-full border hover:shadow-md transition-shadow">
+                <CardContent className="flex h-full flex-col p-4">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <Badge variant="secondary" className="font-normal">
                     {t(`${base}.category`)}
