@@ -210,6 +210,33 @@
           "cta": "Voir la ressource"
         }
       }
+    },
+    "videos": {
+      "title": "Vidéos pratiques",
+      "subtitle": "Des conseils concrets pour faire avancer vos échanges avec les importateurs, de l’envoi des échantillons jusqu’au suivi après commande.",
+      "cta": "Voir la vidéo",
+      "items": {
+        "sendSamples": {
+          "title": "Envoyer des échantillons à un importateur",
+          "description": "Comment préparer l’envoi, quoi joindre et comment donner toutes les informations utiles pour faciliter la dégustation."
+        },
+        "confirmReceipt": {
+          "title": "Confirmer la réception et garder le contact",
+          "description": "Comment confirmer que les échantillons sont bien arrivés et maintenir un échange actif avec l’importateur avant la dégustation."
+        },
+        "tastingFeedback": {
+          "title": "Obtenir un retour après dégustation",
+          "description": "Quand relancer après la dégustation et comment obtenir un retour concret sans mettre de pression inutile."
+        },
+        "negotiateFirstOrder": {
+          "title": "Négocier et sécuriser une première commande",
+          "description": "Comment faire avancer la discussion commerciale, traiter les derniers points de blocage et transformer l’intérêt en première commande."
+        },
+        "postOrderFollowUp": {
+          "title": "Suivi après commande et fidélisation",
+          "description": "Comment assurer le suivi après une première commande et construire une relation durable avec l’importateur."
+        }
+      }
     }
   },
   "mobileNav": {
