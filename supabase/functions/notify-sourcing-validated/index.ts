@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
               <strong style="color: #59191F;">${request.target_market}</strong>.
             </p>
             <p style="color: #333333; font-size: 15px; line-height: 1.6; margin: 0 0 28px;">
-              Vous pouvez dès maintenant consulter et télécharger la liste des contacts identifiés depuis votre espace.
+              Vous pouvez dès maintenant consulter la liste des contacts identifiés depuis votre espace, et l'exporter au format Excel.
             </p>
             <p style="margin: 0 0 32px; text-align: center;">
               <a href="${appUrl}" style="background-color: #59191F; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 15px;">
