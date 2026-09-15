@@ -189,11 +189,10 @@ const Resources = () => {
                 <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
                   {t(`${base}.description`)}
                 </p>
-                <div className="mt-auto">
-                  {resource.href ? <Link to={resource.href}>{cta}</Link> : cta}
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="mt-auto">{cta}</div>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>
