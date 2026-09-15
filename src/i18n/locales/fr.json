@@ -237,6 +237,93 @@
           "description": "Comment assurer le suivi après une première commande et construire une relation durable avec l’importateur."
         }
       }
+    },
+    "articles": {
+      "firstEmail": {
+        "title": "Comment écrire un premier email à un importateur",
+        "meta": {
+          "category": "Premier contact",
+          "type": "Guide",
+          "duration": "5 min"
+        },
+        "intro": "Le premier email doit donner envie à l’importateur d’en savoir plus, pas lui raconter toute l’histoire du domaine. L’objectif est simple : être compris rapidement, montrer pourquoi vos vins peuvent être pertinents pour son portefeuille et obtenir une réponse.",
+        "when": {
+          "title": "Quand utiliser cette méthode",
+          "body": [
+            "Utilisez ce format lorsque vous contactez directement un importateur identifié dans la base WineExporters ou dans une recherche sur mesure, sans échange préalable avec lui.",
+            "Si l’importateur a déjà reçu une campagne WineExporters ou manifesté son intérêt, utilisez plutôt la ressource dédiée au suivi après campagne."
+          ]
+        },
+        "recommend": {
+          "title": "Ce que nous recommandons",
+          "intro": "Votre premier email doit rester court, personnalisé et facile à parcourir. L’importateur doit comprendre en quelques secondes :",
+          "points": [
+            "qui vous êtes ;",
+            "d’où viennent vos vins ;",
+            "ce qui peut les rendre intéressants pour son marché ;",
+            "pourquoi vous le contactez lui ;",
+            "quelle est la prochaine étape proposée."
+          ],
+          "outro": "Évitez de présenter toute la gamme dès le premier message. Mettez plutôt en avant 1 à 3 vins maximum qui correspondent à son positionnement."
+        },
+        "structure": {
+          "title": "Structure d’un bon premier email",
+          "steps": [
+            {
+              "title": "Une introduction simple",
+              "body": "Présentez-vous, votre domaine et votre région en une phrase."
+            },
+            {
+              "title": "Une raison précise de le contacter",
+              "body": "Montrez que vous savez à qui vous écrivez. Une référence à son portefeuille, son marché ou son positionnement suffit."
+            },
+            {
+              "title": "Une proposition claire",
+              "body": "Présentez brièvement les vins qui pourraient correspondre à son activité."
+            },
+            {
+              "title": "Une preuve ou un élément concret",
+              "body": "Certification, appellation, gamme de prix, marchés déjà ouverts, distinction ou autre élément réellement pertinent."
+            },
+            {
+              "title": "Une prochaine étape simple",
+              "body": "Proposez d’envoyer davantage d’informations, une sélection de vins ou des échantillons."
+            }
+          ]
+        },
+        "template": {
+          "title": "Modèle d’email",
+          "subjectLabel": "Objet",
+          "subject": "French wines from [Region] – [Winery name]",
+          "body": "Bonjour [Prénom],\n\nJe suis [Prénom], [fonction] au [Nom du domaine], situé à [région / appellation].\n\nJe me permets de vous contacter car j’ai vu que vous travaillez avec [type de vins / région / positionnement pertinent], et je pense que certaines de nos cuvées pourraient correspondre à votre portefeuille.\n\nNous produisons notamment [1 à 3 éléments maximum : appellations, cépages ou styles de vins], avec des tarifs export à partir de [prix, si pertinent]. Nous travaillons déjà [marchés / références pertinentes, si pertinent].\n\nJe serais ravi de vous envoyer notre présentation, nos fiches techniques et une sélection adaptée à votre marché. Seriez-vous disponible pour y jeter un œil ?\n\nBien cordialement,\n[Prénom]\n[Domaine]\n[Email]\n[Téléphone]\n[Site web]",
+          "copy": "Copier le modèle",
+          "copied": "Modèle copié"
+        },
+        "avoid": {
+          "title": "À éviter",
+          "points": [
+            "envoyer un email trop long ;",
+            "joindre 8 ou 10 documents dès le premier message ;",
+            "parler uniquement de l’histoire du domaine sans expliquer la pertinence pour l’importateur ;",
+            "envoyer un message générique adressé à tout le monde ;",
+            "demander une commande immédiatement ;",
+            "multiplier les superlatifs sans preuve concrète."
+          ]
+        },
+        "takeaways": {
+          "title": "À retenir",
+          "points": [
+            "Restez court.",
+            "Mettez la pertinence en avant, pas seulement l’histoire du domaine.",
+            "Mettez en avant quelques vins, pas toute votre gamme.",
+            "Terminez toujours par une prochaine étape simple."
+          ]
+        },
+        "next": {
+          "title": "Étape suivante",
+          "label": "Que joindre à un premier email ?"
+        }
+      }
     }
   },
   "mobileNav": {

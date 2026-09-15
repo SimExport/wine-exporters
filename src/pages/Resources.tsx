@@ -44,7 +44,7 @@ interface EssentialResource {
 }
 
 const ESSENTIAL_RESOURCES: EssentialResource[] = [
-  { slug: "firstEmail", type: "guide" },
+  { slug: "firstEmail", type: "guide", href: "/ressources/premier-email-importateur" },
   { slug: "followCampaign", type: "guide", recommended: true },
   { slug: "firstEmailAttachments", type: "guide" },
   { slug: "followUpStructure", type: "guide" },

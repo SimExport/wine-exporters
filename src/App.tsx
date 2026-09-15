@@ -36,6 +36,7 @@ import Billing from "./pages/Billing";
 import Roadmap from "./pages/Roadmap";
 import Help from "./pages/Help";
 import Resources from "./pages/Resources";
+import FirstEmailImporter from "./pages/resources/FirstEmailImporter";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
@@ -104,6 +105,7 @@ const App = () => (
             <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
             <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
             <Route path="/ressources" element={<DashboardLayout><Resources /></DashboardLayout>} />
+            <Route path="/ressources/premier-email-importateur" element={<DashboardLayout><FirstEmailImporter /></DashboardLayout>} />
             <Route path="/recherches" element={<DashboardLayout><SourcingRequests /></DashboardLayout>} />
             <Route path="/opportunites" element={<DashboardLayout><Opportunities /></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
