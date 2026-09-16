@@ -138,6 +138,7 @@ const MarketAnalysis = () => {
         title={t("seo.marketAnalysis.title")}
         description={t("seo.marketAnalysis.description")}
         path="/market-analysis"
+        noindex
       />
 
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
