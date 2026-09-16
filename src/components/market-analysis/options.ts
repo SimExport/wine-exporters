@@ -47,6 +47,37 @@ export const IMPORTER_PREFERENCES: Option[] = [
   { value: IMPORTER_LET_US_CHOOSE, key: "letUsChoose" },
 ];
 
+// Marchés cibles disponibles pour cette V1 (liste fermée, sans saisie libre).
+// Les codes correspondent à `code` dans src/components/importers/country-data.ts :
+// pour ajouter ou retirer un marché, il suffit de modifier cette liste.
+export const AVAILABLE_MARKET_CODES: string[] = [
+  "GB", // Royaume-Uni
+  "DE", // Allemagne
+  "NL", // Pays-Bas
+  "DK", // Danemark
+  "BE", // Belgique
+  "CH", // Suisse
+  "SE", // Suède
+  "CZ", // République tchèque
+  "PL", // Pologne
+  "IT", // Italie
+  "AT", // Autriche
+  "ES", // Espagne
+  "NO", // Norvège
+  "IE", // Irlande
+  "US", // États-Unis
+  "CA", // Canada
+  "JP", // Japon
+  "HK", // Hong Kong
+  "CN", // Chine
+  "SG", // Singapour
+  "KR", // Corée du Sud
+  "AU", // Australie
+  "BR", // Brésil
+  "MX", // Mexique
+  "FI", // Finlande
+];
+
 export interface MarketAnalysisForm {
   winery_name: string;
   contact_name: string;
