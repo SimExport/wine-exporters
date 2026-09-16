@@ -10,6 +10,7 @@ Formulaire public en 4 étapes sur `/market-analysis`, accessible sans compte, q
 - Étape 2 « Quels vins souhaitez-vous développer à l'export ? » : types de vins (cases à cocher), appellations ou cuvées, fourchette de prix EXW (choix unique), certifications (facultatif ; cocher « Aucune » décoche les autres).
 - Étape 3 « Quel marché souhaitez-vous développer ? » : pays ciblé (liste complète, avec recherche, un seul pays), types d'importateurs (facultatif ; « Je préfère laisser WineExporters sélectionner » décoche les autres), acteurs à éviter.
 - Étape 4 « Une dernière chose » : précision libre, phrase de rappel avant le bouton, CTA « Analyser mon marché » et texte explicatif en dessous.
+- Sous le bouton, une mention : « En envoyant ce formulaire, vous acceptez que WineExporters utilise ces informations pour préparer votre analyse. Voir notre politique de confidentialité. » (pas de case à cocher).
 - Après envoi : « Votre demande a bien été enregistrée. » / « Nous préparons la prochaine étape de votre analyse. »
 
 ## Règles de saisie
