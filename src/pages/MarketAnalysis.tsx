@@ -96,8 +96,13 @@ const MarketAnalysis = () => {
     }
 
     const tooFast = (Date.now() - openedAt.current) / 1000 < MIN_FILL_SECONDS;
-    if (honeypot.trim() || tooFast) {
+    const trapped = honeypotTyped.current && honeypot.trim().length > 0;
+    if (trapped || tooFast) {
       // Robot probable : on affiche la confirmation sans rien enregistrer.
+      console.warn(
+        "market-analysis: submission skipped (anti-bot)",
+        trapped ? "honeypot" : "too-fast"
+      );
       setSubmitted(true);
       return;
     }
