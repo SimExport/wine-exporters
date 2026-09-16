@@ -62,3 +62,9 @@ verify_jwt = true
 
 [functions.admin-invite-link]
 verify_jwt = true
+
+[functions.process-prospect-market-analysis]
+verify_jwt = false
+
+[functions.get-prospect-market-analysis]
+verify_jwt = false
