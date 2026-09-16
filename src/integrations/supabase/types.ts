@@ -1188,7 +1188,11 @@ export type Database = {
           export_price_range: string | null
           id: string
           importer_preferences: string[] | null
+          processed_at: string | null
+          processing_error: string | null
           referrer: string | null
+          result_json: Json | null
+          result_summary: string | null
           source: string | null
           status: string
           target_country: string | null
@@ -1209,7 +1213,11 @@ export type Database = {
           export_price_range?: string | null
           id?: string
           importer_preferences?: string[] | null
+          processed_at?: string | null
+          processing_error?: string | null
           referrer?: string | null
+          result_json?: Json | null
+          result_summary?: string | null
           source?: string | null
           status?: string
           target_country?: string | null
@@ -1230,7 +1238,11 @@ export type Database = {
           export_price_range?: string | null
           id?: string
           importer_preferences?: string[] | null
+          processed_at?: string | null
+          processing_error?: string | null
           referrer?: string | null
+          result_json?: Json | null
+          result_summary?: string | null
           source?: string | null
           status?: string
           target_country?: string | null
