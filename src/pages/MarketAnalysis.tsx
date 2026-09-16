@@ -131,6 +131,7 @@ const MarketAnalysis = () => {
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
+      console.error("market-analysis insert failed", err);
       setSubmitError(err?.message || t("marketAnalysis.errors.submit"));
     } finally {
       setSubmitting(false);
