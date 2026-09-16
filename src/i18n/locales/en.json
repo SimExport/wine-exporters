@@ -27,6 +27,10 @@
     "marketAnalysis": {
       "title": "Export market analysis — WineExporters",
       "description": "Tell us about your estate, your wines and your target market: WineExporters identifies the importers to contact first."
+    },
+    "marketAnalysisResult": {
+      "title": "Your market analysis — WineExporters",
+      "description": "The importers to contact first on your target market, selected by WineExporters."
     }
   },
   "common": {
@@ -3172,6 +3176,67 @@
       "title": "Your request has been recorded.",
       "body": "We are preparing the next step of your analysis.",
       "backHome": "Back to home"
+    },
+    "processing": {
+      "title": "We are preparing your analysis",
+      "step1": "We are analysing your estate and the importers available on this market.",
+      "step2": "We are now comparing the most relevant profiles."
+    }
+  },
+  "marketAnalysisResult": {
+    "badge": "Personalised WineExporters analysis",
+    "title": "Your analysis is ready",
+    "subtitle": "We identified {{count}} importers to contact first on the {{market}} market.",
+    "priceRange": "core range {{range}}",
+    "loading": "Loading your analysis...",
+    "processing": {
+      "title": "Your analysis is being prepared.",
+      "step1": "We are analysing your estate and the importers available on this market.",
+      "step2": "We are now comparing the most relevant profiles."
+    },
+    "failed": {
+      "title": "We could not complete your analysis at the moment.",
+      "body": "You can run the analysis again for this request, without filling in the form a second time.",
+      "retry": "Run the analysis again",
+      "retrying": "Running..."
+    },
+    "notFound": {
+      "title": "Analysis not found",
+      "body": "This link does not match any analysis."
+    },
+    "empty": {
+      "title": "No usable importer on this market for now",
+      "body": "We do not yet have enough qualified companies on this market to build a reliable selection. We would rather show you nothing than approximate results."
+    },
+    "summary": {
+      "title": "What we take away for your estate",
+      "approachTitle": "Recommended approach"
+    },
+    "shortlist": {
+      "title": "{{count}} importers to contact first",
+      "masked": "Direct contact details are intentionally hidden in this analysis. They are available in WineExporters.",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "scoreLabel": "Priority",
+      "website": "Website"
+    },
+    "product": {
+      "title": "WineExporters is more than a database.",
+      "body1": "Identifying the right importers is an essential first step, and that is exactly what this analysis lets you do with a high level of precision. But the platform goes further: it also helps you contact those importers, launch and track your prospecting campaigns, centralise your opportunities in an export CRM, access direct requests from buyers and importers looking for wines, as well as tenders on certain monopoly markets.",
+      "body2": "The goal is not simply to give you names, but to give you the tools to turn these contacts into commercial conversations, and then into concrete opportunities.",
+      "steps": [
+        "Identify",
+        "Contact",
+        "Track",
+        "Follow up",
+        "Convert"
+      ],
+      "stepsNote": "WineExporters brings this entire journey together in one place."
+    },
+    "cta": {
+      "title": "Ready to move from analysis to prospecting?",
+      "body": "See how to contact these importers, launch your campaigns and track your opportunities directly in WineExporters.",
+      "button": "See a WineExporters demo"
     }
   }
 }

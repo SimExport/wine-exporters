@@ -27,6 +27,10 @@
     "marketAnalysis": {
       "title": "Analyse de marché export — WineExporters",
       "description": "Renseignez votre domaine, vos vins et votre marché cible : WineExporters identifie les importateurs à contacter en priorité."
+    },
+    "marketAnalysisResult": {
+      "title": "Votre analyse de marché — WineExporters",
+      "description": "Les importateurs à contacter en priorité sur votre marché cible, sélectionnés par WineExporters."
     }
   },
   "common": {
@@ -3172,6 +3176,67 @@
       "title": "Votre demande a bien été enregistrée.",
       "body": "Nous préparons la prochaine étape de votre analyse.",
       "backHome": "Retour à l'accueil"
+    },
+    "processing": {
+      "title": "Nous préparons votre analyse",
+      "step1": "Nous analysons votre domaine et les importateurs disponibles sur ce marché.",
+      "step2": "Nous comparons actuellement les profils les plus pertinents."
+    }
+  },
+  "marketAnalysisResult": {
+    "badge": "Analyse personnalisée WineExporters",
+    "title": "Votre analyse est prête",
+    "subtitle": "Nous avons identifié {{count}} importateurs à contacter en priorité sur le marché {{market}}.",
+    "priceRange": "cœur de gamme {{range}}",
+    "loading": "Chargement de votre analyse...",
+    "processing": {
+      "title": "Votre analyse est en cours de préparation.",
+      "step1": "Nous analysons votre domaine et les importateurs disponibles sur ce marché.",
+      "step2": "Nous comparons actuellement les profils les plus pertinents."
+    },
+    "failed": {
+      "title": "Nous n'avons pas pu finaliser votre analyse pour le moment.",
+      "body": "Vous pouvez relancer l'analyse de votre demande, sans avoir à remplir à nouveau le formulaire.",
+      "retry": "Relancer l'analyse",
+      "retrying": "Relance en cours..."
+    },
+    "notFound": {
+      "title": "Analyse introuvable",
+      "body": "Ce lien ne correspond à aucune analyse."
+    },
+    "empty": {
+      "title": "Aucun importateur exploitable sur ce marché pour le moment",
+      "body": "Nous n'avons pas encore assez de sociétés qualifiées sur ce marché pour établir une sélection fiable. Nous préférons ne rien vous présenter plutôt que des résultats approximatifs."
+    },
+    "summary": {
+      "title": "Ce que nous retenons pour votre domaine",
+      "approachTitle": "Approche recommandée"
+    },
+    "shortlist": {
+      "title": "{{count}} importateurs à contacter en priorité",
+      "masked": "Les coordonnées directes sont volontairement masquées dans cette analyse. Elles sont disponibles dans WineExporters.",
+      "emailLabel": "Email",
+      "phoneLabel": "Téléphone",
+      "scoreLabel": "Priorité",
+      "website": "Site internet"
+    },
+    "product": {
+      "title": "WineExporters ne se limite pas à une base de données.",
+      "body1": "Identifier les bons importateurs est une première étape essentielle, et c'est précisément ce que cette analyse vous permet de faire avec un haut niveau de précision. Mais la plateforme va plus loin : elle vous aide aussi à contacter ces importateurs, à lancer et suivre vos campagnes de prospection, à centraliser vos opportunités dans un CRM export, à accéder à des demandes directes d'acheteurs et d'importateurs à la recherche de vins, ainsi qu'à des appels d'offres sur certains marchés à monopole.",
+      "body2": "L'objectif n'est pas simplement de vous donner des noms, mais de vous donner les outils pour transformer ces contacts en conversations commerciales, puis en opportunités concrètes.",
+      "steps": [
+        "Identifier",
+        "Contacter",
+        "Suivre",
+        "Relancer",
+        "Convertir"
+      ],
+      "stepsNote": "WineExporters regroupe l'ensemble de ce parcours au même endroit."
+    },
+    "cta": {
+      "title": "Prêt à passer de l'analyse à la prospection ?",
+      "body": "Découvrez comment contacter ces importateurs, lancer vos campagnes et suivre vos opportunités directement dans WineExporters.",
+      "button": "Découvrir WineExporters en démo"
     }
   }
 }
