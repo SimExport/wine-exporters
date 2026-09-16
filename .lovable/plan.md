@@ -20,6 +20,12 @@ Formulaire public en 4 étapes sur `/market-analysis`, accessible sans compte, q
 - Aucun rechargement de page entre les étapes.
 - Bouton désactivé pendant l'envoi avec état de chargement, pour éviter les doubles soumissions ; en cas d'échec, message d'erreur clair et possibilité de réessayer.
 
+## Anti-robots (léger)
+
+- Un champ piège invisible (honeypot), invisible pour un visiteur mais rempli par la plupart des robots : si le champ est rempli, la page affiche la confirmation sans rien enregistrer.
+- Un délai minimum entre l'ouverture de la page et l'envoi (quelques secondes) pour écarter les envois automatiques instantanés.
+- Pas de CAPTCHA en V1.
+
 ## Détails techniques
 
 Fichiers créés :
