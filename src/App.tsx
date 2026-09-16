@@ -10,6 +10,7 @@ import AdminRoute from "@/components/AdminRoute";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import DemoRequest from "./pages/DemoRequest";
+import MarketAnalysis from "./pages/MarketAnalysis";
 import Discover from "./pages/Discover";
 import Dashboard from "./pages/Dashboard";
 import DomainProfile from "./pages/DomainProfile";
