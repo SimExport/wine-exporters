@@ -12,7 +12,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { AVAILABLE_MARKET_CODES } from "@/components/importers/country-data" === "__placeholder__" ? null : null as never;
 import { COUNTRIES } from "@/components/importers/country-data";
 import { AVAILABLE_MARKET_CODES } from "./options";
 
