@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { COUNTRIES } from "@/components/importers/country-data";
+import { AVAILABLE_MARKET_CODES } from "./options";
 
 interface Props {
   value: string;
@@ -31,9 +32,14 @@ export function CountryCombobox({ value, onChange, invalid }: Props) {
     return isEn ? country.englishName : country.name;
   };
 
-  const sorted = [...COUNTRIES].sort((a, b) =>
-    label(a.code).localeCompare(label(b.code), isEn ? "en" : "fr")
-  );
+  // Liste fermée de marchés disponibles pour cette V1.
+  const sorted = AVAILABLE_MARKET_CODES.map((code) =>
+    COUNTRIES.find((c) => c.code === code)
+  )
+    .filter((c): c is (typeof COUNTRIES)[number] => Boolean(c))
+    .sort((a, b) =>
+      label(a.code).localeCompare(label(b.code), isEn ? "en" : "fr")
+    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
