@@ -29,7 +29,10 @@ const MarketAnalysis = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   // Anti-robots : champ piège invisible + délai minimum de remplissage.
+  // Le piège ne compte que si une frappe réelle a eu lieu (évite les faux positifs
+  // dus au remplissage automatique des navigateurs).
   const [honeypot, setHoneypot] = useState("");
+  const honeypotTyped = useRef(false);
   const openedAt = useRef(Date.now());
 
   const update = <K extends keyof MarketAnalysisForm>(key: K, value: MarketAnalysisForm[K]) => {
@@ -93,8 +96,13 @@ const MarketAnalysis = () => {
     }
 
     const tooFast = (Date.now() - openedAt.current) / 1000 < MIN_FILL_SECONDS;
-    if (honeypot.trim() || tooFast) {
+    const trapped = honeypotTyped.current && honeypot.trim().length > 0;
+    if (trapped || tooFast) {
       // Robot probable : on affiche la confirmation sans rien enregistrer.
+      console.warn(
+        "market-analysis: submission skipped (anti-bot)",
+        trapped ? "honeypot" : "too-fast"
+      );
       setSubmitted(true);
       return;
     }
@@ -123,6 +131,7 @@ const MarketAnalysis = () => {
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
+      console.error("market-analysis insert failed", err);
       setSubmitError(err?.message || t("marketAnalysis.errors.submit"));
     } finally {
       setSubmitting(false);
@@ -188,16 +197,20 @@ const MarketAnalysis = () => {
                   }}
                   className="space-y-8"
                 >
-                  {/* Champ piège anti-robots : invisible pour les visiteurs. */}
+                  {/* Champ piège anti-robots : invisible pour les visiteurs.
+                      Nom neutre + autocomplétion désactivée pour éviter le
+                      remplissage automatique des navigateurs. */}
                   <div className="absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
-                    <label htmlFor="company_website_extra">Website</label>
                     <input
-                      id="company_website_extra"
-                      name="company_website_extra"
+                      id="contact_reference"
+                      name="contact_reference"
                       type="text"
                       tabIndex={-1}
-                      autoComplete="off"
+                      autoComplete="new-password"
                       value={honeypot}
+                      onKeyDown={() => {
+                        honeypotTyped.current = true;
+                      }}
                       onChange={(e) => setHoneypot(e.target.value)}
                     />
                   </div>
