@@ -10,6 +10,7 @@ Formulaire public en 4 étapes sur `/market-analysis`, accessible sans compte, q
 - Étape 2 « Quels vins souhaitez-vous développer à l'export ? » : types de vins (cases à cocher), appellations ou cuvées, fourchette de prix EXW (choix unique), certifications (facultatif ; cocher « Aucune » décoche les autres).
 - Étape 3 « Quel marché souhaitez-vous développer ? » : pays ciblé (liste complète, avec recherche, un seul pays), types d'importateurs (facultatif ; « Je préfère laisser WineExporters sélectionner » décoche les autres), acteurs à éviter.
 - Étape 4 « Une dernière chose » : précision libre, phrase de rappel avant le bouton, CTA « Analyser mon marché » et texte explicatif en dessous.
+- Sous le bouton, une mention : « En envoyant ce formulaire, vous acceptez que WineExporters utilise ces informations pour préparer votre analyse. Voir notre politique de confidentialité. » (pas de case à cocher).
 - Après envoi : « Votre demande a bien été enregistrée. » / « Nous préparons la prochaine étape de votre analyse. »
 
 ## Règles de saisie
@@ -18,6 +19,12 @@ Formulaire public en 4 étapes sur `/market-analysis`, accessible sans compte, q
 - Impossible de continuer si un champ obligatoire est vide ou si l'email est invalide ; les messages d'erreur s'affichent sous le champ concerné.
 - Aucun rechargement de page entre les étapes.
 - Bouton désactivé pendant l'envoi avec état de chargement, pour éviter les doubles soumissions ; en cas d'échec, message d'erreur clair et possibilité de réessayer.
+
+## Anti-robots (léger)
+
+- Un champ piège invisible (honeypot), invisible pour un visiteur mais rempli par la plupart des robots : si le champ est rempli, la page affiche la confirmation sans rien enregistrer.
+- Un délai minimum entre l'ouverture de la page et l'envoi (quelques secondes) pour écarter les envois automatiques instantanés.
+- Pas de CAPTCHA en V1.
 
 ## Détails techniques
 
@@ -31,11 +38,12 @@ Fichiers modifiés :
 
 Table Supabase `prospect_market_searches` : `id`, `created_at`, `winery_name`, `contact_name`, `email`, `website`, `winery_location`, `wine_types text[]`, `appellations_cuvees`, `export_price_range`, `certifications text[]`, `target_country`, `importer_preferences text[]`, `exclusions`, `additional_context`, `status` (défaut `new`), `source`, `campaign`, `referrer` (ces trois derniers présents mais non utilisés visuellement pour l'instant).
 
-Accès :
-- `GRANT INSERT` à `anon` et `authenticated`, `GRANT ALL` à `service_role`.
-- RLS activée : une seule policy d'insertion pour les visiteurs (anonymes et connectés), aucune policy de lecture, de modification ou de suppression — personne ne peut consulter les demandes depuis la page publique ; l'équipe y accède via le back-office Supabase (rôle service).
+Accès (strict) :
+- `GRANT INSERT` uniquement à `anon` et `authenticated` (aucun `SELECT`, `UPDATE`, `DELETE`), `GRANT ALL` à `service_role`.
+- RLS activée avec une seule policy : insertion pour `anon` et `authenticated`. Aucune policy de lecture, de modification ou de suppression : un visiteur ne peut ni relire sa demande ni voir celles des autres. La consultation se fera plus tard via une interface authentifiée réservée aux administrateurs (policy de lecture ajoutée à ce moment-là, basée sur `has_role(auth.uid(), 'admin')`).
+- L'identifiant reste un `uuid` aléatoire (`gen_random_uuid()`), jamais séquentiel : il servira de base au lien unique de la future page de résultats. Aucune route publique ne devra exposer d'identifiant prévisible.
 
-Non inclus à cette étape : page de résultats, traitement automatique, email de notification, entrée dans l'espace admin.
+Non inclus à cette étape : page de résultats, traitement automatique, email de notification, entrée dans l'espace admin, page « politique de confidentialité » (le lien pointera vers la page existante si elle existe, sinon il faudra me le confirmer).
 
 ## Point à valider
 
