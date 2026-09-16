@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Check, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface TechSheetDoc {
   id: string;
@@ -29,6 +30,28 @@ export function TechSheetRow({ doc, onSave, onDelete }: Props) {
   const [format, setFormat] = useState(doc.format ?? '');
   const [language, setLanguage] = useState(doc.language ?? '');
   const [savedField, setSavedField] = useState<string | null>(null);
+  const [opening, setOpening] = useState(false);
+
+  const handleOpen = async () => {
+    setOpening(true);
+    try {
+      const filePath = doc.file_url.split('/documents/')[1];
+      if (!filePath) {
+        window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(decodeURIComponent(filePath), 3600);
+      if (error || !data?.signedUrl) throw error;
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      console.error('Error opening document:', e);
+      window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+    } finally {
+      setOpening(false);
+    }
+  };
 
   useEffect(() => {
     if (!savedField) return;
@@ -104,11 +127,9 @@ export function TechSheetRow({ doc, onSave, onDelete }: Props) {
       </td>
       <td className={cell}>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" asChild>
-            <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4 mr-1" />
-              {t('profile.techSheets.open')}
-            </a>
+          <Button type="button" variant="outline" size="sm" onClick={handleOpen} disabled={opening}>
+            <ExternalLink className="h-4 w-4 mr-1" />
+            {t('profile.techSheets.open')}
           </Button>
           <Button type="button" variant="destructive" size="sm" onClick={() => onDelete(doc.id, doc.file_url)}>
             {t('profile.documents.delete')}
