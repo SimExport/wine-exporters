@@ -1175,6 +1175,72 @@ export type Database = {
         }
         Relationships: []
       }
+      prospect_market_searches: {
+        Row: {
+          additional_context: string | null
+          appellations_cuvees: string | null
+          campaign: string | null
+          certifications: string[] | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          exclusions: string | null
+          export_price_range: string | null
+          id: string
+          importer_preferences: string[] | null
+          referrer: string | null
+          source: string | null
+          status: string
+          target_country: string | null
+          website: string | null
+          wine_types: string[] | null
+          winery_location: string | null
+          winery_name: string | null
+        }
+        Insert: {
+          additional_context?: string | null
+          appellations_cuvees?: string | null
+          campaign?: string | null
+          certifications?: string[] | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          exclusions?: string | null
+          export_price_range?: string | null
+          id?: string
+          importer_preferences?: string[] | null
+          referrer?: string | null
+          source?: string | null
+          status?: string
+          target_country?: string | null
+          website?: string | null
+          wine_types?: string[] | null
+          winery_location?: string | null
+          winery_name?: string | null
+        }
+        Update: {
+          additional_context?: string | null
+          appellations_cuvees?: string | null
+          campaign?: string | null
+          certifications?: string[] | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          exclusions?: string | null
+          export_price_range?: string | null
+          id?: string
+          importer_preferences?: string[] | null
+          referrer?: string | null
+          source?: string | null
+          status?: string
+          target_country?: string | null
+          website?: string | null
+          wine_types?: string[] | null
+          winery_location?: string | null
+          winery_name?: string | null
+        }
+        Relationships: []
+      }
       prospect_notes: {
         Row: {
           body: string
