@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Check, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface TechSheetDoc {
   id: string;
