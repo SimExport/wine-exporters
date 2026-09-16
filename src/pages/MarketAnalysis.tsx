@@ -110,7 +110,7 @@ const MarketAnalysis = () => {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const { error } = await supabase.from("prospect_market_searches").insert({
+      const { data: inserted, error } = await supabase.from("prospect_market_searches").insert({
         winery_name: form.winery_name.trim(),
         contact_name: form.contact_name.trim(),
         email: form.email.trim(),
@@ -126,10 +126,18 @@ const MarketAnalysis = () => {
         additional_context: form.additional_context.trim() || null,
         source: "market-analysis",
         referrer: typeof document !== "undefined" ? document.referrer || null : null,
-      });
+      }).select("id").single();
       if (error) throw error;
-      setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Déclenchement du traitement (workflow prospect dédié) puis redirection
+      // vers la page de résultat, qui affiche l'état d'avancement.
+      supabase.functions
+        .invoke("process-prospect-market-analysis", {
+          body: { prospect_market_search_id: inserted.id },
+        })
+        .catch((err) => console.error("market-analysis processing trigger failed", err));
+
+      navigate(`/market-analysis/result/${inserted.id}`);
     } catch (err: any) {
       console.error("market-analysis insert failed", err);
       setSubmitError(err?.message || t("marketAnalysis.errors.submit"));
