@@ -1,0 +1,1 @@
+DELETE FROM public.prospect_market_searches WHERE email = 'qa-test@example.com';
