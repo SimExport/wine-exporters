@@ -127,11 +127,9 @@ export function TechSheetRow({ doc, onSave, onDelete }: Props) {
       </td>
       <td className={cell}>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" asChild>
-            <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4 mr-1" />
-              {t('profile.techSheets.open')}
-            </a>
+          <Button type="button" variant="outline" size="sm" onClick={handleOpen} disabled={opening}>
+            <ExternalLink className="h-4 w-4 mr-1" />
+            {t('profile.techSheets.open')}
           </Button>
           <Button type="button" variant="destructive" size="sm" onClick={() => onDelete(doc.id, doc.file_url)}>
             {t('profile.documents.delete')}
