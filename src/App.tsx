@@ -87,6 +87,7 @@ const App = () => (
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
             <Route path="/decouvrir" element={<Discover />} />
+            <Route path="/market-analysis" element={<MarketAnalysis />} />
             <Route path="/interest/:campaignId" element={<CampaignInterestForm />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
