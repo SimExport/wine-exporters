@@ -38,11 +38,12 @@ Fichiers modifiés :
 
 Table Supabase `prospect_market_searches` : `id`, `created_at`, `winery_name`, `contact_name`, `email`, `website`, `winery_location`, `wine_types text[]`, `appellations_cuvees`, `export_price_range`, `certifications text[]`, `target_country`, `importer_preferences text[]`, `exclusions`, `additional_context`, `status` (défaut `new`), `source`, `campaign`, `referrer` (ces trois derniers présents mais non utilisés visuellement pour l'instant).
 
-Accès :
-- `GRANT INSERT` à `anon` et `authenticated`, `GRANT ALL` à `service_role`.
-- RLS activée : une seule policy d'insertion pour les visiteurs (anonymes et connectés), aucune policy de lecture, de modification ou de suppression — personne ne peut consulter les demandes depuis la page publique ; l'équipe y accède via le back-office Supabase (rôle service).
+Accès (strict) :
+- `GRANT INSERT` uniquement à `anon` et `authenticated` (aucun `SELECT`, `UPDATE`, `DELETE`), `GRANT ALL` à `service_role`.
+- RLS activée avec une seule policy : insertion pour `anon` et `authenticated`. Aucune policy de lecture, de modification ou de suppression : un visiteur ne peut ni relire sa demande ni voir celles des autres. La consultation se fera plus tard via une interface authentifiée réservée aux administrateurs (policy de lecture ajoutée à ce moment-là, basée sur `has_role(auth.uid(), 'admin')`).
+- L'identifiant reste un `uuid` aléatoire (`gen_random_uuid()`), jamais séquentiel : il servira de base au lien unique de la future page de résultats. Aucune route publique ne devra exposer d'identifiant prévisible.
 
-Non inclus à cette étape : page de résultats, traitement automatique, email de notification, entrée dans l'espace admin.
+Non inclus à cette étape : page de résultats, traitement automatique, email de notification, entrée dans l'espace admin, page « politique de confidentialité » (le lien pointera vers la page existante si elle existe, sinon il faudra me le confirmer).
 
 ## Point à valider
 
