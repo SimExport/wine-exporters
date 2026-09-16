@@ -23,6 +23,10 @@
     "roadmap": {
       "title": "Roadmap — WineExporters",
       "description": "Découvrez les prochaines fonctionnalités de WineExporters et votez pour vos préférées."
+    },
+    "marketAnalysis": {
+      "title": "Analyse de marché export — WineExporters",
+      "description": "Renseignez votre domaine, vos vins et votre marché cible : WineExporters identifie les importateurs à contacter en priorité."
     }
   },
   "common": {
@@ -3076,5 +3080,98 @@
       "message": "{{name}} vous recontactera très prochainement."
     },
     "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "marketAnalysis": {
+    "stepLabel": "Étape {{current}}/{{total}}",
+    "continue": "Continuer",
+    "submit": "Analyser mon marché",
+    "submitting": "Envoi en cours...",
+    "submitHelp": "WineExporters identifiera les importateurs à contacter en priorité et vous présentera les profils les plus pertinents pour votre domaine.",
+    "consent": "En envoyant ce formulaire, vous acceptez que WineExporters utilise ces informations pour préparer votre analyse. Voir notre politique de confidentialité.",
+    "errors": {
+      "required": "Ce champ est obligatoire.",
+      "email": "Veuillez saisir une adresse email valide.",
+      "selectOne": "Veuillez sélectionner au moins une option.",
+      "selectCountry": "Veuillez sélectionner un pays.",
+      "submit": "L'envoi a échoué. Merci de réessayer."
+    },
+    "step1": {
+      "title": "Parlez-nous de votre domaine",
+      "subtitle": "Quelques informations suffisent pour commencer votre analyse.",
+      "wineryName": "Nom du domaine",
+      "wineryNamePh": "Ex. Domaine Martin",
+      "contactName": "Votre nom et prénom",
+      "email": "Email professionnel",
+      "website": "Site internet du domaine",
+      "websiteHelp": "Nous pourrons l'utiliser pour mieux comprendre votre positionnement.",
+      "location": "Pays / région / appellation principale",
+      "locationPh": "Ex. France — Alsace — AOC Alsace"
+    },
+    "step2": {
+      "title": "Quels vins souhaitez-vous développer à l'export ?",
+      "wineTypes": "Types de vins",
+      "wineTypeOptions": {
+        "red": "Rouge",
+        "white": "Blanc",
+        "rose": "Rosé",
+        "sparkling": "Effervescent",
+        "sweet": "Doux",
+        "orange": "Orange / macération",
+        "other": "Autre"
+      },
+      "appellations": "Principales appellations ou cuvées",
+      "appellationsPh": "Ex. AOC Alsace Riesling, Crémant d'Alsace, Pinot Noir",
+      "priceRange": "Où se situe le cœur de votre gamme export ?",
+      "priceRangeHelp": "Sélectionnez la fourchette de prix qui représente le mieux la majorité des vins que vous souhaitez développer.",
+      "priceRangeOptions": {
+        "r3_5": "3–5 € EXW",
+        "r5_7": "5–7 € EXW",
+        "r8_10": "8–10 € EXW",
+        "r10plus": "Plus de 10 € EXW"
+      },
+      "certifications": "Certifications",
+      "certificationOptions": {
+        "organic": "Bio",
+        "biodynamic": "Biodynamie",
+        "hve": "HVE",
+        "vegan": "Vegan",
+        "other": "Autre",
+        "none": "Aucune"
+      }
+    },
+    "step3": {
+      "title": "Quel marché souhaitez-vous développer ?",
+      "subtitle": "Choisissez un marché. WineExporters analysera votre profil pour identifier les importateurs les plus pertinents à contacter en priorité.",
+      "country": "Pays ciblé",
+      "countryPlaceholder": "Sélectionnez un pays",
+      "countrySearch": "Rechercher un pays...",
+      "countryEmpty": "Aucun pays trouvé.",
+      "importerTypes": "Avez-vous un type d'importateur en tête ?",
+      "importerTypesHelp": "Vous pouvez sélectionner plusieurs réponses. Si vous ne savez pas, WineExporters sélectionnera les profils les plus pertinents.",
+      "importerTypeOptions": {
+        "generalist": "Importateurs généralistes",
+        "frenchSpecialist": "Spécialistes des vins français",
+        "organicNatural": "Bio / biodynamie / vins nature",
+        "premium": "Premium / Fine Wine",
+        "horeca": "CHR / restaurants",
+        "retail": "Cavistes / retail spécialisé",
+        "massRetail": "Grande distribution",
+        "letUsChoose": "Je préfère laisser WineExporters sélectionner"
+      },
+      "exclusions": "Y a-t-il des importateurs ou types d'acteurs que vous souhaitez éviter ?",
+      "exclusionsPh": "Ex. grande distribution, certains circuits, importateurs déjà contactés…"
+    },
+    "step4": {
+      "title": "Une dernière chose",
+      "subtitle": "Vous pouvez ajouter un détail qui nous aidera à mieux cibler votre recherche.",
+      "context": "Y a-t-il quelque chose que nous devons savoir ?",
+      "contextPh": "Ex. Nous voulons développer surtout le CHR, nous cherchons un partenaire pour une gamme premium, nous voulons éviter certains circuits…",
+      "recap": "Votre analyse sera basée sur votre domaine, vos vins, votre positionnement prix et le marché sélectionné."
+    },
+    "success": {
+      "title": "Votre demande a bien été enregistrée.",
+      "body": "Nous préparons la prochaine étape de votre analyse.",
+      "backHome": "Retour à l'accueil"
+    }
   }
 }
