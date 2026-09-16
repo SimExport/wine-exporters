@@ -23,6 +23,10 @@
     "roadmap": {
       "title": "Roadmap — WineExporters",
       "description": "Discover upcoming WineExporters features and vote for your favorites."
+    },
+    "marketAnalysis": {
+      "title": "Export market analysis — WineExporters",
+      "description": "Tell us about your estate, your wines and your target market: WineExporters identifies the importers to contact first."
     }
   },
   "common": {
@@ -3076,5 +3080,98 @@
       "message": "{{name}} will be in touch shortly."
     },
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "marketAnalysis": {
+    "stepLabel": "Step {{current}}/{{total}}",
+    "continue": "Continue",
+    "submit": "Analyse my market",
+    "submitting": "Sending...",
+    "submitHelp": "WineExporters will identify the importers to contact first and show you the profiles most relevant to your estate.",
+    "consent": "By submitting this form, you agree that WineExporters may use this information to prepare your analysis. See our privacy policy.",
+    "errors": {
+      "required": "This field is required.",
+      "email": "Please enter a valid email address.",
+      "selectOne": "Please select at least one option.",
+      "selectCountry": "Please select a country.",
+      "submit": "Sending failed. Please try again."
+    },
+    "step1": {
+      "title": "Tell us about your estate",
+      "subtitle": "A few details are enough to start your analysis.",
+      "wineryName": "Estate name",
+      "wineryNamePh": "E.g. Domaine Martin",
+      "contactName": "Your first and last name",
+      "email": "Business email",
+      "website": "Estate website",
+      "websiteHelp": "We may use it to better understand your positioning.",
+      "location": "Country / region / main appellation",
+      "locationPh": "E.g. France — Alsace — AOC Alsace"
+    },
+    "step2": {
+      "title": "Which wines do you want to develop for export?",
+      "wineTypes": "Wine types",
+      "wineTypeOptions": {
+        "red": "Red",
+        "white": "White",
+        "rose": "Rosé",
+        "sparkling": "Sparkling",
+        "sweet": "Sweet",
+        "orange": "Orange / skin contact",
+        "other": "Other"
+      },
+      "appellations": "Main appellations or cuvées",
+      "appellationsPh": "E.g. AOC Alsace Riesling, Crémant d'Alsace, Pinot Noir",
+      "priceRange": "Where does the core of your export range sit?",
+      "priceRangeHelp": "Select the price bracket that best represents most of the wines you want to develop.",
+      "priceRangeOptions": {
+        "r3_5": "€3–5 EXW",
+        "r5_7": "€5–7 EXW",
+        "r8_10": "€8–10 EXW",
+        "r10plus": "Over €10 EXW"
+      },
+      "certifications": "Certifications",
+      "certificationOptions": {
+        "organic": "Organic",
+        "biodynamic": "Biodynamic",
+        "hve": "HVE",
+        "vegan": "Vegan",
+        "other": "Other",
+        "none": "None"
+      }
+    },
+    "step3": {
+      "title": "Which market do you want to develop?",
+      "subtitle": "Choose one market. WineExporters will analyse your profile to identify the most relevant importers to contact first.",
+      "country": "Target country",
+      "countryPlaceholder": "Select a country",
+      "countrySearch": "Search a country...",
+      "countryEmpty": "No country found.",
+      "importerTypes": "Do you have a type of importer in mind?",
+      "importerTypesHelp": "You can select several answers. If you are not sure, WineExporters will select the most relevant profiles.",
+      "importerTypeOptions": {
+        "generalist": "Generalist importers",
+        "frenchSpecialist": "French wine specialists",
+        "organicNatural": "Organic / biodynamic / natural wines",
+        "premium": "Premium / Fine Wine",
+        "horeca": "HoReCa / restaurants",
+        "retail": "Wine shops / specialist retail",
+        "massRetail": "Mass retail",
+        "letUsChoose": "I'd rather let WineExporters choose"
+      },
+      "exclusions": "Are there importers or types of players you would rather avoid?",
+      "exclusionsPh": "E.g. mass retail, certain channels, importers already contacted…"
+    },
+    "step4": {
+      "title": "One last thing",
+      "subtitle": "You can add a detail that will help us target your search more precisely.",
+      "context": "Is there anything we should know?",
+      "contextPh": "E.g. We mainly want to develop HoReCa, we are looking for a partner for a premium range, we want to avoid certain channels…",
+      "recap": "Your analysis will be based on your estate, your wines, your price positioning and the selected market."
+    },
+    "success": {
+      "title": "Your request has been recorded.",
+      "body": "We are preparing the next step of your analysis.",
+      "backHome": "Back to home"
+    }
   }
 }
