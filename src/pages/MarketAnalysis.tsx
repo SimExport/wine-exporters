@@ -29,7 +29,10 @@ const MarketAnalysis = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   // Anti-robots : champ piège invisible + délai minimum de remplissage.
+  // Le piège ne compte que si une frappe réelle a eu lieu (évite les faux positifs
+  // dus au remplissage automatique des navigateurs).
   const [honeypot, setHoneypot] = useState("");
+  const honeypotTyped = useRef(false);
   const openedAt = useRef(Date.now());
 
   const update = <K extends keyof MarketAnalysisForm>(key: K, value: MarketAnalysisForm[K]) => {
