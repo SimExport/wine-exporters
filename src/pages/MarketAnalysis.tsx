@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const MarketAnalysis = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<MarketAnalysisForm>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
