@@ -197,16 +197,20 @@ const MarketAnalysis = () => {
                   }}
                   className="space-y-8"
                 >
-                  {/* Champ piège anti-robots : invisible pour les visiteurs. */}
+                  {/* Champ piège anti-robots : invisible pour les visiteurs.
+                      Nom neutre + autocomplétion désactivée pour éviter le
+                      remplissage automatique des navigateurs. */}
                   <div className="absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
-                    <label htmlFor="company_website_extra">Website</label>
                     <input
-                      id="company_website_extra"
-                      name="company_website_extra"
+                      id="contact_reference"
+                      name="contact_reference"
                       type="text"
                       tabIndex={-1}
-                      autoComplete="off"
+                      autoComplete="new-password"
                       value={honeypot}
+                      onKeyDown={() => {
+                        honeypotTyped.current = true;
+                      }}
                       onChange={(e) => setHoneypot(e.target.value)}
                     />
                   </div>
