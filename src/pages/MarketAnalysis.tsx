@@ -28,6 +28,7 @@ const MarketAnalysis = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
   // Anti-robots : champ piège invisible + délai minimum de remplissage.
   // Le piège ne compte que si une frappe réelle a eu lieu (évite les faux positifs
   // dus au remplissage automatique des navigateurs).
@@ -115,11 +116,15 @@ const MarketAnalysis = () => {
       // l'INSERT (aucune lecture publique), donc on ne peut pas utiliser
       // `.select()` pour récupérer l'ID généré par la base.
       const searchId = crypto.randomUUID();
+      // Email normalisé (trim + minuscules) : un index unique en base garantit
+      // une seule analyse gratuite par adresse, même en cas de soumissions
+      // simultanées ou d'appel direct à l'API.
+      const normalizedEmail = form.email.trim().toLowerCase();
       const { error } = await supabase.from("prospect_market_searches").insert({
         id: searchId,
         winery_name: form.winery_name.trim(),
         contact_name: form.contact_name.trim(),
-        email: form.email.trim(),
+        email: normalizedEmail,
         phone: form.phone.trim(),
         website: form.website.trim(),
         winery_location: form.winery_location.trim(),
