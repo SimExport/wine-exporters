@@ -3107,6 +3107,9 @@
       "wineryNamePh": "Ex. Domaine Martin",
       "contactName": "Votre nom et prénom",
       "email": "Email professionnel",
+      "phone": "Téléphone",
+      "phonePh": "Ex. +33 6 12 34 56 78",
+      "phoneHelp": "Utilisé uniquement pour le suivi de votre analyse.",
       "website": "Site internet du domaine",
       "websiteHelp": "Nous pourrons l'utiliser pour mieux comprendre votre positionnement.",
       "location": "Pays / région / appellation principale",
@@ -3164,7 +3167,8 @@
         "letUsChoose": "Je préfère laisser WineExporters sélectionner"
       },
       "exclusions": "Y a-t-il des importateurs ou types d'acteurs que vous souhaitez éviter ?",
-      "exclusionsPh": "Ex. grande distribution, certains circuits, importateurs déjà contactés…"
+      "exclusionsPh": "Ex. grande distribution, certains circuits, importateurs déjà contactés…",
+      "recap": "Votre analyse sera basée sur votre domaine, vos vins et le marché sélectionné. WineExporters identifiera les importateurs à contacter en priorité."
     },
     "step4": {
       "title": "Une dernière chose",
