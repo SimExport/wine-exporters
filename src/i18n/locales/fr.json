@@ -105,7 +105,8 @@
     "adminUsers": "Utilisateurs",
     "sourcing": "Recherches sur-mesure",
     "opportunities": "Opportunités",
-    "adminOpportunities": "Opportunités Admin"
+    "adminOpportunities": "Opportunités Admin",
+    "adminMarketAnalyses": "Analyses de marché"
   },
   "resources": {
     "title": "Ressources",
@@ -3250,6 +3251,67 @@
       "title": "Vous voulez contacter ces importateurs ?",
       "body": "Découvrez comment WineExporters vous permet de contacter ces profils, lancer votre prospection et suivre les échanges au même endroit.",
       "button": "Découvrir WineExporters en démo"
+    }
+  },
+  "adminMarketAnalyses": {
+    "title": "Analyses de marché",
+    "subtitle": "Toutes les demandes envoyées depuis le formulaire public d'analyse de marché.",
+    "count": "{{count}} demande(s)",
+    "empty": "Aucune demande pour ces filtres.",
+    "searchPlaceholder": "Rechercher un domaine ou un email…",
+    "view": "Voir l'analyse",
+    "filters": {
+      "all": "Tous",
+      "completed": "Terminés",
+      "failed": "En erreur",
+      "today": "Aujourd'hui",
+      "week": "Cette semaine"
+    },
+    "status": {
+      "new": "En attente",
+      "processing": "En cours",
+      "completed": "Terminé",
+      "failed": "Échec"
+    },
+    "table": {
+      "date": "Date",
+      "winery": "Domaine",
+      "contact": "Contact",
+      "email": "Email",
+      "market": "Marché ciblé",
+      "status": "Statut",
+      "importers": "Importateurs",
+      "avgScore": "Score moyen",
+      "source": "Source",
+      "actions": "Actions"
+    },
+    "fields": {
+      "wineryName": "Domaine",
+      "contactName": "Contact",
+      "email": "Email",
+      "website": "Site internet",
+      "location": "Localisation",
+      "wineTypes": "Types de vins",
+      "appellations": "Appellations / cuvées",
+      "priceRange": "Cœur de gamme",
+      "certifications": "Certifications",
+      "market": "Marché ciblé",
+      "importerPreferences": "Types d'importateurs",
+      "exclusions": "À éviter",
+      "additionalContext": "Précisions",
+      "source": "Source",
+      "campaign": "Campagne",
+      "referrer": "Referrer"
+    },
+    "detail": {
+      "formData": "Données du formulaire",
+      "summary": "Synthèse marché",
+      "recommendations": "Recommandations",
+      "shortlist": "{{count}} importateurs sélectionnés",
+      "processedAt": "Généré le",
+      "error": "Erreur technique",
+      "showRaw": "Afficher le JSON brut",
+      "hideRaw": "Masquer le JSON brut"
     }
   }
 }
