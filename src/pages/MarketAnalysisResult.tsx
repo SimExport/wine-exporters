@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   AlertTriangle,
   ArrowRight,
+  Check,
   ExternalLink,
   Loader2,
   MapPin,
@@ -40,6 +41,12 @@ type AnalysisResult = {
 
 const POLL_MS = 5000;
 const MAX_POLL_MS = 4 * 60 * 1000;
+
+/** Nombre de paragraphes de synthèse affichés (le contenu backend reste inchangé). */
+const MAX_SUMMARY_PARAGRAPHS = 2;
+
+/** Position du CTA intermédiaire : après la 3e carte importateur. */
+const MID_CTA_AFTER = 3;
 
 /** Masques purement décoratifs : les vraies coordonnées ne sont jamais envoyées au navigateur. */
 const MASKED_EMAIL = "m••••••@••••••.com";
@@ -106,6 +113,76 @@ const MarketAnalysisResult = () => {
   const shortlist = data?.shortlist ?? [];
   const failed = data?.status === "failed" || timedOut;
 
+  const demoCta = (
+    <Button asChild size="lg" className="w-full sm:w-auto">
+      <Link to="/demande-demo">{t("marketAnalysisResult.cta.button")}</Link>
+    </Button>
+  );
+
+  const renderImporterCard = (item: ShortlistItem, i: number) => (
+    <Card key={`${item.company_name}-${i}`}>
+      <CardContent className="space-y-4 p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1">
+            <h3 className="font-semibold leading-snug">{item.company_name}</h3>
+            {(item.city || item.country) && (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span className="min-w-0 break-words">
+                  {[item.city, item.country].filter(Boolean).join(", ")}
+                </span>
+              </p>
+            )}
+          </div>
+          <div className="flex shrink-0 flex-col items-center rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+            <span className="font-display text-xl font-semibold leading-none text-primary">
+              {item.score ?? "-"}
+              <span className="text-xs font-normal text-muted-foreground">/10</span>
+            </span>
+            <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              {t("marketAnalysisResult.shortlist.scoreLabel")}
+            </span>
+          </div>
+        </div>
+
+        {item.reason && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+              {t("marketAnalysisResult.shortlist.reasonLabel")}
+            </p>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {item.reason}
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+          {item.website_url && (
+            <a
+              href={
+                item.website_url.startsWith("http")
+                  ? item.website_url
+                  : `https://${item.website_url}`
+              }
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              {t("marketAnalysisResult.shortlist.website")}
+            </a>
+          )}
+          <span className="select-none">
+            {t("marketAnalysisResult.shortlist.emailLabel")} : {MASKED_EMAIL}
+          </span>
+          <span className="select-none">
+            {t("marketAnalysisResult.shortlist.phoneLabel")} : {MASKED_PHONE}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen bg-cream/60">
       <SEO
@@ -124,7 +201,7 @@ const MarketAnalysisResult = () => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl space-y-8 px-6 py-10 sm:py-14">
+      <main className="mx-auto max-w-4xl space-y-10 px-6 py-10 sm:py-14">
         {notFound ? (
           <Card>
             <CardContent className="space-y-2 p-10 text-center">
@@ -166,17 +243,17 @@ const MarketAnalysisResult = () => {
           </Card>
         ) : (
           <>
-            {/* Bloc 1 — en-tête */}
-            <section className="space-y-3">
+            {/* Bloc 1 — header renforcé, compact */}
+            <section className="space-y-4">
               <Badge variant="secondary" className="gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
                 {t("marketAnalysisResult.badge")}
               </Badge>
-              <h1 className="font-display text-3xl sm:text-4xl">
+              <h1 className="font-display text-4xl leading-tight sm:text-5xl">
                 {t("marketAnalysisResult.title")}
               </h1>
               {shortlist.length > 0 && (
-                <p className="text-lg text-muted-foreground">
+                <p className="max-w-2xl text-lg font-medium leading-snug sm:text-xl">
                   {t("marketAnalysisResult.subtitle", {
                     count: shortlist.length,
                     market: data.target_country ?? "",
@@ -200,23 +277,24 @@ const MarketAnalysisResult = () => {
               <Card>
                 <CardContent className="space-y-2 p-8">
                   <h2 className="text-xl font-semibold">{t("marketAnalysisResult.empty.title")}</h2>
-                  <p className="text-muted-foreground">{t("marketAnalysisResult.empty.body")}</p>
+                  <p className="max-w-2xl text-muted-foreground">{t("marketAnalysisResult.empty.body")}</p>
                 </CardContent>
               </Card>
             ) : (
               <>
-                {/* Bloc 2 — synthèse */}
+                {/* Bloc 2 — synthèse aérée */}
                 {data.market_summary && (
                   <Card>
                     <CardHeader>
                       <CardTitle>{t("marketAnalysisResult.summary.title")}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
+                    <CardContent className="space-y-8">
+                      <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-muted-foreground">
                         {data.market_summary
                           .split(/\n{2,}|\n/)
                           .map((p) => p.trim())
                           .filter(Boolean)
+                          .slice(0, MAX_SUMMARY_PARAGRAPHS)
                           .map((p, i) => (
                             <p key={i}>{p}</p>
                           ))}
@@ -225,20 +303,23 @@ const MarketAnalysisResult = () => {
                       {(data.recommended_approach ?? []).length > 0 && (
                         <>
                           <Separator />
-                          <div className="space-y-3">
+                          <div className="space-y-4">
                             <h3 className="font-semibold">
                               {t("marketAnalysisResult.summary.approachTitle")}
                             </h3>
-                            <ul className="space-y-2">
+                            <div className="grid gap-3 sm:grid-cols-3">
                               {(data.recommended_approach ?? []).map((r, i) => (
-                                <li key={i} className="flex gap-3 text-sm text-muted-foreground">
-                                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                                <div
+                                  key={i}
+                                  className="flex gap-3 rounded-lg border border-border/60 bg-background p-4"
+                                >
+                                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                                     {i + 1}
                                   </span>
-                                  {r}
-                                </li>
+                                  <p className="text-sm leading-relaxed text-muted-foreground">{r}</p>
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         </>
                       )}
@@ -246,85 +327,76 @@ const MarketAnalysisResult = () => {
                   </Card>
                 )}
 
-                {/* Bloc 3 — shortlist */}
+                {/* Bloc 3 — shortlist + CTA intermédiaire */}
                 <section className="space-y-4">
                   <div className="space-y-1">
                     <h2 className="font-display text-2xl">
                       {t("marketAnalysisResult.shortlist.title", { count: shortlist.length })}
                     </h2>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="max-w-2xl text-xs text-muted-foreground">
                       {t("marketAnalysisResult.shortlist.masked")}
                     </p>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {shortlist.map((item, i) => (
-                      <Card key={`${item.company_name}-${i}`}>
-                        <CardContent className="space-y-3 p-5">
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div className="space-y-1">
-                              <h3 className="font-semibold">{item.company_name}</h3>
-                              {(item.city || item.country) && (
-                                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                  <MapPin className="h-3.5 w-3.5" />
-                                  {[item.city, item.country].filter(Boolean).join(", ")}
-                                </p>
-                              )}
-                            </div>
-                            <Badge variant="outline" className="border-primary/30 text-primary">
-                              {t("marketAnalysisResult.shortlist.scoreLabel")} {item.score ?? "-"}/10
-                            </Badge>
-                          </div>
-
-                          {item.reason && (
-                            <p className="text-sm leading-relaxed text-muted-foreground">
-                              {item.reason}
+                      <div key={`${item.company_name}-${i}`} className="space-y-4">
+                        {renderImporterCard(item, i)}
+                        {i === MID_CTA_AFTER - 1 && shortlist.length > MID_CTA_AFTER && (
+                          <div className="rounded-lg border border-border bg-background p-6 text-center sm:p-7">
+                            <h3 className="font-display text-xl">
+                              {t("marketAnalysisResult.midCta.title")}
+                            </h3>
+                            <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                              {t("marketAnalysisResult.midCta.body")}
                             </p>
-                          )}
-
-                          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                            {item.website_url && (
-                              <a
-                                href={
-                                  item.website_url.startsWith("http")
-                                    ? item.website_url
-                                    : `https://${item.website_url}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                                className="inline-flex items-center gap-1.5 text-primary hover:underline"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                                {t("marketAnalysisResult.shortlist.website")}
-                              </a>
-                            )}
-                            <span className="select-none">
-                              {t("marketAnalysisResult.shortlist.emailLabel")} : {MASKED_EMAIL}
-                            </span>
-                            <span className="select-none">
-                              {t("marketAnalysisResult.shortlist.phoneLabel")} : {MASKED_PHONE}
-                            </span>
+                            <Button asChild variant="outline" size="sm" className="mt-4 w-full sm:w-auto">
+                              <Link to="/demande-demo">
+                                {t("marketAnalysisResult.midCta.button")}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
                           </div>
-                        </CardContent>
-                      </Card>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </section>
               </>
             )}
 
-            {/* Bloc 4 — repositionnement produit */}
-            <section className="rounded-lg border border-primary/20 bg-primary/5 p-6 sm:p-8">
-              <h2 className="font-display text-2xl">{t("marketAnalysisResult.product.title")}</h2>
-              <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
+            {/* Bloc 4 — repositionnement produit renforcé */}
+            <section className="rounded-xl border border-primary/25 bg-primary/5 p-7 shadow-sm sm:p-10">
+              <h2 className="max-w-2xl font-display text-2xl leading-snug sm:text-3xl">
+                {t("marketAnalysisResult.product.title")}
+              </h2>
+              <div className="mt-5 max-w-2xl space-y-3 text-[15px] leading-relaxed text-muted-foreground">
                 <p>{t("marketAnalysisResult.product.body1")}</p>
                 <p>{t("marketAnalysisResult.product.body2")}</p>
               </div>
-              <div className="mt-6 flex flex-wrap items-center gap-2">
+
+              {(t("marketAnalysisResult.product.features", { returnObjects: true, defaultValue: [] }) as string[])
+                .length > 0 && (
+                <ul className="mt-6 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                  {(
+                    t("marketAnalysisResult.product.features", {
+                      returnObjects: true,
+                      defaultValue: [],
+                    }) as string[]
+                  ).map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm font-medium text-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-8 flex flex-wrap items-center gap-2.5">
                 {(t("marketAnalysisResult.product.steps", { returnObjects: true }) as string[]).map(
                   (step, i, arr) => (
                     <div key={step} className="flex items-center gap-2">
-                      <span className="rounded-md bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm">
+                      <span className="rounded-md bg-background px-3.5 py-2 text-xs font-semibold text-foreground shadow-sm">
                         {step}
                       </span>
                       {i < arr.length - 1 && (
@@ -339,16 +411,16 @@ const MarketAnalysisResult = () => {
               </p>
             </section>
 
-            {/* Bloc 5 — CTA */}
-            <Card>
-              <CardContent className="space-y-4 p-8 text-center">
-                <h2 className="font-display text-2xl">{t("marketAnalysisResult.cta.title")}</h2>
-                <p className="mx-auto max-w-xl text-sm text-muted-foreground">
+            {/* Bloc 5 — CTA final, plus fort que le CTA intermédiaire */}
+            <Card className="border-primary/25 bg-primary/5">
+              <CardContent className="space-y-5 p-8 text-center sm:p-10">
+                <h2 className="font-display text-2xl sm:text-3xl">
+                  {t("marketAnalysisResult.cta.title")}
+                </h2>
+                <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground">
                   {t("marketAnalysisResult.cta.body")}
                 </p>
-                <Button asChild size="lg" className="mt-2">
-                  <Link to="/demande-demo">{t("marketAnalysisResult.cta.button")}</Link>
-                </Button>
+                <div className="flex justify-center">{demoCta}</div>
               </CardContent>
             </Card>
           </>
