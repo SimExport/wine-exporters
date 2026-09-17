@@ -162,6 +162,13 @@ const App = () => (
                 </AdminRoute>
               </DashboardLayout>
             } />
+            <Route path="/admin/market-analyses" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminMarketAnalyses />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
             <Route path="/admin/users/:userId" element={
               <DashboardLayout>
                 <AdminRoute>
