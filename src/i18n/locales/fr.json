@@ -3218,7 +3218,8 @@
       "emailLabel": "Email",
       "phoneLabel": "Téléphone",
       "scoreLabel": "Priorité",
-      "website": "Site internet"
+      "website": "Site internet",
+      "reasonLabel": "Pourquoi ce profil ?"
     },
     "product": {
       "title": "WineExporters ne se limite pas à une base de données.",
@@ -3231,11 +3232,23 @@
         "Relancer",
         "Convertir"
       ],
-      "stepsNote": "WineExporters regroupe l'ensemble de ce parcours au même endroit."
+      "stepsNote": "WineExporters regroupe l'ensemble de ce parcours au même endroit.",
+      "features": [
+        "Contacter les importateurs",
+        "Lancer et suivre vos campagnes de prospection",
+        "Centraliser vos opportunités dans le CRM export",
+        "Accéder aux demandes directes d'importateurs",
+        "Consulter les appels d'offres"
+      ]
     },
     "cta": {
       "title": "Prêt à passer de l'analyse à la prospection ?",
       "body": "Découvrez comment contacter ces importateurs, lancer vos campagnes et suivre vos opportunités directement dans WineExporters.",
+      "button": "Découvrir WineExporters en démo"
+    },
+    "midCta": {
+      "title": "Vous voulez contacter ces importateurs ?",
+      "body": "Découvrez comment WineExporters vous permet de contacter ces profils, lancer votre prospection et suivre les échanges au même endroit.",
       "button": "Découvrir WineExporters en démo"
     }
   }
