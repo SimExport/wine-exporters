@@ -82,6 +82,7 @@ export interface MarketAnalysisForm {
   winery_name: string;
   contact_name: string;
   email: string;
+  phone: string;
   website: string;
   winery_location: string;
   wine_types: string[];
@@ -98,6 +99,7 @@ export const EMPTY_FORM: MarketAnalysisForm = {
   winery_name: "",
   contact_name: "",
   email: "",
+  phone: "",
   website: "",
   winery_location: "",
   wine_types: [],

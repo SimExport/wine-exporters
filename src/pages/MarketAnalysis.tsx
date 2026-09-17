@@ -13,10 +13,9 @@ import { COUNTRIES } from "@/components/importers/country-data";
 import { StepWinery } from "@/components/market-analysis/StepWinery";
 import { StepWines } from "@/components/market-analysis/StepWines";
 import { StepMarket } from "@/components/market-analysis/StepMarket";
-import { StepDetails } from "@/components/market-analysis/StepDetails";
 import { EMPTY_FORM, MarketAnalysisForm } from "@/components/market-analysis/options";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 const MIN_FILL_SECONDS = 3;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -55,6 +54,7 @@ const MarketAnalysis = () => {
       if (!form.contact_name.trim()) next.contact_name = req;
       if (!form.email.trim()) next.email = req;
       else if (!EMAIL_RE.test(form.email.trim())) next.email = t("marketAnalysis.errors.email");
+      if (!form.phone.trim()) next.phone = req;
       if (!form.website.trim()) next.website = req;
       if (!form.winery_location.trim()) next.winery_location = req;
     }
@@ -120,6 +120,7 @@ const MarketAnalysis = () => {
         winery_name: form.winery_name.trim(),
         contact_name: form.contact_name.trim(),
         email: form.email.trim(),
+        phone: form.phone.trim(),
         website: form.website.trim(),
         winery_location: form.winery_location.trim(),
         wine_types: form.wine_types,
@@ -128,8 +129,8 @@ const MarketAnalysis = () => {
         certifications: form.certifications,
         target_country: targetCountryName,
         importer_preferences: form.importer_preferences,
-        exclusions: form.exclusions.trim() || null,
-        additional_context: form.additional_context.trim() || null,
+        exclusions: null,
+        additional_context: null,
         source: "market-analysis",
         referrer: typeof document !== "undefined" ? document.referrer || null : null,
       });
@@ -192,7 +193,7 @@ const MarketAnalysis = () => {
             <div className="mb-6 space-y-2">
               <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                 <span>{t("marketAnalysis.stepLabel", { current: step, total: TOTAL_STEPS })}</span>
-                <span>{Math.round((step / TOTAL_STEPS) * 100)}%</span>
+                <span>{Math.floor((step / TOTAL_STEPS) * 100)}%</span>
               </div>
               <Progress value={(step / TOTAL_STEPS) * 100} className="h-1.5" />
             </div>
@@ -233,7 +234,7 @@ const MarketAnalysis = () => {
                     {step === 1 && <StepWinery form={form} errors={errors} update={update} />}
                     {step === 2 && <StepWines form={form} errors={errors} update={update} />}
                     {step === 3 && <StepMarket form={form} errors={errors} update={update} />}
-                    {step === 4 && <StepDetails form={form} update={update} />}
+                    
                   </div>
 
                   {submitError && <p className="text-sm text-destructive">{submitError}</p>}

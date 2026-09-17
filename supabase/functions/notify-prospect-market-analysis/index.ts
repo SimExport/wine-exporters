@@ -133,6 +133,7 @@ Deno.serve(async (req) => {
     row("Domaine", String(row_.winery_name ?? "")),
     row("Contact", String(row_.contact_name ?? "")),
     row("Email", String(row_.email ?? "")),
+    row("Téléphone", String(row_.phone ?? "")),
     row("Site", String(row_.website ?? "")),
     row("Localisation / appellation", String(row_.winery_location ?? "")),
     row("Marché ciblé", market === "—" ? "" : market),

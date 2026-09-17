@@ -3107,6 +3107,9 @@
       "wineryNamePh": "E.g. Domaine Martin",
       "contactName": "Your first and last name",
       "email": "Business email",
+      "phone": "Phone",
+      "phonePh": "E.g. +33 6 12 34 56 78",
+      "phoneHelp": "Used only to follow up on your analysis.",
       "website": "Estate website",
       "websiteHelp": "We may use it to better understand your positioning.",
       "location": "Country / region / main appellation",
@@ -3164,7 +3167,8 @@
         "letUsChoose": "I'd rather let WineExporters choose"
       },
       "exclusions": "Are there importers or types of players you would rather avoid?",
-      "exclusionsPh": "E.g. mass retail, certain channels, importers already contacted…"
+      "exclusionsPh": "E.g. mass retail, certain channels, importers already contacted…",
+      "recap": "Your analysis will be based on your estate, your wines and the selected market. WineExporters will identify the importers to contact first."
     },
     "step4": {
       "title": "One last thing",

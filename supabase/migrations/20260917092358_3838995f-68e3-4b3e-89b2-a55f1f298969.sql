@@ -1,0 +1,1 @@
+ALTER TABLE public.prospect_market_searches ADD COLUMN IF NOT EXISTS phone text;
