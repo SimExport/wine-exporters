@@ -56,16 +56,9 @@ export function StepMarket({ form, errors, update }: Props) {
         </div>
       </Field>
 
-      <Field id="exclusions" label={t("marketAnalysis.step3.exclusions")}>
-        <Textarea
-          id="exclusions"
-          rows={3}
-          maxLength={1000}
-          placeholder={t("marketAnalysis.step3.exclusionsPh")}
-          value={form.exclusions}
-          onChange={(e) => update("exclusions", e.target.value)}
-        />
-      </Field>
+      <p className="rounded-md bg-cream p-4 text-sm text-cream-foreground">
+        {t("marketAnalysis.step3.recap")}
+      </p>
     </div>
   );
 }

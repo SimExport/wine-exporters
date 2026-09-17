@@ -44,6 +44,23 @@ export function StepWinery({ form, errors, update }: Props) {
       </Field>
 
       <Field
+        id="phone"
+        label={t("marketAnalysis.step1.phone")}
+        required
+        help={t("marketAnalysis.step1.phoneHelp")}
+        error={errors.phone}
+      >
+        <Input
+          id="phone"
+          type="tel"
+          maxLength={40}
+          placeholder={t("marketAnalysis.step1.phonePh")}
+          value={form.phone}
+          onChange={(e) => update("phone", e.target.value)}
+        />
+      </Field>
+
+      <Field
         id="website"
         label={t("marketAnalysis.step1.website")}
         required
