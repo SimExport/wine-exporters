@@ -439,6 +439,27 @@ function validateResult(parsed: any, candidates: Candidate[]) {
   };
 }
 
+// Notification interne (équipe WineExporters). Un échec d'email ne doit jamais
+// impacter l'analyse : l'erreur est simplement journalisée.
+async function notifyInternal(searchId: string) {
+  try {
+    const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-prospect-market-analysis`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({ prospect_market_search_id: searchId }),
+    });
+    if (!res.ok) {
+      console.error("internal notification failed", searchId, res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("internal notification error", searchId, err);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
