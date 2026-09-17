@@ -188,7 +188,31 @@ const MarketAnalysis = () => {
       </header>
 
       <main className="mx-auto max-w-2xl px-6 py-10 sm:py-14">
-        {submitted ? (
+        {alreadyRequested ? (
+          <Card>
+            <CardContent className="space-y-5 p-10 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle2 className="h-7 w-7 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold">{t("marketAnalysis.alreadyRequested.title")}</h1>
+              <p className="text-muted-foreground">{t("marketAnalysis.alreadyRequested.body")}</p>
+              <div className="flex flex-col items-center gap-3">
+                <Button asChild size="lg" className="w-full sm:w-auto">
+                  <a
+                    href="https://calendar.app.google/rfx7N1bBhJcbwyJg9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("marketAnalysis.alreadyRequested.cta")}
+                  </a>
+                </Button>
+                <Link to="/" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                  {t("marketAnalysis.alreadyRequested.back")}
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : submitted ? (
           <Card>
             <CardContent className="space-y-4 p-10 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
