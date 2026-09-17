@@ -3093,6 +3093,12 @@
     "submitting": "Envoi en cours...",
     "submitHelp": "WineExporters identifiera les importateurs à contacter en priorité et vous présentera les profils les plus pertinents pour votre domaine.",
     "consent": "En envoyant ce formulaire, vous acceptez que WineExporters utilise ces informations pour préparer votre analyse. Voir notre politique de confidentialité.",
+    "alreadyRequested": {
+      "title": "Vous avez déjà demandé une analyse",
+      "body": "Une analyse personnalisée a déjà été générée pour cette adresse email. Si vous souhaitez aller plus loin, découvrez WineExporters ou contactez-nous pour échanger sur vos marchés export.",
+      "cta": "Découvrir WineExporters en démo",
+      "back": "Retour"
+    },
     "errors": {
       "required": "Ce champ est obligatoire.",
       "email": "Veuillez saisir une adresse email valide.",

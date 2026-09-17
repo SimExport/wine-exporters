@@ -28,6 +28,7 @@ const MarketAnalysis = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
   // Anti-robots : champ piège invisible + délai minimum de remplissage.
   // Le piège ne compte que si une frappe réelle a eu lieu (évite les faux positifs
   // dus au remplissage automatique des navigateurs).
@@ -115,11 +116,15 @@ const MarketAnalysis = () => {
       // l'INSERT (aucune lecture publique), donc on ne peut pas utiliser
       // `.select()` pour récupérer l'ID généré par la base.
       const searchId = crypto.randomUUID();
+      // Email normalisé (trim + minuscules) : un index unique en base garantit
+      // une seule analyse gratuite par adresse, même en cas de soumissions
+      // simultanées ou d'appel direct à l'API.
+      const normalizedEmail = form.email.trim().toLowerCase();
       const { error } = await supabase.from("prospect_market_searches").insert({
         id: searchId,
         winery_name: form.winery_name.trim(),
         contact_name: form.contact_name.trim(),
-        email: form.email.trim(),
+        email: normalizedEmail,
         phone: form.phone.trim(),
         website: form.website.trim(),
         winery_location: form.winery_location.trim(),
@@ -134,7 +139,15 @@ const MarketAnalysis = () => {
         source: "market-analysis",
         referrer: typeof document !== "undefined" ? document.referrer || null : null,
       });
-      if (error) throw error;
+      if (error) {
+        // 23505 = violation d'unicité : une analyse existe déjà pour cet email.
+        if (error.code === "23505") {
+          console.info("market-analysis: duplicate email submission blocked");
+          setAlreadyRequested(true);
+          return;
+        }
+        throw error;
+      }
 
       // Déclenchement du traitement (workflow prospect dédié) puis redirection
       // vers la page de résultat, qui affiche l'état d'avancement.
@@ -175,7 +188,31 @@ const MarketAnalysis = () => {
       </header>
 
       <main className="mx-auto max-w-2xl px-6 py-10 sm:py-14">
-        {submitted ? (
+        {alreadyRequested ? (
+          <Card>
+            <CardContent className="space-y-5 p-10 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle2 className="h-7 w-7 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold">{t("marketAnalysis.alreadyRequested.title")}</h1>
+              <p className="text-muted-foreground">{t("marketAnalysis.alreadyRequested.body")}</p>
+              <div className="flex flex-col items-center gap-3">
+                <Button asChild size="lg" className="w-full sm:w-auto">
+                  <a
+                    href="https://calendar.app.google/rfx7N1bBhJcbwyJg9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("marketAnalysis.alreadyRequested.cta")}
+                  </a>
+                </Button>
+                <Link to="/" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                  {t("marketAnalysis.alreadyRequested.back")}
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : submitted ? (
           <Card>
             <CardContent className="space-y-4 p-10 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
