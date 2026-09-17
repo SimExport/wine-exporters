@@ -263,29 +263,98 @@ N'affirme jamais qu'une société possède un positionnement, un portefeuille, u
 
 Lorsque peu d'informations sont disponibles sur une entreprise, formule la justification avec prudence.
 
-Objectif :
-sélectionner jusqu'à 10 sociétés à contacter en priorité.
+PRIORITÉ ABSOLUE : IMPORTATEURS / DISTRIBUTEURS
 
-Critères de scoring :
-- cohérence avec les types de vins du domaine ;
-- cohérence avec les appellations ou cuvées ;
-- cohérence avec le cœur de gamme prix ;
-- cohérence avec les certifications ;
-- adéquation avec les types d'importateurs recherchés ;
-- absence de conflit avec les acteurs ou circuits à éviter ;
-- signaux factuels pertinents trouvés sur le site de l'entreprise ;
-- qualité et complétude des coordonnées disponibles.
+La priorité absolue est de sélectionner des sociétés réellement pertinentes pour l'importation et la distribution de vin sur le marché ciblé.
 
-Le score de 1 à 10 représente une priorité de prospection et non une probabilité de succès commercial.
+Privilégie en priorité les entreprises pour lesquelles les données fournies indiquent ou suggèrent de manière solide une activité de :
+- importation de vin ;
+- distribution de vin ;
+- grossiste en vin ;
+- agent / broker / représentant ;
+- achat direct auprès de producteurs étrangers ;
+- fourniture professionnelle au réseau HORECA / cavistes / retail.
 
-La qualité prime sur le volume.
+Ne privilégie jamais un retailer, caviste, boutique, wine bar ou site e-commerce B2C à un importateur/distributeur simplement parce que son site contient davantage d'informations.
 
-Retourne au maximum 10 sociétés.
-Si moins de 10 sociétés disposent d'éléments suffisamment pertinents, retourne moins de 10 résultats plutôt que de compléter artificiellement.
+Un retailer pur ou caviste pur ne doit apparaître que s'il existe des éléments suffisamment solides montrant qu'il importe, distribue ou source directement les vins.
 
-La synthèse marché doit rester prudente :
-tu n'as pas réalisé une étude exhaustive du marché national.
-Elle doit décrire ce que le profil du domaine et les sociétés analysées suggèrent pour sa prospection sur ce marché.
+LES CRITÈRES DU FORMULAIRE SONT SECONDAIRES
+
+Les informations du domaine servent à PERSONNALISER et PRIORISER les importateurs, mais ne doivent pas transformer la recherche en quête du « match parfait ».
+
+Les critères suivants sont secondaires :
+- types de vins ;
+- appellations / cuvées ;
+- cœur de gamme prix ;
+- certifications ;
+- préférences de type d'importateur.
+
+Ils servent principalement à départager plusieurs importateurs déjà pertinents.
+
+Ne rejette pas un bon importateur de vin simplement parce que son site ne mentionne pas explicitement le cépage, l'appellation, la certification ou le niveau de prix du domaine.
+
+Un importateur professionnel, actif, multi-régions ou multi-catégories peut rester très pertinent même si son site ne permet pas de confirmer précisément tous les critères du domaine.
+
+SCORING : PRIORITÉ DE PROSPECTION
+
+Le score de 1 à 10 représente une priorité de prospection au sein d'une shortlist déjà qualifiée, et non une probabilité de succès commercial.
+
+Barème :
+- 9–10/10 : importateur/distributeur clairement identifié, activité professionnelle solide, forte cohérence avec le domaine ou plusieurs signaux pertinents.
+- 8/10 : importateur/distributeur solide et exploitable, avec une bonne cohérence générale avec le profil du domaine.
+- 7/10 : importateur/distributeur pertinent à prospecter, même si certaines informations manquent ou si l'adéquation est moins directe.
+- Moins de 7/10 : à ne PAS inclure dans la shortlist.
+
+Ne retourne jamais un contact avec un score inférieur à 7/10.
+
+Ne complète jamais artificiellement la shortlist avec des profils faibles pour atteindre 10 résultats.
+Si seulement 6 ou 8 contacts méritent 7/10 ou plus, retourne uniquement ces 6 ou 8 contacts.
+
+Un retailer/caviste non confirmé comme importateur/distributeur ne doit pas être noté 7/10 ou plus.
+
+La qualité prime sur le volume : retourne au maximum 10 sociétés, uniquement des profils réellement pertinents à prospecter, sans aucune obligation d'atteindre 10.
+
+TON DES JUSTIFICATIONS
+
+Les justifications doivent rester crédibles mais positives et orientées action : pour chaque profil retenu, explique pourquoi il mérite d'être contacté.
+
+Évite les formulations inutilement dépréciatives comme « peu pertinent », « faible adéquation », « pas parfaitement aligné », « la sélection manque de candidats », « peu d'informations disponibles donc intérêt limité », « profil éloigné du domaine ».
+
+Si un profil n'est pas suffisamment pertinent, ne l'affiche pas.
+
+Exemples de formulations adaptées :
+- « Profil pertinent pour une première prise de contact »
+- « Structure professionnelle disposant d'un portefeuille international »
+- « Importateur à considérer en priorité pour son positionnement et son réseau »
+- « Présente plusieurs signaux cohérents avec le profil du domaine »
+- « Acteur pertinent à tester dans une première vague de prospection »
+
+Reste factuel : n'invente pas de portefeuille, de canal ou de spécialisation.
+
+SYNTHÈSE MARCHÉ
+
+La synthèse ne doit pas saboter commercialement le résultat.
+
+Supprime toute formulation mettant directement en doute la valeur de la shortlist affichée, comme « la présente sélection manque de candidats parfaitement alignés », « peu d'acteurs correspondent réellement » ou « plusieurs profils sont davantage des cavistes ».
+
+Si la qualité des candidats est hétérogène : n'affiche que ceux à 7/10 ou plus et présente la synthèse de manière constructive.
+
+Exemple de ton attendu :
+« Les profils sélectionnés montrent plusieurs voies de prospection pertinentes pour le domaine, avec des acteurs disposant d'une capacité d'importation/distribution et d'une exposition aux vins français ou européens. La shortlist combine des profils complémentaires, à tester en priorité selon le positionnement du domaine. »
+
+Important : n'invente aucune donnée générale sur le marché national. La synthèse doit rester basée sur les sociétés analysées et sur le profil du domaine.
+
+APPROCHE RECOMMANDÉE
+
+Les recommandations doivent rester simples et commerciales (maximum 3) :
+- quels profils contacter en premier ;
+- quel argument du domaine mettre en avant ;
+- quel type d'approche commerciale privilégier.
+
+Évite les recommandations trop complexes ou trop proches d'une mission de conseil approfondie.
+
+FORMAT DE SORTIE
 
 Retourne UNIQUEMENT un JSON valide, sans markdown autour, au format strict suivant :
 
@@ -296,7 +365,7 @@ Retourne UNIQUEMENT un JSON valide, sans markdown autour, au format strict suiva
       "company_name": "string",
       "website_url": "string|null",
       "city": "string|null",
-      "score": 1,
+      "score": 7,
       "reason": "explication concise en français en 1 à 2 phrases, basée uniquement sur les éléments fournis"
     }
   ],
@@ -415,6 +484,9 @@ function validateResult(parsed: any, candidates: Candidate[]) {
     if (!Number.isFinite(score) || score < 1 || score > 10) {
       throw new Error(`Score hors bornes pour ${source.company_name}`);
     }
+    // Filet de sécurité produit : aucun profil sous 7/10 n'est jamais affiché
+    // au prospect, même si le modèle en retournait un.
+    if (score < 7) return null;
     const reason = String(item?.reason ?? "").trim();
     if (!reason) throw new Error(`Justification manquante pour ${source.company_name}`);
     // Les valeurs factuelles sont réalignées sur la base : l'IA ne peut ni
@@ -428,7 +500,7 @@ function validateResult(parsed: any, candidates: Candidate[]) {
       score: Math.round(score),
       reason,
     };
-  });
+  }).filter(Boolean);
 
   return {
     shortlist,
