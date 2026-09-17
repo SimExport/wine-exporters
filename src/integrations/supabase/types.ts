@@ -1190,6 +1190,7 @@ export type Database = {
           export_price_range: string | null
           id: string
           importer_preferences: string[] | null
+          phone: string | null
           processed_at: string | null
           processing_error: string | null
           referrer: string | null
@@ -1217,6 +1218,7 @@ export type Database = {
           export_price_range?: string | null
           id?: string
           importer_preferences?: string[] | null
+          phone?: string | null
           processed_at?: string | null
           processing_error?: string | null
           referrer?: string | null
@@ -1244,6 +1246,7 @@ export type Database = {
           export_price_range?: string | null
           id?: string
           importer_preferences?: string[] | null
+          phone?: string | null
           processed_at?: string | null
           processing_error?: string | null
           referrer?: string | null
