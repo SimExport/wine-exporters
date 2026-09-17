@@ -115,7 +115,13 @@ const MarketAnalysisResult = () => {
 
   const demoCta = (
     <Button asChild size="lg" className="w-full sm:w-auto">
-      <Link to="/demande-demo">{t("marketAnalysisResult.cta.button")}</Link>
+      <a
+        href="https://calendar.app.google/rfx7N1bBhJcbwyJg9"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t("marketAnalysisResult.cta.button")}
+      </a>
     </Button>
   );
 
