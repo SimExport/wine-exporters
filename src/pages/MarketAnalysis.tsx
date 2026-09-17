@@ -13,10 +13,9 @@ import { COUNTRIES } from "@/components/importers/country-data";
 import { StepWinery } from "@/components/market-analysis/StepWinery";
 import { StepWines } from "@/components/market-analysis/StepWines";
 import { StepMarket } from "@/components/market-analysis/StepMarket";
-import { StepDetails } from "@/components/market-analysis/StepDetails";
 import { EMPTY_FORM, MarketAnalysisForm } from "@/components/market-analysis/options";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 const MIN_FILL_SECONDS = 3;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
