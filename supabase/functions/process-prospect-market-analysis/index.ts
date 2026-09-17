@@ -535,6 +535,7 @@ Deno.serve(async (req) => {
           processed_at: new Date().toISOString(),
         })
         .eq("id", id);
+      await notifyInternal(id);
       return json({ status: "completed", shortlist: 0 });
     }
 
@@ -554,6 +555,7 @@ Deno.serve(async (req) => {
       })
       .eq("id", id);
 
+    await notifyInternal(id);
     return json({ status: "completed", shortlist: validated.shortlist.length });
   } catch (err) {
     return await fail(err instanceof Error ? err.message : String(err));
