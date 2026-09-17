@@ -1178,6 +1178,8 @@ export type Database = {
       prospect_market_searches: {
         Row: {
           additional_context: string | null
+          admin_notification_error: string | null
+          admin_notification_sent_at: string | null
           appellations_cuvees: string | null
           campaign: string | null
           certifications: string[] | null
@@ -1203,6 +1205,8 @@ export type Database = {
         }
         Insert: {
           additional_context?: string | null
+          admin_notification_error?: string | null
+          admin_notification_sent_at?: string | null
           appellations_cuvees?: string | null
           campaign?: string | null
           certifications?: string[] | null
@@ -1228,6 +1232,8 @@ export type Database = {
         }
         Update: {
           additional_context?: string | null
+          admin_notification_error?: string | null
+          admin_notification_sent_at?: string | null
           appellations_cuvees?: string | null
           campaign?: string | null
           certifications?: string[] | null
