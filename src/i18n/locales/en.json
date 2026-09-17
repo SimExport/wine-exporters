@@ -105,7 +105,8 @@
     "adminUsers": "Users",
     "sourcing": "Bespoke Searches",
     "opportunities": "Opportunities",
-    "adminOpportunities": "Admin Opportunities"
+    "adminOpportunities": "Admin Opportunities",
+    "adminMarketAnalyses": "Market analyses"
   },
   "resources": {
     "title": "Resources",
@@ -3250,6 +3251,67 @@
       "title": "Want to contact these importers?",
       "body": "See how WineExporters lets you contact these profiles, launch your prospection and follow every exchange in one place.",
       "button": "See a WineExporters demo"
+    }
+  },
+  "adminMarketAnalyses": {
+    "title": "Market analyses",
+    "subtitle": "All requests submitted through the public market analysis form.",
+    "count": "{{count}} request(s)",
+    "empty": "No request for these filters.",
+    "searchPlaceholder": "Search a winery or email…",
+    "view": "View analysis",
+    "filters": {
+      "all": "All",
+      "completed": "Completed",
+      "failed": "Failed",
+      "today": "Today",
+      "week": "This week"
+    },
+    "status": {
+      "new": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "table": {
+      "date": "Date",
+      "winery": "Winery",
+      "contact": "Contact",
+      "email": "Email",
+      "market": "Target market",
+      "status": "Status",
+      "importers": "Importers",
+      "avgScore": "Avg. score",
+      "source": "Source",
+      "actions": "Actions"
+    },
+    "fields": {
+      "wineryName": "Winery",
+      "contactName": "Contact",
+      "email": "Email",
+      "website": "Website",
+      "location": "Location",
+      "wineTypes": "Wine types",
+      "appellations": "Appellations / cuvées",
+      "priceRange": "Core price range",
+      "certifications": "Certifications",
+      "market": "Target market",
+      "importerPreferences": "Importer types",
+      "exclusions": "To avoid",
+      "additionalContext": "Additional context",
+      "source": "Source",
+      "campaign": "Campaign",
+      "referrer": "Referrer"
+    },
+    "detail": {
+      "formData": "Form data",
+      "summary": "Market summary",
+      "recommendations": "Recommendations",
+      "shortlist": "{{count}} selected importers",
+      "processedAt": "Generated on",
+      "error": "Technical error",
+      "showRaw": "Show raw JSON",
+      "hideRaw": "Hide raw JSON"
     }
   }
 }
