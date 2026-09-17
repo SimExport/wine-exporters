@@ -139,7 +139,15 @@ const MarketAnalysis = () => {
         source: "market-analysis",
         referrer: typeof document !== "undefined" ? document.referrer || null : null,
       });
-      if (error) throw error;
+      if (error) {
+        // 23505 = violation d'unicité : une analyse existe déjà pour cet email.
+        if (error.code === "23505") {
+          console.info("market-analysis: duplicate email submission blocked");
+          setAlreadyRequested(true);
+          return;
+        }
+        throw error;
+      }
 
       // Déclenchement du traitement (workflow prospect dédié) puis redirection
       // vers la page de résultat, qui affiche l'état d'avancement.
