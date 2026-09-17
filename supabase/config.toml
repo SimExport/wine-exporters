@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.get-prospect-market-analysis]
 verify_jwt = false
+
+[functions.notify-prospect-market-analysis]
+verify_jwt = false
