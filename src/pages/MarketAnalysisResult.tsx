@@ -357,10 +357,14 @@ const MarketAnalysisResult = () => {
                               {t("marketAnalysisResult.midCta.body")}
                             </p>
                             <Button asChild variant="outline" size="sm" className="mt-4 w-full sm:w-auto">
-                              <Link to="/demande-demo">
+                              <a
+                                href="https://calendar.app.google/rfx7N1bBhJcbwyJg9"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
                                 {t("marketAnalysisResult.midCta.button")}
                                 <ArrowRight className="ml-2 h-4 w-4" />
-                              </Link>
+                              </a>
                             </Button>
                           </div>
                         )}
