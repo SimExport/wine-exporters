@@ -111,7 +111,12 @@ const MarketAnalysis = () => {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const { data: inserted, error } = await supabase.from("prospect_market_searches").insert({
+      // L'identifiant est généré côté navigateur : la table n'autorise que
+      // l'INSERT (aucune lecture publique), donc on ne peut pas utiliser
+      // `.select()` pour récupérer l'ID généré par la base.
+      const searchId = crypto.randomUUID();
+      const { error } = await supabase.from("prospect_market_searches").insert({
+        id: searchId,
         winery_name: form.winery_name.trim(),
         contact_name: form.contact_name.trim(),
         email: form.email.trim(),
