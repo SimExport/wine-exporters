@@ -29,6 +29,7 @@ import AdminSourcing from "./pages/AdminSourcing";
 import AdminUsers from "./pages/AdminUsers";
 import AdminUserProfile from "./pages/AdminUserProfile";
 import AdminOpportunities from "./pages/AdminOpportunities";
+import AdminMarketAnalyses from "./pages/AdminMarketAnalyses";
 import Opportunities from "./pages/Opportunities";
 import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
