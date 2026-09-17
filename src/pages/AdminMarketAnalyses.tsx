@@ -10,6 +10,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Loader2, Eye, ExternalLink, Mail, Phone } from 'lucide-react';
 import { COUNTRIES as COUNTRY_LIST } from '@/components/importers/CountrySelector';
 import { formatDateLong } from '@/lib/format';
+import {
+  WINE_TYPES,
+  PRICE_RANGES,
+  CERTIFICATIONS,
+  IMPORTER_PREFERENCES,
+  type Option,
+} from '@/components/market-analysis/options';
 
 interface ShortlistItem {
   buyer_contact_id?: string | null;
@@ -155,8 +162,18 @@ export default function AdminMarketAnalyses() {
     setContacts(Object.fromEntries(((data as any[]) || []).map(c => [c.id, c as ContactInfo])));
   };
 
-  const optionLabel = (group: string, value: string) =>
-    t(`marketAnalysis.options.${group}.${value}`, { defaultValue: value });
+  const OPTION_GROUPS: Record<string, { options: Option[]; path: string }> = {
+    wineTypes: { options: WINE_TYPES, path: 'marketAnalysis.step2.wineTypeOptions' },
+    priceRanges: { options: PRICE_RANGES, path: 'marketAnalysis.step2.priceRangeOptions' },
+    certifications: { options: CERTIFICATIONS, path: 'marketAnalysis.step2.certificationOptions' },
+    importerPreferences: { options: IMPORTER_PREFERENCES, path: 'marketAnalysis.step3.importerTypeOptions' },
+  };
+
+  const optionLabel = (group: string, value: string) => {
+    const conf = OPTION_GROUPS[group];
+    const key = conf?.options.find(o => o.value === value)?.key;
+    return key ? t(`${conf.path}.${key}`, { defaultValue: value }) : value;
+  };
 
   const listLabels = (group: string, values: string[] | null) =>
     values && values.length ? values.map(v => optionLabel(group, v)).join(', ') : '—';
