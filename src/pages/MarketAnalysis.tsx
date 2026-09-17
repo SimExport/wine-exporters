@@ -111,7 +111,12 @@ const MarketAnalysis = () => {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const { data: inserted, error } = await supabase.from("prospect_market_searches").insert({
+      // L'identifiant est généré côté navigateur : la table n'autorise que
+      // l'INSERT (aucune lecture publique), donc on ne peut pas utiliser
+      // `.select()` pour récupérer l'ID généré par la base.
+      const searchId = crypto.randomUUID();
+      const { error } = await supabase.from("prospect_market_searches").insert({
+        id: searchId,
         winery_name: form.winery_name.trim(),
         contact_name: form.contact_name.trim(),
         email: form.email.trim(),
@@ -127,18 +132,18 @@ const MarketAnalysis = () => {
         additional_context: form.additional_context.trim() || null,
         source: "market-analysis",
         referrer: typeof document !== "undefined" ? document.referrer || null : null,
-      }).select("id").single();
+      });
       if (error) throw error;
 
       // Déclenchement du traitement (workflow prospect dédié) puis redirection
       // vers la page de résultat, qui affiche l'état d'avancement.
       supabase.functions
         .invoke("process-prospect-market-analysis", {
-          body: { prospect_market_search_id: inserted.id },
+          body: { prospect_market_search_id: searchId },
         })
         .catch((err) => console.error("market-analysis processing trigger failed", err));
 
-      navigate(`/market-analysis/result/${inserted.id}`);
+      navigate(`/market-analysis/result/${searchId}`);
     } catch (err: any) {
       console.error("market-analysis insert failed", err);
       setSubmitError(err?.message || t("marketAnalysis.errors.submit"));
