@@ -42,7 +42,9 @@ type AnalysisResult = {
 const POLL_MS = 5000;
 const MAX_POLL_MS = 4 * 60 * 1000;
 
-/** Nombre de paragraphes de synthèse affichés (le contenu backend reste inchangé). */
+/** Nombre de paragraphes de synthèse affichés (le contenu backend reste inchangé).
+ * Le découpage ne se fait que sur les doubles sauts de ligne : chaque "paragraphe"
+ * est un vrai paragraphe rédigé, pas une simple ligne du texte. */
 const MAX_SUMMARY_PARAGRAPHS = 2;
 
 /** Position du CTA intermédiaire : après la 3e carte importateur. */
