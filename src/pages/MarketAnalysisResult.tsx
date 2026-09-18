@@ -298,9 +298,9 @@ const MarketAnalysisResult = () => {
                     </CardHeader>
                     <CardContent className="space-y-8">
                       <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-muted-foreground">
-                        {data.market_summary
-                          .split(/\n{2,}|\n/)
-                          .map((p) => p.trim())
+                          {data.market_summary
+                            .split(/\n{2,}/)
+                            .map((p) => p.trim())
                           .filter(Boolean)
                           .slice(0, MAX_SUMMARY_PARAGRAPHS)
                           .map((p, i) => (
