@@ -42,7 +42,9 @@ type AnalysisResult = {
 const POLL_MS = 5000;
 const MAX_POLL_MS = 4 * 60 * 1000;
 
-/** Nombre de paragraphes de synthèse affichés (le contenu backend reste inchangé). */
+/** Nombre de paragraphes de synthèse affichés (le contenu backend reste inchangé).
+ * Le découpage ne se fait que sur les doubles sauts de ligne : chaque "paragraphe"
+ * est un vrai paragraphe rédigé, pas une simple ligne du texte. */
 const MAX_SUMMARY_PARAGRAPHS = 2;
 
 /** Position du CTA intermédiaire : après la 3e carte importateur. */
@@ -296,9 +298,9 @@ const MarketAnalysisResult = () => {
                     </CardHeader>
                     <CardContent className="space-y-8">
                       <div className="max-w-2xl space-y-4 text-[15px] leading-relaxed text-muted-foreground">
-                        {data.market_summary
-                          .split(/\n{2,}|\n/)
-                          .map((p) => p.trim())
+                          {data.market_summary
+                            .split(/\n{2,}/)
+                            .map((p) => p.trim())
                           .filter(Boolean)
                           .slice(0, MAX_SUMMARY_PARAGRAPHS)
                           .map((p, i) => (
