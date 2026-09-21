@@ -379,7 +379,7 @@ const MarketAnalysisResult = () => {
                     {shortlist.map((item, i) => (
                       <div key={`${item.company_name}-${i}`} className="space-y-4">
                         {renderImporterCard(item, i)}
-                        {i === MID_CTA_AFTER - 1 && shortlist.length > MID_CTA_AFTER && (
+                        {i === Math.min(MID_CTA_AFTER, shortlist.length) - 1 && (
                           <div className="space-y-4 py-2">
                             <section className="rounded-lg border border-border/70 bg-secondary/55 p-5 sm:p-6">
                               <h3 className="text-sm font-semibold text-foreground">
