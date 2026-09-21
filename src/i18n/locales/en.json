@@ -3232,10 +3232,51 @@
       "website": "Website",
       "reasonLabel": "Why this profile?"
     },
+    "testimonials": {
+      "title": "Winegrowers already use WineExporters",
+      "items": [
+        {
+          "quote": "What I appreciate most is the lead qualification, as well as the platform’s ability to evolve to meet our needs as closely as possible.",
+          "name": "Arnaud",
+          "role": "Winegrower in Pessac-Léognan"
+        },
+        {
+          "quote": "The platform meets a real need for us, and we know the value and relevance of Simon’s approach.",
+          "name": "Mathilde",
+          "role": "Winegrower in Alsace"
+        }
+      ]
+    },
     "product": {
-      "title": "WineExporters is more than a database.",
-      "body1": "Identifying the right importers is an essential first step, and that is exactly what this analysis lets you do with a high level of precision. But the platform goes further: it also helps you contact those importers, launch and track your prospecting campaigns, centralise your opportunities in an export CRM, access direct requests from buyers and importers looking for wines, as well as tenders on certain monopoly markets.",
-      "body2": "The goal is not simply to give you names, but to give you the tools to turn these contacts into commercial conversations, and then into concrete opportunities.",
+      "title": "You have identified the right importers. What comes next?",
+      "subtitle": "WineExporters does more than give you names. The platform supports your entire export prospecting process, from identifying buyers to tracking opportunities.",
+      "items": [
+        {
+          "eyebrow": "Identify",
+          "title": "Find the right importers",
+          "body": "Access our importer database and run targeted searches tailored to your estate, your wines and your markets."
+        },
+        {
+          "eyebrow": "Contact",
+          "title": "Launch your campaigns",
+          "body": "Choose your markets, wines and documents. WineExporters helps you launch your prospecting and contact buyers directly."
+        },
+        {
+          "eyebrow": "Track",
+          "title": "Manage your export CRM",
+          "body": "Centralise your conversations and track every opportunity: samples, follow-ups, negotiations and orders."
+        },
+        {
+          "eyebrow": "Seize opportunities",
+          "title": "Receive buyer requests",
+          "body": "Access direct requests from importers looking for wines and add relevant opportunities to your pipeline."
+        },
+        {
+          "eyebrow": "Discover new markets",
+          "title": "Track tenders",
+          "body": "Browse tenders available in monopoly markets and identify new commercial opportunities."
+        }
+      ],
       "steps": [
         "Identify",
         "Contact",
@@ -3243,19 +3284,25 @@
         "Follow up",
         "Convert"
       ],
-      "stepsNote": "WineExporters brings this entire journey together in one place.",
-      "features": [
-        "Contact the importers",
-        "Launch and track your prospecting campaigns",
-        "Centralise your opportunities in the export CRM",
-        "Access direct importer requests",
-        "Browse tenders"
+      "stepsNote": "WineExporters brings this entire journey together in one place."
+    },
+    "proof": {
+      "title": "Wine estates opening new markets",
+      "subtitle": "WineExporters draws on several years of export prospecting and a methodology already used with wine estates.",
+      "marketOpened": "Market opened",
+      "items": [
+        { "winery": "Château de France", "market": "Germany", "flag": "🇩🇪" },
+        { "winery": "Maison Kieffer", "market": "Denmark", "flag": "🇩🇰" },
+        { "winery": "Potel-Aviron", "market": "Poland · Netherlands · Switzerland", "flag": "🇵🇱 🇳🇱 🇨🇭" },
+        { "winery": "Château Paquet", "market": "Denmark", "flag": "🇩🇰" },
+        { "winery": "Domaine de Ness", "market": "Finland", "flag": "🇫🇮" }
       ]
     },
     "cta": {
-      "title": "Ready to move from analysis to prospecting?",
-      "body": "See how to contact these importers, launch your campaigns and track your opportunities directly in WineExporters.",
-      "button": "See a WineExporters demo"
+      "title": "Now it’s your turn to grow your export markets.",
+      "body": "You have already seen the importers WineExporters can identify for your estate. Now discover how to contact them, launch your prospecting and track your opportunities from a single platform.",
+      "button": "See a WineExporters demo",
+      "note": "A personalised presentation of the platform."
     },
     "midCta": {
       "title": "Want to contact these importers?",
