@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   AlertTriangle,
   ArrowRight,
-  Check,
   ExternalLink,
   Loader2,
   MapPin,
@@ -37,6 +36,24 @@ type AnalysisResult = {
   shortlist?: ShortlistItem[];
   market_summary?: string | null;
   recommended_approach?: string[];
+};
+
+type ProductItem = {
+  eyebrow: string;
+  title: string;
+  body: string;
+};
+
+type Testimonial = {
+  quote: string;
+  name: string;
+  role: string;
+};
+
+type MarketProof = {
+  winery: string;
+  market: string;
+  flag: string;
 };
 
 const POLL_MS = 5000;
@@ -114,6 +131,18 @@ const MarketAnalysisResult = () => {
 
   const shortlist = data?.shortlist ?? [];
   const failed = data?.status === "failed" || timedOut;
+  const testimonials = t("marketAnalysisResult.testimonials.items", {
+    returnObjects: true,
+    defaultValue: [],
+  }) as Testimonial[];
+  const productItems = t("marketAnalysisResult.product.items", {
+    returnObjects: true,
+    defaultValue: [],
+  }) as ProductItem[];
+  const marketProofs = t("marketAnalysisResult.proof.items", {
+    returnObjects: true,
+    defaultValue: [],
+  }) as MarketProof[];
 
   const demoCta = (
     <Button asChild size="lg" className="w-full sm:w-auto">
@@ -350,24 +379,50 @@ const MarketAnalysisResult = () => {
                     {shortlist.map((item, i) => (
                       <div key={`${item.company_name}-${i}`} className="space-y-4">
                         {renderImporterCard(item, i)}
-                        {i === MID_CTA_AFTER - 1 && shortlist.length > MID_CTA_AFTER && (
-                          <div className="rounded-lg border border-border bg-background p-6 text-center sm:p-7">
-                            <h3 className="font-display text-xl">
-                              {t("marketAnalysisResult.midCta.title")}
-                            </h3>
-                            <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                              {t("marketAnalysisResult.midCta.body")}
-                            </p>
-                            <Button asChild variant="outline" size="sm" className="mt-4 w-full sm:w-auto">
-                              <a
-                                href="https://calendar.app.google/rfx7N1bBhJcbwyJg9"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {t("marketAnalysisResult.midCta.button")}
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </a>
-                            </Button>
+                        {i === Math.min(MID_CTA_AFTER, shortlist.length) - 1 && (
+                          <div className="space-y-4 py-2">
+                            <section className="rounded-lg border border-border/70 bg-secondary/55 p-5 sm:p-6">
+                              <h3 className="text-sm font-semibold text-foreground">
+                                {t("marketAnalysisResult.testimonials.title")}
+                              </h3>
+                              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                {testimonials.map((testimonial) => (
+                                  <figure
+                                    key={testimonial.name}
+                                    className="flex h-full flex-col justify-between rounded-md border border-border/60 bg-background/80 p-4"
+                                  >
+                                    <blockquote className="text-sm leading-relaxed text-foreground/80">
+                                      “{testimonial.quote}”
+                                    </blockquote>
+                                    <figcaption className="mt-4 border-t border-border/50 pt-3">
+                                      <p className="text-sm font-semibold text-foreground">
+                                        {testimonial.name}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                                    </figcaption>
+                                  </figure>
+                                ))}
+                              </div>
+                            </section>
+
+                            <div className="rounded-lg border border-border bg-background p-6 text-center sm:p-7">
+                              <h3 className="font-display text-xl">
+                                {t("marketAnalysisResult.midCta.title")}
+                              </h3>
+                              <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                                {t("marketAnalysisResult.midCta.body")}
+                              </p>
+                              <Button asChild variant="outline" size="sm" className="mt-4 w-full sm:w-auto">
+                                <a
+                                  href="https://calendar.app.google/rfx7N1bBhJcbwyJg9"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {t("marketAnalysisResult.midCta.button")}
+                                  <ArrowRight className="ml-2 h-4 w-4" />
+                                </a>
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -377,32 +432,31 @@ const MarketAnalysisResult = () => {
               </>
             )}
 
-            {/* Bloc 4 — repositionnement produit renforcé */}
-            <section className="rounded-xl border border-primary/25 bg-primary/5 p-7 shadow-sm sm:p-10">
+            {/* Bloc 4 — parcours produit */}
+            <section className="rounded-lg border border-primary/20 bg-primary/5 p-6 sm:p-9">
               <h2 className="max-w-2xl font-display text-2xl leading-snug sm:text-3xl">
                 {t("marketAnalysisResult.product.title")}
               </h2>
-              <div className="mt-5 max-w-2xl space-y-3 text-[15px] leading-relaxed text-muted-foreground">
-                <p>{t("marketAnalysisResult.product.body1")}</p>
-                <p>{t("marketAnalysisResult.product.body2")}</p>
-              </div>
+              <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">
+                {t("marketAnalysisResult.product.subtitle")}
+              </p>
 
-              {(t("marketAnalysisResult.product.features", { returnObjects: true, defaultValue: [] }) as string[])
-                .length > 0 && (
-                <ul className="mt-6 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
-                  {(
-                    t("marketAnalysisResult.product.features", {
-                      returnObjects: true,
-                      defaultValue: [],
-                    }) as string[]
-                  ).map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm font-medium text-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+                {productItems.map((item, i) => (
+                  <article
+                    key={item.eyebrow}
+                    className={`rounded-md border border-border/70 bg-background p-5 ${
+                      i < 3 ? "lg:col-span-2" : "lg:col-span-3"
+                    }`}
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                      {item.eyebrow}
+                    </p>
+                    <h3 className="mt-2 font-semibold leading-snug text-foreground">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                  </article>
+                ))}
+              </div>
 
               <div className="mt-8 flex flex-wrap items-center gap-2.5">
                 {(t("marketAnalysisResult.product.steps", { returnObjects: true }) as string[]).map(
@@ -423,7 +477,37 @@ const MarketAnalysisResult = () => {
               </p>
             </section>
 
-            {/* Bloc 5 — CTA final, plus fort que le CTA intermédiaire */}
+            {/* Bloc 5 — résultats obtenus */}
+            <section className="space-y-5">
+              <div className="max-w-3xl space-y-2">
+                <h2 className="font-display text-2xl sm:text-3xl">
+                  {t("marketAnalysisResult.proof.title")}
+                </h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                  {t("marketAnalysisResult.proof.subtitle")}
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                {marketProofs.map((proof) => (
+                  <Card key={proof.winery} className="h-full">
+                    <CardContent className="flex h-full flex-col p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                        {proof.winery}
+                      </p>
+                      <p className="mt-4 text-[11px] font-medium text-muted-foreground">
+                        {t("marketAnalysisResult.proof.marketOpened")}
+                      </p>
+                      <p className="mt-1 text-sm font-medium leading-snug text-foreground">
+                        <span className="mr-1.5" aria-hidden="true">{proof.flag}</span>
+                        {proof.market}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
+            {/* Bloc 6 — CTA final */}
             <Card className="border-primary/25 bg-primary/5">
               <CardContent className="space-y-5 p-8 text-center sm:p-10">
                 <h2 className="font-display text-2xl sm:text-3xl">
@@ -433,6 +517,9 @@ const MarketAnalysisResult = () => {
                   {t("marketAnalysisResult.cta.body")}
                 </p>
                 <div className="flex justify-center">{demoCta}</div>
+                <p className="text-xs text-muted-foreground">
+                  {t("marketAnalysisResult.cta.note")}
+                </p>
               </CardContent>
             </Card>
           </>
