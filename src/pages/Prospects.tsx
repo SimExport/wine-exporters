@@ -25,6 +25,7 @@ import { formatDate, formatDateFile } from '@/lib/format'
 import { useTranslation } from 'react-i18next'
 
 interface Prospect {
+  source?: string | null
   id: string
   first_name?: string
   last_name?: string

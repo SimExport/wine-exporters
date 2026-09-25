@@ -61,6 +61,12 @@ interface Prospect {
   prospect_status: string
   stage_id?: string | null
   estimated_amount?: number
+  samples_sent_at?: string | null
+  order_won?: boolean | null
+  order_amount?: number | null
+  order_details?: string | null
+  next_action?: string | null
+  next_action_at?: string | null
   lost_reason?: string
   last_activity_at?: string
   tally_response_id?: string
@@ -517,7 +523,12 @@ export default function ProspectDetail() {
   }
 
   const handleMarkSamplesSent = async () => {
-    if (!sampleItems.length) return
+    if (!sampleItems.length || !prospect) return
+    const today = new Date().toISOString().slice(0, 10)
+    if (!prospect.samples_sent_at) {
+      const { error } = await supabase.from('leads').update({ samples_sent_at: today } as any).eq('id', prospect.id)
+      if (!error) setProspect(prev => prev ? { ...prev, samples_sent_at: today } : null)
+    }
     await handleUpdateStatus('samples_sent')
   }
 
@@ -553,6 +564,12 @@ export default function ProspectDetail() {
           requested_other: prospect.requested_other,
           estimated_amount: prospect.estimated_amount,
           lost_reason: prospect.lost_reason,
+          samples_sent_at: prospect.samples_sent_at || null,
+          order_won: prospect.order_won ?? null,
+          order_amount: prospect.order_amount ?? null,
+          order_details: prospect.order_details || null,
+          next_action: prospect.next_action || null,
+          next_action_at: prospect.next_action_at || null,
           last_activity_at: new Date().toISOString()
         })
         .eq('id', prospect.id)
@@ -1196,6 +1213,69 @@ export default function ProspectDetail() {
 
         {/* Right Column */}
         <div className="space-y-6">
+          {/* Commercial follow-up (always editable by owner) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('prospectDetail.followUp.title')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {(() => {
+                const set = (patch: Partial<Prospect>) => setProspect(prev => prev ? { ...prev, ...patch } : null)
+                const fmtDate = (d?: string | null) => d ? new Date(d).toLocaleDateString(i18n.language) : t('prospectDetail.commercial.notSet')
+                return (
+                  <>
+                    <div>
+                      <Label>{t('prospectDetail.followUp.samplesSentAt')}</Label>
+                      {editing ? (
+                        <Input type="date" value={prospect.samples_sent_at || ''} onChange={(e) => set({ samples_sent_at: e.target.value || null })} />
+                      ) : <p className="text-sm">{fmtDate(prospect.samples_sent_at)}</p>}
+                    </div>
+                    <div>
+                      <Label>{t('prospectDetail.followUp.orderWon')}</Label>
+                      {editing ? (
+                        <Select value={prospect.order_won == null ? 'unset' : prospect.order_won ? 'yes' : 'no'} onValueChange={(v) => set({ order_won: v === 'unset' ? null : v === 'yes' })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unset">{t('prospectDetail.followUp.unset')}</SelectItem>
+                            <SelectItem value="yes">{t('prospectDetail.followUp.yes')}</SelectItem>
+                            <SelectItem value="no">{t('prospectDetail.followUp.no')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : <p className="text-sm">{prospect.order_won == null ? t('prospectDetail.followUp.unset') : prospect.order_won ? t('prospectDetail.followUp.yes') : t('prospectDetail.followUp.no')}</p>}
+                    </div>
+                    <div>
+                      <Label>{t('prospectDetail.followUp.orderAmount')}</Label>
+                      {editing ? (
+                        <Input type="number" min={0} value={prospect.order_amount ?? ''} onChange={(e) => set({ order_amount: e.target.value === '' ? null : parseFloat(e.target.value) })} />
+                      ) : <p className="text-sm">{prospect.order_amount != null ? formatCurrency(prospect.order_amount, 'EUR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : t('prospectDetail.commercial.notSet')}</p>}
+                    </div>
+                    <div>
+                      <Label>{t('prospectDetail.followUp.orderDetails')}</Label>
+                      {editing ? (
+                        <Textarea value={prospect.order_details || ''} onChange={(e) => set({ order_details: e.target.value })} placeholder={t('prospectDetail.followUp.orderDetailsPlaceholder')} />
+                      ) : <p className="text-sm whitespace-pre-wrap text-muted-foreground">{prospect.order_details || t('prospectDetail.commercial.notSet')}</p>}
+                    </div>
+                    <div>
+                      <Label>{t('prospectDetail.followUp.nextAction')}</Label>
+                      {editing ? (
+                        <Input value={prospect.next_action || ''} onChange={(e) => set({ next_action: e.target.value })} placeholder={t('prospectDetail.followUp.nextActionPlaceholder')} />
+                      ) : <p className="text-sm">{prospect.next_action || t('prospectDetail.commercial.notSet')}</p>}
+                    </div>
+                    <div>
+                      <Label>{t('prospectDetail.followUp.nextActionAt')}</Label>
+                      {editing ? (
+                        <Input type="date" value={prospect.next_action_at || ''} onChange={(e) => set({ next_action_at: e.target.value || null })} />
+                      ) : <p className="text-sm">{fmtDate(prospect.next_action_at)}</p>}
+                    </div>
+                    {!editing && (
+                      <Button variant="outline" size="sm" onClick={() => setEditing(true)}>{t('prospectDetail.followUp.edit')}</Button>
+                    )}
+                  </>
+                )
+              })()}
+            </CardContent>
+          </Card>
+
           {/* Status Management */}
           {(prospect.prospect_status === 'won' || prospect.prospect_status === 'lost') && (
             <Card>
