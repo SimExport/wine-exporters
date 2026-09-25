@@ -115,7 +115,7 @@ interface PipelineStageLite {
 }
 
 export default function ProspectDetail() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const { user } = useAuth()
   const { toast } = useToast()
