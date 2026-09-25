@@ -841,6 +841,11 @@ export type Database = {
           lost_reason: string | null
           market: string
           message_snippet: string | null
+          next_action: string | null
+          next_action_at: string | null
+          order_amount: number | null
+          order_details: string | null
+          order_won: boolean | null
           owner_notes: string | null
           phone: string | null
           postal_code: string | null
@@ -851,6 +856,7 @@ export type Database = {
             | Database["public"]["Enums"]["requested_action"][]
             | null
           requested_other: string | null
+          samples_sent_at: string | null
           source: string
           source_ref: string | null
           source_relevance: string | null
@@ -883,6 +889,11 @@ export type Database = {
           lost_reason?: string | null
           market: string
           message_snippet?: string | null
+          next_action?: string | null
+          next_action_at?: string | null
+          order_amount?: number | null
+          order_details?: string | null
+          order_won?: boolean | null
           owner_notes?: string | null
           phone?: string | null
           postal_code?: string | null
@@ -895,6 +906,7 @@ export type Database = {
             | Database["public"]["Enums"]["requested_action"][]
             | null
           requested_other?: string | null
+          samples_sent_at?: string | null
           source?: string
           source_ref?: string | null
           source_relevance?: string | null
@@ -927,6 +939,11 @@ export type Database = {
           lost_reason?: string | null
           market?: string
           message_snippet?: string | null
+          next_action?: string | null
+          next_action_at?: string | null
+          order_amount?: number | null
+          order_details?: string | null
+          order_won?: boolean | null
           owner_notes?: string | null
           phone?: string | null
           postal_code?: string | null
@@ -939,6 +956,7 @@ export type Database = {
             | Database["public"]["Enums"]["requested_action"][]
             | null
           requested_other?: string | null
+          samples_sent_at?: string | null
           source?: string
           source_ref?: string | null
           source_relevance?: string | null
@@ -1803,6 +1821,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      search_buyer_contacts: {
+        Args: {
+          _countries: string[]
+          _limit: number
+          _offset: number
+          _q: string
+        }
+        Returns: {
+          row_data: Json
+          total_count: number
+        }[]
       }
     }
     Enums: {
