@@ -974,6 +974,10 @@
       "previous": "Previous",
       "next": "Next",
       "pageOf": "Page {{current}} of {{total}}"
+    },
+    "search": {
+      "placeholder": "Search a company, city, email…",
+      "noResults": "No importer matches your search."
     }
   },
   "profile": {
@@ -1709,6 +1713,13 @@
       "cancel": "Cancel",
       "create": "Create prospect",
       "createShort": "Create"
+    },
+    "origin": {
+      "manual": "Manual entry",
+      "campaign": "Campaign",
+      "sourcing": "Custom search",
+      "buyerRequest": "Buyer request",
+      "tender": "Tender"
     }
   },
   "pipeline": {
@@ -2213,6 +2224,21 @@
       "title": "History",
       "created": "Prospect created",
       "lastUpdate": "Last update"
+    },
+    "followUp": {
+      "title": "Sales follow-up",
+      "samplesSentAt": "Samples sent on",
+      "orderWon": "Order won",
+      "orderAmount": "Order amount (€)",
+      "orderDetails": "Order details",
+      "orderDetailsPlaceholder": "Wines, quantities, terms…",
+      "nextAction": "Next action",
+      "nextActionPlaceholder": "E.g. follow up after tasting",
+      "nextActionAt": "Next action date",
+      "unset": "Not set",
+      "yes": "Yes",
+      "no": "No",
+      "edit": "Edit follow-up"
     }
   },
   "billing": {
@@ -3291,11 +3317,31 @@
       "subtitle": "WineExporters draws on several years of export prospecting and a methodology already used with wine estates.",
       "marketOpened": "Market opened",
       "items": [
-        { "winery": "Château de France", "market": "Germany", "flag": "🇩🇪" },
-        { "winery": "Maison Kieffer", "market": "Denmark", "flag": "🇩🇰" },
-        { "winery": "Potel-Aviron", "market": "Poland · Netherlands · Switzerland", "flag": "🇵🇱 🇳🇱 🇨🇭" },
-        { "winery": "Château Paquet", "market": "Denmark", "flag": "🇩🇰" },
-        { "winery": "Domaine de Ness", "market": "Finland", "flag": "🇫🇮" }
+        {
+          "winery": "Château de France",
+          "market": "Germany",
+          "flag": "🇩🇪"
+        },
+        {
+          "winery": "Maison Kieffer",
+          "market": "Denmark",
+          "flag": "🇩🇰"
+        },
+        {
+          "winery": "Potel-Aviron",
+          "market": "Poland · Netherlands · Switzerland",
+          "flag": "🇵🇱 🇳🇱 🇨🇭"
+        },
+        {
+          "winery": "Château Paquet",
+          "market": "Denmark",
+          "flag": "🇩🇰"
+        },
+        {
+          "winery": "Domaine de Ness",
+          "market": "Finland",
+          "flag": "🇫🇮"
+        }
       ]
     },
     "cta": {

@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download, ChevronDown } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download, ChevronDown, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import * as XLSX from 'xlsx';
 import {
   DropdownMenu,
@@ -103,6 +104,13 @@ const Importers = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  useEffect(() => {
+    const h = setTimeout(() => setSearchQuery(searchInput.trim()), 300);
+    return () => clearTimeout(h);
+  }, [searchInput]);
+  useEffect(() => { setSearchInput(''); setSearchQuery(''); }, [selectedCountry]);
   const [sourcingOpen, setSourcingOpen] = useState(false);
   const [sourcingMarket, setSourcingMarket] = useState('');
   const [sourcingLoading, setSourcingLoading] = useState(false);
@@ -243,15 +251,25 @@ const Importers = () => {
         setLoading(false);
         return;
       }
-      const {
-        data,
-        error,
-        count
-      } = await supabase.from('buyer_contacts').select('*', {
-        count: 'exact'
-      }).in('country', country.dbAliases).order('company_name', {
-        ascending: true
-      }).range(from, to);
+      let data: any[] | null = null;
+      let error: any = null;
+      let count: number | null = null;
+      if (searchQuery) {
+        const res = await (supabase.rpc as any)('search_buyer_contacts', {
+          _countries: country.dbAliases, _q: searchQuery, _offset: from, _limit: limit,
+        });
+        error = res.error;
+        const rows = (res.data ?? []) as Array<{ row_data: any; total_count: number }>;
+        data = rows.map(r => r.row_data);
+        count = rows[0]?.total_count ?? 0;
+      } else {
+        const res = await supabase.from('buyer_contacts').select('*', {
+          count: 'exact'
+        }).in('country', country.dbAliases).order('company_name', {
+          ascending: true
+        }).range(from, to);
+        data = res.data; error = res.error; count = res.count;
+      }
       if (error) {
         console.error('Error fetching contacts:', error);
         toast({
@@ -277,7 +295,7 @@ const Importers = () => {
   useEffect(() => {
     setCurrentPage(1);
     fetchContacts(selectedCountry, 1, itemsPerPage);
-  }, [selectedCountry, itemsPerPage]);
+  }, [selectedCountry, itemsPerPage, searchQuery]);
   useEffect(() => {
     fetchContacts(selectedCountry, currentPage, itemsPerPage);
   }, [currentPage]);
@@ -568,6 +586,19 @@ const Importers = () => {
         </div>
       )}
 
+      {selectedCountry && (
+        <div className="relative mb-3 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t('importers.search.placeholder')}
+            aria-label={t('importers.search.placeholder')}
+            className="pl-9"
+          />
+        </div>
+      )}
+
       {/* Main Content */}
       <Card>
         {!selectedCountry ? <div className="p-12 text-center text-muted-foreground">
@@ -576,7 +607,7 @@ const Importers = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             <p className="text-muted-foreground mt-2">{t('importers.loadingProtected')}</p>
           </div> : contacts.length === 0 ? <div className="p-12 text-center text-muted-foreground">
-            {t('importers.table.noResultsForCountry')}
+            {searchQuery ? t('importers.search.noResults') : t('importers.table.noResultsForCountry')}
           </div> : <>
             {/* Selection banner */}
             {hasPaidAccess && (selectAllAcrossPages || (allPageSelected && totalCount > contacts.length)) && (
