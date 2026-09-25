@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getLeadOriginLabel } from '@/lib/lead-origin'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -716,7 +717,7 @@ export default function ProspectDetail() {
                 </Badge>
               )}
               <Badge variant="outline">
-                {prospect.campaigns?.name}
+                {getLeadOriginLabel(prospect, t)}
               </Badge>
               {prospect.country && (
                 <Badge variant="secondary">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getLeadOriginLabel } from '@/lib/lead-origin'
 import { useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -328,6 +329,7 @@ export default function Prospects() {
           prospect_status: 'new' as any,
           last_activity_at: new Date().toISOString(),
           created_by: user?.id,
+          source: 'manual',
           requested_actions: newProspect.requested_actions as any,
           message_snippet: newProspect.requested_samples.length > 0 
             ? t('crm.createDialog.samplesRequestedSnippet', { list: newProspect.requested_samples.join(', ') })
@@ -373,7 +375,7 @@ export default function Prospects() {
     const headers = t('prospects.csv.headers', { returnObjects: true }) as string[]
     const rows = prospects.map(p => [
       formatDate(p.created_at),
-      p.campaigns?.name || '',
+      getLeadOriginLabel(p, t),
       p.company_name || '',
       `${p.first_name || ''} ${p.last_name || ''}`.trim(),
       p.email || '',
@@ -761,7 +763,7 @@ export default function Prospects() {
                       </TableCell>}
                       {isVisible('campaign') && <TableCell>
                         <Badge variant="outline" className="cursor-pointer">
-                          {prospect.campaigns?.name}
+                          {getLeadOriginLabel(prospect, t)}
                         </Badge>
                       </TableCell>}
                       {isVisible('company') && <TableCell className="font-medium">

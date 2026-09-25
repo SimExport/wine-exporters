@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getLeadOriginLabel } from '@/lib/lead-origin'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -443,6 +444,7 @@ export default function Pipeline() {
           stage_id: firstStageId,
           last_activity_at: new Date().toISOString(),
           created_by: user?.id,
+          source: 'manual',
           requested_actions: newProspect.requested_actions as any,
           message_snippet: newProspect.requested_samples.length > 0 
             ? t('crm.createDialog.samplesRequestedSnippet', { list: newProspect.requested_samples.join(', ') })
@@ -883,7 +885,7 @@ export default function Pipeline() {
 
                               {visibleFields.has('campaign') && (
                                 <p className="text-[10px] text-muted-foreground mt-2">
-                                  {prospect.campaigns?.name}
+                                  {getLeadOriginLabel(prospect, t)}
                                 </p>
                               )}
 
