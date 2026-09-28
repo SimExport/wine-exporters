@@ -106,7 +106,8 @@
     "sourcing": "Recherches sur-mesure",
     "opportunities": "Opportunités",
     "adminOpportunities": "Opportunités Admin",
-    "adminMarketAnalyses": "Analyses de marché"
+    "adminMarketAnalyses": "Analyses de marché",
+    "adminSeoArticles": "SEO / Ressources"
   },
   "resources": {
     "title": "Ressources",
@@ -3415,6 +3416,116 @@
       "error": "Erreur technique",
       "showRaw": "Afficher le JSON brut",
       "hideRaw": "Masquer le JSON brut"
+    }
+  },
+  "seoArticles": {
+    "publicTitle": "Guides et articles export",
+    "publicSubtitle": "Conseils pratiques pour trouver des importateurs, comprendre vos marchés et développer vos ventes à l'export.",
+    "empty": "Les premiers articles arrivent bientôt.",
+    "readMore": "Lire l'article",
+    "featured": "À la une",
+    "minRead": "{{count}} min de lecture",
+    "publishedOn": "Publié le {{date}}",
+    "updatedOn": "Mis à jour le {{date}}",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbResources": "Ressources",
+    "related": "À lire aussi",
+    "faq": "Questions fréquentes",
+    "notFound": "Cet article est introuvable.",
+    "backToResources": "Retour aux ressources",
+    "members": {
+      "title": "Les utilisateurs WineExporters ont également accès à…",
+      "subtitle": "Guides pas à pas, modèles d'emails et vidéos pratiques pour faire avancer chaque échange avec un importateur.",
+      "badge": "Réservé aux utilisateurs",
+      "login": "Se connecter",
+      "demo": "Découvrir WineExporters en démo"
+    },
+    "nav": {
+      "login": "Connexion",
+      "resources": "Ressources",
+      "analysis": "Analyser mon marché"
+    },
+    "cta": {
+      "marketTitle": "Vous cherchez des importateurs pour vos vins ?",
+      "marketBody": "WineExporters vous aide à identifier les marchés et les importateurs les plus pertinents pour votre domaine.",
+      "marketButton": "Analyser mon marché",
+      "demoTitle": "Passez de l'identification à la prospection",
+      "demoBody": "Découvrez comment WineExporters vous aide à contacter les importateurs et suivre vos opportunités au même endroit.",
+      "demoButton": "Découvrir WineExporters"
+    },
+    "admin": {
+      "title": "SEO / Ressources",
+      "subtitle": "Articles publics référencés sur /ressources.",
+      "new": "Nouvel article",
+      "search": "Rechercher un article…",
+      "empty": "Aucun article pour le moment.",
+      "colTitle": "Titre",
+      "colStatus": "Statut",
+      "colCategory": "Catégorie",
+      "colCountry": "Pays",
+      "colDate": "Publication",
+      "draft": "Brouillon",
+      "published": "Publié",
+      "scheduled": "Programmé",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "publish": "Publier",
+      "unpublish": "Dépublier",
+      "view": "Voir",
+      "confirmDelete": "Supprimer définitivement cet article ?",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "saved": "Article enregistré",
+      "deleted": "Article supprimé",
+      "error": "Une erreur est survenue",
+      "editorTitleNew": "Nouvel article",
+      "editorTitleEdit": "Modifier l'article",
+      "preview": "Aperçu",
+      "tabContent": "Contenu",
+      "tabSeo": "SEO",
+      "tabLinks": "Maillage & FAQ",
+      "f": {
+        "title": "Titre éditorial (H1)",
+        "slug": "Slug (URL)",
+        "language": "Langue",
+        "contentType": "Type de contenu",
+        "category": "Catégorie",
+        "country": "Pays",
+        "excerpt": "Extrait / introduction",
+        "content": "Contenu (Markdown)",
+        "contentHelp": "## = H2 · ### = H3 · > = encadré · [[CTA_ANALYSE_MARCHE]] · [[CTA_DEMO]]",
+        "featuredImage": "Image principale (URL)",
+        "author": "Auteur",
+        "status": "Statut",
+        "publishedAt": "Date de publication",
+        "seoTitle": "Titre SEO",
+        "metaTitle": "Meta title",
+        "metaDescription": "Meta description",
+        "focusKeyword": "Mot-clé principal",
+        "canonical": "URL canonique (optionnel)",
+        "ogImage": "Image de partage (URL)",
+        "featured": "Mettre à la une",
+        "readingTime": "Temps de lecture (min)",
+        "ctaType": "CTA de fin d'article",
+        "related": "Articles liés (sinon automatique)",
+        "faq": "FAQ",
+        "faqQ": "Question",
+        "faqA": "Réponse",
+        "addFaq": "Ajouter une question"
+      },
+      "ctaOptions": {
+        "market_analysis": "Analyse de marché",
+        "demo": "Démo",
+        "both": "Les deux",
+        "none": "Aucun"
+      },
+      "types": {
+        "guide": "Guide",
+        "market": "Marché",
+        "how_to": "Méthode",
+        "case_study": "Cas client",
+        "news": "Actualité"
+      }
     }
   }
 }

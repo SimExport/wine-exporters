@@ -106,7 +106,8 @@
     "sourcing": "Bespoke Searches",
     "opportunities": "Opportunities",
     "adminOpportunities": "Admin Opportunities",
-    "adminMarketAnalyses": "Market analyses"
+    "adminMarketAnalyses": "Market analyses",
+    "adminSeoArticles": "SEO / Resources"
   },
   "resources": {
     "title": "Resources",
@@ -3415,6 +3416,116 @@
       "error": "Technical error",
       "showRaw": "Show raw JSON",
       "hideRaw": "Hide raw JSON"
+    }
+  },
+  "seoArticles": {
+    "publicTitle": "Export guides and articles",
+    "publicSubtitle": "Practical advice to find importers, understand your markets and grow your export sales.",
+    "empty": "The first articles are coming soon.",
+    "readMore": "Read article",
+    "featured": "Featured",
+    "minRead": "{{count}} min read",
+    "publishedOn": "Published on {{date}}",
+    "updatedOn": "Updated on {{date}}",
+    "breadcrumbHome": "Home",
+    "breadcrumbResources": "Resources",
+    "related": "Read next",
+    "faq": "Frequently asked questions",
+    "notFound": "This article could not be found.",
+    "backToResources": "Back to resources",
+    "members": {
+      "title": "WineExporters users also get access to…",
+      "subtitle": "Step-by-step guides, email templates and practical videos to move every importer conversation forward.",
+      "badge": "For users only",
+      "login": "Log in",
+      "demo": "Discover WineExporters in a demo"
+    },
+    "nav": {
+      "login": "Log in",
+      "resources": "Resources",
+      "analysis": "Analyse my market"
+    },
+    "cta": {
+      "marketTitle": "Looking for importers for your wines?",
+      "marketBody": "WineExporters helps you identify the most relevant markets and importers for your estate.",
+      "marketButton": "Analyse my market",
+      "demoTitle": "Move from identification to prospecting",
+      "demoBody": "See how WineExporters helps you contact importers and track your opportunities in one place.",
+      "demoButton": "Discover WineExporters"
+    },
+    "admin": {
+      "title": "SEO / Resources",
+      "subtitle": "Public articles listed on /ressources.",
+      "new": "New article",
+      "search": "Search articles…",
+      "empty": "No articles yet.",
+      "colTitle": "Title",
+      "colStatus": "Status",
+      "colCategory": "Category",
+      "colCountry": "Country",
+      "colDate": "Publication",
+      "draft": "Draft",
+      "published": "Published",
+      "scheduled": "Scheduled",
+      "edit": "Edit",
+      "delete": "Delete",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "view": "View",
+      "confirmDelete": "Permanently delete this article?",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Article saved",
+      "deleted": "Article deleted",
+      "error": "Something went wrong",
+      "editorTitleNew": "New article",
+      "editorTitleEdit": "Edit article",
+      "preview": "Preview",
+      "tabContent": "Content",
+      "tabSeo": "SEO",
+      "tabLinks": "Links & FAQ",
+      "f": {
+        "title": "Editorial title (H1)",
+        "slug": "Slug (URL)",
+        "language": "Language",
+        "contentType": "Content type",
+        "category": "Category",
+        "country": "Country",
+        "excerpt": "Excerpt / introduction",
+        "content": "Content (Markdown)",
+        "contentHelp": "## = H2 · ### = H3 · > = callout · [[CTA_ANALYSE_MARCHE]] · [[CTA_DEMO]]",
+        "featuredImage": "Main image (URL)",
+        "author": "Author",
+        "status": "Status",
+        "publishedAt": "Publication date",
+        "seoTitle": "SEO title",
+        "metaTitle": "Meta title",
+        "metaDescription": "Meta description",
+        "focusKeyword": "Focus keyword",
+        "canonical": "Canonical URL (optional)",
+        "ogImage": "Share image (URL)",
+        "featured": "Feature this article",
+        "readingTime": "Reading time (min)",
+        "ctaType": "End-of-article CTA",
+        "related": "Related articles (otherwise automatic)",
+        "faq": "FAQ",
+        "faqQ": "Question",
+        "faqA": "Answer",
+        "addFaq": "Add a question"
+      },
+      "ctaOptions": {
+        "market_analysis": "Market analysis",
+        "demo": "Demo",
+        "both": "Both",
+        "none": "None"
+      },
+      "types": {
+        "guide": "Guide",
+        "market": "Market",
+        "how_to": "How-to",
+        "case_study": "Case study",
+        "news": "News"
+      }
     }
   }
 }
