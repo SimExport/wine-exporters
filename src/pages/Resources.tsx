@@ -109,7 +109,7 @@ const Resources = () => {
           </div>
           <p className="text-muted-foreground text-lg max-w-2xl">{t("seoArticles.publicSubtitle")}</p>
         </div>
-        <PublicArticlesSection />
+        <PublicArticlesSection hideSubtitle />
         <MembersResourcesTeaser />
       </div>
     );
