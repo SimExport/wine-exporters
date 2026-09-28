@@ -51,7 +51,7 @@ export const ArticleCard = ({ article, featured }: { article: SeoArticleSummary;
 };
 
 /** Liste des articles publics. `hideWhenEmpty` : n'affiche rien s'il n'y a aucun article. */
-export const PublicArticlesSection = ({ hideWhenEmpty }: { hideWhenEmpty?: boolean }) => {
+export const PublicArticlesSection = ({ hideWhenEmpty, hideSubtitle }: { hideWhenEmpty?: boolean; hideSubtitle?: boolean }) => {
   const { t } = useTranslation();
   const [articles, setArticles] = useState<SeoArticleSummary[] | null>(null);
 
@@ -66,7 +66,7 @@ export const PublicArticlesSection = ({ hideWhenEmpty }: { hideWhenEmpty?: boole
     <section id="articles" className="scroll-mt-8 space-y-4">
       <div>
         <h2 className="mb-1 text-2xl font-bold text-foreground">{t("seoArticles.publicTitle")}</h2>
-        <p className="text-muted-foreground">{t("seoArticles.publicSubtitle")}</p>
+        {!hideSubtitle && <p className="text-muted-foreground">{t("seoArticles.publicSubtitle")}</p>}
       </div>
       {articles.length ? (
         <div className="grid gap-4 sm:grid-cols-2">

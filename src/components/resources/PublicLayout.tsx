@@ -13,7 +13,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/" aria-label="WineExporters">
-            <BrandLogo />
+            <BrandLogo className="h-9 w-auto" />
           </Link>
           <nav className="flex items-center gap-2 sm:gap-4">
             <Link to="/ressources" className="hidden text-sm font-medium text-foreground/80 hover:text-foreground sm:inline">
