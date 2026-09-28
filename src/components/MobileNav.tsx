@@ -59,6 +59,7 @@ const adminItems = [
   { key: 'adminUsers', url: '/admin/users', icon: UsersRound },
   { key: 'adminOpportunities', url: '/admin/opportunites', icon: Sparkles },
   { key: 'adminMarketAnalyses', url: '/admin/market-analyses', icon: FileSearch },
+  { key: 'adminSeoArticles', url: '/admin/ressources', icon: BookOpen },
 ] as const;
 
 export function MobileNav() {

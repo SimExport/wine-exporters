@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SEO } from "@/components/SEO";
+import { useAuth } from "@/hooks/useAuth";
+import { PublicArticlesSection } from "@/components/resources/PublicArticlesSection";
+import { MembersResourcesTeaser } from "@/components/resources/MembersResourcesTeaser";
 
 type ResourceCardKey = "contactImporter" | "followCampaign" | "followProspect" | "moveOpportunity";
 
@@ -82,14 +85,39 @@ const PRACTICAL_VIDEOS: PracticalVideo[] = [
 const Resources = () => {
   const { t } = useTranslation();
   const [activeVideo, setActiveVideo] = useState<PracticalVideo | null>(null);
+  const { user } = useAuth();
+
+  const seo = (
+    <SEO
+      title={t("seo.resources.title")}
+      description={t("seo.resources.description")}
+      path="/ressources"
+    />
+  );
+
+  // Visiteur non connecté : articles publics + aperçu des ressources réservées.
+  if (!user) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6 lg:py-14">
+        {seo}
+        <div>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <BookOpen className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold text-foreground">{t("resources.title")}</h1>
+          </div>
+          <p className="text-muted-foreground text-lg max-w-2xl">{t("seoArticles.publicSubtitle")}</p>
+        </div>
+        <PublicArticlesSection />
+        <MembersResourcesTeaser />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 lg:p-10 space-y-10 max-w-6xl">
-      <SEO
-        title={t("seo.resources.title")}
-        description={t("seo.resources.description")}
-        path="/ressources"
-      />
+      {seo}
 
       {/* Hero */}
       <div>
@@ -245,6 +273,8 @@ const Resources = () => {
           );
         })}
       </div>
+
+      <PublicArticlesSection hideWhenEmpty />
 
       {/* Modal vidéo Loom */}
       <Dialog open={!!activeVideo} onOpenChange={(open) => !open && setActiveVideo(null)}>

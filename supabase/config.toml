@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.notify-prospect-market-analysis]
 verify_jwt = false
+
+[functions.sitemap-articles]
+verify_jwt = false

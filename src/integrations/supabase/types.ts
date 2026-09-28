@@ -1378,6 +1378,96 @@ export type Database = {
           },
         ]
       }
+      seo_articles: {
+        Row: {
+          author: string | null
+          canonical_url: string | null
+          category: string | null
+          content: string
+          content_type: string
+          country: string | null
+          created_at: string
+          cta_type: string | null
+          excerpt: string | null
+          faq: Json
+          featured_image: string | null
+          focus_keyword: string | null
+          id: string
+          is_featured: boolean
+          language: string
+          meta_description: string | null
+          meta_title: string | null
+          og_image: string | null
+          published_at: string | null
+          reading_time: number | null
+          related_article_ids: string[]
+          seo_title: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          author?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          content?: string
+          content_type?: string
+          country?: string | null
+          created_at?: string
+          cta_type?: string | null
+          excerpt?: string | null
+          faq?: Json
+          featured_image?: string | null
+          focus_keyword?: string | null
+          id?: string
+          is_featured?: boolean
+          language?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          related_article_ids?: string[]
+          seo_title?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          author?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          content?: string
+          content_type?: string
+          country?: string | null
+          created_at?: string
+          cta_type?: string | null
+          excerpt?: string | null
+          faq?: Json
+          featured_image?: string | null
+          focus_keyword?: string | null
+          id?: string
+          is_featured?: boolean
+          language?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          related_article_ids?: string[]
+          seo_title?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       sourcing_requests: {
         Row: {
           admin_note: string | null
