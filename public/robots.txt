@@ -14,3 +14,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://wine-exporters.com/sitemap.xml
+Sitemap: https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/sitemap-articles
