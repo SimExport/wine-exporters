@@ -9,9 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   ArrowLeft, Copy, Download, FileJson, Package, ExternalLink, User, Grape,
-  FileText, Image as ImageIcon, Megaphone, Wallet, Loader2,
+  FileText, Image as ImageIcon, Megaphone, Wallet, Loader2, Pencil,
 } from 'lucide-react';
 import { EditUserCreditsDialog } from '@/components/admin/EditUserCreditsDialog';
+import { EditUserProfileDialog } from '@/components/admin/EditUserProfileDialog';
 
 type AnyRow = Record<string, any>;
 
@@ -65,6 +66,7 @@ export default function AdminUserProfile() {
   const [leadsSummary, setLeadsSummary] = useState<Record<string, number>>({});
   const [credits, setCredits] = useState<AnyRow | null>(null);
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -269,7 +271,21 @@ export default function AdminUserProfile() {
         {/* DOMAINE */}
         <TabsContent value="domain" className="mt-4">
           <Card>
-            <CardHeader><CardTitle>Profil domaine</CardTitle></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle>Profil domaine</CardTitle>
+              <Button variant="outline" size="sm" onClick={() => setProfileEditOpen(true)}>
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />Modifier
+              </Button>
+            </CardHeader>
+            {userId && (
+              <EditUserProfileDialog
+                open={profileEditOpen}
+                onOpenChange={setProfileEditOpen}
+                userId={userId}
+                profile={profile}
+                onSaved={setProfile}
+              />
+            )}
             <CardContent>
               {!profile ? (
                 <p className="text-sm text-muted-foreground">Aucun profil rempli.</p>
