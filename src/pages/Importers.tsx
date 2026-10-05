@@ -350,11 +350,21 @@ const Importers = () => {
         let error: any = null;
         if (searchQuery) {
           // Search active → export exactly the filtered list, not the whole country.
-          const res = await (supabase.rpc as any)('search_buyer_contacts', {
-            _countries: country.dbAliases, _q: searchQuery, _offset: 0, _limit: limit,
-          });
-          error = res.error;
-          rows = (res.data ?? []).map((r: any) => r.row_data);
+          // The RPC caps at 100 rows per call, so page through it.
+          const PAGE = 100;
+          const collected: any[] = [];
+          let offset = 0;
+          while (collected.length < limit) {
+            const res = await (supabase.rpc as any)('search_buyer_contacts', {
+              _countries: country.dbAliases, _q: searchQuery, _offset: offset, _limit: Math.min(PAGE, limit - collected.length),
+            });
+            if (res.error) { error = res.error; break; }
+            const pageRows = (res.data ?? []).map((r: any) => r.row_data);
+            collected.push(...pageRows);
+            if (pageRows.length < PAGE) break;
+            offset += PAGE;
+          }
+          rows = collected;
         } else {
           const res = await supabase
             .from('buyer_contacts')
