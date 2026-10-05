@@ -135,11 +135,11 @@ const Importers = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllAcrossPages, setSelectAllAcrossPages] = useState(false);
 
-  // Reset selection when country changes
+  // Reset selection when country or search changes
   useEffect(() => {
     setSelectedIds(new Set());
     setSelectAllAcrossPages(false);
-  }, [selectedCountry]);
+  }, [selectedCountry, searchQuery]);
 
   const effectiveSelectionCount = selectAllAcrossPages ? totalCount : selectedIds.size;
   const pageIds = contacts.map(c => c.id);
@@ -346,12 +346,35 @@ const Importers = () => {
         results.sort((a, b) => (a.company_name || '').localeCompare(b.company_name || ''));
         data = results.slice(0, limit);
       } else {
-        const { data: rows, error } = await supabase
-          .from('buyer_contacts')
-          .select('*')
-          .in('country', country.dbAliases)
-          .order('company_name', { ascending: true })
-          .limit(limit);
+        let rows: any[] | null = null;
+        let error: any = null;
+        if (searchQuery) {
+          // Search active → export exactly the filtered list, not the whole country.
+          // The RPC caps at 100 rows per call, so page through it.
+          const PAGE = 100;
+          const collected: any[] = [];
+          let offset = 0;
+          while (collected.length < limit) {
+            const res = await (supabase.rpc as any)('search_buyer_contacts', {
+              _countries: country.dbAliases, _q: searchQuery, _offset: offset, _limit: Math.min(PAGE, limit - collected.length),
+            });
+            if (res.error) { error = res.error; break; }
+            const pageRows = (res.data ?? []).map((r: any) => r.row_data);
+            collected.push(...pageRows);
+            if (pageRows.length < PAGE) break;
+            offset += PAGE;
+          }
+          rows = collected;
+        } else {
+          const res = await supabase
+            .from('buyer_contacts')
+            .select('*')
+            .in('country', country.dbAliases)
+            .order('company_name', { ascending: true })
+            .limit(limit);
+          rows = res.data;
+          error = res.error;
+        }
         if (error) {
           console.error('Error fetching data for export:', error);
           toast({ title: t('common.error'), description: t('importers.exportError'), variant: 'destructive' });
