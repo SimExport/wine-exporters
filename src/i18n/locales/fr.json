@@ -3538,11 +3538,18 @@
     "cardCta": "Lire le guide",
     "breadcrumb": "Ressources",
     "stepLabel": "Étape {{n}}",
+    "phases": {
+      "preparation": "Préparation",
+      "prospection": "Prospection",
+      "suivi": "Suivi"
+    },
     "notMarketplaceTitle": "WineExporters est un outil de prospection, pas une marketplace.",
     "notMarketplaceText": "WineExporters vous aide à identifier des acheteurs pertinents, générer des opportunités et organiser votre prospection. La relation commerciale reste entre vous et l'importateur : vous gardez le contrôle de vos tarifs, de vos conditions et de vos négociations.",
     "rhythmTitle": "Le rythme recommandé",
     "rhythmText": "Mieux vaut travailler régulièrement un nombre raisonnable de prospects, traiter les réponses et effectuer les relances, plutôt que contacter des centaines d'importateurs en une fois.",
     "rhythmExample": "Commencez par vos opportunités les plus pertinentes, lancez ensuite votre recherche et votre campagne, puis consacrez du temps chaque semaine au suivi des réponses et aux relances.",
+    "rhythmCycleLabel": "Chaque semaine :",
+    "rhythmCycle": ["nouveaux contacts", "réponses", "relances", "mise à jour CRM"],
     "steps": [
       {
         "title": "Complétez votre profil",
@@ -3552,7 +3559,7 @@
       },
       {
         "title": "Ajoutez vos documents commerciaux",
-        "text": "Présentation du domaine, fiches techniques, certifications et tarifs. Si vos conditions diffèrent fortement selon les zones, préparez plusieurs documents tarifaires, par exemple « Europe » et « International / Overseas ».",
+        "text": "Présentation du domaine, fiches techniques, certifications et tarifs. Si vos tarifs diffèrent fortement selon les zones, ajoutez par exemple un document Europe et un document International / Overseas.",
         "cta": "Ajouter mes documents",
         "href": "/profile"
       },
@@ -3575,7 +3582,7 @@
         "href": "/campaigns"
       },
       {
-        "title": "Utilisez la base de données pour votre prospection directe",
+        "title": "Complétez votre prospection avec la base importateurs",
         "text": "Recherchez et sélectionnez des importateurs selon vos marchés prioritaires, et organisez votre prospection progressivement.",
         "cta": "Ouvrir la base importateurs",
         "href": "/importers"

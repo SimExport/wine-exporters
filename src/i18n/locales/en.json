@@ -3538,11 +3538,18 @@
     "cardCta": "Read the guide",
     "breadcrumb": "Resources",
     "stepLabel": "Step {{n}}",
+    "phases": {
+      "preparation": "Preparation",
+      "prospection": "Prospecting",
+      "suivi": "Follow-up"
+    },
     "notMarketplaceTitle": "WineExporters is a prospecting tool, not a marketplace.",
     "notMarketplaceText": "WineExporters helps you identify relevant buyers, generate opportunities and organise your prospecting. The business relationship stays between you and the importer: you keep control of your prices, terms and negotiations.",
     "rhythmTitle": "The recommended pace",
     "rhythmText": "It is better to work regularly on a reasonable number of prospects, handle replies and follow up, rather than contacting hundreds of importers at once.",
     "rhythmExample": "Start with your most relevant opportunities, then launch your search and your campaign, and set aside time each week to handle replies and follow-ups.",
+    "rhythmCycleLabel": "Every week:",
+    "rhythmCycle": ["new contacts", "replies", "follow-ups", "CRM update"],
     "steps": [
       {
         "title": "Complete your profile",
@@ -3552,7 +3559,7 @@
       },
       {
         "title": "Add your sales documents",
-        "text": "Winery presentation, technical sheets, certifications and price lists. If your conditions differ strongly by region, prepare several price documents, for example \"Europe\" and \"International / Overseas\".",
+        "text": "Winery presentation, technical sheets, certifications and price lists. If your prices differ strongly by region, add for example a Europe document and an International / Overseas document.",
         "cta": "Add my documents",
         "href": "/profile"
       },
@@ -3575,7 +3582,7 @@
         "href": "/campaigns"
       },
       {
-        "title": "Use the database for direct prospecting",
+        "title": "Expand your prospecting with the importer database",
         "text": "Search and select importers based on your priority markets, and organise your prospecting step by step.",
         "cta": "Open the importer database",
         "href": "/importers"
