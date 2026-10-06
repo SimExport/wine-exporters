@@ -1168,7 +1168,9 @@
       "uploading": "Uploading…",
       "uploadTooLarge": "File too large for the server. Contact support to raise the project Storage limit.",
       "uploadNetworkError": "Network error during upload. Check your connection and try again."
-    }
+    },
+    "privacyNote": "Your profile is private. Importers do not have direct access to it. WineExporters uses this information to understand your winery, wines and positioning and to personalise the searches and campaigns carried out for you.",
+    "languageTip": "Recommended language: English. The information entered here is used to personalise your searches and campaigns. It is not published directly to importers. You may use French, but English helps preserve the exact wording and positioning you want to communicate."
   },
   "countryMultiSelect": {
     "placeholder": "Select countries...",
@@ -1204,7 +1206,7 @@
       "appellationPlaceholder": "AOC Bordeaux",
       "color": "Color",
       "colorPlaceholder": "Choose a color",
-      "price": "EXW (€ / 75cl)",
+      "price": "Indicative / starting EXW price (€ / 75cl)",
       "pricePlaceholder": "12.50",
       "grapes": "Grape varieties",
       "grapesPlaceholder": "Type a grape variety and press Enter",
@@ -1256,7 +1258,8 @@
     "deleteConfirmDescription": "“{{name}}” will be permanently deleted. This action cannot be undone.",
     "deleteSuccess": "Cuvée deleted",
     "deleteError": "Could not delete the cuvée",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "exwHelp": "Enter a reference price here. Your actual conditions may vary depending on volumes and markets. You can attach the appropriate price documents to each campaign."
   },
   "campaigns": {
     "list": {
@@ -3526,6 +3529,73 @@
         "case_study": "Case study",
         "news": "News"
       }
+    }
+  },
+  "gettingStarted": {
+    "title": "Getting started with WineExporters",
+    "subtitle": "The recommended path to get the most out of WineExporters, step by step.",
+    "cardDesc": "The recommended path, step by step.",
+    "cardCta": "Read the guide",
+    "breadcrumb": "Resources",
+    "stepLabel": "Step {{n}}",
+    "notMarketplaceTitle": "WineExporters is a prospecting tool, not a marketplace.",
+    "notMarketplaceText": "WineExporters helps you identify relevant buyers, generate opportunities and organise your prospecting. The business relationship stays between you and the importer: you keep control of your prices, terms and negotiations.",
+    "rhythmTitle": "The recommended pace",
+    "rhythmText": "It is better to work regularly on a reasonable number of prospects, handle replies and follow up, rather than contacting hundreds of importers at once.",
+    "rhythmExample": "Start with your most relevant opportunities, then launch your search and your campaign, and set aside time each week to handle replies and follow-ups.",
+    "steps": [
+      {
+        "title": "Complete your profile",
+        "text": "Fill in your winery, wines, descriptions, photos, documents and commercial information. We recommend English. Your profile is private: it is only used to personalise WineExporters tools.",
+        "cta": "Complete my profile",
+        "href": "/profile"
+      },
+      {
+        "title": "Add your sales documents",
+        "text": "Winery presentation, technical sheets, certifications and price lists. If your conditions differ strongly by region, prepare several price documents, for example \"Europe\" and \"International / Overseas\".",
+        "cta": "Add my documents",
+        "href": "/profile"
+      },
+      {
+        "title": "Start with Opportunities",
+        "text": "Browse importer requests and tenders that match your wines. Answer the most relevant ones first and add them to the CRM when needed.",
+        "cta": "See opportunities",
+        "href": "/opportunites"
+      },
+      {
+        "title": "Launch your tailored search",
+        "text": "Choose a priority market. WineExporters analyses your profile and wines to propose a shortlist of importers to contact first, with relevance scores and a market analysis.",
+        "cta": "Launch a search",
+        "href": "/recherches"
+      },
+      {
+        "title": "Prepare your first campaign",
+        "text": "Choose the markets, wines and documents to use. WineExporters then handles the writing, sending and deliverability of the campaign.",
+        "cta": "Prepare a campaign",
+        "href": "/campaigns"
+      },
+      {
+        "title": "Use the database for direct prospecting",
+        "text": "Search and select importers based on your priority markets, and organise your prospecting step by step.",
+        "cta": "Open the importer database",
+        "href": "/importers"
+      },
+      {
+        "title": "Track everything in the CRM",
+        "text": "Add interesting contacts and track exchanges, samples, follow-ups, negotiations and orders. The CRM is the memory of your export prospecting.",
+        "cta": "Open the CRM",
+        "href": "/pipeline"
+      }
+    ],
+    "dashboard": {
+      "title": "Getting started with WineExporters",
+      "s1": "Complete my profile",
+      "s2": "Browse opportunities",
+      "s3": "Launch my first search",
+      "s4": "Prepare my first campaign",
+      "s5": "Track my prospects in the CRM",
+      "done": "Done",
+      "guide": "See the full guide →"
     }
   }
 }
