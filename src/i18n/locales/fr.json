@@ -3552,7 +3552,7 @@
       },
       {
         "title": "Ajoutez vos documents commerciaux",
-        "text": "Présentation du domaine, fiches techniques, certifications et tarifs. Si vos conditions diffèrent fortement selon les zones, préparez plusieurs documents tarifaires, par exemple « Europe » et « International / Overseas ».",
+        "text": "Présentation du domaine, fiches techniques, certifications et tarifs. Si vos tarifs diffèrent fortement selon les zones, ajoutez par exemple un document Europe et un document International / Overseas.",
         "cta": "Ajouter mes documents",
         "href": "/profile"
       },
@@ -3575,7 +3575,7 @@
         "href": "/campaigns"
       },
       {
-        "title": "Utilisez la base de données pour votre prospection directe",
+        "title": "Complétez votre prospection avec la base importateurs",
         "text": "Recherchez et sélectionnez des importateurs selon vos marchés prioritaires, et organisez votre prospection progressivement.",
         "cta": "Ouvrir la base importateurs",
         "href": "/importers"

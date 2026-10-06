@@ -3552,7 +3552,7 @@
       },
       {
         "title": "Add your sales documents",
-        "text": "Winery presentation, technical sheets, certifications and price lists. If your conditions differ strongly by region, prepare several price documents, for example \"Europe\" and \"International / Overseas\".",
+        "text": "Winery presentation, technical sheets, certifications and price lists. If your prices differ strongly by region, add for example a Europe document and an International / Overseas document.",
         "cta": "Add my documents",
         "href": "/profile"
       },
@@ -3575,7 +3575,7 @@
         "href": "/campaigns"
       },
       {
-        "title": "Use the database for direct prospecting",
+        "title": "Expand your prospecting with the importer database",
         "text": "Search and select importers based on your priority markets, and organise your prospecting step by step.",
         "cta": "Open the importer database",
         "href": "/importers"
