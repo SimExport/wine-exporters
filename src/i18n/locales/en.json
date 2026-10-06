@@ -1458,7 +1458,7 @@
     },
     "banner": {
       "pendingTitle": "Pending validation",
-      "pendingMessage": "Our team is preparing your campaign within 72h. You'll be notified upon validation. Within 7 days, interested importers will appear in your Prospects area.",
+      "pendingMessage": "You will receive an email as soon as your campaign is validated, then a second email once the results are available.",
       "approvedTitle": "Campaign validated",
       "approvedMessage": "Prospects will be added by our team within 7 days after validation.",
       "approvedDay": "Day {{day}}/7",
@@ -1606,7 +1606,7 @@
       "techLinkItem": "• Tech sheets link: {{link}}",
       "clientNoteLabel": "Note to the team",
       "warningTitle": "Upon submission, your campaign moves to pending validation.",
-      "warningBody": "Our team prepares your campaign within 72h. You will be notified upon validation. Then, within 7 days, interested importers and buyers will appear in your Prospects and Pipeline spaces.",
+      "warningBody": "You will receive an email as soon as your campaign is validated, then a second email once the results are available.",
       "backToStep1": "Back to step 1"
     }
   },
