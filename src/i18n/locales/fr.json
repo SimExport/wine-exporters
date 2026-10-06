@@ -1558,7 +1558,7 @@
       },
       "submitted": {
         "title": "Campagne soumise",
-        "description": "En attente de validation (≤72h)"
+        "description": "En attente de validation. Vous recevrez un email à la validation, puis un second à la disponibilité des résultats."
       },
       "submitError": {
         "title": "Erreur",

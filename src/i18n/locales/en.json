@@ -1558,7 +1558,7 @@
       },
       "submitted": {
         "title": "Campaign submitted",
-        "description": "Pending validation (≤72h)"
+        "description": "Pending validation. You will receive an email upon validation, then a second one once results are available."
       },
       "submitError": {
         "title": "Error",
