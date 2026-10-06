@@ -351,6 +351,7 @@ const WineManagement = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, exw_price_eur: e.target.value }))}
                       placeholder={t('wines.fields.pricePlaceholder')}
                     />
+                    <p className="text-xs text-muted-foreground">{t('wines.exwHelp')}</p>
                   </div>
                 </div>
 

@@ -130,6 +130,20 @@ const Resources = () => {
         <p className="text-muted-foreground text-lg max-w-2xl">{t("resources.subtitle")}</p>
       </div>
 
+      <Link to="/ressources/bien-demarrer" className="block">
+        <Card className="border-primary/40 bg-primary/5 hover:shadow-md transition-shadow">
+          <CardContent className="flex flex-col sm:flex-row sm:items-center gap-3 p-5">
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-foreground">{t("gettingStarted.title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("gettingStarted.cardDesc")}</p>
+            </div>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+              {t("gettingStarted.cardCta")} <ArrowRight className="h-4 w-4" />
+            </span>
+          </CardContent>
+        </Card>
+      </Link>
+
       {/* Cartes principales */}
       <div className="grid gap-4 sm:grid-cols-2">
         {RESOURCE_CARDS.map((card) => {
