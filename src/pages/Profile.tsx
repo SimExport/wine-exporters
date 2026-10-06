@@ -777,6 +777,7 @@ const Profile = () => {
             <div>
               <h1 className="text-2xl font-bold text-foreground">{t('profile.title')}</h1>
               <p className="text-muted-foreground mt-1">{t('profile.subtitle')}</p>
+              <p className="mt-2 max-w-2xl flex items-start gap-1.5 text-xs text-muted-foreground"><Lock className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />{t('profile.privacyNote')}</p>
               {lastSaved && <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs">
                     {t('profile.savedAt', { time: lastSaved.toLocaleTimeString(localeCode) })}
@@ -864,6 +865,10 @@ const Profile = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <TabsContent value="general" className="space-y-6">
+              <div className="flex items-start gap-2 rounded-lg border border-border bg-secondary/40 p-3 text-sm text-muted-foreground">
+                <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+                <span>{t('profile.languageTip')}</span>
+              </div>
               <Card>
                 <CardHeader>
                   <CardTitle>{t('profile.general.cardTitle')}</CardTitle>

@@ -50,6 +50,7 @@ import FollowUpTemplates from "./pages/resources/FollowUpTemplates";
 import RespondOpportunity from "./pages/resources/RespondOpportunity";
 import SendSamples from "./pages/resources/SendSamples";
 import TastingFollowUp from "./pages/resources/TastingFollowUp";
+import GettingStarted from "./pages/resources/GettingStarted";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
@@ -120,6 +121,7 @@ const App = () => (
             <Route path="/roadmap" element={<DashboardLayout><Roadmap /></DashboardLayout>} />
             <Route path="/help" element={<DashboardLayout><Help /></DashboardLayout>} />
             <Route path="/ressources" element={<ResourcesLayout><Resources /></ResourcesLayout>} />
+            <Route path="/ressources/bien-demarrer" element={<DashboardLayout><GettingStarted /></DashboardLayout>} />
             <Route path="/ressources/premier-email-importateur" element={<DashboardLayout><FirstEmailImporter /></DashboardLayout>} />
             <Route path="/ressources/suivi-campagne-wineexporters" element={<DashboardLayout><CampaignFollowUp /></DashboardLayout>} />
             <Route path="/ressources/documents-premier-email" element={<DashboardLayout><FirstEmailAttachments /></DashboardLayout>} />
