@@ -18,7 +18,8 @@ export function GettingStartedCard({ profileDone }: Props) {
       const [s, c, l] = await Promise.all([
         supabase.from('sourcing_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('campaigns').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        (supabase.from as any)('leads').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        // leads has no user_id column — count leads reachable through the user's campaigns
+        supabase.from('leads').select('id, campaigns!inner(user_id)', { count: 'exact', head: true }).eq('campaigns.user_id', user.id),
       ]);
       setDone({ search: (s.count ?? 0) > 0, campaign: (c.count ?? 0) > 0, crm: (l.count ?? 0) > 0 });
     })();
