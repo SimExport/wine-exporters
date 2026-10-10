@@ -849,6 +849,7 @@ export type Database = {
           first_name: string | null
           id: string
           import_key: string | null
+          importer_description: string | null
           last_activity_at: string | null
           last_name: string | null
           lost_reason: string | null
@@ -864,6 +865,7 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           prospect_status: Database["public"]["Enums"]["prospect_status"] | null
+          relevance_reason: string | null
           remind_at: string | null
           remind_note: string | null
           requested_actions:
@@ -899,6 +901,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           import_key?: string | null
+          importer_description?: string | null
           last_activity_at?: string | null
           last_name?: string | null
           lost_reason?: string | null
@@ -916,6 +919,7 @@ export type Database = {
           prospect_status?:
             | Database["public"]["Enums"]["prospect_status"]
             | null
+          relevance_reason?: string | null
           remind_at?: string | null
           remind_note?: string | null
           requested_actions?:
@@ -951,6 +955,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           import_key?: string | null
+          importer_description?: string | null
           last_activity_at?: string | null
           last_name?: string | null
           lost_reason?: string | null
@@ -968,6 +973,7 @@ export type Database = {
           prospect_status?:
             | Database["public"]["Enums"]["prospect_status"]
             | null
+          relevance_reason?: string | null
           remind_at?: string | null
           remind_note?: string | null
           requested_actions?:

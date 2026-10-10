@@ -4,23 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { X, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCrmAccess } from '@/hooks/useCrmAccess';
+import { exportFullCrm } from '@/lib/crm-export';
 
 /** Trial banner, welcome block and read-only / closed notices for ExportVins trial accounts. */
 const TrialCrmBanner = () => {
   const { t } = useTranslation();
   const a = useCrmAccess();
   const { user } = useAuth();
-  const exportCsv = async () => {
-    if (!user) return;
-    const { data } = await supabase.from('leads')
-      .select('company_name, first_name, last_name, email, phone, country, city, website_url, status, next_action, next_action_at, owner_notes, campaigns!inner(user_id, name)')
-      .eq('campaigns.user_id', user.id).limit(5000);
-    const cols = ['company_name','first_name','last_name','email','phone','country','city','website_url','status','next_action','next_action_at','owner_notes'];
-    const q = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const csv = '\uFEFF' + [cols.join(';'), ...(data || []).map((r: any) => cols.map((c) => q(r[c])).join(';'))].join('\r\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    const el = document.createElement('a'); el.href = url; el.download = 'prospects-wineexporters.csv'; el.click(); URL.revokeObjectURL(url);
-  };
+  const exportCsv = async () => { if (user) await exportFullCrm(user.id); };
   if (a.loading || !a.isTrialAccount) return null;
 
   if (a.isClosed) {
@@ -46,7 +37,7 @@ const TrialCrmBanner = () => {
       ) : (
         <div className="rounded-lg border border-border bg-secondary/40 px-4 py-2 text-sm flex flex-wrap items-center justify-between gap-2">
           <span>{t('trial.banner', { count: a.daysLeft })}</span>
-          <a href="https://calendar.app.google/rfx7N1bBhJcbwyJg9" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">{t('trial.discover')}</a>
+          <span className="flex gap-3"><button onClick={exportCsv} className="text-primary underline underline-offset-2">{t('trial.exportCsv')}</button><a href="https://calendar.app.google/rfx7N1bBhJcbwyJg9" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">{t('trial.discover')}</a></span>
         </div>
       )}
       {a.showWelcome && (
