@@ -110,7 +110,19 @@ export default function ExportVinsInviteForm({ buildRedirect, onDone }: { buildR
       setEmail(""); setDomain(""); setMission(""); setPreview(null); setFileName("");
       onDone();
     } catch (err: any) {
-      toast({ title: "Erreur", description: err?.message || "Échec", variant: "destructive" });
+      let detail = err?.message || "Échec inconnu";
+      try {
+        const ctx = err?.context;
+        if (ctx && typeof ctx.json === "function") {
+          const j = await ctx.json();
+          if (j?.error) detail = j.error;
+        }
+      } catch { /* ignore */ }
+      if (/Failed to send a request/i.test(detail)) {
+        detail = "Le service d'invitation n'a pas répondu (indisponible ou en erreur au démarrage). Aucun compte, contact ni email n'a été créé. Réessayez dans quelques minutes ; si le problème persiste, contactez le support technique.";
+      }
+      toast({ title: "Invitation ExportVins non créée", description: detail, variant: "destructive", duration: 15000 });
+      setResult(null);
       onDone();
     } finally { setLoading(false); }
   };
