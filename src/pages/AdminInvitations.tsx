@@ -9,12 +9,17 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, UserPlus, CheckCircle2, XCircle, History, Send, Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import ExportVinsInviteForm from "@/components/admin/ExportVinsInviteForm";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type InvitationRow = {
   id: string;
   email: string;
-  status: "sent" | "failed";
+  status: "sent" | "failed" | "pending";
+  invitation_type?: string;
+  domain_name?: string | null;
+  mission_name?: string | null;
+  imported_count?: number | null;
   error_message: string | null;
   invited_user_id: string | null;
   created_at: string;
@@ -31,6 +36,8 @@ const AdminInvitations = () => {
   const [loadingRows, setLoadingRows] = useState(true);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [linkingId, setLinkingId] = useState<string | null>(null);
+  const [inviteType, setInviteType] = useState<"classic" | "exportvins">("classic");
+  const [ents, setEnts] = useState<Record<string, any>>({});
 
   const buildRedirect = () => {
     const PROD_ORIGIN = "https://wine-exporters.com";
@@ -93,10 +100,18 @@ const AdminInvitations = () => {
     setLoadingRows(true);
     const { data, error } = await supabase
       .from("admin_invitations")
-      .select("id,email,status,error_message,invited_user_id,created_at")
+      .select("id,email,status,error_message,invited_user_id,created_at,invitation_type,domain_name,mission_name,imported_count")
       .order("created_at", { ascending: false })
       .limit(50);
-    if (!error && data) setRows(data as InvitationRow[]);
+    if (!error && data) {
+      setRows(data as InvitationRow[]);
+      const ids = (data as any[]).filter((r) => r.invitation_type === "exportvins" && r.invited_user_id).map((r) => r.invited_user_id);
+      if (ids.length) {
+        const { data: e } = await (supabase.from as any)("user_entitlements")
+          .select("user_id,status,activated_at,expires_at,grace_ends_at").in("user_id", ids);
+        setEnts(Object.fromEntries((e || []).map((x: any) => [x.user_id, x])));
+      }
+    }
     setLoadingRows(false);
   }, []);
 
@@ -124,7 +139,7 @@ const AdminInvitations = () => {
   };
 
   return (
-    <div className="container max-w-2xl py-8 space-y-6">
+    <div className="container max-w-4xl py-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t("adminInvitations.title")}</h1>
         <p className="text-muted-foreground mt-1">{t("adminInvitations.subtitle")}</p>
@@ -138,7 +153,16 @@ const AdminInvitations = () => {
           </CardTitle>
           <CardDescription>{t("adminInvitations.formDesc")}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {([["classic","Invitation classique WineExporters"],["exportvins","Client ExportVins — Mission Performance"]] as const).map(([v,l]) => (
+              <button key={v} type="button" onClick={() => setInviteType(v)}
+                className={`rounded-md border px-3 py-2 text-sm text-left ${inviteType===v ? "border-primary bg-primary/5 text-foreground" : "border-border text-muted-foreground"}`}>{l}</button>
+            ))}
+          </div>
+          {inviteType === "exportvins" ? (
+            <ExportVinsInviteForm buildRedirect={buildRedirect} onDone={loadRows} />
+          ) : (
           <form onSubmit={onInvite} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="invite-email">{t("adminInvitations.emailLabel")}</Label>
@@ -158,6 +182,7 @@ const AdminInvitations = () => {
               {loading ? t("adminInvitations.sending") : t("adminInvitations.send")}
             </Button>
           </form>
+          )}
         </CardContent>
       </Card>
 
@@ -180,6 +205,7 @@ const AdminInvitations = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Email</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>User ID</TableHead>
@@ -190,6 +216,23 @@ const AdminInvitations = () => {
                   {rows.map((r) => (
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">{r.email}</TableCell>
+                      <TableCell className="text-xs">
+                        {r.invitation_type === "exportvins" ? (() => {
+                          const e = r.invited_user_id ? ents[r.invited_user_id] : null;
+                          const now = Date.now();
+                          const st = !e ? "Abonné / sans essai" : e.status === "invited" ? "En attente de connexion"
+                            : e.status === "converted" ? "Abonné"
+                            : new Date(e.expires_at).getTime() > now ? "Essai actif"
+                            : new Date(e.grace_ends_at).getTime() > now ? "Lecture seule" : "Expiré";
+                          const d = (x?: string) => x ? new Date(x).toLocaleDateString("fr-FR") : "—";
+                          return (<div className="space-y-0.5">
+                            <Badge variant="outline">ExportVins</Badge>
+                            <div>{r.domain_name} · {r.mission_name}</div>
+                            <div className="text-muted-foreground">{st}{r.imported_count != null ? ` · ${r.imported_count} contacts` : ""}</div>
+                            {e?.activated_at && <div className="text-muted-foreground">{d(e.activated_at)} → {d(e.expires_at)}</div>}
+                          </div>);
+                        })() : <span className="text-muted-foreground">Classique</span>}
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {new Date(r.created_at).toLocaleString("fr-FR")}
                       </TableCell>
@@ -198,6 +241,8 @@ const AdminInvitations = () => {
                           <Badge variant="secondary" className="gap-1">
                             <CheckCircle2 className="h-3 w-3" /> Envoyée
                           </Badge>
+                        ) : r.status === "pending" ? (
+                          <Badge variant="outline">En préparation</Badge>
                         ) : (
                           <Badge variant="destructive" className="gap-1" title={r.error_message ?? undefined}>
                             <XCircle className="h-3 w-3" /> Échouée
