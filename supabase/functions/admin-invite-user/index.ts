@@ -47,7 +47,8 @@ serve(async (req) => {
       });
     }
 
-    const { email, redirectTo, mode } = await req.json();
+    const body = await req.json();
+    const { email, redirectTo, mode } = body;
     if (!email || typeof email !== "string") {
       return new Response(JSON.stringify({ error: "missing_email" }), {
         status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -55,6 +56,14 @@ serve(async (req) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+
+    // ExportVins branch: never grants 'paid', never touches subscription/Stripe.
+    if (body.type === "exportvins") {
+      const result = await handleExportVins(admin, userData.user.id, cleanEmail, body);
+      return new Response(JSON.stringify(result), {
+        status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     // Log the invitation BEFORE creating the user so the handle_new_user_role
     // trigger finds it and assigns the 'paid' role at signup time.
