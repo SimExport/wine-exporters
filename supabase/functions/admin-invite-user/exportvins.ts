@@ -83,15 +83,28 @@ export async function handleExportVins(admin: any, adminId: string, email: strin
       if (r.error) return await fail("Campagne : " + r.error.message);
       camp = r.data;
     }
+    // Pipeline: full ExportVins template only when the account has no stage at all.
+    // Existing pipelines are never modified (no added, renamed or duplicated stage).
     const STAGE = "Échantillons à envoyer";
-    let { data: stage } = await admin.from("pipeline_stages").select("id").eq("user_id", userId).eq("name", STAGE).maybeSingle();
-    if (!stage) {
-      const { data: last } = await admin.from("pipeline_stages").select("position").eq("user_id", userId)
-        .order("position", { ascending: false }).limit(1).maybeSingle();
-      const r = await admin.from("pipeline_stages").insert({
-        user_id: userId, name: STAGE, position: (last?.position ?? -1) + 1,
-      }).select("id").single();
-      stage = r.data ?? null;
+    const TEMPLATE: [string, string][] = [
+      ["Échantillons à envoyer", "#2563EB"],
+      ["Échantillons envoyés", "#7C3AED"],
+      ["Échantillons réceptionnés", "#D97706"],
+      ["Échantillons dégustés", "#E11D48"],
+      ["Négociation", "#9F1239"],
+      ["Commande", "#16A34A"],
+    ];
+    const { data: existingStages } = await admin.from("pipeline_stages").select("id,name,position")
+      .eq("user_id", userId).order("position", { ascending: true });
+    let stage: { id: string } | null = null;
+    if (!existingStages || existingStages.length === 0) {
+      const r = await admin.from("pipeline_stages").insert(
+        TEMPLATE.map(([name, color], i) => ({ user_id: userId, name, position: i, color })),
+      ).select("id,name");
+      if (r.error) return await fail("Pipeline : " + r.error.message);
+      stage = (r.data || []).find((x: any) => x.name === STAGE) ?? null;
+    } else {
+      stage = existingStages.find((x: any) => norm(x.name) === norm(STAGE)) ?? existingStages[0];
     }
 
     // Dedupe against all existing leads of this user — never overwrite
