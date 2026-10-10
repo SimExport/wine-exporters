@@ -63,6 +63,9 @@ Deno.serve(async (req) => {
 
   let sent = 0
   for (const [userId, leads] of byUser.entries()) {
+    // ExportVins trial accounts: no reminders once the 30 free days are over
+    const { data: lvl } = await supabaseAdmin.rpc('crm_access_level', { _user_id: userId })
+    if (lvl === 'readonly' || lvl === 'none') continue
     // Get user email
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId)
     const email = userData?.user?.email
