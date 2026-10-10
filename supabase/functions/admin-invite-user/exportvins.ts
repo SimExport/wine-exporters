@@ -10,6 +10,7 @@ const s = (v: unknown, max = 500) =>
   typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
 const full = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 const norm = (v: string | null | undefined) => (v || "").trim().toLowerCase();
+const full = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
 async function findUserId(admin: any, email: string): Promise<string | null> {
   for (let page = 1; page <= 20; page++) {
