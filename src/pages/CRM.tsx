@@ -60,7 +60,7 @@ export default function CRM() {
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
-      {view === 'kanban' ? <Pipeline /> : <Prospects />}
+      <fieldset disabled={access.isReadonly} className={access.isReadonly ? 'opacity-80 [&_*]:!cursor-default' : ''}>{view === 'kanban' ? <Pipeline /> : <Prospects />}</fieldset>
       </>)}
     </div>
   )

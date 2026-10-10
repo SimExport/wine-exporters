@@ -3620,8 +3620,8 @@
     "banner": "Votre accès CRM offert avec ExportVins : encore {{count}} jours disponibles.",
     "discover": "Découvrir WineExporters",
     "continue": "Poursuivre à 99 € HT/mois",
-    "readonlyTitle": "Vos 30 jours inclus sont terminés.",
-    "readonlyText": "Votre CRM reste consultable et exportable pendant 7 jours.",
+    "readonlyTitle": "Votre période gratuite est terminée.",
+    "readonlyText": "Votre CRM reste consultable et exportable pendant 7 jours ; les modifications sont désactivées.",
     "closedTitle": "Votre accès CRM est terminé",
     "closedText": "Vos contacts sont conservés. Abonnez-vous pour reprendre votre suivi commercial là où vous l'avez laissé.",
     "welcomeTitle": "Bienvenue sur WineExporters !",
@@ -3670,6 +3670,8 @@
           "Résultats prêts à intégrer à votre CRM"
         ]
       }
-    }
+    },
+    "bookCall": "Échanger avec nous sur l'abonnement",
+    "exportCsv": "Exporter mes contacts (CSV)"
   }
 }

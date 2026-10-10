@@ -54,7 +54,7 @@ import GettingStarted from "./pages/resources/GettingStarted";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
-import { PremiumGate, TrialHomeRedirect } from "@/components/trial/TrialGate";
+import { PremiumGate, TrialHomeRedirect, TrialReadonly } from "@/components/trial/TrialGate";
 
 const queryClient = new QueryClient();
 
@@ -115,7 +115,7 @@ const App = () => (
             <Route path="/importers" element={<DashboardLayout><PremiumGate feature="importers"><Importers /></PremiumGate></DashboardLayout>} />
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
             <Route path="/prospects" element={<Navigate to="/pipeline" replace />} />
-            <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
+            <Route path="/prospects/:id" element={<DashboardLayout><TrialReadonly><ProspectDetail /></TrialReadonly></DashboardLayout>} />
             <Route path="/pipeline" element={<DashboardLayout><CRM /></DashboardLayout>} />
             <Route path="/crm" element={<Navigate to="/pipeline" replace />} />
             <Route path="/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />

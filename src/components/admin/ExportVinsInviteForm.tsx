@@ -70,6 +70,7 @@ export default function ExportVinsInviteForm({ buildRedirect, onDone }: { buildR
   const [domain, setDomain] = useState("");
   const [mission, setMission] = useState("");
   const [discount, setDiscount] = useState(true);
+  const [lang, setLang] = useState<"fr" | "en">("fr");
   const [fileName, setFileName] = useState("");
   const [preview, setPreview] = useState<ReturnType<typeof analyse> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,7 +93,7 @@ export default function ExportVinsInviteForm({ buildRedirect, onDone }: { buildR
       const { data, error } = await supabase.functions.invoke("admin-invite-user", {
         body: {
           type: "exportvins", email: email.trim(), domainName: domain.trim(), missionName: mission.trim(),
-          discountEligible: discount, contacts: preview.valid, redirectTo: buildRedirect(),
+          discountEligible: discount, lang, contacts: preview.valid, redirectTo: buildRedirect(),
         },
       });
       if (error) throw error;
@@ -153,6 +154,12 @@ export default function ExportVinsInviteForm({ buildRedirect, onDone }: { buildR
         </div>
       )}
 
+      <div className="flex items-center gap-3 text-sm">
+        <span>Langue de l'email :</span>
+        {(["fr","en"] as const).map((l) => (
+          <button key={l} type="button" onClick={() => setLang(l)} className={`rounded border px-2 py-0.5 ${lang===l ? "border-primary text-primary" : "border-border text-muted-foreground"}`}>{l.toUpperCase()}</button>
+        ))}
+      </div>
       <label className="flex items-center gap-2 text-sm">
         <Checkbox checked={discount} onCheckedChange={(v) => setDiscount(v === true)} />
         Tarif privilégié WineExporters 99 € HT/mois

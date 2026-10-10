@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, Check, Briefcase, Database, Mail, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,8 @@ const PremiumFeaturePreview = ({ feature, discountEligible }: { feature: Premium
           ) : (
             <p className="text-foreground">{t('trial.subscribeNote')}</p>
           )}
-          <Button asChild><Link to="/billing">{t('trial.unlock')}</Link></Button>
+          <Button asChild><a href="https://calendar.app.google/rfx7N1bBhJcbwyJg9" target="_blank" rel="noopener noreferrer">{t('trial.bookCall')}</a></Button>
+          {/* Secondary 'Souscrire directement' intentionally hidden until Stripe link flow is verified */}
         </div>
       </div>
     </div>
