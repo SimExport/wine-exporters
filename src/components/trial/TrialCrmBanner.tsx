@@ -37,7 +37,7 @@ const TrialCrmBanner = () => {
       ) : (
         <div className="rounded-lg border border-border bg-secondary/40 px-4 py-2 text-sm flex flex-wrap items-center justify-between gap-2">
           <span>{t('trial.banner', { count: a.daysLeft })}</span>
-          <a href="https://calendar.app.google/rfx7N1bBhJcbwyJg9" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">{t('trial.discover')}</a>
+          <span className="flex gap-3"><button onClick={exportCsv} className="text-primary underline underline-offset-2">{t('trial.exportCsv')}</button><a href="https://calendar.app.google/rfx7N1bBhJcbwyJg9" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">{t('trial.discover')}</a></span>
         </div>
       )}
       {a.showWelcome && (

@@ -2243,6 +2243,14 @@
       "yes": "Yes",
       "no": "No",
       "edit": "Edit follow-up"
+    },
+    "insights": {
+      "about": "About the importer",
+      "relevance": "Why this importer is relevant for your estate",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "empty": "No information yet."
     }
   },
   "billing": {

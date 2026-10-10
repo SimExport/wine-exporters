@@ -21,6 +21,8 @@ const FIELD_ALIASES: Record<string, string[]> = {
   cuvees: ["cuvees", "cuvées", "cuvees selectionnees", "cuvées sélectionnées", "wines", "vins"],
   comments: ["commentaires", "commentaire", "comments", "besoins", "notes", "remarques"],
   next_action: ["prochaine action", "next action", "next_action"],
+  importer_description: ["description importateur", "description de l'importateur", "description", "importer description", "about", "about the importer", "a propos"],
+  relevance_reason: ["pourquoi pertinent", "pourquoi cet importateur est pertinent", "pertinence", "why relevant", "relevance", "why this importer is relevant"],
 };
 const strip = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 
@@ -136,7 +138,7 @@ export default function ExportVinsInviteForm({ buildRedirect, onDone }: { buildR
           <Upload className="h-4 w-4" /> {fileName || "Choisir un fichier CSV (; ou ,)"}
         </label>
         <input id="ev-csv" type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
-        <p className="text-xs text-muted-foreground">Colonnes reconnues : société, pays, contact, email, téléphone, site, adresse, cuvées, commentaires, prochaine action.</p>
+        <p className="text-xs text-muted-foreground">Colonnes reconnues : société, pays, contact, email, téléphone, site, adresse, cuvées, commentaires, prochaine action, description importateur, pourquoi pertinent (facultatives).</p>
       </div>
 
       {preview && (
@@ -150,6 +152,17 @@ export default function ExportVinsInviteForm({ buildRedirect, onDone }: { buildR
             </div>
           )}
           {preview.mapped.length === 0 && <p className="text-destructive">Aucune colonne reconnue : vérifiez la ligne d'en-tête.</p>}
+          {preview.valid.some((c) => c.importer_description || c.relevance_reason) && (
+            <div className="max-h-80 overflow-y-auto space-y-2 pt-2">
+              {preview.valid.map((c, i) => (c.importer_description || c.relevance_reason) && (
+                <details key={i} className="rounded border border-border bg-background p-2">
+                  <summary className="cursor-pointer font-medium">{c.company_name || c.email}</summary>
+                  {c.importer_description && <p className="mt-2 whitespace-pre-wrap text-xs"><strong>Description :</strong> {c.importer_description}</p>}
+                  {c.relevance_reason && <p className="mt-2 whitespace-pre-wrap text-xs"><strong>Pourquoi pertinent :</strong> {c.relevance_reason}</p>}
+                </details>
+              ))}
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">Les contacts déjà présents dans le CRM du client seront aussi ignorés, sans être modifiés.</p>
         </div>
       )}

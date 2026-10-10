@@ -4,10 +4,11 @@ import { layout, sendResend, esc, BOOKING_URL } from "../_shared/we-email.ts";
 type Contact = {
   company_name?: string; country?: string; contact_name?: string; email?: string;
   phone?: string; website?: string; address?: string; cuvees?: string;
-  comments?: string; next_action?: string;
+  comments?: string; next_action?: string; importer_description?: string; relevance_reason?: string;
 };
 const s = (v: unknown, max = 500) =>
   typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+const full = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 const norm = (v: string | null | undefined) => (v || "").trim().toLowerCase();
 
 async function findUserId(admin: any, email: string): Promise<string | null> {
@@ -121,6 +122,7 @@ export async function handleExportVins(admin: any, adminId: string, email: strin
         market: country || "", country, company_name: company, first_name: s(c.contact_name, 200),
         email: em, phone: s(c.phone, 50), website_url: s(c.website, 500), address_line1: s(c.address, 500),
         owner_notes: notes || null, next_action: s(c.next_action, 500),
+        importer_description: full(c.importer_description), relevance_reason: full(c.relevance_reason),
         source: "exportvins_mission", stage_id: stage?.id ?? null, created_by: adminId,
       });
     }

@@ -2243,6 +2243,14 @@
       "yes": "Oui",
       "no": "Non",
       "edit": "Modifier le suivi"
+    },
+    "insights": {
+      "about": "À propos de l'importateur",
+      "relevance": "Pourquoi cet importateur est pertinent pour votre domaine",
+      "edit": "Modifier",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "empty": "Aucune information pour le moment."
     }
   },
   "billing": {
