@@ -836,11 +836,13 @@ export type Database = {
           estimated_amount: number | null
           first_name: string | null
           id: string
+          import_key: string | null
           last_activity_at: string | null
           last_name: string | null
           lost_reason: string | null
           market: string
           message_snippet: string | null
+          mission_name: string | null
           next_action: string | null
           next_action_at: string | null
           order_amount: number | null
@@ -884,11 +886,13 @@ export type Database = {
           estimated_amount?: number | null
           first_name?: string | null
           id?: string
+          import_key?: string | null
           last_activity_at?: string | null
           last_name?: string | null
           lost_reason?: string | null
           market: string
           message_snippet?: string | null
+          mission_name?: string | null
           next_action?: string | null
           next_action_at?: string | null
           order_amount?: number | null
@@ -934,11 +938,13 @@ export type Database = {
           estimated_amount?: number | null
           first_name?: string | null
           id?: string
+          import_key?: string | null
           last_activity_at?: string | null
           last_name?: string | null
           lost_reason?: string | null
           market?: string
           message_snippet?: string | null
+          mission_name?: string | null
           next_action?: string | null
           next_action_at?: string | null
           order_amount?: number | null
@@ -1728,6 +1734,66 @@ export type Database = {
         }
         Relationships: []
       }
+      user_entitlements: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          discount_eligible: boolean
+          entitlement: string
+          expires_at: string | null
+          grace_ends_at: string | null
+          id: string
+          invited_at: string
+          invited_by: string | null
+          mission_name: string | null
+          notified_d25_at: string | null
+          notified_d30_at: string | null
+          notified_d37_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          welcome_dismissed_at: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          discount_eligible?: boolean
+          entitlement?: string
+          expires_at?: string | null
+          grace_ends_at?: string | null
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          mission_name?: string | null
+          notified_d25_at?: string | null
+          notified_d30_at?: string | null
+          notified_d37_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          welcome_dismissed_at?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          discount_eligible?: boolean
+          entitlement?: string
+          expires_at?: string | null
+          grace_ends_at?: string | null
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          mission_name?: string | null
+          notified_d25_at?: string | null
+          notified_d30_at?: string | null
+          notified_d37_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          welcome_dismissed_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1859,6 +1925,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_exportvins_trial: {
+        Args: never
+        Returns: {
+          activated_at: string | null
+          created_at: string
+          discount_eligible: boolean
+          entitlement: string
+          expires_at: string | null
+          grace_ends_at: string | null
+          id: string
+          invited_at: string
+          invited_by: string | null
+          mission_name: string | null
+          notified_d25_at: string | null
+          notified_d30_at: string | null
+          notified_d37_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          welcome_dismissed_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_entitlements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_set_user_credits: {
         Args: {
           _campaign: number
@@ -1886,6 +1980,8 @@ export type Database = {
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
+      crm_access_level: { Args: { _user_id: string }; Returns: string }
+      dismiss_exportvins_welcome: { Args: never; Returns: undefined }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
       get_campaign_public_info: {
         Args: { _campaign_id: string }
@@ -1905,6 +2001,7 @@ export type Database = {
         }[]
       }
       has_paid_access: { Args: { _user_id: string }; Returns: boolean }
+      has_premium_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1912,6 +2009,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
       search_buyer_contacts: {
         Args: {
           _countries: string[]
