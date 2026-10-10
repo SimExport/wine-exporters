@@ -17,29 +17,41 @@ export type Database = {
       admin_invitations: {
         Row: {
           created_at: string
+          domain_name: string | null
           email: string
           error_message: string | null
           id: string
+          imported_count: number | null
+          invitation_type: string
           invited_by: string | null
           invited_user_id: string | null
+          mission_name: string | null
           status: string
         }
         Insert: {
           created_at?: string
+          domain_name?: string | null
           email: string
           error_message?: string | null
           id?: string
+          imported_count?: number | null
+          invitation_type?: string
           invited_by?: string | null
           invited_user_id?: string | null
+          mission_name?: string | null
           status: string
         }
         Update: {
           created_at?: string
+          domain_name?: string | null
           email?: string
           error_message?: string | null
           id?: string
+          imported_count?: number | null
+          invitation_type?: string
           invited_by?: string | null
           invited_user_id?: string | null
+          mission_name?: string | null
           status?: string
         }
         Relationships: []
