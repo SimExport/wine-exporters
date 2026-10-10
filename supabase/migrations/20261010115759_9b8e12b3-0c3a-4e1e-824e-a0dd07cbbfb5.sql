@@ -1,0 +1,2 @@
+ALTER TABLE public.admin_invitations DROP CONSTRAINT admin_invitations_status_check;
+ALTER TABLE public.admin_invitations ADD CONSTRAINT admin_invitations_status_check CHECK (status = ANY (ARRAY['sent','failed','pending']));
