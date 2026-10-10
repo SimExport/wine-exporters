@@ -3620,8 +3620,8 @@
     "banner": "Your CRM access offered by ExportVins: {{count}} days left.",
     "discover": "Discover WineExporters",
     "continue": "Continue at €99/month",
-    "readonlyTitle": "Your 30 included days are over.",
-    "readonlyText": "Your CRM stays viewable and exportable for 7 days.",
+    "readonlyTitle": "Your free period has ended.",
+    "readonlyText": "Your CRM stays viewable and exportable for 7 days; editing is disabled.",
     "closedTitle": "Your CRM access has ended",
     "closedText": "Your contacts are kept. Subscribe to pick up your follow-up where you left off.",
     "welcomeTitle": "Welcome to WineExporters!",
@@ -3670,6 +3670,8 @@
           "Results ready to add to your CRM"
         ]
       }
-    }
+    },
+    "bookCall": "Talk to us about the subscription",
+    "exportCsv": "Export my contacts (CSV)"
   }
 }
