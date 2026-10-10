@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getLeadOriginLabel } from '@/lib/lead-origin'
+import ImporterInsights from '@/components/prospect/ImporterInsights'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -1016,6 +1017,8 @@ export default function ProspectDetail() {
               </CardContent>
             </Card>
           )}
+
+          <ImporterInsights lead={prospect} onChange={(p) => setProspect({ ...(prospect as any), ...p })} />
 
           {/* Requested Actions */}
           <Card>
