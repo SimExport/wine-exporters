@@ -18,3 +18,10 @@ export const TrialHomeRedirect = ({ children }: { children: ReactNode }) => {
   if (isTrialAccount) return <Navigate to="/pipeline" replace />;
   return <>{children}</>;
 };
+
+/** Disables all form controls for ExportVins trial accounts in their 7-day read-only week. */
+export const TrialReadonly = ({ children }: { children: ReactNode }) => {
+  const { isReadonly, isClosed, isTrialAccount } = useCrmAccess();
+  if (isTrialAccount && isClosed) return <Navigate to="/pipeline" replace />;
+  return <fieldset disabled={isReadonly} className={isReadonly ? 'opacity-80' : ''}>{children}</fieldset>;
+};
