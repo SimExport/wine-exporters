@@ -3549,7 +3549,12 @@
     "rhythmText": "Mieux vaut travailler régulièrement un nombre raisonnable de prospects, traiter les réponses et effectuer les relances, plutôt que contacter des centaines d'importateurs en une fois.",
     "rhythmExample": "Commencez par vos opportunités les plus pertinentes, lancez ensuite votre recherche et votre campagne, puis consacrez du temps chaque semaine au suivi des réponses et aux relances.",
     "rhythmCycleLabel": "Chaque semaine :",
-    "rhythmCycle": ["nouveaux contacts", "réponses", "relances", "mise à jour CRM"],
+    "rhythmCycle": [
+      "nouveaux contacts",
+      "réponses",
+      "relances",
+      "mise à jour CRM"
+    ],
     "steps": [
       {
         "title": "Complétez votre profil",
@@ -3603,6 +3608,68 @@
       "s5": "Suivre mes prospects dans le CRM",
       "done": "Fait",
       "guide": "Voir le guide complet →"
+    }
+  },
+  "trial": {
+    "reserved": "Réservé aux abonnés WineExporters",
+    "offerPrice": "Offre ExportVins : 99 € HT/mois",
+    "standardPrice": "au lieu de 199 € HT/mois",
+    "offerNote": "Tarif privilégié réservé aux domaines ayant réalisé une Mission Performance Export.",
+    "subscribeNote": "Disponible avec l'abonnement WineExporters.",
+    "unlock": "Débloquer WineExporters",
+    "banner": "Votre accès CRM offert avec ExportVins : encore {{count}} jours disponibles.",
+    "discover": "Découvrir WineExporters",
+    "continue": "Poursuivre à 99 € HT/mois",
+    "readonlyTitle": "Vos 30 jours inclus sont terminés.",
+    "readonlyText": "Votre CRM reste consultable et exportable pendant 7 jours.",
+    "closedTitle": "Votre accès CRM est terminé",
+    "closedText": "Vos contacts sont conservés. Abonnez-vous pour reprendre votre suivi commercial là où vous l'avez laissé.",
+    "welcomeTitle": "Bienvenue sur WineExporters !",
+    "welcomeText": "Les importateurs identifiés pendant votre Mission Performance Export sont maintenant disponibles dans votre CRM. Vous pouvez organiser vos prochaines actions commerciales et suivre vos contacts depuis cet espace.",
+    "welcomeSteps": [
+      "Vérifier les contacts et les sélections d'échantillons.",
+      "Préparer les expéditions.",
+      "Enregistrer la date d'envoi des échantillons.",
+      "Programmer les relances après réception.",
+      "Suivre les retours de dégustation et les négociations."
+    ],
+    "features": {
+      "opportunities": {
+        "title": "Opportunités commerciales",
+        "intro": "Recevez les demandes d'importateurs et les appels d'offres qui correspondent à vos vins.",
+        "benefits": [
+          "Des demandes réelles d'acheteurs à la recherche de nouveaux domaines",
+          "Des appels d'offres sélectionnés par marché",
+          "Ajout direct au CRM pour répondre rapidement"
+        ]
+      },
+      "importers": {
+        "title": "Base de données importateurs",
+        "intro": "Explorez une base internationale d'importateurs et de distributeurs de vin.",
+        "benefits": [
+          "Des milliers de contacts qualifiés dans plus de 25 pays",
+          "Recherche par pays, ville et société",
+          "Export de vos sélections pour votre prospection"
+        ]
+      },
+      "campaigns": {
+        "title": "Campagnes emailing",
+        "intro": "Présentez vos vins aux importateurs d'un marché avec des campagnes validées par nos experts.",
+        "benefits": [
+          "Ciblage par marché et par type d'acheteur",
+          "Messages personnalisés à partir de votre profil",
+          "Suivi des ouvertures, clics et réponses"
+        ]
+      },
+      "sourcing": {
+        "title": "Recherches sur mesure",
+        "intro": "Confiez-nous la recherche d'importateurs adaptés à votre domaine sur un marché précis.",
+        "benefits": [
+          "Une sélection d'importateurs pertinents pour vos vins",
+          "Validée manuellement par un expert",
+          "Résultats prêts à intégrer à votre CRM"
+        ]
+      }
     }
   }
 }
