@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS importer_description text, ADD COLUMN IF NOT EXISTS relevance_reason text;
