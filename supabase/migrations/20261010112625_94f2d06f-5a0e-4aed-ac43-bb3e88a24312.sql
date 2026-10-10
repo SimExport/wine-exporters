@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.has_premium_access(uuid), public.crm_access_level(uuid), public.is_exportvins_trial_user(uuid), public.activate_exportvins_trial(), public.dismiss_exportvins_welcome() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_premium_access(uuid), public.crm_access_level(uuid), public.is_exportvins_trial_user(uuid), public.activate_exportvins_trial(), public.dismiss_exportvins_welcome() TO authenticated, service_role;
