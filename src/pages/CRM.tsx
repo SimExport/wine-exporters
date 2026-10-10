@@ -5,6 +5,8 @@ import { Kanban, List } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Pipeline from './Pipeline'
 import Prospects from './Prospects'
+import TrialCrmBanner from '@/components/trial/TrialCrmBanner'
+import { useCrmAccess } from '@/hooks/useCrmAccess'
 
 type View = 'kanban' | 'list'
 const STORAGE_KEY = 'crm-view-mode'
@@ -24,6 +26,7 @@ export default function CRM() {
   })()
 
   const [view, setView] = useState<View>(initial)
+  const access = useCrmAccess()
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, view)
@@ -37,6 +40,8 @@ export default function CRM() {
 
   return (
     <div>
+      <TrialCrmBanner />
+      {access.isTrialAccount && access.isClosed ? null : (<>
       <div className="container mx-auto pt-6 px-4 flex justify-end">
         <ToggleGroup
           type="single"
@@ -56,6 +61,7 @@ export default function CRM() {
         </ToggleGroup>
       </div>
       {view === 'kanban' ? <Pipeline /> : <Prospects />}
+      </>)}
     </div>
   )
 }

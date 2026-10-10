@@ -54,6 +54,7 @@ import GettingStarted from "./pages/resources/GettingStarted";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
+import { PremiumGate, TrialHomeRedirect } from "@/components/trial/TrialGate";
 
 const queryClient = new QueryClient();
 
@@ -106,12 +107,12 @@ const App = () => (
               path="/signup"
               element={<Navigate to="/demande-demo" replace state={{ fromRegister: true }} />}
             />
-            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+            <Route path="/dashboard" element={<DashboardLayout><TrialHomeRedirect><Dashboard /></TrialHomeRedirect></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
-            <Route path="/campaigns" element={<DashboardLayout><Campaigns /></DashboardLayout>} />
-            <Route path="/campaigns/:id" element={<DashboardLayout><CampaignDetail /></DashboardLayout>} />
-            <Route path="/create-campaign" element={<DashboardLayout><CreateCampaign /></DashboardLayout>} />
-            <Route path="/importers" element={<DashboardLayout><Importers /></DashboardLayout>} />
+            <Route path="/campaigns" element={<DashboardLayout><PremiumGate feature="campaigns"><Campaigns /></PremiumGate></DashboardLayout>} />
+            <Route path="/campaigns/:id" element={<DashboardLayout><PremiumGate feature="campaigns"><CampaignDetail /></PremiumGate></DashboardLayout>} />
+            <Route path="/create-campaign" element={<DashboardLayout><PremiumGate feature="campaigns"><CreateCampaign /></PremiumGate></DashboardLayout>} />
+            <Route path="/importers" element={<DashboardLayout><PremiumGate feature="importers"><Importers /></PremiumGate></DashboardLayout>} />
             <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
             <Route path="/prospects" element={<Navigate to="/pipeline" replace />} />
             <Route path="/prospects/:id" element={<DashboardLayout><ProspectDetail /></DashboardLayout>} />
@@ -138,8 +139,8 @@ const App = () => (
                 </AdminRoute>
               </DashboardLayout>
             } />
-            <Route path="/recherches" element={<DashboardLayout><SourcingRequests /></DashboardLayout>} />
-            <Route path="/opportunites" element={<DashboardLayout><Opportunities /></DashboardLayout>} />
+            <Route path="/recherches" element={<DashboardLayout><PremiumGate feature="sourcing"><SourcingRequests /></PremiumGate></DashboardLayout>} />
+            <Route path="/opportunites" element={<DashboardLayout><PremiumGate feature="opportunities"><Opportunities /></PremiumGate></DashboardLayout>} />
             <Route path="/admin/campaigns" element={
               <DashboardLayout>
                 <AdminRoute>
