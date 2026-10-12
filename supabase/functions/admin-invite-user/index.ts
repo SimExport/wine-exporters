@@ -66,6 +66,41 @@ serve(async (req) => {
       });
     }
 
+    // Never run the classic (paid-granting) flow for an ExportVins beneficiary.
+    const { data: evInvite } = await admin
+      .from("admin_invitations")
+      .select("id")
+      .eq("email", cleanEmail)
+      .eq("invitation_type", "exportvins")
+      .limit(1)
+      .maybeSingle();
+    const { data: evUser } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const evUid = evUser?.users?.find((u: any) => (u.email || "").toLowerCase() === cleanEmail)?.id;
+    let evEnt = null;
+    if (evUid) {
+      const { data } = await admin.from("user_entitlements").select("user_id").eq("user_id", evUid).limit(1).maybeSingle();
+      evEnt = data;
+    }
+    if (evInvite || evEnt) {
+      if (mode !== "resend") {
+        return new Response(JSON.stringify({ error: "Ce contact est un client ExportVins : utilisez le formulaire ExportVins." }), {
+          status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      const { error: otpErr } = await admin.auth.signInWithOtp({
+        email: cleanEmail,
+        options: { emailRedirectTo: redirectTo || undefined, shouldCreateUser: false },
+      });
+      if (otpErr) {
+        return new Response(JSON.stringify({ error: otpErr.message }), {
+          status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      return new Response(JSON.stringify({ success: true, exportvins: true }), {
+        status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     // Log the invitation BEFORE creating the user so the handle_new_user_role
     // trigger finds it and assigns the 'paid' role at signup time.
     const { data: logRow } = await admin
