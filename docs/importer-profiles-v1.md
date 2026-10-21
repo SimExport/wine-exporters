@@ -1,26 +1,29 @@
-# Importer profiles V1 — preview only
+# Importer profiles V1 — connected, preview only
 
 ## Connection status
-The UI is implemented on `/importers`. Its default repository returns `not-connected`; it makes no enrichment requests and consumes no credits. No migration, Edge Function deployment, table change or publication was performed.
+The UI on `/importers` is connected to Supabase via the `get_importer_profile` RPC. No Edge Function deployment, no table change, no publication was performed.
 
-## Authorization blocker verified read-only
-Live database checks on 2026-10-21 confirmed:
-- `authenticated` has UPDATE privilege on `profiles.subscription_plan`.
-- The own-profile UPDATE policy allows `auth.uid() = user_id`; there is no protection trigger for subscription fields (only the updated-at trigger).
-- `has_premium_access` accepts any non-null subscription plan different from `none`, alongside protected admin/paid roles.
+## Authorization model
+Same perimeter as the `/importers` page itself: any authenticated user, whatever their subscription, except ExportVins CRM trial accounts (which `PremiumGate` already blocks from the page). No premium/Stripe/subscription_plan condition was added; the known `subscription_plan` editability issue is out of scope for this V1.
 
-Therefore this helper alone is not a trustworthy subscription authorization boundary for newly exposing enrichment data. This V1 deliberately leaves RLS and grants unchanged. Existing account access was not changed.
+- `public.get_importer_profile(uuid)`: SECURITY DEFINER, STABLE, `SET search_path TO 'public'`.
+- Raises `Not authenticated` when `auth.uid()` is null; `Forbidden` for `is_exportvins_trial_user(auth.uid())`.
+- Returns a fixed field allowlist from `buyer_contact_enrichments`, `buyer_contact_enrichment_people`, `buyer_contact_enrichment_emails`, `buyer_contact_enrichment_evidence` as one jsonb document. All enrichment statuses are returned (`verified`, `partial`, `review_needed` describe enrichment progress, not rejection); the UI's factual safeguards still reserve the "Profil enrichi" badge for sourced high-confidence `verified`/`validated` descriptions.
+- `REVOKE ALL ... FROM PUBLIC, anon`; `GRANT EXECUTE ... TO authenticated`. No direct SELECT grant on the enrichment tables; RLS unchanged; `buyer_contacts` untouched.
 
-## Approval needed before connection/deployment
-1. Approve protection of subscription/access fields against user writes, covering both INSERT and UPDATE while preserving normal profile editing and service/admin synchronization.
-2. Confirm whether legitimate paid invitations and admins, as well as Stripe subscribers, receive enrichment access.
-3. Approve a minimal server-authorized read RPC deriving identity from `auth.uid()`, with explicit access checks, an allowlist of returned fields and no direct SELECT grants on enrichment tables. Never accept a caller-selected user ID as authorization.
-4. Test anonymous, Free, trial (invited/active/expired), paid invite, subscriber and admin access, including forged subscription values, before enabling the repository.
-5. Agree on validated enrichment statuses. Current records are `partial` or `review_needed`; the UI conservatively reserves the badge for a sourced high-confidence `verified`/`validated` description.
+## Verified against the live database (2026-10-21)
+- Anonymous REST call: `42501 permission denied for function`.
+- Authenticated non-trial user (role `authenticated` + JWT sub): enriched contact returns `enrichment` (status `review_needed`), 1 person, evidence; non-enriched contact returns `{enrichment: null, people: [], emails: [], evidence: []}`.
+- Active ExportVins trial user: `P0001 Forbidden`.
+- Direct table read as `authenticated` remains denied (no SELECT grant leaked).
+
+## Remaining verification
+- In-browser authenticated run of `/importers` (open sheet, FR/EN, with/without enrichment): not done — this external Supabase project provides no managed test session in the sandbox.
+- The Supabase linter flags this new function like the 24 pre-existing authenticated SECURITY DEFINER functions; EXECUTE is intentionally restricted to `authenticated` per the design above.
 
 ## Implementation
 - `src/components/importers/ImporterProfileSheet.tsx`: accessible dialog, large right panel, full-screen below 1024px, one-column reading, internal scroll, X/Escape, loading/error/retry/neutral states.
-- `src/lib/importer-profile.ts`: typed injectable repository and factual presentation safeguards; no client or service-role key.
+- `src/lib/importer-profile.ts`: typed injectable repository (default calls the RPC, maps `restricted`/`ready`, lazily imports the Supabase client), `mapProfileResponse` payload mapping, factual presentation safeguards; no client or service-role key.
 - `src/pages/Importers.tsx`: name/row opens panel; interactive controls do not open it. Country, search, pagination, selections, quotas and exports are untouched.
 - `src/i18n/locales/importer-profile.ts` and `src/i18n/index.ts`: isolated FR/EN translations.
 - `src/index.css`: feature-scoped heading token and desktop width.
