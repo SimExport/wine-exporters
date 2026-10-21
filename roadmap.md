@@ -1,4 +1,5 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
+- [ ] Fiches importateurs : panneau FR/EN, couche données découplée, vérification UI et sécurité sans publication
 - [x] 1. Base de données, règles serveur, useCrmAccess
 - [x] 3. Pages de présentation premium, bandeau/accueil CRM, lecture seule (serveur), redirection
 - [x] 2. Invitation ExportVins + import CSV dans /admin/invitations
