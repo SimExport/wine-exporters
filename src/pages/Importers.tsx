@@ -32,6 +32,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
 import { useTranslation } from 'react-i18next';
+import { ImporterProfileSheet } from '@/components/importers/ImporterProfileSheet';
 const CopyButton = ({ value }: { value: string }) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
@@ -100,6 +101,7 @@ const Importers = () => {
   const contactsSectionRef = useRef<HTMLDivElement>(null);
   const [totalDbContacts, setTotalDbContacts] = useState<number>(0);
   const [contacts, setContacts] = useState<BuyerContact[]>([]);
+  const [activeContact, setActiveContact] = useState<BuyerContact | null>(null);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -688,7 +690,11 @@ const Importers = () => {
                     const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
                     const rowChecked = selectAllAcrossPages || selectedIds.has(contact.id);
                     return (
-                      <TableRow key={contact.id} className="hover:bg-muted/50">
+                      <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50" onClick={(event) => {
+                        const target = event.target;
+                        if (target instanceof Element && target.closest('button, a, input, [role="checkbox"]')) return;
+                        setActiveContact(contact);
+                      }}>
                         {hasPaidAccess && (
                           <TableCell className="w-10">
                             <Checkbox
@@ -699,7 +705,9 @@ const Importers = () => {
                           </TableCell>
                         )}
                         <TableCell className="font-medium">
-                          {contact.company_name}
+                          <Button variant="link" className="h-auto justify-start whitespace-normal p-0 text-left font-medium" onClick={() => setActiveContact(contact)} aria-label={t('importerProfile.open', { name: contact.company_name || t('importerProfile.unnamed') })}>
+                            {contact.company_name || t('importerProfile.unnamed')}
+                          </Button>
                         </TableCell>
                         <TableCell>
                           {translateCountry(contact.country)}
@@ -783,6 +791,7 @@ const Importers = () => {
           </>}
       </Card>
 
+      <ImporterProfileSheet contact={activeContact} onClose={() => setActiveContact(null)} />
       <AlertDialog open={partialOpen} onOpenChange={setPartialOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

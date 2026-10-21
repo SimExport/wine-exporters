@@ -3,14 +3,15 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import fr from "./locales/fr.json";
 import en from "./locales/en.json";
+import { importerProfileFr, importerProfileEn } from "./locales/importer-profile";
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      fr: { common: fr },
-      en: { common: en },
+      fr: { common: { ...fr, importerProfile: importerProfileFr } },
+      en: { common: { ...en, importerProfile: importerProfileEn } },
     },
     fallbackLng: "fr",
     supportedLngs: ["fr", "en"],

@@ -43,6 +43,8 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     --wine-light: 345 45% 35%;
     --wine-dark: 345 50% 15%;
 
+    --importer-profile-heading: 354 56% 22%;
+
     /* Accent doré */
     --gold: 42 55% 60%;
     --gold-foreground: 345 50% 15%;
@@ -94,6 +96,7 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     --wine-light: 345 45% 55%;
     --wine-dark: 345 50% 35%;
 
+    --importer-profile-heading: 345 45% 65%;
     --gold: 42 55% 55%;
     --gold-foreground: 0 0% 98%;
 
@@ -124,5 +127,16 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     .animate-marquee {
       animation: none !important;
     }
+  }
+}
+
+/* Keep the list visible on desktops; smaller viewports use the full screen. */
+.importer-profile-panel h2,
+.importer-profile-panel h3 {
+  color: hsl(var(--importer-profile-heading));
+}
+@media (min-width: 1024px) {
+  .importer-profile-panel {
+    width: min(850px, max(620px, 55vw));
   }
 }

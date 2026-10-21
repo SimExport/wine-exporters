@@ -130,6 +130,286 @@ export type Database = {
         }
         Relationships: []
       }
+      buyer_contact_enrichment_emails: {
+        Row: {
+          buyer_contact_id: string
+          confidence: string
+          created_at: string
+          email: string
+          email_purpose: string | null
+          id: string
+          last_verified_at: string | null
+          source_url: string | null
+        }
+        Insert: {
+          buyer_contact_id: string
+          confidence?: string
+          created_at?: string
+          email: string
+          email_purpose?: string | null
+          id?: string
+          last_verified_at?: string | null
+          source_url?: string | null
+        }
+        Update: {
+          buyer_contact_id?: string
+          confidence?: string
+          created_at?: string
+          email?: string
+          email_purpose?: string | null
+          id?: string
+          last_verified_at?: string | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contact_enrichment_emails_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buyer_contact_enrichment_evidence: {
+        Row: {
+          buyer_contact_id: string
+          confidence: string
+          created_at: string
+          field_name: string
+          field_value: string | null
+          id: string
+          source_url: string
+          verified_at: string
+        }
+        Insert: {
+          buyer_contact_id: string
+          confidence?: string
+          created_at?: string
+          field_name: string
+          field_value?: string | null
+          id?: string
+          source_url: string
+          verified_at?: string
+        }
+        Update: {
+          buyer_contact_id?: string
+          confidence?: string
+          created_at?: string
+          field_name?: string
+          field_value?: string | null
+          id?: string
+          source_url?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contact_enrichment_evidence_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buyer_contact_enrichment_people: {
+        Row: {
+          business_email: string | null
+          business_phone: string | null
+          buyer_contact_id: string
+          confidence: string
+          created_at: string
+          full_name: string
+          id: string
+          job_title: string | null
+          last_verified_at: string | null
+          linkedin_url: string | null
+          source_url: string | null
+        }
+        Insert: {
+          business_email?: string | null
+          business_phone?: string | null
+          buyer_contact_id: string
+          confidence?: string
+          created_at?: string
+          full_name: string
+          id?: string
+          job_title?: string | null
+          last_verified_at?: string | null
+          linkedin_url?: string | null
+          source_url?: string | null
+        }
+        Update: {
+          business_email?: string | null
+          business_phone?: string | null
+          buyer_contact_id?: string
+          confidence?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          job_title?: string | null
+          last_verified_at?: string | null
+          linkedin_url?: string | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contact_enrichment_people_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buyer_contact_enrichment_pilot: {
+        Row: {
+          additional_emails: string[] | null
+          buyer_contact_id: string
+          commercial_notes: string | null
+          company_name: string
+          company_type: string | null
+          confidence: string
+          country: string
+          decision_makers: Json
+          description_fr: string | null
+          direct_import_status: string
+          distribution_channels: string[] | null
+          featured_producers: string[] | null
+          researched_at: string
+          source_urls: string[]
+          status: string
+          wine_origins: string[] | null
+          wine_styles: string[] | null
+        }
+        Insert: {
+          additional_emails?: string[] | null
+          buyer_contact_id: string
+          commercial_notes?: string | null
+          company_name: string
+          company_type?: string | null
+          confidence?: string
+          country: string
+          decision_makers?: Json
+          description_fr?: string | null
+          direct_import_status?: string
+          distribution_channels?: string[] | null
+          featured_producers?: string[] | null
+          researched_at?: string
+          source_urls?: string[]
+          status?: string
+          wine_origins?: string[] | null
+          wine_styles?: string[] | null
+        }
+        Update: {
+          additional_emails?: string[] | null
+          buyer_contact_id?: string
+          commercial_notes?: string | null
+          company_name?: string
+          company_type?: string | null
+          confidence?: string
+          country?: string
+          decision_makers?: Json
+          description_fr?: string | null
+          direct_import_status?: string
+          distribution_channels?: string[] | null
+          featured_producers?: string[] | null
+          researched_at?: string
+          source_urls?: string[]
+          status?: string
+          wine_origins?: string[] | null
+          wine_styles?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contact_enrichment_pilot_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: true
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buyer_contact_enrichments: {
+        Row: {
+          buyer_contact_id: string
+          commercial_notes: string | null
+          company_type: string | null
+          confidence: string
+          created_at: string
+          description_en: string | null
+          description_fr: string | null
+          direct_import_status: string
+          distribution_channels: string[]
+          featured_producers: string[]
+          last_enriched_at: string | null
+          next_enrichment_at: string | null
+          price_positioning: string | null
+          source_urls: string[]
+          status: string
+          updated_at: string
+          wine_appellations: string[]
+          wine_origins: string[]
+          wine_regions: string[]
+          wine_specialties: string[]
+          wine_styles: string[]
+        }
+        Insert: {
+          buyer_contact_id: string
+          commercial_notes?: string | null
+          company_type?: string | null
+          confidence?: string
+          created_at?: string
+          description_en?: string | null
+          description_fr?: string | null
+          direct_import_status?: string
+          distribution_channels?: string[]
+          featured_producers?: string[]
+          last_enriched_at?: string | null
+          next_enrichment_at?: string | null
+          price_positioning?: string | null
+          source_urls?: string[]
+          status?: string
+          updated_at?: string
+          wine_appellations?: string[]
+          wine_origins?: string[]
+          wine_regions?: string[]
+          wine_specialties?: string[]
+          wine_styles?: string[]
+        }
+        Update: {
+          buyer_contact_id?: string
+          commercial_notes?: string | null
+          company_type?: string | null
+          confidence?: string
+          created_at?: string
+          description_en?: string | null
+          description_fr?: string | null
+          direct_import_status?: string
+          distribution_channels?: string[]
+          featured_producers?: string[]
+          last_enriched_at?: string | null
+          next_enrichment_at?: string | null
+          price_positioning?: string | null
+          source_urls?: string[]
+          status?: string
+          updated_at?: string
+          wine_appellations?: string[]
+          wine_origins?: string[]
+          wine_regions?: string[]
+          wine_specialties?: string[]
+          wine_styles?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contact_enrichments_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: true
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buyer_contacts: {
         Row: {
           Address: string | null
