@@ -1,5 +1,8 @@
-// Read model deliberately separate from Supabase. Never query protected enrichment
-// tables in the browser or use a client-side subscription check to authorize reads.
+// Read model deliberately separate from Supabase tables. Enrichment data is
+// only reachable through the server-authorized get_importer_profile RPC
+// (SECURITY DEFINER, auth.uid() required, trial accounts excluded, field
+// allowlist, EXECUTE granted to authenticated only). Never query the protected
+// enrichment tables directly from the browser.
 export interface ImporterContact {
   id: string;
   company_name?: string | null;
@@ -58,11 +61,45 @@ export interface ImporterProfileRepository {
   load: (contactId: string, signal: AbortSignal) => Promise<ImporterProfileResult>;
 }
 
-// Intentionally not connected: has_premium_access currently trusts an editable
-// profiles.subscription_plan. A reviewed, server-authorized read API is required.
-// No sample content and no reads (or credits consumed) masquerading as live data.
+// Maps the get_importer_profile RPC payload to the typed read model. All
+// enrichment statuses (verified, partial, review_needed) are returned: they
+// describe enrichment progress, not rejection. Factual safeguards below keep
+// unconfirmed claims from being displayed as certainties.
+export function mapProfileResponse(payload: unknown): ImporterProfileResult {
+  if (!payload || typeof payload !== 'object') {
+    return { status: 'ready', data: { enrichment: null, people: [], emails: [], evidence: [] } };
+  }
+  const raw = payload as Record<string, unknown>;
+  const enrichment = raw.enrichment && typeof raw.enrichment === 'object'
+    ? (raw.enrichment as ImporterEnrichment) : null;
+  const list = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
+  return {
+    status: 'ready',
+    data: {
+      enrichment,
+      people: list<ImporterPerson>(raw.people),
+      emails: list<ImporterEmail>(raw.emails),
+      evidence: list<ImporterEvidence>(raw.evidence),
+    },
+  };
+}
+
+const FORBIDDEN_PATTERNS = ['Forbidden', 'Not authenticated', '42501', 'P0001'];
+
 export const importerProfileRepository: ImporterProfileRepository = {
-  async load() { return { status: 'not-connected' }; },
+  async load(contactId, signal) {
+    // Lazy import keeps this module usable in tests without Supabase env vars.
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await (supabase.rpc as any)('get_importer_profile', { _buyer_contact_id: contactId }).abortSignal(signal);
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+    if (error) {
+      if (FORBIDDEN_PATTERNS.some(p => String(error.message ?? '').includes(p) || String(error.code ?? '').includes(p))) {
+        return { status: 'restricted' };
+      }
+      throw error;
+    }
+    return mapProfileResponse(data);
+  },
 };
 
 export function safeExternalUrl(value?: string | null): string | null {

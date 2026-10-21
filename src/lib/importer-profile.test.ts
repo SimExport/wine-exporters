@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { hasReliableDescription, importLabel, descriptionFor, importerProfileRepository, safeExternalUrl, type ImporterEnrichment } from './importer-profile';
+import { hasReliableDescription, importLabel, descriptionFor, mapProfileResponse, safeExternalUrl, type ImporterEnrichment } from './importer-profile';
 
 const verified: ImporterEnrichment = {
   description_fr: 'Description complète\n\nDernier paragraphe.', description_en: 'Full description.',
@@ -35,7 +35,29 @@ describe('Importer profile factual safeguards', () => {
     expect(safeExternalUrl('https://user:pass@example.com')).toBeNull();
     expect(safeExternalUrl('https://example.com/about')).toBe('https://example.com/about');
   });
-  test('default repository cannot expose protected enrichment data', async () => {
-    expect(await importerProfileRepository.load('any-contact', new AbortController().signal)).toEqual({ status: 'not-connected' });
+  test('RPC payloads map to the read model and keep every enrichment status', () => {
+    const payload = {
+      enrichment: { ...verified, status: 'review_needed' },
+      people: [{ id: 'p1', full_name: 'Jane', confidence: 'medium' }],
+      emails: [],
+      evidence: [{ field_name: 'direct_import_status', field_value: 'confirmed_direct_import', confidence: 'high', source_url: 'https://example.com/x' }],
+    };
+    const result = mapProfileResponse(payload);
+    assert.equal(result.status, 'ready');
+    if (result.status !== 'ready') return;
+    expect(result.data.enrichment?.status).toBe('review_needed');
+    expect(result.data.people.length).toBe(1);
+    expect(result.data.evidence.length).toBe(1);
+  });
+  test('empty or malformed RPC payloads become a neutral empty profile', () => {
+    for (const payload of [null, undefined, {}, { enrichment: null, people: null }]) {
+      const result = mapProfileResponse(payload);
+      assert.equal(result.status, 'ready');
+      if (result.status !== 'ready') return;
+      expect(result.data.enrichment).toBeNull();
+      expect(result.data.people).toEqual([]);
+      expect(result.data.emails).toEqual([]);
+      expect(result.data.evidence).toEqual([]);
+    }
   });
 });
