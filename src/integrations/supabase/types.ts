@@ -2289,6 +2289,10 @@ export type Database = {
           producer_name: string
         }[]
       }
+      get_importer_profile: {
+        Args: { _buyer_contact_id: string }
+        Returns: Json
+      }
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { uid: string }; Returns: string }
       get_users_emails_for_admin: {
