@@ -1,4 +1,5 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, test } from 'node:test';
+import { strict as assert } from 'node:assert';
 import { hasReliableDescription, importLabel, descriptionFor, importerProfileRepository, safeExternalUrl, type ImporterEnrichment } from './importer-profile';
 
 const verified: ImporterEnrichment = {
@@ -6,6 +7,11 @@ const verified: ImporterEnrichment = {
   confidence: 'high', status: 'verified', source_urls: ['https://example.com/about'],
   direct_import_status: 'confirmed_direct_import',
 };
+const expect = (actual: unknown) => ({
+  toBe: (expected: unknown) => assert.equal(actual, expected),
+  toEqual: (expected: unknown) => assert.deepEqual(actual, expected),
+  toBeNull: () => assert.equal(actual, null),
+});
 describe('Importer profile factual safeguards', () => {
   test('a badge needs a reliable description, not only enrichment metadata', () => {
     expect(hasReliableDescription(verified)).toBe(true);
