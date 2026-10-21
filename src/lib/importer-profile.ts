@@ -90,11 +90,7 @@ export const importerProfileRepository: ImporterProfileRepository = {
   async load(contactId, signal) {
     // Lazy import keeps this module usable in tests without Supabase env vars.
     const { supabase } = await import('@/integrations/supabase/client');
-    const { data, error } = await (supabase.rpc as any)(
-      'get_importer_profile',
-      { _buyer_contact_id: contactId },
-      { signal },
-    );
+    const { data, error } = await (supabase.rpc as any)('get_importer_profile', { _buyer_contact_id: contactId }).abortSignal(signal);
     if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
     if (error) {
       if (FORBIDDEN_PATTERNS.some(p => String(error.message ?? '').includes(p) || String(error.code ?? '').includes(p))) {
