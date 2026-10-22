@@ -132,6 +132,12 @@ Prérequis : compte producteur de test avec 1 crédit, liste Brevo de test (dest
 
 Suppression de `create-campaign` ; édition du contenu par l'admin ; historique de versions ; relances ; personnalisation par importateur ; refonte des résultats, CRM, statistiques ou crédits.
 
-## Point à confirmer
+## Ajustements validés
 
-- Ajout d'une petite table de réglages pour l'interrupteur d'activation/retour arrière (seule nouvelle table du lot) : OK ? Sinon, l'activation se fait directement dans la fonction serveur et le retour arrière demandera une intervention.
+- `app_settings` accepté ; `campaign_email_editor_enabled = false` à la fin. Admins et comptes autorisés testent le parcours complet ; ouverture générale manuelle après recette.
+- `check`, `confirm_send`, `release` restent utilisables sur toute campagne en attente ayant un verrou ou un `brevo_campaign_id`, indépendamment du classement du parcours (la garde « nouveau parcours » ne s'applique qu'au mode `send`). `release` exige une confirmation explicite (`confirm: true`) et reste refusé si une campagne Brevo existe.
+- Mode test : listes imposées côté serveur à `BREVO_TEST_LIST_ID` seulement (refus si absent ou non numérique, ou si la liste n'existe pas dans Brevo). Il n'est utilisable que sur une campagne de test marquée par un événement `campaign_events` `test_campaign` posé par l'admin ; après envoi la campagne passe en `archived` (et non `active`), aucune notification producteur, et la synchronisation et l'enrichissement ignorent les campagnes portant ce marqueur (seule protection ajoutée à ces modules).
+- Notifications : la mise en ligne n'est notifiée que si la transition `pending_validation → active` a réellement eu lieu ; le rejet n'est notifié que si `reject_campaign` a réussi. Une erreur Resend est seulement journalisée, sans effet sur l'envoi Brevo.
+- Retour arrière : contenu jamais supprimé ; l'admin peut toujours examiner, envoyer ou rejeter les campagnes personnalisées soumises ; `create-campaign` refuse toujours un email personnalisé.
+- Les 2 campagnes en attente et toutes les campagnes historiques ne sont pas modifiées.
+- Uniquement tests techniques automatiques et tests SQL annulés ; ni recette fonctionnelle, ni envoi réel, ni débit réel, ni génération IA, ni publication.
