@@ -116,7 +116,10 @@ Facultatif : admin « activer l'éditeur pour ce client » dans la fiche utilisa
 
 Bouton admin vers `send-campaign` et activation générale de l'éditeur ; obligation d'un HTML à la soumission ; historique de versions ; personnalisation par importateur ; relances ; stats Brevo ; CRM/prospects.
 
-## Points à confirmer
+## Ajustements validés
 
-- Activation restreinte (admins + comptes autorisés) jusqu'au lot C : OK ?
-- Bouton CTA « Send me the price list » fixe et non modifiable : OK, ou texte modifiable par le producteur ?
+- CTA : texte du bouton modifiable par le producteur (champ dédié, 60 caractères max, défaut proposé par Claude ou « Send me the price list ») ; lien `/interest/{campaignId}` fixe, ajouté par le serveur. Aide affichée : le texte doit correspondre au formulaire (tarifs, échantillons, appel, fiches techniques).
+- Brouillons existants sans `email_content` ni `message_html` : ouverture normale, marchés/vins/documents/instructions conservés, étape email vide avec « Générer mon email ». Aucune modification des campagnes historiques.
+- Activation restreinte appliquée aussi côté serveur : `generate-campaign-email` et `save-campaign-email` refusent (403) un appelant ni admin ni titulaire du droit `campaign_email_editor` actif.
+- Blocage maintenu : `create-campaign` refuse toute campagne avec `message_html` non vide.
+- Tests : aucun envoi Brevo, aucun débit réel de crédit (vérifications SQL en transaction annulée). Compte rendu final détaillé (fonctionnalités, fichiers, fonctions déployées, tests exécutés, limites, reste lot C).
