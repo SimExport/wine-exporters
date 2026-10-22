@@ -97,6 +97,27 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       brochure_leads: {
         Row: {
           created_at: string
@@ -2338,6 +2359,7 @@ export type Database = {
         Returns: boolean
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
+      is_test_campaign: { Args: { _id: string }; Returns: boolean }
       reject_campaign: {
         Args: { _id: string; _reason: string }
         Returns: {
