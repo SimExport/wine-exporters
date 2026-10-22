@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -378,6 +379,16 @@ const CampaignDetail = () => {
           validatedAt={campaign.validated_at}
           prospectCount={campaign.prospect_count}
         />
+
+        {String((campaign as any).message_html ?? '').trim() && (
+          <Card>
+            <CardHeader><CardTitle>{t('emailEditor.savedEmail')}</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {campaign.status === 'pending_validation' && <p className="text-sm text-muted-foreground">{t('emailEditor.status.pending')}</p>}
+              <EmailPreviewFrame html={(campaign as any).message_html} subject={(campaign as any).subject_selected ?? undefined} />
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Markets & Targeting */}

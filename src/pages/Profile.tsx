@@ -14,6 +14,7 @@ import { Loader2, Save, Plus, X, ExternalLink, Upload, File, Image as ImageIcon,
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import WineManagement from '@/components/profile/WineManagement';
 import CountryMultiSelect, { parseMarketString } from '@/components/profile/CountryMultiSelect';
+import { campaignsUsingMedia } from '@/lib/media-upload';
 import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
 import { resumableUpload } from '@/lib/resumable-upload';
@@ -724,6 +725,15 @@ const Profile = () => {
   };
   const handleDeleteMedia = async (mediaId: string, fileUrl: string) => {
     try {
+      // Lot B: never break an email already submitted or sent; warn for drafts.
+      if (user) {
+        const used = await campaignsUsingMedia(user.id, fileUrl);
+        if (used.some((c) => c.status !== 'draft')) {
+          toast({ title: t('profile.documents.deleteErrorTitle'), description: t('emailEditor.mediaInUse'), variant: 'destructive' });
+          return;
+        }
+        if (used.length > 0 && !window.confirm(t('emailEditor.mediaInDraft'))) return;
+      }
       const filePath = fileUrl.split('/media/')[1];
       const {
         error: storageError
