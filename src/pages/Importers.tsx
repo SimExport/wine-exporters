@@ -344,15 +344,15 @@ const Importers = () => {
       } else {
         let rows: any[] | null = null;
         let error: any = null;
-        if (searchQuery) {
-          // Search active → export exactly the filtered list, not the whole country.
+        {
+          // Same order as the list (enriched first, then alphabetical).
           // The RPC caps at 100 rows per call, so page through it.
           const PAGE = 100;
           const collected: any[] = [];
           let offset = 0;
           while (collected.length < limit) {
             const res = await (supabase.rpc as any)('search_buyer_contacts', {
-              _countries: country.dbAliases, _q: searchQuery, _offset: offset, _limit: Math.min(PAGE, limit - collected.length),
+              _countries: country.dbAliases, _q: searchQuery || '', _offset: offset, _limit: Math.min(PAGE, limit - collected.length),
             });
             if (res.error) { error = res.error; break; }
             const pageRows = (res.data ?? []).map((r: any) => r.row_data);
@@ -361,15 +361,6 @@ const Importers = () => {
             offset += PAGE;
           }
           rows = collected;
-        } else {
-          const res = await supabase
-            .from('buyer_contacts')
-            .select('*')
-            .in('country', country.dbAliases)
-            .order('company_name', { ascending: true })
-            .limit(limit);
-          rows = res.data;
-          error = res.error;
         }
         if (error) {
           console.error('Error fetching data for export:', error);
