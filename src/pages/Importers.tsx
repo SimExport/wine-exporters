@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download, ChevronDown, Search } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download, ChevronDown, Search, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import * as XLSX from 'xlsx';
 import {
@@ -693,6 +693,12 @@ const Importers = () => {
                           <Button variant="link" className="h-auto justify-start whitespace-normal p-0 text-left font-medium" onClick={() => setActiveContact(contact)} aria-label={t('importerProfile.open', { name: contact.company_name || t('importerProfile.unnamed') })}>
                             {contact.company_name || t('importerProfile.unnamed')}
                           </Button>
+                          {(contact as any).is_enriched && (
+                            <span className="mt-1 flex w-fit items-center gap-1 rounded-full bg-enriched-badge px-2 py-0.5 text-[11px] font-semibold text-enriched-badge-foreground">
+                              <Sparkles className="h-3 w-3" aria-hidden="true" />
+                              {t('importerProfile.enrichedBadge')}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {translateCountry(contact.country)}
