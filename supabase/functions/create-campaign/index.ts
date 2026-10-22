@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
 
   const markAsError = async () => {
     try {
-      await admin.from("campaigns").update({ status: "error" }).eq("id", campaignId);
+      await admin.from("campaigns").update({ status: "failed" }).eq("id", campaignId);
     } catch (e) {
       console.error("markAsError failed:", e);
     }
@@ -119,6 +119,10 @@ Deno.serve(async (req) => {
     const { data: campaign, error: cErr } = await admin
       .from("campaigns").select("*").eq("id", campaignId).maybeSingle();
     if (cErr || !campaign) throw new Error(`Campaign not found: ${cErr?.message}`);
+    // Anti double-send: never re-send a campaign that already has a Brevo campaign.
+    if (campaign.brevo_campaign_id || campaign.send_started_at) {
+      return json(409, { error: "Campaign already sent or send in progress", brevoCampaignId: campaign.brevo_campaign_id });
+    }
 
     step = "fetch_profile";
     const { data: profile, error: pErr } = await admin
@@ -214,6 +218,8 @@ Deno.serve(async (req) => {
     const createJson = await createResp.json();
     const brevoId = createJson?.id;
     if (!brevoId) throw new Error("Brevo did not return campaign id");
+    // Persist the Brevo id before sending so a retry can never create a second campaign.
+    await admin.from("campaigns").update({ brevo_campaign_id: brevoId, send_started_at: new Date().toISOString() }).eq("id", campaignId);
 
     step = "brevo_send";
     const sendResp = await fetch(`https://api.brevo.com/v3/emailCampaigns/${brevoId}/sendNow`, {
