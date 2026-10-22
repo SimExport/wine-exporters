@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.save-campaign-email]
 verify_jwt = false
+
+[functions.notify-campaign-rejected]
+verify_jwt = false
