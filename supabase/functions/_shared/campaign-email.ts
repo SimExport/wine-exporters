@@ -180,7 +180,8 @@ Return ONLY a JSON object, no markdown, with this exact shape:
  "subtitle": string (one line: appellation and key wine(s)),
  "intro": string (2 sentences max, concrete facts),
  "bullets": [ {"title": string (short, no emoji), "text": string (1-2 sentences, one concrete fact, max 2 data points)} ] (EXACTLY 3),
- "closing": string (one specific personal sentence, signed with the contact name at the domain, e.g. "... <br/>Name, Domain")}
+ "closing": string (one specific personal sentence, signed with the contact name at the domain, e.g. "... <br/>Name, Domain"),
+ "cta_label": string (max 40 chars, button text matching what the importer can request on the interest form: price list, samples, a video call or technical sheets; default "Send me the price list")}
 Allowed inline HTML in strings: <strong>, <em>, <br/>. No other HTML.`;
 
 export function contentFromClaude(j: any, domainName: string): EmailContent {
