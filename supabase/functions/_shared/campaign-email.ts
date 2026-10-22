@@ -101,3 +101,100 @@ export function buildOwnerEmailHtml(campaignName: string, markets: string[]): st
 export function escapeHtml(s: string): string {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+
+// ---------- Lot A: structured content + fixed template ----------
+
+export const INTEREST_BASE = "https://wine-exporters.com/interest/";
+
+export interface EmailBlock {
+  type: "heading" | "subtitle" | "text" | "image" | "bullets" | "signature";
+  text?: string;
+  url?: string;
+  alt?: string;
+  items?: { title: string; text: string }[];
+}
+export interface EmailContent { version: 1; subject: string; blocks: EmailBlock[] }
+
+/** Returns the list of missing mandatory Brevo tags / links (empty = valid). */
+export function missingEmailTags(html: string, subject: string, campaignId: string): string[] {
+  const missing: string[] = [];
+  if (!html.includes("{{ unsubscribe }}")) missing.push("{{ unsubscribe }}");
+  if (!html.includes("{{ mirror }}")) missing.push("{{ mirror }}");
+  if (!html.includes(INTEREST_BASE + campaignId)) missing.push("interest link");
+  if (!subject.includes("{{ contact.COMPANY_NAME }}")) missing.push("{{ contact.COMPANY_NAME }} (subject)");
+  return missing;
+}
+
+export function mapMarketsToLists(markets: string[]): { listIds: number[]; unmatched: string[] } {
+  const listIds: number[] = []; const unmatched: string[] = [];
+  for (const m of markets) {
+    const id = BREVO_LIST_IDS[normalizeCountry(m)];
+    if (id) { if (!listIds.includes(id)) listIds.push(id); } else unmatched.push(m);
+  }
+  return { listIds, unmatched };
+}
+
+// Allow only <strong>/<b>/<em>/<br>/<a href="http(s)"> in rich text; escape the rest.
+export function sanitizeInline(s: string): string {
+  const esc = escapeHtml(s ?? "");
+  return esc
+    .replace(/&lt;(\/?)(strong|b|em|i)&gt;/gi, "<$1$2>")
+    .replace(/&lt;br\s*\/?&gt;/gi, "<br/>")
+    .replace(/&lt;a href=&quot;(https?:\/\/[^&]+?)&quot;&gt;/gi, '<a href="$1" style="color:#be2d2d;">')
+    .replace(/&lt;\/a&gt;/gi, "</a>");
+}
+const safeUrl = (u?: string) => (u && /^https:\/\//i.test(u) ? escapeHtml(u) : "");
+
+export function renderEmailHtml(content: EmailContent, ctx: { campaignId: string; domainName: string; address: string }): string {
+  const interest = INTEREST_BASE + ctx.campaignId;
+  const body = content.blocks.map((b) => {
+    switch (b.type) {
+      case "heading": return `<h1 style="margin:0 0 12px;font-size:30px;line-height:1.25;color:#000000;font-weight:700;">${sanitizeInline(b.text ?? "")}</h1>`;
+      case "subtitle": return `<p style="margin:0 0 20px;font-size:14px;font-style:italic;color:#555555;">${sanitizeInline(b.text ?? "")}</p>`;
+      case "text": return `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1a1a1a;">${sanitizeInline(b.text ?? "")}</p>`;
+      case "image": { const u = safeUrl(b.url); return u ? `<a href="${interest}"><img src="${u}" alt="${escapeHtml(b.alt ?? "")}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border-radius:8px;margin:0 0 20px;border:0;"/></a>` : ""; }
+      case "bullets": return `<p style="margin:8px 0 12px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#5a3d2b;font-weight:600;">${sanitizeInline(b.text ?? `Why ${ctx.domainName} stands out`)}</p>` +
+        (b.items ?? []).slice(0, 3).map((i) => `<p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#1a1a1a;"><strong>${sanitizeInline(i.title)}</strong><br/>${sanitizeInline(i.text)}</p>`).join("") +
+        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:16px 0 24px;"><a href="${interest}" style="display:inline-block;background:#be2d2d;color:#FFFEFE;padding:12px 24px;text-decoration:none;font-weight:600;">Send me the price list</a></td></tr></table>`;
+      case "signature": return `<p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:#1a1a1a;">${sanitizeInline(b.text ?? "")}</p>`;
+      default: return "";
+    }
+  }).join("\n");
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(content.subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap" rel="stylesheet"/></head>
+<body style="margin:0;padding:0;background:#fbfbfb;font-family:Rubik,Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbfbfb;"><tr><td align="center" style="padding:16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+<tr><td align="center" style="padding:0 0 12px;font-size:12px;"><a href="{{ mirror }}" style="color:#555555;">View in browser</a></td></tr>
+<tr><td style="padding:8px 0;">${body}</td></tr>
+<tr><td align="center" style="padding:24px 0;font-size:12px;color:#666666;line-height:1.6;">${escapeHtml(ctx.domainName)}${ctx.address ? `<br/>${escapeHtml(ctx.address)}` : ""}<br/><a href="{{ unsubscribe }}" style="color:#666666;">Unsubscribe</a></td></tr>
+</table></td></tr></table></body></html>`;
+}
+
+export const STRUCTURED_SYSTEM_PROMPT = `You are an expert email copywriter specializing in French wine export outreach to international importers.
+Write entirely in English. Direct, professional tone, like a short personal note. Never use hollow phrases ("world-class", "passionate about wine", "unique terroir") without a concrete fact.
+Whole body (subtitle + intro + bullets + closing) under 180 words. Lead with the single strongest, most specific selling point.
+Return ONLY a JSON object, no markdown, with this exact shape:
+{"subject": string starting with "{{ contact.COMPANY_NAME }}" followed by a specific hook,
+ "heading": string (H1, may include {{ contact.COMPANY_NAME }}),
+ "subtitle": string (one line: appellation and key wine(s)),
+ "intro": string (2 sentences max, concrete facts),
+ "bullets": [ {"title": string (short, no emoji), "text": string (1-2 sentences, one concrete fact, max 2 data points)} ] (EXACTLY 3),
+ "closing": string (one specific personal sentence, signed with the contact name at the domain, e.g. "... <br/>Name, Domain")}
+Allowed inline HTML in strings: <strong>, <em>, <br/>. No other HTML.`;
+
+export function contentFromClaude(j: any, domainName: string): EmailContent {
+  const bullets = Array.isArray(j?.bullets) ? j.bullets.slice(0, 3) : [];
+  if (!j?.subject || !j?.heading || bullets.length !== 3) throw new Error("Claude returned incomplete content");
+  return {
+    version: 1,
+    subject: String(j.subject),
+    blocks: [
+      { type: "heading", text: String(j.heading) },
+      { type: "subtitle", text: String(j.subtitle ?? "") },
+      { type: "text", text: String(j.intro ?? "") },
+      { type: "bullets", text: `Why ${domainName} stands out`, items: bullets.map((b: any) => ({ title: String(b.title ?? ""), text: String(b.text ?? "") })) },
+      { type: "signature", text: String(j.closing ?? "") },
+    ],
+  };
+}
