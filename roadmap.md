@@ -12,3 +12,9 @@
 - [x] Étape « Préparation de l'email » (génération IA, édition, images, aperçu, sauvegarde, soumission)
 - [ ] Test de bout en bout connecté par l'utilisateur (aucune session de test disponible dans le sandbox)
 - [ ] Lot C : envoi admin via send-campaign, activation générale de l'éditeur
+
+## Campagnes — Lot C (fait, preview, réglage général désactivé)
+- [x] Examen admin, envoi Brevo du HTML approuvé, récupération des envois incertains, rejet motivé notifié, interrupteur général, mode test isolé
+- [ ] Ajouter le secret BREVO_TEST_LIST_ID (liste Brevo interne) avant la recette
+- [ ] Recette fonctionnelle globale A+B+C (par l'utilisateur)
+- [ ] Activer le nouveau parcours pour tous après recette (interrupteur admin)
