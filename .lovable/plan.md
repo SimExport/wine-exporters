@@ -48,7 +48,7 @@ Nouveau format `email_content` **version 2**, plus libre :
   - `mode: "preview"` → reçoit `email_content`, valide, rend le HTML, le renvoie sans écrire.
   - `mode: "save"` → idem puis écrit `email_content`, `message_html`, `subject_selected`.
   - Le navigateur n'envoie jamais de HTML final. La RPC `save_campaign_email` voit son EXECUTE retiré à `authenticated` (non utilisée par le front aujourd'hui).
-- Aperçu : appel `preview` différé (~800 ms après la dernière frappe, annulé si nouvelle frappe) → pas une requête par touche, même moteur que l'envoi. Après `save`, l'aperçu affiche le HTML enregistré.
+- Aperçu : rendu serveur uniquement à l'enregistrement ou via un bouton « Actualiser l'aperçu » (mode `preview`) ; badge « Aperçu non à jour » dès qu'une modification n'est pas reflétée. Aucun appel automatique pendant la frappe.
 - Protection perte : indicateur de modifications, `beforeunload`, confirmation en quittant l'étape, enregistrement forcé avant soumission.
 
 ## E. Images
