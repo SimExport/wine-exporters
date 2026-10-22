@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ImagePlus, Loader2, Plus, RefreshCw, Save, Sparkles, Trash2, Type, Heading1, Lock, Info } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ImagePlus, Loader2, RefreshCw, Save, Sparkles, Trash2, Type, Heading1, Lock, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

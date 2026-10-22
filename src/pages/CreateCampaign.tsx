@@ -18,6 +18,9 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { useCampaignEditorAccess } from '@/hooks/useCampaignEditorAccess';
+import { EmailPrepareStep, type EmailStepState } from '@/components/campaigns/email-editor/EmailPrepareStep';
+import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
 interface Wine {
   id: string;
   name: string;
@@ -86,6 +89,20 @@ const CreateCampaign = () => {
   const [creditAlreadyConsumed, setCreditAlreadyConsumed] = useState(false);
   const canLaunchCampaign = isAdmin || creditAlreadyConsumed || campaignCredits > 0;
   const [step, setStep] = useState(1);
+  // Lot B: email preparation step, restricted rollout until lot C (also enforced server-side).
+  const { enabled: editorEnabled, loading: editorLoading } = useCampaignEditorAccess();
+  const recapStep = editorEnabled ? 3 : 2;
+  const [emailInfo, setEmailInfo] = useState<{ content: unknown; html: string | null; count: number }>({ content: null, html: null, count: 0 });
+  const [emailState, setEmailState] = useState<EmailStepState>({ dirty: false, hasSavedEmail: false });
+  const [wasRejected, setWasRejected] = useState(false);
+  const onEmailState = React.useCallback((s: EmailStepState) => setEmailState(s), []);
+  const loadEmail = async (id: string) => {
+    const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count').eq('id', id).maybeSingle();
+    if (data) {
+      setEmailInfo({ content: data.email_content, html: data.message_html || null, count: data.email_generation_count ?? 0 });
+      setEmailState({ dirty: false, hasSavedEmail: !!(data.message_html && String(data.message_html).trim()) });
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [wines, setWines] = useState<Wine[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -141,6 +158,9 @@ const CreateCampaign = () => {
       setTechDocs(data.doc_techs || []);
       setTechsLink(data.techs_link || '');
       setClientNote(data.client_note || '');
+      setEmailInfo({ content: (data as any).email_content ?? null, html: (data as any).message_html || null, count: (data as any).email_generation_count ?? 0 });
+      setEmailState({ dirty: false, hasSavedEmail: !!((data as any).message_html && String((data as any).message_html).trim()) });
+      setWasRejected(Boolean((data as any).credit_consumed_at));
     } catch (error) {
       console.error('Error loading campaign:', error);
       toast({
@@ -233,8 +253,29 @@ const CreateCampaign = () => {
       });
       return;
     }
+    if (emailState.dirty && !window.confirm(t('emailEditor.leaveConfirm'))) return;
     setLoading(true);
     try {
+      await persistDraft();
+      toast({
+        title: t('createCampaign.toasts.draftSaved.title'),
+        description: t('createCampaign.toasts.draftSaved.description')
+      });
+      navigate('/campaigns');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast({
+        title: t('createCampaign.toasts.draftError.title'),
+        description: t('createCampaign.toasts.draftError.description'),
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  /** Saves the configuration as a draft (never touches the email) and returns its id. */
+  const persistDraft = async (): Promise<string> => {
+    {
       const campaignData = {
         name: campaignName,
         user_id: user?.id,
@@ -259,19 +300,22 @@ const CreateCampaign = () => {
         const { data, error } = await supabase.from('campaigns').insert(campaignData).select('id').single();
         if (error) throw error;
         setCampaignId(data.id);
+        return data.id as string;
       }
-      toast({
-        title: t('createCampaign.toasts.draftSaved.title'),
-        description: t('createCampaign.toasts.draftSaved.description')
-      });
-      navigate('/campaigns');
+      return campaignId as string;
+    }
+  };
+  const goToEmailStep = async () => {
+    if (!validateStep1()) return;
+    if (!editorEnabled) { setStep(2); return; }
+    setLoading(true);
+    try {
+      const id = await persistDraft();
+      await loadEmail(id);
+      setStep(2);
     } catch (error) {
       console.error('Error saving draft:', error);
-      toast({
-        title: t('createCampaign.toasts.draftError.title'),
-        description: t('createCampaign.toasts.draftError.description'),
-        variant: "destructive"
-      });
+      toast({ title: t('createCampaign.toasts.draftError.title'), description: t('createCampaign.toasts.draftError.description'), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -297,6 +341,11 @@ const CreateCampaign = () => {
       return;
     }
     if (!validateStep1()) return;
+    if (editorEnabled && (emailState.dirty || !emailState.hasSavedEmail)) {
+      toast({ title: t('emailEditor.mustHaveEmail'), variant: 'destructive' });
+      setStep(2);
+      return;
+    }
     setLoading(true);
     try {
       // 1) Save the configuration as a draft (status stays 'draft').
@@ -391,7 +440,7 @@ const CreateCampaign = () => {
     const doc = documents.find(d => d.id === docId);
     return doc ? doc.title : '';
   };
-  if (loadingDraft) {
+  if (loadingDraft || editorLoading) {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>;
@@ -413,12 +462,22 @@ const CreateCampaign = () => {
               <Save className="h-4 w-4 mr-2" />
               {t('createCampaign.saveDraft')}
             </Button>
-            {step === 2 && <Button onClick={submitForValidation} disabled={loading}>
+            {step === recapStep && <Button onClick={submitForValidation} disabled={loading}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 {t('createCampaign.submit')}
               </Button>}
           </div>
         </div>
+
+        {editorEnabled && <div className="flex items-center gap-2 mb-6 text-sm">
+            {[t('emailEditor.stepConfig'), t('emailEditor.stepEmail'), t('emailEditor.stepValidation')].map((label, i) => (
+              <React.Fragment key={label}>
+                {i > 0 && <span className="h-px w-6 bg-border" />}
+                <span className={cn('rounded-full px-3 py-1', step === i + 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>{i + 1}. {label}</span>
+              </React.Fragment>
+            ))}
+          </div>}
+        {editorEnabled && wasRejected && <Alert className="mb-6"><AlertCircle className="h-4 w-4" /><AlertDescription>{t('emailEditor.status.rejected')}</AlertDescription></Alert>}
 
         {/* Step 1: Markets & Wines */}
         {step === 1 && <div className="space-y-6">
@@ -672,11 +731,7 @@ const CreateCampaign = () => {
                   </div>
                 </div>
 
-                <Button onClick={() => {
-              if (validateStep1()) {
-                setStep(2);
-              }
-            }} className="w-full">
+                <Button onClick={goToEmailStep} disabled={loading} className="w-full">
                   {t('createCampaign.step1.continueBtn')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -684,8 +739,19 @@ const CreateCampaign = () => {
             </Card>
           </div>}
 
-        {/* Step 2: Recap & Submission */}
-        {step === 2 && <div className="space-y-6">
+        {/* Step 2 (editor rollout): email preparation */}
+        {editorEnabled && step === 2 && campaignId && <EmailPrepareStep
+            campaignId={campaignId}
+            initialContent={emailInfo.content}
+            initialHtml={emailInfo.html}
+            generationCount={emailInfo.count}
+            onStateChange={onEmailState}
+            onBack={() => setStep(1)}
+            onContinue={async () => { await loadEmail(campaignId); setStep(3); }}
+          />}
+
+        {/* Recap & Submission */}
+        {step === recapStep && <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>{t('createCampaign.step2.title')}</CardTitle>
@@ -731,6 +797,11 @@ const CreateCampaign = () => {
                     </div>}
                 </div>
 
+                {editorEnabled && emailInfo.html && <div className="space-y-2">
+                    <Label className="font-medium">{t('emailEditor.savedEmail')}</Label>
+                    <EmailPreviewFrame html={emailInfo.html} />
+                  </div>}
+
                 {/* Warning */}
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
@@ -741,7 +812,7 @@ const CreateCampaign = () => {
                 </Alert>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(1)}>
+                  <Button variant="outline" onClick={() => setStep(editorEnabled ? 2 : 1)}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     {t('createCampaign.step2.backToStep1')}
                   </Button>
