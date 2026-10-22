@@ -250,6 +250,11 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (campErr || !campaign) return json(404, { error: "Campaign not found" });
   if (!campaign.brevo_campaign_id) return json(400, { error: "Missing brevo_campaign_id on campaign" });
+  // Lot C: internal test campaigns never feed client results, prospects or CRM.
+  {
+    const { data: testCamp } = await admin.rpc("is_test_campaign", { _id: campaign.id });
+    if (testCamp === true) return json(200, { skipped: true, reason: "test_campaign" });
+  }
 
   const brevoId = campaign.brevo_campaign_id;
   const result: {

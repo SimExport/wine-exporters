@@ -51,7 +51,8 @@ Deno.serve(async (req) => {
 
   const { data: c } = await admin.from("campaigns").select("*").eq("id", id).maybeSingle();
   if (!c) return json(404, { error: "Campaign not found" });
-  const { data: isTest } = await admin.rpc("is_test_campaign", { _id: id });
+  const { data: testFlag } = await admin.rpc("is_test_campaign", { _id: id });
+  let isTest = testFlag === true;
 
   /** Marks the campaign live ONCE (conditional transition) and notifies only if the row really changed. */
   const markLive = async (brevoId: number) => {
@@ -165,9 +166,9 @@ Deno.serve(async (req) => {
     if (testRequested && !isTest) {
       // Marks the campaign as a test BEFORE Brevo: sync, enrichment and notifications ignore it.
       await event("test_campaign", {});
+      isTest = true;
     }
-    const testMode = testRequested || !!isTest;
-    const isTestNow = testMode;
+    const isTestNow = isTest;
 
     let brevoId: number;
     try {
@@ -200,15 +201,7 @@ Deno.serve(async (req) => {
       console.error("Brevo sendNow uncertain:", e);
       return json(504, { error: "Brevo outcome uncertain — use check, no automatic retry", result: "uncertain" });
     }
-    // markLive reads isTest from the start of the request; refresh for a just-marked test campaign.
-    if (testRequested && !isTest) {
-      const now = new Date().toISOString();
-      await admin.from("campaigns").update({ status: "archived", validated_at: now, launched_at: now, admin_reviewer: u.user.id, send_error: null })
-        .eq("id", id).eq("status", "pending_validation");
-      await event("sent", { brevo_campaign_id: brevoId, test: true });
-    } else {
-      await markLive(brevoId);
-    }
+    await markLive(brevoId);
     return json(200, { result: "sent", brevoCampaignId: brevoId, listIds, unmatched, test: isTestNow });
   } catch (e: any) {
     console.error("send-campaign failed:", e?.message ?? e);
