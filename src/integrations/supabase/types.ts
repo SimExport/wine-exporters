@@ -2324,6 +2324,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_campaign_editor_access: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       has_paid_access: { Args: { _user_id: string }; Returns: boolean }
       has_premium_access: { Args: { _user_id: string }; Returns: boolean }
       has_role: {

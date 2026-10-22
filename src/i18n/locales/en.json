@@ -2799,7 +2799,9 @@
       "invalidTitle": "Invalid field",
       "companyRequired": "Company is required.",
       "scoreRange": "Score must be between 0 and 10."
-    }
+    },
+    "customEmail": "Custom email",
+    "customEmailHint": "Email prepared by the producer: sending will be available in lot C. The legacy button is disabled so no different text is sent."
   },
   "parseAddresses": {
     "button": "Normalize addresses",

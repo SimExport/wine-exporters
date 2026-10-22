@@ -390,6 +390,19 @@ export default function AdminCampaigns() {
     const comment = prompt(t('adminCampaigns.rejectPrompt', { name: campaignName }));
     if (!comment) return;
 
+    // Lot B: a producer-prepared email goes back to draft (content and credit kept).
+    const target = campaigns.find((c: any) => c.id === campaignId) as any;
+    if (target && String(target.message_html ?? '').trim()) {
+      const { error } = await (supabase.rpc as any)('reject_campaign', { _id: campaignId, _reason: comment });
+      if (error) {
+        toast({ title: t('adminCampaigns.errorTitle'), description: t('adminCampaigns.rejectError'), variant: 'destructive' });
+        return;
+      }
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+      toast({ title: t('adminCampaigns.rejectedTitle'), description: t('adminCampaigns.rejectedDesc', { name: campaignName }) });
+      return;
+    }
+
     try {
       const { error: campaignError } = await supabase
         .from('campaigns')
@@ -893,6 +906,14 @@ export default function AdminCampaigns() {
                        <div className="flex gap-2">
                          {campaign.status === 'pending_validation' && (
                            <>
+                             {String((campaign as any).message_html ?? '').trim() ? (
+                               <span
+                                 className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-enriched-badge text-enriched-badge-foreground"
+                                 title={t('adminCampaigns.customEmailHint', { defaultValue: "Email préparé par le producteur : l'envoi sera disponible au lot C. L'ancien bouton est désactivé pour ne pas envoyer un autre texte." })}
+                               >
+                                 {t('adminCampaigns.customEmail', { defaultValue: 'Email personnalisé' })}
+                               </span>
+                             ) : (
                              <Button
                                size="sm"
                                variant="default"
@@ -902,6 +923,7 @@ export default function AdminCampaigns() {
                                <CheckCircle className="h-4 w-4 mr-1" />
                                {t('adminCampaigns.table.validate')}
                              </Button>
+                             )}
                              <Button
                                size="sm"
                                variant="destructive"

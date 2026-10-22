@@ -2799,7 +2799,9 @@
       "invalidTitle": "Champ invalide",
       "companyRequired": "La société est obligatoire.",
       "scoreRange": "Le score doit être compris entre 0 et 10."
-    }
+    },
+    "customEmail": "Email personnalisé",
+    "customEmailHint": "Email préparé par le producteur : l'envoi sera disponible au lot C. L'ancien bouton est désactivé pour ne pas envoyer un autre texte."
   },
   "parseAddresses": {
     "button": "Normaliser les adresses",

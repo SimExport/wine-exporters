@@ -120,6 +120,11 @@ Deno.serve(async (req) => {
       .from("campaigns").select("*").eq("id", campaignId).maybeSingle();
     if (cErr || !campaign) throw new Error(`Campaign not found: ${cErr?.message}`);
     // Anti double-send: never re-send a campaign that already has a Brevo campaign.
+    // Lot B guard: an email prepared and approved by the producer must never be
+    // replaced by a freshly generated one. Those campaigns are sent in lot C.
+    if (String(campaign.message_html ?? "").trim().length > 0) {
+      return json(409, { error: "Custom email prepared by the producer: legacy send disabled until lot C", code: "custom_email" });
+    }
     if (campaign.brevo_campaign_id || campaign.send_started_at) {
       return json(409, { error: "Campaign already sent or send in progress", brevoCampaignId: campaign.brevo_campaign_id });
     }
