@@ -95,6 +95,7 @@ const CreateCampaign = () => {
   const [emailInfo, setEmailInfo] = useState<{ content: unknown; html: string | null; count: number }>({ content: null, html: null, count: 0 });
   const [emailState, setEmailState] = useState<EmailStepState>({ dirty: false, hasSavedEmail: false });
   const [wasRejected, setWasRejected] = useState(false);
+  const [rejectReason, setRejectReason] = useState<string | null>(null);
   const onEmailState = React.useCallback((s: EmailStepState) => setEmailState(s), []);
   const loadEmail = async (id: string) => {
     const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count').eq('id', id).maybeSingle();
@@ -161,6 +162,8 @@ const CreateCampaign = () => {
       setEmailInfo({ content: (data as any).email_content ?? null, html: (data as any).message_html || null, count: (data as any).email_generation_count ?? 0 });
       setEmailState({ dirty: false, hasSavedEmail: !!((data as any).message_html && String((data as any).message_html).trim()) });
       setWasRejected(Boolean((data as any).credit_consumed_at));
+      const { data: ev } = await supabase.from('campaign_events').select('payload').eq('campaign_id', data.id).eq('type', 'rejected').order('created_at', { ascending: false }).limit(1).maybeSingle();
+      setRejectReason(((ev?.payload as any)?.reason as string) ?? null);
     } catch (error) {
       console.error('Error loading campaign:', error);
       toast({
@@ -384,6 +387,10 @@ const CreateCampaign = () => {
       // 2) Server-side submission: status change + single credit debit in one transaction.
       const { error: submitError } = await (supabase.rpc as any)('submit_campaign', { _id: savedId });
       if (submitError) {
+        if (String(submitError.message ?? '').includes('Email must be prepared')) {
+          toast({ title: t('emailEditor.mustHaveEmail'), variant: 'destructive' });
+          return;
+        }
         if (String(submitError.message ?? '').includes('No campaign credit')) {
           toast({
             title: t('createCampaign.toasts.creditExhaustedShort.title'),
@@ -477,7 +484,7 @@ const CreateCampaign = () => {
               </React.Fragment>
             ))}
           </div>}
-        {editorEnabled && wasRejected && <Alert className="mb-6"><AlertCircle className="h-4 w-4" /><AlertDescription>{t('emailEditor.status.rejected')}</AlertDescription></Alert>}
+        {(wasRejected && (editorEnabled || rejectReason)) && <Alert className="mb-6"><AlertCircle className="h-4 w-4" /><AlertDescription>{t('emailEditor.status.rejected')}{rejectReason && <><br /><strong>{t('emailEditor.rejectedReason')}</strong> <span className="whitespace-pre-wrap">{rejectReason}</span></>}</AlertDescription></Alert>}
 
         {/* Step 1: Markets & Wines */}
         {step === 1 && <div className="space-y-6">
