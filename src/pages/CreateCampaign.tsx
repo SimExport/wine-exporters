@@ -78,11 +78,13 @@ const CreateCampaign = () => {
   } = useSubscription();
   const {
     campaignCredits,
-    consumeCampaignCredit,
+    refetch: refetchCredits,
     noCreditsMessage,
     loading: creditsLoading,
   } = useCredits();
-  const canLaunchCampaign = isAdmin || campaignCredits > 0;
+  // A campaign rejected after submission keeps its credit: resubmission is free.
+  const [creditAlreadyConsumed, setCreditAlreadyConsumed] = useState(false);
+  const canLaunchCampaign = isAdmin || creditAlreadyConsumed || campaignCredits > 0;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [wines, setWines] = useState<Wine[]>([]);
@@ -129,6 +131,7 @@ const CreateCampaign = () => {
         return;
       }
       setCampaignId(data.id);
+      setCreditAlreadyConsumed(Boolean((data as any).credit_consumed_at));
       setCampaignName(data.name || '');
       setSelectedMarkets(data.target_markets || []);
       setOpenToOtherMarkets(!!data.open_to_other_markets);
@@ -285,7 +288,7 @@ const CreateCampaign = () => {
     }
 
     // Check if user has campaigns remaining (admins bypass this check)
-    if (!isAdmin && campaignCredits <= 0) {
+    if (!isAdmin && !creditAlreadyConsumed && campaignCredits <= 0) {
       toast({
         title: t('createCampaign.toasts.creditExhausted.title'),
         description: noCreditsMessage('campaign'),
