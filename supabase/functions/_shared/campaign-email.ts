@@ -198,3 +198,124 @@ export function contentFromClaude(j: any, domainName: string): EmailContent {
     ],
   };
 }
+
+// ---------- Lot B: editable content v2 ----------
+
+export interface EmailBlockV2 { id: string; type: "heading" | "text" | "image"; html?: string; url?: string; alt?: string; media_id?: string }
+export interface EmailContentV2 { version: 2; subject: string; cta_label: string; blocks: EmailBlockV2[] }
+
+export const SUBJECT_PREFIX = "{{ contact.COMPANY_NAME }}";
+export const DEFAULT_CTA = "Send me the price list";
+export const MAX_IMAGES = 3;
+export const MAX_BLOCKS = 30;
+export const MAX_CTA = 60;
+
+const MEDIA_PREFIX = () => `${(Deno.env.get("SUPABASE_URL") ?? "").replace(/\/$/, "")}/storage/v1/object/public/media/`;
+
+/** Allowlist sanitizer for Tiptap output: p, br, strong/b, em/i, a[href=http(s)]. */
+export function sanitizeRichHtml(input: string): string {
+  let s = String(input ?? "").slice(0, 20000);
+  s = s.replace(/<(script|style|iframe|object|embed)[\s\S]*?<\/\1>/gi, "");
+  const out: string[] = [];
+  const re = /<\/?([a-z0-9]+)([^>]*)>|([^<]+)|</gi;
+  let m: RegExpExecArray | null;
+  const open: string[] = [];
+  while ((m = re.exec(s))) {
+    if (m[3] !== undefined) { out.push(escapeHtml(decodeEntities(m[3]))); continue; }
+    if (!m[1]) { out.push("&lt;"); continue; }
+    const tag = m[1].toLowerCase(); const closing = m[0].startsWith("</");
+    const map: Record<string, string> = { p: "p", br: "br", strong: "strong", b: "strong", em: "em", i: "em", a: "a" };
+    const t = map[tag];
+    if (!t) continue;
+    if (t === "br") { out.push("<br/>"); continue; }
+    if (closing) { if (open.includes(t)) { open.splice(open.lastIndexOf(t), 1); out.push(`</${t}>`); } continue; }
+    if (t === "a") {
+      const href = (m[2].match(/href\s*=\s*"([^"]*)"/i) ?? m[2].match(/href\s*=\s*'([^']*)'/i))?.[1] ?? "";
+      const h = decodeEntities(href).trim();
+      if (!/^https?:\/\/[^\s<>"']+$/i.test(h)) continue;
+      open.push("a"); out.push(`<a href="${escapeHtml(h)}">`); continue;
+    }
+    open.push(t); out.push(`<${t}>`);
+  }
+  while (open.length) out.push(`</${open.pop()}>`);
+  return out.join("");
+}
+function decodeEntities(s: string): string {
+  return s.replace(/&nbsp;/g, " ").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+}
+const stripTags = (h: string) => decodeEntities(h.replace(/<[^>]+>/g, "")).trim();
+
+/** Validates and normalizes v2 content coming from the browser. Throws with a readable message. */
+export function normalizeContentV2(raw: any, opts: { mediaPrefix?: string } = {}): EmailContentV2 {
+  if (!raw || raw.version !== 2 || !Array.isArray(raw.blocks)) throw new Error("Invalid email content");
+  let subject = String(raw.subject ?? "").replace(/\s+/g, " ").trim();
+  if (subject.startsWith(SUBJECT_PREFIX)) subject = subject.slice(SUBJECT_PREFIX.length).trim();
+  subject = subject.replace(/\{\{[^}]*\}\}/g, "").trim();
+  if (!subject) throw new Error("Subject is required");
+  if (subject.length > 200) throw new Error("Subject is too long");
+  const cta = String(raw.cta_label ?? "").replace(/[{}<>]/g, "").replace(/\s+/g, " ").trim() || DEFAULT_CTA;
+  if (cta.length > MAX_CTA) throw new Error("Button text is too long");
+  if (raw.blocks.length > MAX_BLOCKS) throw new Error("Too many blocks");
+  const prefix = opts.mediaPrefix ?? MEDIA_PREFIX();
+  const blocks: EmailBlockV2[] = []; let images = 0;
+  for (const b of raw.blocks) {
+    const id = String(b?.id ?? crypto.randomUUID()).slice(0, 64);
+    if (b?.type === "image") {
+      const url = String(b.url ?? "");
+      if (!url.startsWith(prefix) || /[\s"'<>]/.test(url)) throw new Error("Images must come from your media library");
+      if (++images > MAX_IMAGES) throw new Error(`Maximum ${MAX_IMAGES} images`);
+      blocks.push({ id, type: "image", url, alt: String(b.alt ?? "").slice(0, 200), media_id: b.media_id ? String(b.media_id).slice(0, 64) : undefined });
+    } else if (b?.type === "heading" || b?.type === "text") {
+      const html = sanitizeRichHtml(String(b.html ?? ""));
+      if (!stripTags(html)) continue; // empty blocks are dropped
+      blocks.push({ id, type: b.type, html });
+    } else throw new Error("Unknown block type");
+  }
+  if (!blocks.some((b) => b.type === "text" || b.type === "heading")) throw new Error("Email needs at least one paragraph");
+  return { version: 2, subject: `${SUBJECT_PREFIX} ${subject}`.trim(), cta_label: cta, blocks };
+}
+
+const inlineStyle = (html: string, pStyle: string) => {
+  const linked = html.replace(/<a href="/g, '<a style="color:#be2d2d;" href="');
+  const wrapped = /^<p>/.test(linked) ? linked : `<p>${linked}</p>`;
+  return wrapped.replace(/<p>/g, `<p style="${pStyle}">`);
+};
+
+export function renderEmailHtmlV2(c: EmailContentV2, ctx: { campaignId: string; domainName: string; address: string }): string {
+  const interest = INTEREST_BASE + ctx.campaignId;
+  const body = c.blocks.map((b) => {
+    if (b.type === "heading") return `<h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#000000;font-weight:700;">${(b.html ?? "").replace(/<\/?p>/g, "").replace(/<a href="/g, '<a style="color:#000000;" href="')}</h1>`;
+    if (b.type === "text") return inlineStyle(b.html ?? "", "margin:0 0 16px;font-size:15px;line-height:1.6;color:#1a1a1a;");
+    if (b.type === "image") { const u = safeUrl(b.url); return u ? `<a href="${interest}"><img src="${u}" alt="${escapeHtml(b.alt ?? "")}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border-radius:8px;margin:0 0 20px;border:0;"/></a>` : ""; }
+    return "";
+  }).join("\n");
+  const cta = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:16px 0 24px;"><a href="${interest}" style="display:inline-block;background:#be2d2d;color:#FFFEFE;padding:12px 24px;text-decoration:none;font-weight:600;">${escapeHtml(c.cta_label || DEFAULT_CTA)}</a></td></tr></table>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(c.subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap" rel="stylesheet"/></head>
+<body style="margin:0;padding:0;background:#fbfbfb;font-family:Rubik,Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbfbfb;"><tr><td align="center" style="padding:16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+<tr><td align="center" style="padding:0 0 12px;font-size:12px;"><a href="{{ mirror }}" style="color:#555555;">View in browser</a></td></tr>
+<tr><td style="padding:8px 0;">${body}${cta}</td></tr>
+<tr><td align="center" style="padding:24px 0;font-size:12px;color:#666666;line-height:1.6;">${escapeHtml(ctx.domainName)}${ctx.address ? `<br/>${escapeHtml(ctx.address)}` : ""}<br/><a href="{{ unsubscribe }}" style="color:#666666;">Unsubscribe</a></td></tr>
+</table></td></tr></table></body></html>`;
+}
+
+/** Converts Claude's structured JSON into the editable v2 model (no fixed 3-bullet constraint). */
+export function contentV2FromClaude(j: any, domainName: string): EmailContentV2 {
+  const v1 = contentFromClaude(j, domainName);
+  const p = (s?: string) => `<p>${sanitizeInline(s ?? "")}</p>`;
+  const blocks: EmailBlockV2[] = [];
+  const id = () => crypto.randomUUID();
+  for (const b of v1.blocks) {
+    if (b.type === "heading" && b.text) blocks.push({ id: id(), type: "heading", html: sanitizeRichHtml(sanitizeInline(b.text)) });
+    else if ((b.type === "subtitle" || b.type === "text" || b.type === "signature") && b.text) blocks.push({ id: id(), type: "text", html: sanitizeRichHtml(p(b.text)) });
+    else if (b.type === "bullets") {
+      blocks.push({ id: id(), type: "text", html: sanitizeRichHtml(`<p><strong>${sanitizeInline(b.text ?? `Why ${domainName} stands out`)}</strong></p>`) });
+      for (const i of b.items ?? []) blocks.push({ id: id(), type: "text", html: sanitizeRichHtml(`<p><strong>${sanitizeInline(i.title)}</strong><br/>${sanitizeInline(i.text)}</p>`) });
+    }
+  }
+  const cta = String(j?.cta_label ?? "").replace(/[{}<>]/g, "").trim().slice(0, MAX_CTA) || DEFAULT_CTA;
+  const subject = String(v1.subject).startsWith(SUBJECT_PREFIX) ? v1.subject : `${SUBJECT_PREFIX} ${v1.subject}`;
+  return { version: 2, subject, cta_label: cta, blocks };
+}
