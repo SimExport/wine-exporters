@@ -78,11 +78,13 @@ const CreateCampaign = () => {
   } = useSubscription();
   const {
     campaignCredits,
-    consumeCampaignCredit,
+    refetch: refetchCredits,
     noCreditsMessage,
     loading: creditsLoading,
   } = useCredits();
-  const canLaunchCampaign = isAdmin || campaignCredits > 0;
+  // A campaign rejected after submission keeps its credit: resubmission is free.
+  const [creditAlreadyConsumed, setCreditAlreadyConsumed] = useState(false);
+  const canLaunchCampaign = isAdmin || creditAlreadyConsumed || campaignCredits > 0;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [wines, setWines] = useState<Wine[]>([]);
@@ -129,6 +131,7 @@ const CreateCampaign = () => {
         return;
       }
       setCampaignId(data.id);
+      setCreditAlreadyConsumed(Boolean((data as any).credit_consumed_at));
       setCampaignName(data.name || '');
       setSelectedMarkets(data.target_markets || []);
       setOpenToOtherMarkets(!!data.open_to_other_markets);
@@ -285,7 +288,7 @@ const CreateCampaign = () => {
     }
 
     // Check if user has campaigns remaining (admins bypass this check)
-    if (!isAdmin && campaignCredits <= 0) {
+    if (!isAdmin && !creditAlreadyConsumed && campaignCredits <= 0) {
       toast({
         title: t('createCampaign.toasts.creditExhausted.title'),
         description: noCreditsMessage('campaign'),
@@ -296,19 +299,19 @@ const CreateCampaign = () => {
     if (!validateStep1()) return;
     setLoading(true);
     try {
+      // 1) Save the configuration as a draft (status stays 'draft').
       const campaignData = {
         name: campaignName,
         user_id: user?.id,
-        status: 'pending_validation',
+        status: 'draft',
         target_markets: selectedMarkets,
         open_to_other_markets: openToOtherMarkets,
         selected_wines: selectedWines,
-        doc_presentation: presentationDoc,
-        doc_pricelist: pricelistDoc,
+        doc_presentation: presentationDoc || null,
+        doc_pricelist: pricelistDoc || null,
         doc_techs: techDocs.length > 0 ? techDocs : null,
         techs_link: techsLink || null,
         client_note: clientNote || null,
-        validation_requested_at: new Date().toISOString()
       };
       let savedId = campaignId;
       if (campaignId) {
@@ -329,17 +332,21 @@ const CreateCampaign = () => {
         setCampaignId(savedId);
       }
 
-      // Consume one campaign credit via RPC (admins bypass)
-      if (!isAdmin) {
-        const { ok } = await consumeCampaignCredit();
-        if (!ok) {
+      // 2) Server-side submission: status change + single credit debit in one transaction.
+      const { error: submitError } = await (supabase.rpc as any)('submit_campaign', { _id: savedId });
+      if (submitError) {
+        if (String(submitError.message ?? '').includes('No campaign credit')) {
           toast({
             title: t('createCampaign.toasts.creditExhaustedShort.title'),
             description: noCreditsMessage('campaign'),
             variant: 'destructive',
           });
+          return;
         }
+        throw submitError;
       }
+      if (!isAdmin) refetchCredits();
+
 
       // Send notification (silent - don't block on failure)
       try {

@@ -732,11 +732,15 @@ export type Database = {
           channels: string[] | null
           client_note: string | null
           created_at: string
+          credit_consumed_at: string | null
           cuvees: string[] | null
           daily_cap: number | null
           doc_presentation: string | null
           doc_pricelist: string | null
           doc_techs: string[] | null
+          email_content: Json | null
+          email_generated_at: string | null
+          email_generation_count: number
           exclude_recent_days: number | null
           id: string
           language: string | null
@@ -754,7 +758,9 @@ export type Database = {
           segments: string[] | null
           selected_wines: string[] | null
           send_as_name: string | null
+          send_error: string | null
           send_now: boolean | null
+          send_started_at: string | null
           seq2_delay_days: number | null
           seq3_delay_days: number | null
           sequence_enabled: boolean | null
@@ -781,11 +787,15 @@ export type Database = {
           channels?: string[] | null
           client_note?: string | null
           created_at?: string
+          credit_consumed_at?: string | null
           cuvees?: string[] | null
           daily_cap?: number | null
           doc_presentation?: string | null
           doc_pricelist?: string | null
           doc_techs?: string[] | null
+          email_content?: Json | null
+          email_generated_at?: string | null
+          email_generation_count?: number
           exclude_recent_days?: number | null
           id?: string
           language?: string | null
@@ -803,7 +813,9 @@ export type Database = {
           segments?: string[] | null
           selected_wines?: string[] | null
           send_as_name?: string | null
+          send_error?: string | null
           send_now?: boolean | null
+          send_started_at?: string | null
           seq2_delay_days?: number | null
           seq3_delay_days?: number | null
           sequence_enabled?: boolean | null
@@ -830,11 +842,15 @@ export type Database = {
           channels?: string[] | null
           client_note?: string | null
           created_at?: string
+          credit_consumed_at?: string | null
           cuvees?: string[] | null
           daily_cap?: number | null
           doc_presentation?: string | null
           doc_pricelist?: string | null
           doc_techs?: string[] | null
+          email_content?: Json | null
+          email_generated_at?: string | null
+          email_generation_count?: number
           exclude_recent_days?: number | null
           id?: string
           language?: string | null
@@ -852,7 +868,9 @@ export type Database = {
           segments?: string[] | null
           selected_wines?: string[] | null
           send_as_name?: string | null
+          send_error?: string | null
           send_now?: boolean | null
+          send_started_at?: string | null
           seq2_delay_days?: number | null
           seq3_delay_days?: number | null
           sequence_enabled?: boolean | null
@@ -2275,6 +2293,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      campaign_html_is_valid: {
+        Args: { _campaign_id: string; _html: string }
+        Returns: boolean
+      }
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
@@ -2312,6 +2334,134 @@ export type Database = {
         Returns: boolean
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
+      reject_campaign: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          admin_reviewer: string | null
+          audience_estimate: number | null
+          blacklist_buyer_ids: string[] | null
+          brevo_campaign_id: number | null
+          channels: string[] | null
+          client_note: string | null
+          created_at: string
+          credit_consumed_at: string | null
+          cuvees: string[] | null
+          daily_cap: number | null
+          doc_presentation: string | null
+          doc_pricelist: string | null
+          doc_techs: string[] | null
+          email_content: Json | null
+          email_generated_at: string | null
+          email_generation_count: number
+          exclude_recent_days: number | null
+          id: string
+          language: string | null
+          launched_at: string | null
+          managed_by_bo: boolean | null
+          markets: string[] | null
+          message_html: string | null
+          message_text: string | null
+          name: string
+          open_to_other_markets: boolean
+          price_max: number | null
+          price_min: number | null
+          reply_to: string | null
+          schedule_at: string | null
+          segments: string[] | null
+          selected_wines: string[] | null
+          send_as_name: string | null
+          send_error: string | null
+          send_now: boolean | null
+          send_started_at: string | null
+          seq2_delay_days: number | null
+          seq3_delay_days: number | null
+          sequence_enabled: boolean | null
+          stats_bounces: number | null
+          stats_clicks: number | null
+          stats_opens: number | null
+          stats_replies: number | null
+          status: string
+          subject_selected: string | null
+          subject_variants: string[] | null
+          target_markets: string[]
+          techs_link: string | null
+          updated_at: string
+          user_id: string
+          validated_at: string | null
+          validation_requested_at: string | null
+          volume_band: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campaigns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_campaign_email: {
+        Args: { _content: Json; _html: string; _id: string; _subject: string }
+        Returns: {
+          admin_reviewer: string | null
+          audience_estimate: number | null
+          blacklist_buyer_ids: string[] | null
+          brevo_campaign_id: number | null
+          channels: string[] | null
+          client_note: string | null
+          created_at: string
+          credit_consumed_at: string | null
+          cuvees: string[] | null
+          daily_cap: number | null
+          doc_presentation: string | null
+          doc_pricelist: string | null
+          doc_techs: string[] | null
+          email_content: Json | null
+          email_generated_at: string | null
+          email_generation_count: number
+          exclude_recent_days: number | null
+          id: string
+          language: string | null
+          launched_at: string | null
+          managed_by_bo: boolean | null
+          markets: string[] | null
+          message_html: string | null
+          message_text: string | null
+          name: string
+          open_to_other_markets: boolean
+          price_max: number | null
+          price_min: number | null
+          reply_to: string | null
+          schedule_at: string | null
+          segments: string[] | null
+          selected_wines: string[] | null
+          send_as_name: string | null
+          send_error: string | null
+          send_now: boolean | null
+          send_started_at: string | null
+          seq2_delay_days: number | null
+          seq3_delay_days: number | null
+          sequence_enabled: boolean | null
+          stats_bounces: number | null
+          stats_clicks: number | null
+          stats_opens: number | null
+          stats_replies: number | null
+          status: string
+          subject_selected: string | null
+          subject_variants: string[] | null
+          target_markets: string[]
+          techs_link: string | null
+          updated_at: string
+          user_id: string
+          validated_at: string | null
+          validation_requested_at: string | null
+          volume_band: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campaigns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       search_buyer_contacts: {
         Args: {
           _countries: string[]
@@ -2323,6 +2473,70 @@ export type Database = {
           row_data: Json
           total_count: number
         }[]
+      }
+      submit_campaign: {
+        Args: { _id: string }
+        Returns: {
+          admin_reviewer: string | null
+          audience_estimate: number | null
+          blacklist_buyer_ids: string[] | null
+          brevo_campaign_id: number | null
+          channels: string[] | null
+          client_note: string | null
+          created_at: string
+          credit_consumed_at: string | null
+          cuvees: string[] | null
+          daily_cap: number | null
+          doc_presentation: string | null
+          doc_pricelist: string | null
+          doc_techs: string[] | null
+          email_content: Json | null
+          email_generated_at: string | null
+          email_generation_count: number
+          exclude_recent_days: number | null
+          id: string
+          language: string | null
+          launched_at: string | null
+          managed_by_bo: boolean | null
+          markets: string[] | null
+          message_html: string | null
+          message_text: string | null
+          name: string
+          open_to_other_markets: boolean
+          price_max: number | null
+          price_min: number | null
+          reply_to: string | null
+          schedule_at: string | null
+          segments: string[] | null
+          selected_wines: string[] | null
+          send_as_name: string | null
+          send_error: string | null
+          send_now: boolean | null
+          send_started_at: string | null
+          seq2_delay_days: number | null
+          seq3_delay_days: number | null
+          sequence_enabled: boolean | null
+          stats_bounces: number | null
+          stats_clicks: number | null
+          stats_opens: number | null
+          stats_replies: number | null
+          status: string
+          subject_selected: string | null
+          subject_variants: string[] | null
+          target_markets: string[]
+          techs_link: string | null
+          updated_at: string
+          user_id: string
+          validated_at: string | null
+          validation_requested_at: string | null
+          volume_band: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campaigns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
