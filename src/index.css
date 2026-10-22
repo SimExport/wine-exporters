@@ -44,6 +44,8 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     --wine-dark: 345 50% 15%;
 
     --importer-profile-heading: 354 56% 22%;
+    --enriched-badge-bg: 43 74% 88%;
+    --enriched-badge-fg: 354 56% 24%;
 
     /* Accent doré */
     --gold: 42 55% 60%;
@@ -97,6 +99,8 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
     --wine-dark: 345 50% 35%;
 
     --importer-profile-heading: 345 45% 65%;
+    --enriched-badge-bg: 43 45% 22%;
+    --enriched-badge-fg: 43 80% 78%;
     --gold: 42 55% 55%;
     --gold-foreground: 0 0% 98%;
 
@@ -139,4 +143,9 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
   .importer-profile-panel {
     width: min(850px, max(620px, 55vw));
   }
+}
+
+@layer utilities {
+  .bg-enriched-badge { background-color: hsl(var(--enriched-badge-bg)); }
+  .text-enriched-badge-foreground { color: hsl(var(--enriched-badge-fg)); }
 }

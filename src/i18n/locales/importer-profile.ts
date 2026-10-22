@@ -1,5 +1,5 @@
 export const importerProfileFr = {
-  title: 'Fiche importateur', close: 'Fermer la fiche', open: 'Consulter {{name}}', unnamed: 'Importateur',
+  title: 'Fiche importateur', close: 'Fermer la fiche', open: 'Consulter {{name}}', unnamed: 'Importateur', enrichedBadge: 'Fiche enrichie',
   enriched: 'Profil enrichi', about: 'À propos de l’importateur', origins: 'Origines et régions',
   countries: 'Origines des vins', regions: 'Régions', appellations: 'Appellations', styles: 'Styles et spécialités',
   wineStyles: 'Styles de vins', specialties: 'Spécialités', producers: 'Producteurs représentés', channels: 'Circuits de vente',
@@ -13,7 +13,7 @@ export const importerProfileFr = {
 };
 
 export const importerProfileEn: typeof importerProfileFr = {
-  title: 'Importer profile', close: 'Close profile', open: 'View {{name}}', unnamed: 'Importer',
+  title: 'Importer profile', close: 'Close profile', open: 'View {{name}}', unnamed: 'Importer', enrichedBadge: 'Enriched profile',
   enriched: 'Enriched profile', about: 'About the importer', origins: 'Origins and regions',
   countries: 'Wine origins', regions: 'Regions', appellations: 'Appellations', styles: 'Styles and specialties',
   wineStyles: 'Wine styles', specialties: 'Specialties', producers: 'Represented producers', channels: 'Sales channels',
