@@ -36,6 +36,9 @@ import { CampaignQualifiedProspectsSheet } from '@/components/admin/CampaignQual
 import { EditInterestedContactDialog } from '@/components/admin/EditInterestedContactDialog';
 import { CampaignCompletionEmailPreview } from '@/components/admin/CampaignCompletionEmailPreview';
 import { formatDate, formatDateTime } from '@/lib/format';
+import { CampaignReviewSheet } from '@/components/admin/CampaignReviewSheet';
+import { Switch } from '@/components/ui/switch';
+import { campaignPath, needsBrevoCheck } from '@/lib/campaign-send-state';
 
 interface Campaign {
   id: string;
@@ -148,6 +151,17 @@ export default function AdminCampaigns() {
     comment: string;
   }>>([]);
 
+  const [reviewCampaign, setReviewCampaign] = useState<any | null>(null);
+  const [editorFlag, setEditorFlag] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.from('app_settings' as any).select('value').eq('key', 'campaign_email_editor_enabled').maybeSingle()
+      .then(({ data }: any) => setEditorFlag(data?.value === true));
+  }, []);
+  const toggleEditorFlag = async (on: boolean) => {
+    const { error } = await supabase.from('app_settings' as any).update({ value: on }).eq('key', 'campaign_email_editor_enabled');
+    if (error) { toast({ title: t('adminCampaigns.errorTitle'), description: error.message, variant: 'destructive' }); return; }
+    setEditorFlag(on);
+  };
   useEffect(() => {
     fetchCampaigns();
     fetchEmailLogs();
@@ -693,6 +707,28 @@ export default function AdminCampaigns() {
         <ParseAddressesButton />
       </div>
 
+      {editorFlag !== null && (
+        <div className="flex items-start gap-3 rounded-lg border p-4">
+          <Switch id="editor-flag" checked={editorFlag} onCheckedChange={toggleEditorFlag} />
+          <div>
+            <Label htmlFor="editor-flag" className="font-medium">{t('emailEditor.admin.editorSwitch')}</Label>
+            <p className="text-sm text-muted-foreground">{t('emailEditor.admin.editorSwitchHelp')}</p>
+          </div>
+        </div>
+      )}
+
+      <CampaignReviewSheet
+        campaign={reviewCampaign}
+        onOpenChange={(o) => { if (!o) setReviewCampaign(null); }}
+        onChanged={async () => {
+          await fetchCampaigns();
+          if (reviewCampaign) {
+            const { data } = await supabase.from('campaigns').select('*').eq('id', reviewCampaign.id).maybeSingle();
+            setReviewCampaign((prev: any) => (prev && data ? { ...prev, ...data } : prev));
+          }
+        }}
+      />
+
       {/* Upload campaign report */}
       <AdminCampaignReportUpload />
 
@@ -904,15 +940,22 @@ export default function AdminCampaigns() {
                     </TableCell>
                      <TableCell>
                        <div className="flex gap-2">
-                         {campaign.status === 'pending_validation' && (
+                         {campaign.status === 'pending_validation' && campaignPath(campaign as any) === 'custom' && (
                            <>
-                             {String((campaign as any).message_html ?? '').trim() ? (
-                               <span
-                                 className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-enriched-badge text-enriched-badge-foreground"
-                                 title={t('adminCampaigns.customEmailHint', { defaultValue: "Email préparé par le producteur : l'envoi sera disponible au lot C. L'ancien bouton est désactivé pour ne pas envoyer un autre texte." })}
-                               >
-                                 {t('adminCampaigns.customEmail', { defaultValue: 'Email personnalisé' })}
-                               </span>
+                             <Button size="sm" onClick={() => setReviewCampaign(campaign)}>
+                               <Eye className="h-4 w-4 mr-1" />
+                               {t('emailEditor.admin.review')}
+                             </Button>
+                             <Badge variant="outline" className="whitespace-nowrap">{t('emailEditor.admin.custom')}</Badge>
+                             {needsBrevoCheck(campaign as any) && <Badge variant="destructive" className="whitespace-nowrap">{t('emailEditor.admin.checkBadge')}</Badge>}
+                           </>
+                         )}
+                         {campaign.status === 'pending_validation' && campaignPath(campaign as any) === 'legacy' && (
+                           <>
+                             {needsBrevoCheck(campaign as any) ? (
+                               <Button size="sm" variant="destructive" onClick={() => setReviewCampaign(campaign)}>
+                                 {t('emailEditor.admin.checkBadge')}
+                               </Button>
                              ) : (
                              <Button
                                size="sm"

@@ -111,6 +111,11 @@ Deno.serve(async (req) => {
   }
   const campaign_id = typeof body?.campaign_id === "string" ? body.campaign_id : null;
   if (!campaign_id) return json(400, { error: "Missing campaign_id" });
+  // Lot C: internal test campaigns never feed client results, prospects or CRM.
+  {
+    const { data: testCamp } = await admin.rpc("is_test_campaign", { _id: campaign_id });
+    if (testCamp === true) return json(200, { skipped: true, reason: "test_campaign" });
+  }
   const force = body?.force === true;
   const limit = Number.isFinite(Number(body?.limit))
     ? Math.min(20, Math.max(1, Math.round(Number(body.limit))))
