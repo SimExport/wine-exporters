@@ -446,7 +446,7 @@ const CreateCampaign = () => {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-6">
+      <div className={cn("mx-auto p-6", editorEnabled && step === 2 ? "max-w-7xl" : "max-w-4xl")}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
