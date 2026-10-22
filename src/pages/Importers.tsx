@@ -256,21 +256,15 @@ const Importers = () => {
       let data: any[] | null = null;
       let error: any = null;
       let count: number | null = null;
-      if (searchQuery) {
+      {
+        // Server-side ordering: enriched profiles first, then alphabetical.
         const res = await (supabase.rpc as any)('search_buyer_contacts', {
-          _countries: country.dbAliases, _q: searchQuery, _offset: from, _limit: limit,
+          _countries: country.dbAliases, _q: searchQuery || '', _offset: from, _limit: limit,
         });
         error = res.error;
         const rows = (res.data ?? []) as Array<{ row_data: any; total_count: number }>;
         data = rows.map(r => r.row_data);
         count = rows[0]?.total_count ?? 0;
-      } else {
-        const res = await supabase.from('buyer_contacts').select('*', {
-          count: 'exact'
-        }).in('country', country.dbAliases).order('company_name', {
-          ascending: true
-        }).range(from, to);
-        data = res.data; error = res.error; count = res.count;
       }
       if (error) {
         console.error('Error fetching contacts:', error);
