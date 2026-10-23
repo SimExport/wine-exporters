@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,7 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, ExternalLink, Mail, Phone, UserPlus, Check, ChevronDown } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { addSourcingProspects, sourcingSelectionIndices, formatSourcingSummary } from '@/lib/sourcing-results';
+import { Download, ExternalLink, Mail, Phone, UserPlus, Check, ChevronDown, ChevronLeft, ChevronRight, UsersRound, Loader2, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
   DropdownMenu,
@@ -43,25 +45,39 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
   const { user } = useAuth();
   const { toast } = useToast();
   const [addedIdx, setAddedIdx] = useState<Set<number>>(new Set());
-  const [addingIdx, setAddingIdx] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
+  const busy = useRef(false);
+  const [selectedIdx, setSelectedIdx] = useState<Set<number>>(new Set());
+  const [page, setPage] = useState(0);
   const shortlist = useMemo(() => resultJson?.shortlist ?? [], [resultJson]);
 
-  const addToCrm = async (item: ShortlistItem, idx: number) => {
-    if (!user) return;
-    setAddingIdx(idx);
-    try {
-      const campaignId = await getOrCreateManualCampaign(user.id);
-      // Skip dup by email when available
-      if (item.email) {
-        const { data: existing } = await supabase
-          .from('leads').select('id')
-          .eq('campaign_id', campaignId).eq('email', item.email).maybeSingle();
-        if (existing) {
-          setAddedIdx(prev => new Set(prev).add(idx));
-          toast({ title: t('sourcing.results.alreadyInCrm', { defaultValue: 'Déjà dans le CRM' }) });
-          return;
-        }
-      }
+  useEffect(() => {
+    setAddedIdx(new Set());
+    setSelectedIdx(new Set());
+    setPage(0);
+  }, [requestId, resultJson, user?.id]);
+
+  const available = sourcingSelectionIndices(shortlist.length, addedIdx);
+  const selected = sourcingSelectionIndices(shortlist.length, addedIdx, selectedIdx);
+  const pageCount = Math.max(1, Math.ceil(shortlist.length / 10));
+  const visible = shortlist.slice(page * 10, page * 10 + 10);
+  const toggleSelection = (index: number, checked: boolean) => {
+    setSelectedIdx(previous => {
+      const next = new Set(previous);
+      if (checked) next.add(index); else next.delete(index);
+      return next;
+    });
+  };
+
+  const addToCrm = async (item: ShortlistItem, campaignId: string) => {
+    if (!user) throw new Error(t('common.error'));
+    const identity = item.email || item.company_name;
+    const duplicateQuery = supabase.from('leads').select('id').eq('campaign_id', campaignId);
+    const { data: existing, error: duplicateError } = await (item.email
+      ? duplicateQuery.eq('email', item.email)
+      : duplicateQuery.eq('buyer_id', identity)).limit(1);
+    if (duplicateError) throw duplicateError;
+    if (existing?.length) return 'existing' as const;
       // Enrich from buyer_contacts (address fields not present in LLM shortlist)
       let contact: {
         street: string | null;
@@ -130,19 +146,33 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
         source_relevance: item.reason ?? null,
       });
       if (error) throw error;
-      setAddedIdx(prev => new Set(prev).add(idx));
-      toast({
-        title: t('sourcing.results.addedToCrm', { defaultValue: 'Ajouté au CRM' }),
+      return 'added' as const;
+  };
+
+  const addMultiple = async (indices: number[]) => {
+    if (!user || busy.current || !indices.length) return;
+    busy.current = true;
+    setAdding(true);
+    try {
+      const campaignId = await getOrCreateManualCampaign(user.id);
+      const result = await addSourcingProspects(indices, async index => {
+        const item = shortlist[index];
+        if (!item) throw new Error('Missing prospect');
+        const outcome = await addToCrm(item, campaignId);
+        setAddedIdx(previous => new Set(previous).add(index));
+        toggleSelection(index, false);
+        return outcome;
       });
-    } catch (e: any) {
-      console.error(e);
       toast({
-        title: t('common.error'),
-        description: e?.message,
-        variant: 'destructive',
+        title: t('sourcing.results.bulkComplete'),
+        description: t('sourcing.results.bulkResult', { added: result.added, existing: result.existing, failed: result.failed.length }),
+        variant: result.failed.length ? 'destructive' : 'default',
       });
+    } catch {
+      toast({ title: t('common.error'), description: t('sourcing.results.addError'), variant: 'destructive' });
     } finally {
-      setAddingIdx(null);
+      busy.current = false;
+      setAdding(false);
     }
   };
 
@@ -184,13 +214,13 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+    <Dialog open={open} onOpenChange={value => { if (!busy.current) onOpenChange(value); }}>
+      <DialogContent className="w-[calc(100%-2rem)] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>{t('sourcing.results.title', { market: marketLabel })}</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="contacts" className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <TabsList>
               <TabsTrigger value="contacts">
                 {t('sourcing.results.contactsTab')} ({shortlist.length})
@@ -230,10 +260,34 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
               </DropdownMenu>
             </div>
           </div>
-          <TabsContent value="contacts" className="flex-1 overflow-auto">
+          <TabsContent value="contacts" className="flex-1 min-h-0 overflow-hidden flex flex-col data-[state=inactive]:hidden">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3 mb-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  id="select-all-sourcing"
+                  aria-label={t('sourcing.results.selectAll')}
+                  checked={available.length > 0 && selected.length === available.length ? true : selected.length ? 'indeterminate' : false}
+                  disabled={adding || !available.length}
+                  onCheckedChange={checked => setSelectedIdx(checked === true ? new Set(available) : new Set())}
+                />
+                <label htmlFor="select-all-sourcing" className="cursor-pointer">{t('sourcing.results.selectAll')}</label>
+                {selected.length > 0 && <Badge variant="secondary">{t('sourcing.results.selected', { count: selected.length })}</Badge>}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selected.length > 0 && <Button size="sm" variant="outline" disabled={adding || !user} onClick={() => addMultiple(selected)}>
+                  <UserPlus className="h-4 w-4 mr-2" />{t('sourcing.results.addSelected', { count: selected.length })}
+                </Button>}
+                <Button size="sm" disabled={adding || !available.length || !user} onClick={() => addMultiple(available)}>
+                  {adding ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UsersRound className="h-4 w-4 mr-2" />}
+                  {adding ? t('sourcing.results.adding') : t('sourcing.results.addAll', { count: available.length })}
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0 overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10"><span className="sr-only">{t('sourcing.results.selectAll')}</span></TableHead>
                   <TableHead>{t('sourcing.results.col.company')}</TableHead>
                   <TableHead>{t('sourcing.results.col.contact')}</TableHead>
                   <TableHead className="w-20">{t('sourcing.results.score')}</TableHead>
@@ -242,8 +296,11 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shortlist.map((r, i) => (
-                  <TableRow key={i}>
+                {visible.map((r, offset) => {
+                  const i = page * 10 + offset;
+                  return (
+                  <TableRow key={i} data-state={selectedIdx.has(i) ? 'selected' : undefined}>
+                    <TableCell><Checkbox aria-label={t('sourcing.results.selectProspect', { name: r.company_name })} checked={selectedIdx.has(i)} disabled={adding || addedIdx.has(i)} onCheckedChange={checked => toggleSelection(i, checked === true)} /></TableCell>
                     <TableCell className="font-medium">{r.company_name}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1 text-xs">
@@ -262,21 +319,44 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
                       {addedIdx.has(i) ? (
                         <Badge variant="secondary" className="gap-1"><Check className="h-3 w-3" />{t('sourcing.results.added', { defaultValue: 'Ajouté' })}</Badge>
                       ) : (
-                        <Button size="sm" variant="outline" disabled={addingIdx === i} onClick={() => addToCrm(r, i)}>
+                        <Button size="sm" variant="outline" disabled={adding || !user} onClick={() => addMultiple([i])}>
                           <UserPlus className="h-3 w-3 mr-1" />
                           {t('sourcing.results.addToCrm', { defaultValue: 'Ajouter au CRM' })}
                         </Button>
                       )}
                     </TableCell>
                   </TableRow>
-                ))}
+                ); })}
               </TableBody>
             </Table>
+            </div>
+            <div className="flex items-center justify-between border-t pt-3 mt-3 gap-2">
+              <p className="text-xs text-muted-foreground">{t('sourcing.results.page', { current: page + 1, total: pageCount })}</p>
+              <div className="flex gap-1">
+                <Button size="icon" variant="outline" disabled={page === 0} aria-label={t('sourcing.results.previous')} onClick={() => setPage(value => value - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                <Button size="icon" variant="outline" disabled={page + 1 >= pageCount} aria-label={t('sourcing.results.next')} onClick={() => setPage(value => value + 1)}><ChevronRight className="h-4 w-4" /></Button>
+              </div>
+            </div>
           </TabsContent>
           <TabsContent value="summary" className="flex-1 overflow-auto">
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary || ''}</ReactMarkdown>
-            </div>
+            <section className="px-1 py-3 sm:px-4">
+              <header className="flex items-start gap-3 border-b pb-5 mb-6">
+                <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">{t('sourcing.results.summaryTab')}</p>
+                  <h2 className="text-xl font-semibold text-foreground">{t('sourcing.results.summaryTitle', { market: marketLabel })}</h2>
+                </div>
+              </header>
+              {summary ? <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                h1: ({ children }) => <h3 className="text-xl font-semibold text-foreground mt-8 mb-4">{children}</h3>,
+                h2: ({ children }) => <h3 className="text-base font-semibold text-primary border-l-2 border-primary pl-3 mt-7 mb-3">{children}</h3>,
+                h3: ({ children }) => <h4 className="text-base font-semibold text-foreground mt-6 mb-3">{children}</h4>,
+                p: ({ children }) => <p className="text-sm leading-7 text-foreground mb-5 break-words">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-5 text-sm leading-7">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-5 text-sm leading-7">{children}</ol>,
+                a: ({ children, href }) => <a href={href} className="text-primary underline break-all" target="_blank" rel="noreferrer">{children}</a>,
+              }}>{formatSourcingSummary(summary)}</ReactMarkdown> : <p className="text-sm text-muted-foreground">{t('sourcing.results.emptySummary')}</p>}
+            </section>
           </TabsContent>
         </Tabs>
       </DialogContent>

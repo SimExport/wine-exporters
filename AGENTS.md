@@ -1,4 +1,5 @@
 # AGENTS
+- Sourcing result bulk CRM additions reuse the single-prospect path sequentially with per-item outcomes; selection spans fixed ten-row pages and presentation-only Markdown formatting leaves stored summaries unchanged.
 - Producer campaign prospect display strips technical source labels through a presentation-only helper; stored descriptions and separate admin views remain unchanged.
 - Campaign generation eligibility is shared between the browser and Edge Function in a React-free policy module; the existing atomic reservation enforces the limit across reloads and concurrent requests, independently of manual saves.
 - Importer profile rendering uses a typed, injectable read repository; the default calls the `get_importer_profile` RPC (SECURITY DEFINER, auth.uid() required, ExportVins trial accounts excluded, field allowlist, EXECUTE for `authenticated` only). Never query the enrichment tables directly from the browser.
