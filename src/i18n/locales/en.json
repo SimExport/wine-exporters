@@ -3080,7 +3080,8 @@
     "seoDescription": "Buyers have left their contact details to find their next supplier, plus current official tenders.",
     "tabs": {
       "direct": "Direct requests",
-      "tender": "Tenders"
+      "tender": "Tenders",
+      "archives": "Archives"
     },
     "labels": {
       "search": "Looking for",
@@ -3100,6 +3101,8 @@
     },
     "actions": {
       "reply": "Reply",
+      "archive": "Archive",
+      "restore": "Restore",
       "addToCrm": "Add to CRM",
       "added": "Added",
       "viewContact": "View contacts",
@@ -3107,6 +3110,7 @@
     },
     "states": {
       "emptyDirect": "No direct requests yet.",
+      "emptyArchives": "No archived opportunities.",
       "emptyTender": "No tenders yet.",
       "closed": "Closed",
       "daysLeft": "{{count}}d left",
@@ -3120,6 +3124,9 @@
     },
     "toast": {
       "added": "Added to CRM",
+      "archived": "Opportunity archived for you only",
+      "restored": "Opportunity restored",
+      "archiveError": "Unable to update your archives. Please try again.",
       "error": "Error"
     }
   },

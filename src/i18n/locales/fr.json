@@ -3080,7 +3080,8 @@
     "seoDescription": "Des acheteurs ont laissé leurs coordonnées pour trouver leur prochain fournisseur, et les appels d'offres officiels en cours.",
     "tabs": {
       "direct": "Demandes directes",
-      "tender": "Appels d'offres"
+      "tender": "Appels d'offres",
+      "archives": "Archives"
     },
     "labels": {
       "search": "Recherche",
@@ -3100,6 +3101,8 @@
     },
     "actions": {
       "reply": "Répondre",
+      "archive": "Archiver",
+      "restore": "Restaurer",
       "addToCrm": "Ajouter au CRM",
       "added": "Ajouté",
       "viewContact": "Voir les coordonnées",
@@ -3107,6 +3110,7 @@
     },
     "states": {
       "emptyDirect": "Aucune demande directe pour le moment.",
+      "emptyArchives": "Aucune opportunité archivée.",
       "emptyTender": "Aucun appel d'offres pour le moment.",
       "closed": "Clôturé",
       "daysLeft": "{{count}}j restants",
@@ -3120,6 +3124,9 @@
     },
     "toast": {
       "added": "Ajouté au CRM",
+      "archived": "Opportunité archivée pour vous uniquement",
+      "restored": "Opportunité restaurée",
+      "archiveError": "Impossible de modifier vos archives. Réessayez.",
       "error": "Erreur"
     }
   },
