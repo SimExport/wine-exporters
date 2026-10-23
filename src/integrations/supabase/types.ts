@@ -2353,6 +2353,13 @@ export type Database = {
           producer_name: string
         }[]
       }
+      get_enrichment_activity: {
+        Args: { _days: number }
+        Returns: {
+          country: string
+          enriched_count: number
+        }[]
+      }
       get_importer_profile: {
         Args: { _buyer_contact_id: string }
         Returns: Json
