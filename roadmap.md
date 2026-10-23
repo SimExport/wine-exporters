@@ -1,6 +1,7 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 ## Ajustements email
 - [x] Résultats campagne : une ligne par prospect, meilleure lisibilité, sources masquées côté utilisateur ; test ciblé et rendu isolé ordinateur/mobile vérifiés (parcours connecté indisponible)
+- [x] Préparation email : « Claude » remplacé par « la plateforme », avis FR/EN indiquant la relecture par un admin avant validation
 - [x] Génération unique, bouton centré sans compteur, avertissement FR/EN de validation ; 24 tests passés (parcours connecté non vérifiable ici)
 
 - [x] Fiches importateurs : panneau FR/EN, couche données découplée, tests isolés et audit sécurité sans publication
