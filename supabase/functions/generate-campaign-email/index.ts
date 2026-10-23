@@ -53,13 +53,14 @@ Deno.serve(async (req) => {
     return json(429, { error: "Please wait a few seconds before generating again" });
   }
 
-  // Reserve the generation slot atomically (counts even if Claude fails: paid resource).
+  // Reserve the single generation atomically; failed proposals release the slot.
   const prevCount = campaign.email_generation_count ?? 0;
   const { data: reserved } = await admin.from("campaigns")
     .update({ email_generated_at: new Date().toISOString(), email_generation_count: prevCount + 1 })
     .eq("id", campaignId).eq("status", "draft").eq("email_generation_count", prevCount).select("id");
   if (!reserved?.length) return json(409, { error: "Another generation is in progress" });
 
+  let generated = false;
   try {
     const { data: profile } = await admin.from("profiles").select("*").eq("user_id", campaign.user_id).maybeSingle();
     const ids: string[] = Array.isArray(campaign.selected_wines) ? campaign.selected_wines : [];
@@ -98,10 +99,16 @@ Deno.serve(async (req) => {
         .eq("id", campaignId).eq("status", "draft");
       if (sErr) throw new Error(sErr.message);
     }
+    generated = true;
     return json(200, { subject: content.subject, content, html, applied: apply });
   } catch (e: any) {
     console.error("generate-campaign-email failed:", e?.message ?? e);
     const timeout = e?.name === "TimeoutError" || e?.name === "AbortError";
     return json(timeout ? 504 : 500, { error: timeout ? "AI generation timed out, please retry" : (e?.message ?? "Generation failed") });
+  } finally {
+    if (!generated) {
+      await admin.from("campaigns").update({ email_generation_count: prevCount })
+        .eq("id", campaignId).eq("email_generation_count", prevCount + 1);
+    }
   }
 });
