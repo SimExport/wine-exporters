@@ -3,6 +3,7 @@
 // template and saves it on the draft campaign. Never contacts Brevo, never
 // consumes a campaign credit.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { canGenerateCampaignEmail } from "../_shared/campaign-generation-policy.ts";
 import {
   buildAnthropicUserMessage, contentV2FromClaude, INTEREST_BASE, missingEmailTags,
   renderEmailHtmlV2, STRUCTURED_SYSTEM_PROMPT,
@@ -17,7 +18,6 @@ const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const COOLDOWN_MS = 20_000;
-const MAX_GENERATIONS = 10;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req) => {
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   // apply=false (default): return the proposal only, the saved email is untouched until the user accepts it.
   const apply = body?.apply === true;
   if (campaign.status !== "draft") return json(409, { error: "Only draft campaigns can be generated" });
-  if ((campaign.email_generation_count ?? 0) >= MAX_GENERATIONS) return json(429, { error: "Generation limit reached for this campaign" });
+  if (!canGenerateCampaignEmail(campaign.email_generation_count)) return json(429, { error: "This email has already been generated. You can edit it manually." });
   if (campaign.email_generated_at && Date.now() - new Date(campaign.email_generated_at).getTime() < COOLDOWN_MS) {
     return json(429, { error: "Please wait a few seconds before generating again" });
   }
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
         .eq("id", campaignId).eq("status", "draft");
       if (sErr) throw new Error(sErr.message);
     }
-    return json(200, { subject: content.subject, content, html, remaining: MAX_GENERATIONS - prevCount - 1, applied: apply });
+    return json(200, { subject: content.subject, content, html, applied: apply });
   } catch (e: any) {
     console.error("generate-campaign-email failed:", e?.message ?? e);
     const timeout = e?.name === "TimeoutError" || e?.name === "AbortError";

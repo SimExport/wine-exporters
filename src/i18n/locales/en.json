@@ -1609,7 +1609,7 @@
       "techLinkItem": "• Tech sheets link: {{link}}",
       "clientNoteLabel": "Note to the team",
       "warningTitle": "Upon submission, your campaign moves to pending validation.",
-      "warningBody": "You will receive an email as soon as your campaign is validated, then a second email once the results are available.",
+      "warningBody": "We have updated the campaign editor. During this transition, bugs may occur and reviews may take longer. To reduce errors, a member of our team checks every campaign before it is sent. You will receive an email once it is approved, then another when the results are available. Thank you for your patience.",
       "backToStep1": "Back to step 1"
     }
   },
