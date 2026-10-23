@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye } from 'lucide-react';
+import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye, Archive, ArchiveRestore } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import { differenceInDays, format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
+import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'suede': '🇸🇪', 'suède': '🇸🇪', 'sweden': '🇸🇪',
@@ -122,6 +123,9 @@ export default function Opportunities() {
   const [importers, setImporters] = useState<ImporterRequest[]>([]);
   const [tenders, setTenders] = useState<TenderRequest[]>([]);
   const [addedRefs, setAddedRefs] = useState<Set<string>>(new Set());
+  const [archivedKeys, setArchivedKeys] = useState<Set<string>>(new Set());
+  const [archivePending, setArchivePending] = useState<Set<string>>(new Set());
+  const [archivesReady, setArchivesReady] = useState(false);
   const [viewedKeys, setViewedKeys] = useState<Set<string>>(new Set());
   const [contactDialog, setContactDialog] = useState<
     | { kind: 'importer'; data: ImporterRequest }
@@ -132,7 +136,9 @@ export default function Opportunities() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [imp, ten, leads, views] = await Promise.all([
+      setArchivesReady(false);
+      setArchivedKeys(new Set());
+      const [imp, ten, leads, views, archives] = await Promise.all([
         supabase
           .from('importer_requests')
           .select('*, created_at')
@@ -152,13 +158,54 @@ export default function Opportunities() {
           .from('opportunity_views')
           .select('opportunity_type, opportunity_id')
           .eq('user_id', user.id),
+        supabase.from('opportunity_archives').select('opportunity_type, opportunity_id').eq('user_id', user.id),
       ]);
+      if (archives.error) {
+        toast({ title: tr('opportunitiesPage.toast.archiveError'), variant: 'destructive' });
+      } else {
+        setArchivedKeys(new Set((archives.data ?? []).map(row => `${row.opportunity_type}:${row.opportunity_id}`)));
+        setArchivesReady(true);
+      }
       setImporters((imp.data ?? []) as any);
       setTenders((ten.data ?? []) as any);
       setAddedRefs(new Set((leads.data ?? []).map((l: any) => l.source_ref)));
       setViewedKeys(new Set((views.data ?? []).map((v: any) => `${v.opportunity_type}:${v.opportunity_id}`)));
     })();
   }, [user]);
+
+  const toggleArchive = async (type: OpportunityType, id: string) => {
+    if (!user || !archivesReady) return;
+    const key = opportunityKey(type, id);
+    if (archivePending.has(key)) return;
+    const restoring = archivedKeys.has(key);
+    setArchivePending(prev => new Set(prev).add(key));
+    try {
+      // Ownership comes from auth.uid() on insert and is enforced by RLS.
+      const { error } = restoring
+        ? await supabase.from('opportunity_archives').delete().eq('user_id', user.id).eq('opportunity_type', type).eq('opportunity_id', id)
+        : await supabase.from('opportunity_archives').upsert({ opportunity_type: type, opportunity_id: id }, { onConflict: 'user_id,opportunity_type,opportunity_id', ignoreDuplicates: true });
+      if (error) throw error;
+      setArchivedKeys(prev => {
+        const next = new Set(prev);
+        if (restoring) next.delete(key); else next.add(key);
+        return next;
+      });
+      toast({ title: tr(`opportunitiesPage.toast.${restoring ? 'restored' : 'archived'}`) });
+    } catch {
+      toast({ title: tr('opportunitiesPage.toast.archiveError'), variant: 'destructive' });
+    } finally {
+      setArchivePending(prev => { const next = new Set(prev); next.delete(key); return next; });
+    }
+  };
+
+  const archiveButton = (type: OpportunityType, id: string) => {
+    const key = opportunityKey(type, id);
+    const archived = archivedKeys.has(key);
+    const label = tr(`opportunitiesPage.actions.${archived ? 'restore' : 'archive'}`);
+    return <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" disabled={!archivesReady || archivePending.has(key)} onClick={() => toggleArchive(type, id)}>
+      {archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}{label}
+    </Button>;
+  };
 
   const markViewed = async (type: 'importer' | 'tender', id: string) => {
     if (!user) return;
@@ -252,34 +299,9 @@ export default function Opportunities() {
 
   const labelCol = "text-[10px] uppercase tracking-wide text-muted-foreground";
 
-  return (
-    <div className="container mx-auto py-6 px-4 space-y-6">
-      <SEO
-        title={tr('opportunitiesPage.seoTitle')}
-        description={tr('opportunitiesPage.seoDescription')}
-        path="/opportunites"
-      />
-      <header>
-        <h1 className="text-3xl font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
-          {tr('opportunitiesPage.pageTitle')}
-        </h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
-          {tr('opportunitiesPage.pageSubtitle')}
-        </p>
-      </header>
-
-      <Tabs defaultValue="direct" className="w-full">
-        <TabsList>
-          <TabsTrigger value="direct">{tr('opportunitiesPage.tabs.direct')} ({importers.length})</TabsTrigger>
-          <TabsTrigger value="tender">{tr('opportunitiesPage.tabs.tender')} ({tenders.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="direct" className="mt-6">
-          {importers.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyDirect')}</CardContent></Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {importers.map(r => {
+  const importersPartition = partitionOpportunities(importers, 'importer', archivedKeys);
+  const tendersPartition = partitionOpportunities(tenders, 'tender', archivedKeys);
+  const renderImporters = (rows: ImporterRequest[]) => rows.map(r => {
                 const added = addedRefs.has(r.id);
                 const viewed = viewedKeys.has(`importer:${r.id}`);
                 const req = (pick(r, 'requirements') ?? '').trim();
@@ -349,19 +371,12 @@ export default function Opportunities() {
                         {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
                       </Button>
                     </div>
+                    <div className="px-5 pb-4 flex justify-end">{archiveButton('importer', r.id)}</div>
                   </Card>
                 );
-              })}
-            </div>
-          )}
-        </TabsContent>
+              });
 
-        <TabsContent value="tender" className="mt-6">
-          {tenders.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyTender')}</CardContent></Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tenders.map(t => {
+  const renderTenders = (rows: TenderRequest[]) => rows.map(t => {
                 const added = addedRefs.has(t.id);
                 const viewed = viewedKeys.has(`tender:${t.id}`);
                 const styleProfile = (pick(t, 'style_profile') ?? '').trim();
@@ -446,11 +461,65 @@ export default function Opportunities() {
                         {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
                       </Button>
                     </div>
+                    <div className="px-5 pb-4 flex justify-end">{archiveButton('tender', t.id)}</div>
                   </Card>
                 );
-              })}
+              });
+
+  return (
+    <div className="container mx-auto py-6 px-4 space-y-6">
+      <SEO
+        title={tr('opportunitiesPage.seoTitle')}
+        description={tr('opportunitiesPage.seoDescription')}
+        path="/opportunites"
+      />
+      <header>
+        <h1 className="text-3xl font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
+          {tr('opportunitiesPage.pageTitle')}
+        </h1>
+        <p className="text-muted-foreground mt-2 max-w-2xl">
+          {tr('opportunitiesPage.pageSubtitle')}
+        </p>
+      </header>
+
+      <Tabs defaultValue="direct" className="w-full">
+        <TabsList className="h-auto flex flex-wrap justify-start gap-1">
+          <TabsTrigger value="direct">{tr('opportunitiesPage.tabs.direct')} ({importersPartition.active.length})</TabsTrigger>
+          <TabsTrigger value="tender">{tr('opportunitiesPage.tabs.tender')} ({tendersPartition.active.length})</TabsTrigger>
+          <TabsTrigger value="archives"><Archive className="h-4 w-4 mr-2" />{tr('opportunitiesPage.tabs.archives')} ({importersPartition.archived.length + tendersPartition.archived.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="direct" className="mt-6">
+          {importersPartition.active.length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyDirect')}</CardContent></Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderImporters(importersPartition.active)}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="tender" className="mt-6">
+          {tendersPartition.active.length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyTender')}</CardContent></Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderTenders(tendersPartition.active)}
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="archives" className="mt-6 space-y-6">
+          {importersPartition.archived.length + tendersPartition.archived.length === 0 && (
+            <div className="py-12 text-center text-muted-foreground"><Archive className="h-8 w-8 mx-auto mb-3" />{tr('opportunitiesPage.states.emptyArchives')}</div>
+          )}
+          {importersPartition.archived.length > 0 && <section className="space-y-4">
+            <h2 className="font-semibold">{tr('opportunitiesPage.tabs.direct')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{renderImporters(importersPartition.archived)}</div>
+          </section>}
+          {tendersPartition.archived.length > 0 && <section className="space-y-4">
+            <h2 className="font-semibold">{tr('opportunitiesPage.tabs.tender')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{renderTenders(tendersPartition.archived)}</div>
+          </section>}
         </TabsContent>
       </Tabs>
 
