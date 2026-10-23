@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Grape, Search, Send, Store, Kanban, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
 import { useCredits } from '@/hooks/useCredits';
 import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard';
+import { EnrichmentActivityCard } from '@/components/importers/EnrichmentActivityCard';
 
 interface Profile {
   domain_name: string | null;
@@ -185,6 +186,8 @@ const Dashboard = () => {
         )}
 
         <GettingStartedCard profileDone={!!(profile?.domain_name && profile?.location)} />
+
+        <EnrichmentActivityCard />
 
         {/* 2x2 action cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">

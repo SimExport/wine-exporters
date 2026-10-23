@@ -33,6 +33,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
 import { useTranslation } from 'react-i18next';
 import { ImporterProfileSheet } from '@/components/importers/ImporterProfileSheet';
+import { EnrichmentActivityCard } from '@/components/importers/EnrichmentActivityCard';
 const CopyButton = ({ value }: { value: string }) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
@@ -528,6 +529,8 @@ const Importers = () => {
             </DialogContent>
           </Dialog>
       </div>
+
+      <EnrichmentActivityCard variant="banner" onSelectCountry={setSelectedCountry} />
 
       {/* Country Selector - Map + Continent List */}
       <CountrySelector
