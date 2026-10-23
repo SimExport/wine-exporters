@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,9 +18,10 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Users, UserPlus, Check, Mail, Search, ChevronDown, Sparkles, ExternalLink, RotateCcw,
+  Users, User, UserPlus, Check, Mail, Search, ChevronDown, Sparkles, ExternalLink, RotateCcw,
 } from 'lucide-react';
 import { getCountryFlag } from '@/lib/country-flag';
+import { prospectDisplayText } from '@/lib/campaign-prospect-display';
 
 export interface InterestedContact {
   id: string;
@@ -52,7 +52,6 @@ interface Props {
 
 type SortKey = 'score' | 'name' | 'country';
 type ScoreFilter = 'all' | '8' | '6';
-type SourceFilter = 'all' | 'form' | 'click';
 
 export function InterestedContactsSection({
   contacts, currentUserId, addingId, onAdd, getLeadId, onAddAgain, onOpenLead,
@@ -61,7 +60,6 @@ export function InterestedContactsSection({
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>('all');
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
   // Prefer the real CRM state (lead still exists) over the stored flag.
   const leadIdOf = (c: InterestedContact) => (getLeadId ? getLeadId(c) : null);
@@ -73,7 +71,6 @@ export function InterestedContactsSection({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = contacts.filter((c) => {
-      if (sourceFilter !== 'all' && (c.origin ?? 'form') !== sourceFilter) return false;
       if (scoreFilter !== 'all') {
         const min = parseInt(scoreFilter, 10);
         if ((c.score ?? 0) < min) return false;
@@ -89,32 +86,21 @@ export function InterestedContactsSection({
       return (b.score ?? -1) - (a.score ?? -1);
     });
     return list;
-  }, [contacts, query, sortBy, scoreFilter, sourceFilter]);
+  }, [contacts, query, sortBy, scoreFilter]);
 
   const addedCount = contacts.filter(isAdded).length;
   const total = contacts.length;
-  const formCount = contacts.filter((c) => (c.origin ?? 'form') === 'form').length;
-  const clickCount = contacts.filter((c) => c.origin === 'click').length;
   const progress = total > 0 ? Math.round((addedCount / total) * 100) : 0;
 
   return (
-    <Card className="lg:col-span-2">
-      <CardHeader>
+    <section className="lg:col-span-2 min-w-0 border-t pt-6">
+      <div className="pb-5 space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <h2 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
             <Users className="h-5 w-5" />
             {t('campaigns.detail.interestedContactsCard')}
             <Badge variant="secondary" className="ml-2">{total}</Badge>
-            {clickCount > 0 && (
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                · {t('campaigns.detail.interestedContacts.splitCounts', {
-                  form: formCount,
-                  click: clickCount,
-                  defaultValue: `${formCount} formulaire · ${clickCount} cliqueurs`,
-                })}
-              </span>
-            )}
-          </CardTitle>
+          </h2>
           <div className="flex items-center gap-3 min-w-[220px]">
             <span className="text-xs text-muted-foreground whitespace-nowrap">
               {t('campaigns.detail.interestedContacts.progress', {
@@ -157,27 +143,15 @@ export function InterestedContactsSection({
               <SelectItem value="6">{t('campaigns.detail.interestedContacts.filter.gte6', { defaultValue: 'Score ≥ 6' })}</SelectItem>
             </SelectContent>
           </Select>
-          {clickCount > 0 && (
-            <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as SourceFilter)}>
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('campaigns.detail.interestedContacts.filterSource.all', { defaultValue: 'Toutes sources' })}</SelectItem>
-                <SelectItem value="form">{t('campaigns.detail.interestedContacts.filterSource.form', { defaultValue: 'Formulaire' })}</SelectItem>
-                <SelectItem value="click">{t('campaigns.detail.interestedContacts.filterSource.click', { defaultValue: 'Cliqueurs' })}</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div>
         {filtered.length === 0 ? (
           <div className="py-10 text-center text-sm text-muted-foreground">
             {t('campaigns.detail.interestedContacts.noResults', { defaultValue: 'Aucun prospect ne correspond à votre recherche.' })}
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             {filtered.map((c) => (
               <ProspectCard
                 key={c.id}
@@ -192,8 +166,8 @@ export function InterestedContactsSection({
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -209,50 +183,43 @@ function ProspectCard({
   const [expanded, setExpanded] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const flag = getCountryFlag(c.country);
-  const origin = c.origin ?? 'form';
+  const description = prospectDisplayText(c.description);
+  const actions = prospectDisplayText(c.recommended_actions);
 
   const scoreVariant: 'default' | 'secondary' | 'outline' = c.score != null
     ? (c.score >= 8 ? 'default' : c.score >= 6 ? 'secondary' : 'outline')
     : 'outline';
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm hover:shadow transition-shadow">
-      <div className="flex items-start justify-between gap-3">
+    <article className="flex min-w-0 flex-col gap-4 rounded-lg border bg-card p-5 transition-colors hover:border-primary/40">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b pb-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0">
-            <h3 className="font-semibold text-base truncate">{c.company_name}</h3>
-            <Badge
-              variant={origin === 'form' ? 'default' : 'outline'}
-              className="shrink-0 text-[10px] uppercase tracking-wide"
-            >
-              {origin === 'form'
-                ? t('campaigns.detail.interestedContacts.origin.form', { defaultValue: 'Formulaire' })
-                : t('campaigns.detail.interestedContacts.origin.click', { defaultValue: 'Cliqueur' })}
-            </Badge>
+            <h3 className="font-semibold text-lg break-words min-w-0">{c.company_name}</h3>
           </div>
           {(c.contact_name || c.email) && (
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              {c.contact_name && <span>{c.contact_name}</span>}
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              {c.contact_name && <span className="flex items-center gap-1.5"><User className="h-4 w-4 shrink-0" />{c.contact_name}</span>}
               {c.email && (
                 <a
                   href={`mailto:${c.email}`}
                   className="flex items-center gap-1 text-primary hover:underline min-w-0"
                 >
                   <Mail className="h-3 w-3 shrink-0" />
-                  <span className="truncate">{c.email}</span>
+                  <span className="break-all">{c.email}</span>
                 </a>
               )}
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 sm:max-w-[40%]">
           {c.score != null && (
             <Badge variant={scoreVariant}>{c.score}/10</Badge>
           )}
           {c.country && (
             <Badge variant="outline" className="gap-1 font-normal">
               {flag && <span>{flag}</span>}
-              <span>{c.country}</span>
+              <span className="whitespace-normal">{c.country}</span>
             </Badge>
           )}
         </div>
@@ -267,46 +234,48 @@ function ProspectCard({
         </div>
       )}
 
-      {c.description && (
+      {description && (
         <div className="text-sm text-foreground/80">
           <p className={expanded ? 'whitespace-pre-wrap' : 'whitespace-pre-wrap line-clamp-3'}>
-            {c.description}
+            {description}
           </p>
-          {c.description.length > 180 && (
-            <button
+          {description.length > 180 && (
+            <Button variant="link" size="sm"
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="mt-1 text-xs font-medium text-primary hover:underline"
+              className="mt-1 h-auto p-0 text-xs"
             >
               {expanded
                 ? t('campaigns.detail.interestedContacts.seeLess', { defaultValue: 'Voir moins' })
                 : t('campaigns.detail.interestedContacts.seeMore', { defaultValue: 'Voir plus' })}
-            </button>
+            </Button>
           )}
         </div>
       )}
 
-      {c.recommended_actions && (
-        <Collapsible>
-          <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground group">
+      {actions && (
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="flex h-auto items-center gap-2 p-0 text-sm font-medium text-primary group">
             <Sparkles className="h-3.5 w-3.5" />
             {t('campaigns.detail.interestedContacts.actions')}
             <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+          </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
             <div className="rounded-md bg-muted/50 p-3 text-sm whitespace-pre-wrap">
-              {c.recommended_actions}
+              {actions}
             </div>
           </CollapsibleContent>
         </Collapsible>
       )}
 
-      <div className="mt-auto flex justify-end pt-1">
+      <div className="mt-auto flex justify-end border-t pt-3">
         {added ? (
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="secondary" className="gap-1 h-7" disabled={adding}>
+                <Button size="sm" variant="secondary" className="gap-1" disabled={adding}>
                   <Check className="h-3 w-3" />
                   {t('campaigns.detail.interestedContacts.added')}
                   <ChevronDown className="h-3 w-3 opacity-60" />
@@ -356,6 +325,6 @@ function ProspectCard({
           </Button>
         )}
       </div>
-    </div>
+    </article>
   );
 }

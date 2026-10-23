@@ -1,4 +1,5 @@
 # AGENTS
+- Producer campaign prospect display strips technical source labels through a presentation-only helper; stored descriptions and separate admin views remain unchanged.
 - Campaign generation eligibility is shared between the browser and Edge Function in a React-free policy module; the existing atomic reservation enforces the limit across reloads and concurrent requests, independently of manual saves.
 - Importer profile rendering uses a typed, injectable read repository; the default calls the `get_importer_profile` RPC (SECURITY DEFINER, auth.uid() required, ExportVins trial accounts excluded, field allowlist, EXECUTE for `authenticated` only). Never query the enrichment tables directly from the browser.
 - Importer profile translations live in a dedicated FR/EN module merged into the common i18n namespace, keeping this feature isolated from the large shared locale files.
