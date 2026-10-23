@@ -1,5 +1,6 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 ## Ajustements email
+- [ ] CRM : choisir Manuel, Campagne, Opportunité ou Recherche sur-mesure à la création ; campagne requise uniquement pour la source Campagne
 - [x] Recherche sur-mesure : sélection multiple sur toutes les pages, ajout groupé au CRM et synthèse structurée FR/EN ; 3 tests et parcours isolé vérifiés, ajout réel connecté non vérifiable sur ce Supabase externe
 - [x] Résultats campagne : une ligne par prospect, meilleure lisibilité, sources masquées côté utilisateur ; test ciblé et rendu isolé ordinateur/mobile vérifiés (parcours connecté indisponible)
 - [x] Préparation email : « Claude » remplacé par « la plateforme », avis FR/EN indiquant la relecture par un admin avant validation

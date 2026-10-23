@@ -1,4 +1,5 @@
 # AGENTS
+- CRM creation in Kanban and list views shares source fields and a campaign resolver; non-campaign sources use the existing private manual container to preserve campaign-based ownership and reads without requiring a campaign choice.
 - Sourcing result bulk CRM additions reuse the single-prospect path sequentially with per-item outcomes; selection spans fixed ten-row pages and presentation-only Markdown formatting leaves stored summaries unchanged.
 - Producer campaign prospect display strips technical source labels through a presentation-only helper; stored descriptions and separate admin views remain unchanged.
 - Campaign generation eligibility is shared between the browser and Edge Function in a React-free policy module; the existing atomic reservation enforces the limit across reloads and concurrent requests, independently of manual saves.
