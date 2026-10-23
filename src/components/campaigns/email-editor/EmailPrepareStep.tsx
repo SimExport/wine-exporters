@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { RichTextBlock } from './RichTextBlock';
@@ -18,7 +17,7 @@ import {
   insertBlock, MAX_CTA, MAX_IMAGES, moveBlock, newId, removeBlock, SUBJECT_PREFIX, type DraftBlock, type EmailDraft,
 } from '@/lib/email-draft';
 
-const MAX_GENERATIONS = 10;
+import { canGenerateCampaignEmail } from '../../../../supabase/functions/_shared/campaign-generation-policy';
 
 export interface EmailStepState { dirty: boolean; hasSavedEmail: boolean }
 
@@ -44,7 +43,6 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const [previewKey, setPreviewKey] = useState<string | null>(initial && initialHtml ? draftKey(initial) : null);
   const [generations, setGenerations] = useState(generationCount);
   const [busy, setBusy] = useState<null | 'generate' | 'save' | 'preview'>(null);
-  const [confirmRegen, setConfirmRegen] = useState(false);
   const [isProposal, setIsProposal] = useState(false);
   const [pickerAt, setPickerAt] = useState<number | null>(null);
 
@@ -53,7 +51,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const dirty = hasContent && key !== savedKey;
   const stale = !!previewHtml && key !== previewKey;
   const problems = draftProblems(draft);
-  const remaining = Math.max(0, MAX_GENERATIONS - generations);
+  const canGenerate = canGenerateCampaignEmail(generations) && !hasContent;
 
   useEffect(() => { onStateChange({ dirty, hasSavedEmail: !!savedHtml }); }, [dirty, savedHtml, onStateChange]);
   useEffect(() => {
@@ -68,7 +66,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   };
 
   const generate = async () => {
-    setConfirmRegen(false);
+    if (busy || !canGenerate) return;
     setBusy('generate');
     try {
       const { data, error } = await supabase.functions.invoke('generate-campaign-email', { body: { campaignId, apply: false } });
@@ -79,8 +77,12 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       setPreviewHtml(data.html);
       setPreviewKey(draftKey(d));
       setIsProposal(true);
-      if (typeof data.remaining === 'number') setGenerations(MAX_GENERATIONS - data.remaining);
-    } finally { setBusy(null); }
+      setGenerations(1);
+    } finally {
+      const { data } = await supabase.from('campaigns').select('email_generation_count').eq('id', campaignId).maybeSingle();
+      if (data) setGenerations(data.email_generation_count ?? 0);
+      setBusy(null);
+    }
   };
 
   const callSave = async (mode: 'preview' | 'save') => {
@@ -135,19 +137,20 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
           <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />{t('emailEditor.title')}</CardTitle>
           <CardDescription>{t('emailEditor.intro')}</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => (hasContent ? setConfirmRegen(true) : generate())} disabled={!!busy || remaining === 0} variant={hasContent ? 'outline' : 'default'}>
+        <CardContent className="space-y-3">
+          {canGenerate && <div className="flex justify-center">
+          <Button onClick={generate} disabled={!!busy}>
             {busy === 'generate' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-            {busy === 'generate' ? t('emailEditor.generating') : hasContent ? t('emailEditor.regenerate') : t('emailEditor.generate')}
+            {busy === 'generate' ? t('emailEditor.generating') : t('emailEditor.generate')}
           </Button>
-          <span className="text-xs text-muted-foreground">{t('emailEditor.remaining', { count: remaining })} · {t('emailEditor.noCredit')}</span>
-          <div className="ml-auto flex items-center gap-2">
+          </div>}
+          {hasContent && <div className="flex flex-wrap justify-end items-center gap-2">
             {hasContent && <span className={dirty ? 'text-xs font-medium text-destructive' : 'text-xs text-muted-foreground'}>{dirty ? t('emailEditor.unsaved') : t('emailEditor.allSaved')}</span>}
             <Button onClick={() => callSave('save')} disabled={!!busy || !dirty}>
               {busy === 'save' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
               {busy === 'save' ? t('emailEditor.saving') : t('emailEditor.save')}
             </Button>
-          </div>
+          </div>}
         </CardContent>
       </Card>
 
@@ -164,7 +167,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       {!hasContent ? (
         <Card><CardContent className="py-12 text-center space-y-2">
           <p className="font-medium">{t('emailEditor.emptyTitle')}</p>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">{t('emailEditor.emptyBody')}</p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">{t(canGenerate ? 'emailEditor.emptyBody' : 'emailEditor.generationUsed')}</p>
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -250,18 +253,6 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
         onPick={(img) => update(insertBlock(draft.blocks, { id: newId(), type: 'image', url: img.url, alt: '', media_id: img.id }, pickerAt ?? undefined))}
       />
 
-      <AlertDialog open={confirmRegen} onOpenChange={setConfirmRegen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('emailEditor.regenTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('emailEditor.regenBody')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('emailEditor.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={generate}>{t('emailEditor.regenConfirm')}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

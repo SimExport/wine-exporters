@@ -1,4 +1,7 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
+## Ajustements email
+- [x] Génération unique, bouton centré sans compteur, avertissement FR/EN de validation ; 24 tests passés (parcours connecté non vérifiable ici)
+
 - [x] Fiches importateurs : panneau FR/EN, couche données découplée, tests isolés et audit sécurité sans publication
 - [x] Connexion enrichissement — RPC get_importer_profile (même périmètre que /importers, tout abonnement, essais exclus), repository branché ; reste à tester en navigation connectée (aucune session de test disponible)
 - [x] 1. Base de données, règles serveur, useCrmAccess

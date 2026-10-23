@@ -1609,7 +1609,7 @@
       "techLinkItem": "• Lien fiches techniques: {{link}}",
       "clientNoteLabel": "Note à l'équipe",
       "warningTitle": "À la soumission, votre campagne passe en attente de validation.",
-      "warningBody": "Vous recevrez un email dès la validation de votre campagne, puis un second email dès que les résultats seront disponibles.",
+      "warningBody": "Nous avons fait évoluer l’éditeur de campagnes. Pendant cette transition, des bugs peuvent survenir et les délais de validation peuvent être plus longs. Pour limiter les erreurs, un membre de notre équipe vérifie chaque campagne avant son envoi. Vous recevrez un email dès sa validation, puis un second lorsque les résultats seront disponibles. Merci de votre patience.",
       "backToStep1": "Retour à l'étape 1"
     }
   },
