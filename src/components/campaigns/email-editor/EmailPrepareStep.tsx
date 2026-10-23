@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ShieldCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { RichTextBlock } from './RichTextBlock';
@@ -138,6 +139,10 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
           <CardDescription>{t('emailEditor.intro')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          <Alert className="bg-muted/50 border-primary/20">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <AlertDescription>{t('emailEditor.reviewNotice')}</AlertDescription>
+          </Alert>
           {canGenerate && <div className="flex justify-center">
           <Button onClick={generate} disabled={!!busy}>
             {busy === 'generate' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
