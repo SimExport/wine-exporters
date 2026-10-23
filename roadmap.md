@@ -1,6 +1,6 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 ## Ajustements email
-- [ ] Opportunités : archivage personnel persistant, onglet Archives et restauration, aucune modification des opportunités partagées
+- [x] Opportunités : archivage personnel persistant avec RLS, onglet Archives et restauration ; 3 tests et parcours visuel isolé réussis, aucune modification des opportunités partagées ; Authenticated path: UNVERIFIED (Supabase externe)
 - [x] CRM : quatre sources FR/EN dans les vues Kanban et Liste ; campagne requise seulement pour Campagne, 7 tests et contrôles visuels isolés réussis ; ajout connecté non vérifiable sur le Supabase externe
 - [x] Recherche sur-mesure : sélection multiple sur toutes les pages, ajout groupé au CRM et synthèse structurée FR/EN ; 3 tests et parcours isolé vérifiés, ajout réel connecté non vérifiable sur ce Supabase externe
 - [x] Résultats campagne : une ligne par prospect, meilleure lisibilité, sources masquées côté utilisateur ; test ciblé et rendu isolé ordinateur/mobile vérifiés (parcours connecté indisponible)
