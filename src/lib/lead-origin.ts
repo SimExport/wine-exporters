@@ -1,10 +1,12 @@
 import type { TFunction } from 'i18next'
 import { MANUAL_CAMPAIGN_NAME } from '@/lib/manual-campaign'
 
-export type LeadOriginKey = 'manual' | 'campaign' | 'sourcing' | 'buyerRequest' | 'tender'
+export type LeadOriginKey = 'manual' | 'campaign' | 'sourcing' | 'opportunity' | 'buyerRequest' | 'tender'
 
 export function getLeadOriginKey(source?: string | null): LeadOriginKey {
   switch (source) {
+    case 'opportunity':
+      return 'opportunity'
     case 'sourcing':
       return 'sourcing'
     case 'opportunity_direct':

@@ -1688,6 +1688,13 @@
     },
     "createDialog": {
       "title": "Créer un prospect",
+      "source": "Source *",
+      "sources": {
+        "manual": "Manuel",
+        "campaign": "Campagne",
+        "opportunity": "Opportunité",
+        "sourcing": "Recherche sur-mesure"
+      },
       "campaign": "Campagne *",
       "campaignPlaceholder": "Sélectionner une campagne",
       "country": "Pays",
@@ -1719,6 +1726,7 @@
       "createShort": "Créer"
     },
     "origin": {
+      "opportunity": "Opportunité",
       "manual": "Ajout manuel",
       "campaign": "Campagne",
       "sourcing": "Recherche sur-mesure",

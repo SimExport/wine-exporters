@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getLeadOriginLabel } from '@/lib/lead-origin'
+import { ProspectSourceFields } from '@/components/pipeline/ProspectSourceFields'
+import { hasRequiredCampaign, resolveProspectCampaign, type ProspectSource } from '@/lib/prospect-source'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -169,6 +171,7 @@ export default function Pipeline() {
   }
 
   const [newProspect, setNewProspect] = useState({
+    source: 'manual' as ProspectSource,
     campaign_id: '',
     first_name: '',
     last_name: '',
@@ -405,11 +408,15 @@ export default function Pipeline() {
   }
 
   const handleCreateProspect = async () => {
+    if (!user || !hasRequiredCampaign(newProspect.source, newProspect.campaign_id)) return
     try {
+      const campaignId = await resolveProspectCampaign(
+        newProspect.source, newProspect.campaign_id, () => getOrCreateManualCampaign(user.id),
+      )
       const { data: existing } = await supabase
         .from('leads')
         .select('id')
-        .eq('campaign_id', newProspect.campaign_id)
+        .eq('campaign_id', campaignId)
         .eq('email', newProspect.email)
         .maybeSingle()
 
@@ -427,7 +434,7 @@ export default function Pipeline() {
       const { error } = await supabase
         .from('leads')
         .insert({
-          campaign_id: newProspect.campaign_id,
+          campaign_id: campaignId,
           first_name: newProspect.first_name,
           last_name: newProspect.last_name,
           company_name: newProspect.company_name,
@@ -444,7 +451,7 @@ export default function Pipeline() {
           stage_id: firstStageId,
           last_activity_at: new Date().toISOString(),
           created_by: user?.id,
-          source: 'manual',
+          source: newProspect.source,
           requested_actions: newProspect.requested_actions as any,
           message_snippet: newProspect.requested_samples.length > 0 
             ? t('crm.createDialog.samplesRequestedSnippet', { list: newProspect.requested_samples.join(', ') })
@@ -460,6 +467,7 @@ export default function Pipeline() {
 
       setShowCreateModal(false)
       setNewProspect({
+        source: 'manual',
         campaign_id: '',
         first_name: '',
         last_name: '',
@@ -566,26 +574,20 @@ export default function Pipeline() {
                   {t('pipeline.addProspect')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{t('crm.createDialog.title')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="campaign">{t('crm.createDialog.campaign')}</Label>
-                      <Select value={newProspect.campaign_id} onValueChange={(value) => setNewProspect(prev => ({ ...prev, campaign_id: value }))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('crm.createDialog.campaignPlaceholder')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {campaigns.map(campaign => (
-                            <SelectItem key={campaign.id} value={campaign.id}>
-                              {campaign.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <ProspectSourceFields
+                        source={newProspect.source}
+                        campaignId={newProspect.campaign_id}
+                        campaigns={campaigns}
+                        onSourceChange={(source) => setNewProspect(prev => ({ ...prev, source, campaign_id: '' }))}
+                        onCampaignChange={(campaign_id) => setNewProspect(prev => ({ ...prev, campaign_id }))}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="country">{t('crm.createDialog.country')}</Label>
@@ -731,7 +733,7 @@ export default function Pipeline() {
                   </Button>
                   <Button 
                     onClick={handleCreateProspect}
-                    disabled={!newProspect.campaign_id || !newProspect.first_name || !newProspect.last_name || !newProspect.company_name || !newProspect.email}
+                    disabled={!hasRequiredCampaign(newProspect.source, newProspect.campaign_id) || !newProspect.first_name || !newProspect.last_name || !newProspect.company_name || !newProspect.email}
                   >
                     {t('crm.createDialog.create')}
                   </Button>
