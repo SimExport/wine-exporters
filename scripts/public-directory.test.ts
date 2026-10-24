@@ -45,4 +45,12 @@ test('missing evidence, sparse descriptions and contact-like text fail closed', 
   const email = candidate(); email.publicFields.description = 'Write to private@example.org';
   const phone = candidate(); phone.publicFields.description = 'Call +33 1 23 45 67 89';
   assert.deepEqual(projectPublicDirectory([noEvidence, sparse, email, phone]), []);
+});test('sitemap lists exactly the directory home, six countries and every approved company, without lastmod', async () => {
+  const { readFileSync } = await import('node:fs');
+  const xml = readFileSync(new URL('../public/sitemap.xml', import.meta.url), 'utf8');
+  const listed = [...xml.matchAll(/<loc>https:\/\/wine-exporters\.com(\/annuaire[^<]*)<\/loc>/g)].map(m => m[1]).sort();
+  const expected = ['/annuaire', ...DIRECTORY_COUNTRIES.map(c => `/annuaire/${c.slug}`), ...projectPublicDirectory(APPROVED_PUBLIC_COMPANIES).map(r => `/annuaire/${DIRECTORY_COUNTRIES.find(c => c.code === r.countryCode)!.slug}/${r.slug}`)].sort();
+  assert.deepEqual(listed, expected);
+  assert.equal(listed.length, 42);
+  assert.ok(!/<url>\s*<loc>[^<]*\/annuaire[^<]*<\/loc>\s*<lastmod>/.test(xml));
 });
