@@ -29,13 +29,20 @@ export function EnrichmentActivityCard({ variant = 'card', onSelectCountry }: Pr
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const rpc = supabase.rpc as any;
-      const [today, week] = await Promise.all([
-        rpc('get_enrichment_activity', { _days: 1 }),
-        rpc('get_enrichment_activity', { _days: 7 }),
-      ]);
-      if (cancelled || today.error || week.error) return;
-      setSummary(summarizeEnrichmentActivity((today.data ?? []) as EnrichmentActivityRow[], (week.data ?? []) as EnrichmentActivityRow[]));
+      try {
+        const [today, week] = await Promise.all([
+          (supabase.rpc as any)('get_enrichment_activity', { _days: 1 }),
+          (supabase.rpc as any)('get_enrichment_activity', { _days: 7 }),
+        ]);
+        if (cancelled) return;
+        if (today.error || week.error) {
+          console.error('get_enrichment_activity failed', today.error || week.error);
+          return;
+        }
+        setSummary(summarizeEnrichmentActivity((today.data ?? []) as EnrichmentActivityRow[], (week.data ?? []) as EnrichmentActivityRow[]));
+      } catch (err) {
+        console.error('get_enrichment_activity failed', err);
+      }
     })();
     return () => { cancelled = true; };
   }, []);

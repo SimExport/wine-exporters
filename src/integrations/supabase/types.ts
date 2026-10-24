@@ -351,6 +351,44 @@ export type Database = {
           },
         ]
       }
+      buyer_contact_enrichment_runs: {
+        Row: {
+          batch: string
+          buyer_contact_id: string
+          claimed_at: string
+          completed_at: string | null
+          notes: string | null
+          outcome: string
+          source_urls: string[]
+        }
+        Insert: {
+          batch: string
+          buyer_contact_id: string
+          claimed_at?: string
+          completed_at?: string | null
+          notes?: string | null
+          outcome?: string
+          source_urls?: string[]
+        }
+        Update: {
+          batch?: string
+          buyer_contact_id?: string
+          claimed_at?: string
+          completed_at?: string | null
+          notes?: string | null
+          outcome?: string
+          source_urls?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_contact_enrichment_runs_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: true
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buyer_contact_enrichments: {
         Row: {
           buyer_contact_id: string
