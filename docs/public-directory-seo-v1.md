@@ -38,8 +38,10 @@ Avant tout ajout : confirmer une entreprise réellement existante dans le projet
 
 ## Vérifications réalisées
 - Six tests de règles réussis : registre vide, double approbation, six pays exacts, cinq par pays/trente total, projection sans champs privés, rejet des entrées insuffisantes ou contenant des coordonnées.
+- Deux tests des payloads éditoriaux : six pays, six drafts sans date de publication ; six tests de régression des fiches privées réussis.
 - Navigation publique Playwright : accueil annuaire, six pages pays, fiche inconnue, retour annuaire, changement FR/EN, lien de demande de compte vers `/demande-demo`.
 - Canonical et noindex contrôlés pour les six pays ; un H1 par page ; asset public égal à `[]` ; zéro requête aux tables privées ou à `get_importer_profile`, zéro exception JavaScript sur le parcours.
 - Captures examinées à 1280×1800 et 390×844, sans débordement horizontal mobile. Logo public existant non chargé dans cet environnement : inchangé, hors périmètre de cette V1.
 - HTML initial récupéré sans le contenu annuaire : la limite CSR est confirmée, pas seulement déduite du code.
+- RPC privée testée avec un UUID nul fictif en anonyme : HTTP 401, aucune donnée renvoyée ; liens démo et ressources aller/retour vérifiés.
 - Journal de compilation automatique : build OK. Pas de build lancé manuellement, aucun déploiement/publication.

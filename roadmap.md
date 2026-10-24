@@ -2,8 +2,9 @@
 ## WineExporters — SEO public V1 (preview uniquement)
 - [x] Auditer schéma, droits et séparabilité/licences ; RPC privée protégée, aucune preuve de republication, risque buyer_contacts préexistant signalé, aucune écriture.
 - [x] Annuaire public + six pays + template entreprise ; allowlist build/serveur vide, limites cinq par pays/trente total et projection testées.
-- [ ] Préparer six articles sourcés compatibles CMS dans le repo, sans publication.
-- [ ] Vérifier tests, pages FR/EN desktop/mobile, indexation et documenter approbations nécessaires.
+- [x] Six articles rédigés et sourcés (US, UK, DE, BE, JP, CA), Markdown + JSON CMS en draft, zéro écriture en production.
+- [x] Tests des règles et régression fiches privées, pages FR/EN desktop/mobile, noindex/canonicals, liens et refus RPC anonyme vérifiés ; approbations documentées dans docs/public-directory-seo-v1.md.
+- [ ] Publication réelle des fiches — bloquée sans autorisations/licences et liste d’entreprises approuvées ; publication des articles attend la revue éditoriale et votre approbation.
 
 ## Ajustements email
 - [x] Opportunités : archivage personnel persistant avec RLS, onglet Archives et restauration ; 3 tests et parcours visuel isolé réussis, aucune modification des opportunités partagées ; Authenticated path: UNVERIFIED (Supabase externe)
