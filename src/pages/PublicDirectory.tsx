@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, BookOpen, Building2, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/SEO';
 import PublicLayout from '@/components/resources/PublicLayout';
 import { DIRECTORY_COUNTRIES, directoryCountry, companyPath, type PublicDirectoryCompany } from '@/lib/directory-countries';
-import { articlePath, DEMO_URL, fetchPublishedArticles, SITE_URL, type SeoArticleSummary } from '@/lib/seo-articles';
+import { articlePath, DEMO_URL, fetchPublishedArticles, type SeoArticleSummary } from '@/lib/seo-articles';
 
 const PublicDirectory = () => {
   const { country: countrySlug, slug } = useParams();
   const { t, i18n } = useTranslation();
   const [companies, setCompanies] = useState<PublicDirectoryCompany[]>([]);
   const [articles, setArticles] = useState<SeoArticleSummary[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const country = countrySlug ? directoryCountry(countrySlug) : undefined;
   const name = country ? (i18n.language.startsWith('en') ? country.en : country.fr) : '';
   const company = slug && country ? companies.find(row => row.countryCode === country.code && row.slug === slug) : undefined;
-  const missing = Boolean((countrySlug && !country) || (slug && !company));
+  const missing = Boolean((countrySlug && !country) || (slug && loaded && !company));
   const countryCompanies = country ? companies.filter(row => row.countryCode === country.code) : companies;
   const relatedArticles = articles.filter(article => DIRECTORY_COUNTRIES.some(row => (!country || row.code === country.code) && row.articleSlug === article.slug));
   const path = countrySlug ? `/annuaire/${countrySlug}${slug ? `/${slug}` : ''}` : '/annuaire';
@@ -29,6 +29,7 @@ const PublicDirectory = () => {
     fetch('/directory-public.json', { signal: controller.signal })
       .then(response => { if (!response.ok) throw new Error('Public directory unavailable'); return response.json(); })
       .then(data => { if (!controller.signal.aborted && Array.isArray(data)) setCompanies(data); })
+      .finally(() => { if (!controller.signal.aborted) setLoaded(true); })
       .catch(error => { if (!controller.signal.aborted) console.error('Public directory unavailable', error); });
     fetchPublishedArticles()
       .then(data => { if (!controller.signal.aborted) setArticles(data); })
@@ -38,9 +39,8 @@ const PublicDirectory = () => {
 
   return (
     <PublicLayout>
-      {/* V1 has no approved published directory content: keep all templates out of the index. */}
-      <SEO title={`${title} | WineExporters`} description={description} path={path} noindex />
-      <Helmet><link rel="canonical" href={`${SITE_URL}${path}`} /><meta property="og:type" content="website" /></Helmet>
+      {/* Published directory: valid country/company pages are indexable; unknown routes, and company pages until data has loaded, stay noindex. */}
+      <SEO title={`${title} | WineExporters`} description={description} path={path} type="website" noindex={missing || Boolean(slug && !company)} />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <nav aria-label="breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground">{t('publicDirectory.home')}</Link>
