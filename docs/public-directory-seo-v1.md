@@ -45,3 +45,25 @@ Avant tout ajout : confirmer une entreprise réellement existante dans le projet
 - HTML initial récupéré sans le contenu annuaire : la limite CSR est confirmée, pas seulement déduite du code.
 - RPC privée testée avec un UUID nul fictif en anonyme : HTTP 401, aucune donnée renvoyée ; liens démo et ressources aller/retour vérifiés.
 - Journal de compilation automatique : build OK. Pas de build lancé manuellement, aucun déploiement/publication.
+## Mise à jour du 24 octobre 2026 — 35 fiches en aperçu
+Limites portées à 10 par pays et 60 au total. 60 candidats fournis ; chacun recherché par nom dans `buyer_contacts` (lecture seule : nom, pays, site uniquement, aucune coordonnée), puis site officiel HTTPS consulté le 24/10/2026. Descriptions originales de 2 à 3 phrases, sans chiffre autre qu'une date ou une durée affichée par l'entreprise elle-même. `rights: true` signifie « texte original issu de pages publiques, sans donnée privée ni sous licence » — **pas** une autorisation obtenue de l'entreprise.
+
+| Pays | Intégrées |
+|---|---|
+| États-Unis | 8 |
+| Royaume-Uni | 10 |
+| Allemagne | 4 |
+| Belgique | 4 |
+| Japon | 4 |
+| Canada | 5 |
+| **Total** | **35** |
+
+### Exclusions (25)
+- US — Aiko Importers : le site montre des produits fantaisie, activité vin non confirmée. Atherton Wine Imports : le domaine enregistré affiche une page d'hébergeur sans contenu vin.
+- DE — Weinimport Aumüller : page sans texte descriptif exploitable. Weinimport Eigelsbach : page limitée aux coordonnées d'une personne. Hauser Weinimport : site centré sur la production de boissons à base de vin, import non confirmé. Jacopini Import : boutique en ligne, activité d'import non confirmée. Weinimport Buttgereit : site injoignable. Klocke Weinimporte : grossiste en décoration/fleuristerie, le vin n'y est qu'une gamme parmi d'autres.
+- BE — Global Wineries : site néerlandophone sans confirmation du siège belge (risque Pays-Bas signalé). Le Wine : site en maintenance et marque présente en Belgique, aux Pays-Bas et en France, entité non identifiable. Crombe Wines, Licata, TG Vins : boutiques/cavistes, importation non confirmée sur le site. Matthys Wine Import : ni le siège belge ni l'activité d'import confirmés sur les pages lisibles.
+- JP — Hakurai Wine Trading : aucun site dans buyer_contacts, correspondance avec le site trouvé non certaine. Eurovin Japan, FIC Wine, Heavenly Vines, Vin Passion : importation non confirmée sur les pages lisibles. Wine Diamonds : site injoignable.
+- CA — Agence de Vins David Francis : site expiré. Amethyst Wine Agency : page vide/404. AmoVino, Vins Philippe Dandurand : sites injoignables. Escalade Wines & Spirits : contenu identique à celui d'Authentic Wines and Spirits, identité distincte non vérifiable.
+
+### Statut
+Toutes les pages annuaire restent `noindex, nofollow`, hors sitemap ; aucune publication, aucune écriture Supabase, RLS, auth, campagnes ou CMS. Descriptions en français uniquement (le format public ne prévoit qu'un champ). Avant indexation : relecture humaine des sources de chaque fiche et décision de publication SEO.
