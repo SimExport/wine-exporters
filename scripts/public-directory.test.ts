@@ -9,7 +9,16 @@ const candidate = (slug = 'fixture', countryCode = 'US'): PublicationCandidate =
   approval: { editorial: true, rights: true, approvedAt: '2026-10-24', evidence: 'Synthetic rights fixture' },
   publicFields: { slug, countryCode, name: 'Synthetic fixture', description: 'Synthetic public description', website: 'https://example.org', sources: ['https://example.org/about'] },
 });
-test('no real companies are approved for publication in this V1', () => assert.deepEqual(projectPublicDirectory(APPROVED_PUBLIC_COMPANIES), []));
+test('every reviewed company passes the projection, with the documented count per country', () => {
+  const projected = projectPublicDirectory(APPROVED_PUBLIC_COMPANIES);
+  assert.equal(projected.length, APPROVED_PUBLIC_COMPANIES.length);
+  const perCountry = Object.fromEntries(DIRECTORY_COUNTRIES.map(c => [c.code, projected.filter(r => r.countryCode === c.code).length]));
+  assert.deepEqual(perCountry, { US: 8, UK: 10, DE: 4, BE: 4, JP: 4, CA: 5 });
+});
+test('excluded candidates never reach the public directory', () => {
+  const names = projectPublicDirectory(APPROVED_PUBLIC_COMPANIES).map(r => r.name);
+  for (const excluded of ['Global Wineries', 'Le Wine', 'Aiko Importers', 'Atherton Wine Imports', 'Hakurai Wine Trading, Inc.', 'Escalade Wines & Spirits']) assert.ok(!names.includes(excluded), excluded);
+});
 test('both rights and explicit editorial approval are required', () => {
   const noRights = candidate(); noRights.approval.rights = false;
   const noEditorial = candidate(); noEditorial.approval.editorial = false;
@@ -19,11 +28,11 @@ test('only the six requested countries are accepted', () => {
   assert.deepEqual(DIRECTORY_COUNTRIES.map(country => country.code), ['US', 'UK', 'DE', 'BE', 'JP', 'CA']);
   assert.equal(projectPublicDirectory([candidate('fixture', 'FR')]).length, 0);
 });
-test('at most five companies per country and thirty overall', () => {
-  const rows = DIRECTORY_COUNTRIES.flatMap(country => Array.from({ length: 8 }, (_, i) => candidate(`fixture-${i}`, country.code)));
+test('at most ten companies per country and sixty overall', () => {
+  const rows = DIRECTORY_COUNTRIES.flatMap(country => Array.from({ length: 12 }, (_, i) => candidate(`fixture-${i}`, country.code)));
   const projected = projectPublicDirectory(rows);
-  assert.equal(projected.length, 30);
-  for (const country of DIRECTORY_COUNTRIES) assert.equal(projected.filter(row => row.countryCode === country.code).length, 5);
+  assert.equal(projected.length, 60);
+  for (const country of DIRECTORY_COUNTRIES) assert.equal(projected.filter(row => row.countryCode === country.code).length, 10);
 });
 test('unknown private fields and approval metadata never reach the public projection', () => {
   const row = candidate();
