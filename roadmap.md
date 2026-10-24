@@ -1,4 +1,10 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
+## WineExporters — SEO public V1 (preview uniquement)
+- [ ] Auditer schéma, droits et séparabilité/licences des données publiques, sans écriture en production.
+- [ ] Ajouter annuaire public + six pays + template entreprise, allowlist serveur vide faute d’approbation fiable.
+- [ ] Préparer six articles sourcés compatibles CMS dans le repo, sans publication.
+- [ ] Vérifier tests, pages FR/EN desktop/mobile, indexation et documenter approbations nécessaires.
+
 ## Ajustements email
 - [x] Opportunités : archivage personnel persistant avec RLS, onglet Archives et restauration ; 3 tests et parcours visuel isolé réussis, aucune modification des opportunités partagées ; Authenticated path: UNVERIFIED (Supabase externe)
 - [x] CRM : quatre sources FR/EN dans les vues Kanban et Liste ; campagne requise seulement pour Campagne, 7 tests et contrôles visuels isolés réussis ; ajout connecté non vérifiable sur le Supabase externe
