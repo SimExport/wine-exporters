@@ -34,6 +34,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 text-sm text-muted-foreground sm:flex-row sm:px-6">
           <span>© {new Date().getFullYear()} WineExporters by ExportVins</span>
           <div className="flex gap-4">
+            <Link to="/annuaire" className="hover:text-foreground">{t("publicDirectory.nav")}</Link>
             <Link to="/ressources" className="hover:text-foreground">{t("seoArticles.nav.resources")}</Link>
             <Link to="/market-analysis" className="hover:text-foreground">{t("seoArticles.nav.analysis")}</Link>
           </div>

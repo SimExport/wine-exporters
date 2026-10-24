@@ -54,6 +54,7 @@ import GettingStarted from "./pages/resources/GettingStarted";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
+import PublicDirectory from "./pages/PublicDirectory";
 import { PremiumGate, TrialHomeRedirect, TrialReadonly } from "@/components/trial/TrialGate";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,9 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
+            <Route path="/annuaire" element={<PublicDirectory />} />
+            <Route path="/annuaire/:country" element={<PublicDirectory />} />
+            <Route path="/annuaire/:country/:slug" element={<PublicDirectory />} />
             <Route path="/decouvrir" element={<Discover />} />
             <Route path="/market-analysis" element={<MarketAnalysis />} />
             <Route path="/market-analysis/result/:id" element={<MarketAnalysisResult />} />

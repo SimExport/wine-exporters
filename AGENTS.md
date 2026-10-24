@@ -1,4 +1,6 @@
 # AGENTS
+- Public directory data is a separate, empty-by-default build/server registry in `scripts/public-directory.ts`, never sourced from private buyer tables/RPCs; explicit rights + editorial approval precede the six-field public projection (five per country, thirty total), served as static JSON to preserve production data isolation.
+- Directory templates remain noindex and absent from sitemaps until a separate reviewed publication change; editorial Markdown/CMS payloads are repo-only drafts, never automatically inserted into production.
 - Opportunity archives are per-user markers in `opportunity_archives` with owner-only RLS and auth.uid() defaults; archiving never updates shared importer/tender rows and both main and archive views reuse the same cards.
 - CRM creation in Kanban and list views shares source fields and a campaign resolver; non-campaign sources use the existing private manual container to preserve campaign-based ownership and reads without requiring a campaign choice.
 - Sourcing result bulk CRM additions reuse the single-prospect path sequentially with per-item outcomes; selection spans fixed ten-row pages and presentation-only Markdown formatting leaves stored summaries unchanged.
