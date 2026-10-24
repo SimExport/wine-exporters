@@ -67,3 +67,9 @@ Limites portées à 10 par pays et 60 au total. 60 candidats fournis ; chacun re
 
 ### Statut
 Toutes les pages annuaire restent `noindex, nofollow`, hors sitemap ; aucune publication, aucune écriture Supabase, RLS, auth, campagnes ou CMS. Descriptions en français uniquement (le format public ne prévoit qu'un champ). Avant indexation : relecture humaine des sources de chaque fiche et décision de publication SEO.
+
+## Publication SEO autorisée — 24 octobre 2026 (code seulement, déploiement non effectué)
+- `noindex` retiré de `/annuaire`, des six pages pays et des 35 fiches ; canonical autoréférent `https://wine-exporters.com/...` (balise unique via `SEO`). Routes pays/fiches inconnues : `noindex, nofollow`, sans canonical.
+- `public/sitemap.xml` : 42 URLs annuaire (1 + 6 + 35), sans `lastmod` faute de date de modification propre à chaque page. Un test vérifie la correspondance exacte avec le registre.
+- Limite CSR confirmée : le HTML initial ne contient ni le contenu ni les balises propres à la page ; elles n'apparaissent qu'après exécution du JavaScript. Pas de SSR ni de pré-rendu. Une URL inconnue renvoie HTTP 200 (soft 404) avec noindex après rendu.
+- Articles brouillons non concernés : toujours non publiés.
