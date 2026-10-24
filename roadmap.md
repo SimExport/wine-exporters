@@ -1,6 +1,6 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 ## WineExporters — SEO public V1 (preview uniquement)
-- [ ] Point 6 BestWineImporters : audit agrégé en lecture seule, blocs qualitatifs prouvés, six CTA pays vers le parcours existant, documentation et contrôles (aucune publication).
+- [x] Point 6 BestWineImporters : audit agrégé en lecture seule, aucun chiffre retenu faute de définition/licences, blocs qualitatifs prouvés, six CTA pays vers le parcours existant ; 8 tests et rendu isolé desktop/mobile, anciens jetons et lien vérifiés (aucune publication).
 - [x] Auditer schéma, droits et séparabilité/licences ; RPC privée protégée, aucune preuve de republication, risque buyer_contacts préexistant signalé, aucune écriture.
 - [x] Annuaire public + six pays + template entreprise ; allowlist build/serveur vide, limites cinq par pays/trente total et projection testées.
 - [x] Six articles rédigés et sourcés (US, UK, DE, BE, JP, CA), Markdown + JSON CMS en draft, zéro écriture en production.
