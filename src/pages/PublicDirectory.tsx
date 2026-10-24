@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, BookOpen, Building2, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/SEO';
 import PublicLayout from '@/components/resources/PublicLayout';
 import { DIRECTORY_COUNTRIES, directoryCountry, companyPath, type PublicDirectoryCompany } from '@/lib/directory-countries';
-import { articlePath, DEMO_URL, fetchPublishedArticles, SITE_URL, type SeoArticleSummary } from '@/lib/seo-articles';
+import { articlePath, DEMO_URL, fetchPublishedArticles, type SeoArticleSummary } from '@/lib/seo-articles';
 
 const PublicDirectory = () => {
   const { country: countrySlug, slug } = useParams();
