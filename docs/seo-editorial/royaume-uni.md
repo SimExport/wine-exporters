@@ -40,9 +40,23 @@ Une dégustation positive doit déboucher sur une décision explicite : référe
 
 Une exclusivité mérite le même niveau de précision : circuit, territoire, durée et critères de maintien. Le bon partenaire n’est pas nécessairement celui qui réclame la gamme entière. C’est celui dont le modèle de vente, les coûts et l’organisation sont compatibles avec la place que vous souhaitez donner à vos vins.
 
-**Étape suivante :** explorez l’[annuaire britannique](/annuaire/royaume-uni), puis utilisez [l’analyse de marché WineExporters](/market-analysis) pour approfondir votre cadrage.
+## Ce que WineExporters permet de vérifier dans votre recherche
 
-[[CTA_ANALYSE_MARCHE]]
+Dans l’espace connecté WineExporters, la base Importateurs permet de sélectionner le pays « Royaume-Uni » et d’effectuer une recherche textuelle sur le nom de société, la ville, l’adresse ou l’email renseignés. Ce sont des critères de repérage, pas une certification du rôle d’importateur. Aucun contact ni résultat de cette base privée n’est reproduit ici.
+
+Pour une piste britannique, une localisation ne suffit pas à distinguer le territoire de livraison du territoire commercial. La couverture de la Grande-Bretagne ou de l’Irlande du Nord doit être confirmée séparément.
+
+La demande d’analyse de marché est un parcours distinct : elle permet de préciser vos vins, votre prix export, vos certifications et vos préférences de partenaires. Ces informations cadrent la demande ; elles ne constituent pas des filtres par spécialité dans la base Importateurs.
+
+*Source interne : vérification du fonctionnement de WineExporters et audit agrégé en lecture seule du 24 octobre 2026. Les lignes de contacts ne définissent pas des entreprises importatrices uniques et les droits de réutilisation publique ne sont pas établis ; aucun total ni répartition par spécialité n’est donc présenté.*
+
+> **Cadrer votre recherche au Royaume-Uni**
+>
+> Présentez votre offre, votre prix export et les profils de partenaires recherchés. Précisez dans votre demande si votre projet concerne la Grande-Bretagne ou l’Irlande du Nord, ainsi que le circuit de vente envisagé.
+>
+> [Préparer mon analyse pour le Royaume-Uni](/market-analysis)
+>
+> Le lien ouvre la demande d’analyse existante : sélectionnez « Royaume-Uni » dans le formulaire. Il ne présélectionne pas le pays et ne garantit ni partenaire ni conformité réglementaire.
 
 ## Dossier de sources — à retirer du corps CMS
 
@@ -50,3 +64,5 @@ Date de référence demandée : **2026-10-24** ; réserve de méthode en tête.
 - **UK-1 / citation 1 — HMRC, Import alcoholic products into the UK.** https://www.gov.uk/guidance/import-alcohol-into-the-uk — Différences GB/Irlande du Nord, facteurs déterminant le régime et suspension des droits selon conditions. Aucun taux actuel n’en est tiré.
 - **UK-2 / citation 2 — HMRC, Alcohol Wholesaler Registration Scheme.** https://www.gov.uk/guidance/the-alcohol-wholesaler-registration-scheme-awrs — Champ conditionnel de l’agrément pour le commerce de gros et accès au contrôle d’agrément. Ne démontre pas la fiabilité financière d’une entreprise.
 - **UK-3 / citation 3 — Defra, Importing wine.** https://www.gov.uk/guidance/importing-selling-and-labelling-wine — Distinctions de certification et d’étiquetage selon territoires et flux. À relire pour la destination exacte ; aucune règle GB n’est étendue automatiquement à l’Irlande du Nord.
+
+- **WE-QUAL / vérification interne — 2026-10-24 à 12:44:15 UTC.** Sources : schéma Supabase lu via information_schema.columns ; agrégats seuls de buyer_contacts et buyer_contact_enrichments ; src/pages/Importers.tsx ; public.search_buyer_contacts ; src/components/market-analysis/options.ts. Définition : lignes de contacts rattachées aux alias du pays, pas entités légales uniques. Aucun chiffre ni contenu privé repris. Droits publics non établis ; méthode et limites détaillées dans README.md.

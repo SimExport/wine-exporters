@@ -40,9 +40,23 @@ Dans l’accord commercial, précisez paiement, responsabilité du transport, tr
 
 Le partenaire adapté est celui dont les réponses restent cohérentes entre le catalogue, le contrat et le schéma de réception. Comparez les candidats sur ces preuves plutôt que sur leur enthousiasme. Vous pourrez alors consacrer vos dégustations aux relations les plus réalistes et préparer un développement fondé sur des ventes suivies.
 
-**Pour constituer votre sélection :** consultez l’[annuaire belge](/annuaire/belgique), puis approfondissez votre cadrage avec [l’analyse de marché WineExporters](/market-analysis).
+## Ce que WineExporters permet de vérifier dans votre recherche
 
-[[CTA_ANALYSE_MARCHE]]
+Dans l’espace connecté WineExporters, la base Importateurs permet de sélectionner le pays « Belgique » et d’effectuer une recherche textuelle sur le nom de société, la ville, l’adresse ou l’email renseignés. Ce sont des critères de repérage, pas une certification du rôle d’importateur. Aucun contact ni résultat de cette base privée n’est reproduit ici.
+
+Pour une piste belge, une ville aide à situer l’interlocuteur, sans prouver sa couverture commerciale, ses langues de travail ou son statut de réception. Ces informations demandent une vérification distincte.
+
+La demande d’analyse de marché est un parcours distinct : elle permet de préciser vos vins, votre prix export, vos certifications et vos préférences de partenaires. Ces informations cadrent la demande ; elles ne constituent pas des filtres par spécialité dans la base Importateurs.
+
+*Source interne : vérification du fonctionnement de WineExporters et audit agrégé en lecture seule du 24 octobre 2026. Les lignes de contacts ne définissent pas des entreprises importatrices uniques et les droits de réutilisation publique ne sont pas établis ; aucun total ni répartition par spécialité n’est donc présenté.*
+
+> **Définir votre circuit de vente en Belgique**
+>
+> Présentez votre gamme, votre prix export et les partenaires recherchés. Ajoutez les zones et les circuits visés en Belgique, puis les questions à clarifier sur l’acheteur et la réception des vins.
+>
+> [Préparer mon analyse pour la Belgique](/market-analysis)
+>
+> Le lien ouvre la demande d’analyse existante : sélectionnez « Belgique » dans le formulaire. Il ne présélectionne pas le pays et ne garantit ni partenaire ni conformité réglementaire.
 
 ## Dossier de sources — à retirer du corps CMS
 
@@ -51,3 +65,5 @@ Date de référence demandée : **2026-10-24** ; réserve de méthode en tête.
 - **BE-2 / citation 2 — Commission européenne, SEED.** https://ec.europa.eu/taxation_customs/dds2/seed/seed_consultation.jsp?Lang=en — Outil public de vérification par numéro d’accise ; aucune évaluation commerciale ou financière.
 - **BE-3 / citation 3 — Commission européenne, EMCS.** https://taxation-customs.ec.europa.eu/taxation/excise-duties/emcs_en — Documents des flux et compte rendu de réception. L’application concrète et les exceptions sont à faire confirmer.
 - **Source repérée mais non utilisée comme règle actuelle :** https://finances.belgium.be/sites/default/files/Customs/Brochures/Accijnzen/Brochure_Accises_Boissons_alcoolisees_FR.pdf — Brochure datée de 2021 ; exclue des prescriptions opérationnelles, notamment pour éviter de reprendre des procédures antérieures aux évolutions d’EMCS.
+
+- **WE-QUAL / vérification interne — 2026-10-24 à 12:44:15 UTC.** Sources : schéma Supabase lu via information_schema.columns ; agrégats seuls de buyer_contacts et buyer_contact_enrichments ; src/pages/Importers.tsx ; public.search_buyer_contacts ; src/components/market-analysis/options.ts. Définition : lignes de contacts rattachées aux alias du pays, pas entités légales uniques. Aucun chiffre ni contenu privé repris. Droits publics non établis ; méthode et limites détaillées dans README.md.

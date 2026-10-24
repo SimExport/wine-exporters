@@ -40,12 +40,28 @@ En cas d’intérêt, faites construire un scénario de lancement qui intègre c
 
 Comparez les candidats sur leur adéquation de gamme, leur clarté réglementaire, la précision du retour de dégustation et le réalisme des conditions d’achat. Encadrez l’exclusivité par un périmètre explicite et un réexamen convenu. Le bon partenaire sera celui qui transforme l’intérêt pour vos vins en décisions documentées, puis en actions commerciales suivies.
 
-**Pour préparer vos premiers contacts :** explorez l’[annuaire japonais](/annuaire/japon), puis approfondissez le contexte avec [l’analyse de marché WineExporters](/market-analysis).
+## Ce que WineExporters permet de vérifier dans votre recherche
 
-[[CTA_ANALYSE_MARCHE]]
+Dans l’espace connecté WineExporters, la base Importateurs permet de sélectionner le pays « Japon » et d’effectuer une recherche textuelle sur le nom de société, la ville, l’adresse ou l’email renseignés. Ce sont des critères de repérage, pas une certification du rôle d’importateur. Aucun contact ni résultat de cette base privée n’est reproduit ici.
+
+Pour une piste japonaise, la recherche textuelle sert à retrouver un nom ou une localisation. Elle ne valide ni la licence de l’opérateur ni son aptitude à introduire votre cuvée ; le dossier produit reste à examiner avec lui.
+
+La demande d’analyse de marché est un parcours distinct : elle permet de préciser vos vins, votre prix export, vos certifications et vos préférences de partenaires. Ces informations cadrent la demande ; elles ne constituent pas des filtres par spécialité dans la base Importateurs.
+
+*Source interne : vérification du fonctionnement de WineExporters et audit agrégé en lecture seule du 24 octobre 2026. Les lignes de contacts ne définissent pas des entreprises importatrices uniques et les droits de réutilisation publique ne sont pas établis ; aucun total ni répartition par spécialité n’est donc présenté.*
+
+> **Préparer votre recherche de partenaire au Japon**
+>
+> Renseignez vos types de vin, vos appellations, votre prix export et vos préférences d’importateur. Précisez le circuit envisagé au Japon et les documents techniques déjà disponibles avant de solliciter une dégustation.
+>
+> [Préparer mon analyse pour le Japon](/market-analysis)
+>
+> Le lien ouvre la demande d’analyse existante : sélectionnez « Japon » dans le formulaire. Il ne présélectionne pas le pays et ne garantit ni partenaire ni conformité réglementaire.
 
 ## Dossier de sources — à retirer du corps CMS
 
 Date de référence demandée : **2026-10-24** ; réserve de méthode en tête.
 - **JP-1 / citation 1 — Japan Customs, FAQ 3105.** https://www.customs.go.jp/english/c-answer_e/kojin/3105_e.htm — Déclaration sanitaire pour la vente, licence de vente, distinction avec le service sur place et obligations d’affichage. Les franchises personnelles et seuils de colis ne sont pas transposés aux échantillons professionnels.
 - **JP-2 / citation 2 — JETRO, Guidebook for Export to Japan, Alcoholic Beverages.** https://www.jetro.go.jp/ext_images/canada/resources/guidebook_food_alcoholic_beverages_rev.pdf — Cartographie des cadres Food Sanitation Act, Liquor Tax Act et Customs Act. Document de cadrage dont l’actualité détaillée n’est pas établie : aucun taux, seuil, code produit ou délai n’en est repris comme règle actuelle.
+
+- **WE-QUAL / vérification interne — 2026-10-24 à 12:44:15 UTC.** Sources : schéma Supabase lu via information_schema.columns ; agrégats seuls de buyer_contacts et buyer_contact_enrichments ; src/pages/Importers.tsx ; public.search_buyer_contacts ; src/components/market-analysis/options.ts. Définition : lignes de contacts rattachées aux alias du pays, pas entités légales uniques. Aucun chiffre ni contenu privé repris. Droits publics non établis ; méthode et limites détaillées dans README.md.

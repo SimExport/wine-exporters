@@ -42,9 +42,23 @@ Précisez les provinces, circuits, cuvées, commissions, dépenses autorisées e
 
 Le bon partenaire ne promet pas simplement « le Canada ». Il sait expliquer où il intervient, ce qu’il représente et comment votre vin peut atteindre son client dans le cadre applicable. Cette clarté vous permettra de concentrer vos moyens sur un projet provincial réaliste avant d’envisager une extension.
 
-**Pour préparer votre sélection :** consultez les [pistes canadiennes de l’annuaire](/annuaire/canada), puis approfondissez votre cadrage avec [l’analyse de marché WineExporters](/market-analysis).
+## Ce que WineExporters permet de vérifier dans votre recherche
 
-[[CTA_ANALYSE_MARCHE]]
+Dans l’espace connecté WineExporters, la base Importateurs permet de sélectionner le pays « Canada » et d’effectuer une recherche textuelle sur le nom de société, la ville, l’adresse ou l’email renseignés. Ce sont des critères de repérage, pas une certification du rôle d’importateur. Aucun contact ni résultat de cette base privée n’est reproduit ici.
+
+Pour une piste canadienne, une ville aide à situer un interlocuteur, mais ne prouve pas son mandat provincial ou son rôle d’importation. Ne confondez pas cette recherche avec un filtre vérifié par province ou par licence.
+
+La demande d’analyse de marché est un parcours distinct : elle permet de préciser vos vins, votre prix export, vos certifications et vos préférences de partenaires. Ces informations cadrent la demande ; elles ne constituent pas des filtres par spécialité dans la base Importateurs.
+
+*Source interne : vérification du fonctionnement de WineExporters et audit agrégé en lecture seule du 24 octobre 2026. Les lignes de contacts ne définissent pas des entreprises importatrices uniques et les droits de réutilisation publique ne sont pas établis ; aucun total ni répartition par spécialité n’est donc présenté.*
+
+> **Cadrer un premier projet provincial au Canada**
+>
+> Présentez vos cuvées, votre prix export et le profil de partenaire recherché. Choisissez le Canada comme marché cible et précisez la province dans les informations complémentaires, avec le rôle attendu : représentation, achat ou accompagnement commercial.
+>
+> [Préparer mon analyse pour le Canada](/market-analysis)
+>
+> Le lien ouvre la demande d’analyse existante : sélectionnez « Canada » dans le formulaire. Il ne présélectionne pas le pays et ne garantit ni partenaire ni conformité réglementaire.
 
 ## Dossier de sources — à retirer du corps CMS
 
@@ -53,3 +67,5 @@ Date de référence demandée : **2026-10-24** ; réserve de méthode en tête.
 - **CA-2 / citation 2 — SAQ, Vos produits d’importations privées.** https://www.saq.com/fr/produits-ip — Existence de politiques et guides propres aux agents, fournisseurs et titulaires de permis. Ne promet ni acceptation automatique ni vente hors circuit réglementé.
 - **CA-3 / citation 3 — AGCO, Represent a manufacturer.** https://www.agco.ca/en/alcohol/represent-manufacturer — Portée et limites de la licence de représentation en Ontario ; absence de droit d’importation directe attaché à cette licence. Ne doit pas être extrapolé aux autres licences ou provinces.
 - **CA-4 / citation 4 — LCBO, Specialty Services Private Importation Process.** https://www.lcbo.com/content/dbwl/en/basepage/home/Wholesale/Specialty-services/specialty-services-information/private-importation.html — Achat auprès du fournisseur et définition du fournisseur pour ce dispositif. Les exemples de délais, coûts et quantités du site ne sont pas repris dans l’article et ne sont pas généralisés.
+
+- **WE-QUAL / vérification interne — 2026-10-24 à 12:44:15 UTC.** Sources : schéma Supabase lu via information_schema.columns ; agrégats seuls de buyer_contacts et buyer_contact_enrichments ; src/pages/Importers.tsx ; public.search_buyer_contacts ; src/components/market-analysis/options.ts. Définition : lignes de contacts rattachées aux alias du pays, pas entités légales uniques. Aucun chiffre ni contenu privé repris. Droits publics non établis ; méthode et limites détaillées dans README.md.

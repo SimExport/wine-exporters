@@ -36,12 +36,28 @@ Négociez enfin l’exclusivité sur un périmètre précis : territoire, réfé
 
 Avant de décider, comparez les candidats dans une même grille : compatibilité de gamme, rôle juridique, réseau prouvé, budget de lancement et qualité du reporting. Laissez les cases inconnues visibles. Une question sans réponse mérite une vérification, pas une note favorable par défaut.
 
-**Pour préparer votre sélection :** consultez les [pistes américaines de l’annuaire](/annuaire/etats-unis), puis approfondissez le contexte avec [l’analyse de marché WineExporters](/market-analysis).
+## Ce que WineExporters permet de vérifier dans votre recherche
 
-[[CTA_ANALYSE_MARCHE]]
+Dans l’espace connecté WineExporters, la base Importateurs permet de sélectionner le pays « États-Unis » et d’effectuer une recherche textuelle sur le nom de société, la ville, l’adresse ou l’email renseignés. Ce sont des critères de repérage, pas une certification du rôle d’importateur. Aucun contact ni résultat de cette base privée n’est reproduit ici.
+
+Pour une piste américaine, une ville sert de point de départ géographique ; elle ne démontre ni les États desservis ni le réseau de distribution. Ces points restent à confirmer avec le partenaire.
+
+La demande d’analyse de marché est un parcours distinct : elle permet de préciser vos vins, votre prix export, vos certifications et vos préférences de partenaires. Ces informations cadrent la demande ; elles ne constituent pas des filtres par spécialité dans la base Importateurs.
+
+*Source interne : vérification du fonctionnement de WineExporters et audit agrégé en lecture seule du 24 octobre 2026. Les lignes de contacts ne définissent pas des entreprises importatrices uniques et les droits de réutilisation publique ne sont pas établis ; aucun total ni répartition par spécialité n’est donc présenté.*
+
+> **Préparer une recherche ciblée aux États-Unis**
+>
+> Décrivez vos cuvées, votre prix export et le circuit recherché. Dans les précisions de votre demande, indiquez votre zone de lancement et les relais de distribution à vérifier : choisir les États-Unis ne définit pas à lui seul une couverture par État.
+>
+> [Préparer mon analyse pour les États-Unis](/market-analysis)
+>
+> Le lien ouvre la demande d’analyse existante : sélectionnez « États-Unis » dans le formulaire. Il ne présélectionne pas le pays et ne garantit ni partenaire ni conformité réglementaire.
 
 ## Dossier de sources — à retirer du corps CMS
 
 Date de référence demandée pour chaque source : **2026-10-24** ; voir réserve de méthode en tête du livrable.
 - **US-1 / citation 1 — TTB, Importing Bottled Alcohol Beverages Into the United States.** https://www.ttb.gov/import-export/itd/importing-bottled-alcohol-beverages-into-the-united-states — Appuie le permis fédéral d’importateur, le recours à un importateur existant, la prise en compte des exigences locales et le parcours général d’importation. Ne prouve ni la solvabilité d’un candidat ni sa couverture commerciale. Ne pas extrapoler les avis tarifaires ou restrictions affichés à d’autres origines.
 - **US-2 / citation 2 — TTB, Overview of Labeling Requirements for Imported Wines.** https://www.ttb.gov/regulated-commodities/beverage-alcohol/wine/labelreqimportedwine — Appuie la distinction selon le titre alcoométrique et la nécessité d’examiner les règles d’étiquetage et d’approbation applicables. Ne permet pas d’affirmer que tout vin nécessite exactement le même dossier.
+
+- **WE-QUAL / vérification interne — 2026-10-24 à 12:44:15 UTC.** Sources : schéma Supabase lu via information_schema.columns ; agrégats seuls de buyer_contacts et buyer_contact_enrichments ; src/pages/Importers.tsx ; public.search_buyer_contacts ; src/components/market-analysis/options.ts. Définition : lignes de contacts rattachées aux alias du pays, pas entités légales uniques. Aucun chiffre ni contenu privé repris. Droits publics non établis ; méthode et limites détaillées dans README.md.
