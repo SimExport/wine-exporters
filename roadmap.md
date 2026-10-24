@@ -1,7 +1,7 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 ## WineExporters — SEO public V1 (preview uniquement)
-- [ ] Auditer schéma, droits et séparabilité/licences des données publiques, sans écriture en production.
-- [ ] Ajouter annuaire public + six pays + template entreprise, allowlist serveur vide faute d’approbation fiable.
+- [x] Auditer schéma, droits et séparabilité/licences ; RPC privée protégée, aucune preuve de republication, risque buyer_contacts préexistant signalé, aucune écriture.
+- [x] Annuaire public + six pays + template entreprise ; allowlist build/serveur vide, limites cinq par pays/trente total et projection testées.
 - [ ] Préparer six articles sourcés compatibles CMS dans le repo, sans publication.
 - [ ] Vérifier tests, pages FR/EN desktop/mobile, indexation et documenter approbations nécessaires.
 

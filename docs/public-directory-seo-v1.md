@@ -35,3 +35,11 @@ Avant tout ajout : confirmer une entreprise réellement existante dans le projet
 2. Fournir les autorisations et champs réellement republiables des éventuelles entreprises existantes (maximum trente).
 3. Autoriser séparément la publication/indexation et, si souhaité, un travail SSR.
 4. Traiter séparément les droits préexistants de `buyer_contacts` ; aucun correctif de production appliqué par cette V1.
+
+## Vérifications réalisées
+- Six tests de règles réussis : registre vide, double approbation, six pays exacts, cinq par pays/trente total, projection sans champs privés, rejet des entrées insuffisantes ou contenant des coordonnées.
+- Navigation publique Playwright : accueil annuaire, six pages pays, fiche inconnue, retour annuaire, changement FR/EN, lien de demande de compte vers `/demande-demo`.
+- Canonical et noindex contrôlés pour les six pays ; un H1 par page ; asset public égal à `[]` ; zéro requête aux tables privées ou à `get_importer_profile`, zéro exception JavaScript sur le parcours.
+- Captures examinées à 1280×1800 et 390×844, sans débordement horizontal mobile. Logo public existant non chargé dans cet environnement : inchangé, hors périmètre de cette V1.
+- HTML initial récupéré sans le contenu annuaire : la limite CSR est confirmée, pas seulement déduite du code.
+- Journal de compilation automatique : build OK. Pas de build lancé manuellement, aucun déploiement/publication.
