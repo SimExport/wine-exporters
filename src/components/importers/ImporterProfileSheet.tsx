@@ -95,7 +95,8 @@ export function ImporterProfileSheet({ contact, onClose, repository = importerPr
           {data && <div className="space-y-8">
             {description.text && <Section title={t('importerProfile.about')}>
               {description.language !== (i18n.language.startsWith('en') ? 'en' : 'fr') && <p className="text-xs text-muted-foreground">{t('importerProfile.originalLanguage', { language: t(`importerProfile.${description.language === 'en' ? 'english' : 'french'}`) })}</p>}
-              <div lang={description.language} className="space-y-5 text-base leading-8">{description.text.split(/\n\s*\n/).map((paragraph, index) => <p key={index} className="whitespace-pre-wrap break-words">{paragraph}</p>)}</div>
+              <div lang={description.language} className="space-y-5 text-base leading-8">{descShown.split(/\n\s*\n/).map((paragraph, index) => <p key={index} className="whitespace-pre-wrap break-words">{paragraph}</p>)}</div>
+              {descIsLong && <Button variant="link" className="h-auto p-0" onClick={() => setDescExpanded(v => !v)}>{descExpanded ? t('importerProfile.readLess') : t('importerProfile.readMore')}</Button>}
             </Section>}
             {hasOrigins && <Section title={t('importerProfile.origins')}><Values label={t('importerProfile.countries')} values={enrichment?.wine_origins} /><Values label={t('importerProfile.regions')} values={enrichment?.wine_regions} /><Values label={t('importerProfile.appellations')} values={enrichment?.wine_appellations} /></Section>}
             {hasStyles && <Section title={t('importerProfile.styles')}><Values label={t('importerProfile.wineStyles')} values={enrichment?.wine_styles} /><Values label={t('importerProfile.specialties')} values={enrichment?.wine_specialties} /></Section>}
