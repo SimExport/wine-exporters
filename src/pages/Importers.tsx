@@ -797,7 +797,11 @@ const Importers = () => {
         </Collapsible>
       </div>
 
-      <ImporterProfileSheet contact={activeContact} onClose={() => setActiveContact(null)} />
+      <ImporterProfileSheet
+        contact={activeContact}
+        onClose={() => setActiveContact(null)}
+        crmAction={activeContact ? { state: crmStateFor(activeContact.id), onAdd: () => addToCrm(activeContact) } : undefined}
+      />
       <AlertDialog open={partialOpen} onOpenChange={setPartialOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, Mail, Phone, MapPin, X, Loader2, AlertCircle, Globe } from 'lucide-react';
+import { ExternalLink, Mail, Phone, MapPin, X, Loader2, AlertCircle, Globe, UserPlus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { COUNTRIES } from '@/components/importers/country-data';
@@ -22,17 +22,19 @@ function SourceLink({ url, label }: { url?: string | null; label: string }) {
   return <a href={safe} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"><ExternalLink className="h-3.5 w-3.5 shrink-0" /><span className="break-all">{label}</span></a>;
 }
 
-export function ImporterProfileSheet({ contact, onClose, repository = importerProfileRepository }: {
+export function ImporterProfileSheet({ contact, onClose, repository = importerProfileRepository, crmAction }: {
   contact: ImporterContact | null; onClose: () => void; repository?: ImporterProfileRepository;
+  crmAction?: { state: 'idle' | 'adding' | 'added'; onAdd: () => void };
 }) {
   const { t, i18n } = useTranslation();
   const [result, setResult] = useState<ImporterProfileResult | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [descExpanded, setDescExpanded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contactId = contact?.id;
   useEffect(() => {
-    setResult(null); setError(false); scrollRef.current?.scrollTo(0, 0);
+    setResult(null); setError(false); setDescExpanded(false); scrollRef.current?.scrollTo(0, 0);
     if (!contactId) return;
     const controller = new AbortController();
     repository.load(contactId, controller.signal).then(value => {
@@ -43,6 +45,11 @@ export function ImporterProfileSheet({ contact, onClose, repository = importerPr
   const data = result?.status === 'ready' ? result.data : null;
   const enrichment = data?.enrichment ?? null;
   const description = descriptionFor(enrichment, i18n.language);
+  // Factual excerpt: a faithful prefix of the stored text, with access to the
+  // full text when it is long. Nothing is rewritten or generated.
+  const DESC_EXCERPT = 600;
+  const descIsLong = description.text.length > DESC_EXCERPT;
+  const descShown = descExpanded || !descIsLong ? description.text : `${description.text.slice(0, DESC_EXCERPT).trimEnd()}…`;
   const sources = data ? profileSources(data) : [];
   const country = COUNTRIES.find(c => [c.name, c.englishName, ...(c.dbAliases ?? [])].some(n => n.toLowerCase() === contact?.country.toLowerCase()));
   const countryLabel = country ? (i18n.language.startsWith('en') ? country.englishName : country.name) : contact?.country;
@@ -68,6 +75,16 @@ export function ImporterProfileSheet({ contact, onClose, repository = importerPr
               {safeExternalUrl(contact?.website_url) && <div className="flex items-start gap-3"><dt className="pt-1 text-muted-foreground"><Globe className="h-4 w-4" /><span className="sr-only">{t('importerProfile.website')}</span></dt><dd className="min-w-0"><SourceLink url={contact?.website_url} label={contact?.website_url?.replace(/^https?:\/\/(www\.)?/, '') ?? ''} /></dd></div>}
               {[['Facebook', contact?.Facebook], ['Instagram', contact?.Instagram], ['LinkedIn', contact?.LinkedIn]].filter(([, url]) => safeExternalUrl(url)).map(([label, url]) => <div key={label}><SourceLink url={url} label={label ?? ''} /></div>)}
             </dl>
+            {crmAction && <div className="pt-2">
+              <Button
+                variant={crmAction.state === 'added' ? 'secondary' : 'outline'}
+                disabled={crmAction.state !== 'idle'}
+                onClick={crmAction.onAdd}
+              >
+                {crmAction.state === 'adding' ? <Loader2 className="h-4 w-4 animate-spin" /> : crmAction.state === 'added' ? <Check className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                <span className="ml-2">{crmAction.state === 'added' ? t('importerProfile.crmAdded') : t('importerProfile.crmAdd')}</span>
+              </Button>
+            </div>}
           </header>
           <div aria-live="polite">
             {!result && !error && <div className="space-y-8"><div role="status" className="flex items-center gap-3 border-t border-border py-8 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{t('importerProfile.loading')}</div><Section title={t('importerProfile.contacts')}><p role="status" className="text-sm text-muted-foreground">{t('importerProfile.peopleLoading')}</p></Section></div>}
