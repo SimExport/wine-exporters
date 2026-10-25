@@ -12,6 +12,8 @@ import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, C
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAddImporterToCrm } from '@/components/importers/use-add-importer-to-crm';
 import { Input } from '@/components/ui/input';
+import { ImporterCountryPicker } from '@/components/importers/ImporterCountryPicker';
+import { exportCap, exportCount, boundedSelection, updateSelection, firstResultIds } from '@/components/importers/importer-selection';
 import * as XLSX from 'xlsx';
 import {
   DropdownMenu,
@@ -72,6 +74,7 @@ interface BuyerContact {
   LinkedIn?: string;
   created_at: string;
   updated_at: string;
+  profile_highlights?: string[];
 }
 
 
@@ -121,54 +124,52 @@ const Importers = () => {
     resetDateLabel,
   } = useCredits();
 
-  const EXPORT_QUOTA = 500;
+  const cap = exportCap(exportCredits);
   const [partialOpen, setPartialOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+  const operationRef = useRef(false);
+  const filterRef = useRef('');
+  filterRef.current = `${selectedCountry}|${searchQuery}`;
+  const capRef = useRef(cap);
+  capRef.current = cap;
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [selectAllAcrossPages, setSelectAllAcrossPages] = useState(false);
-
-  // Reset selection when country or search changes
-  useEffect(() => {
-    setSelectedIds(new Set());
-    setSelectAllAcrossPages(false);
-  }, [selectedCountry, searchQuery]);
-
-  const effectiveSelectionCount = selectAllAcrossPages ? totalCount : selectedIds.size;
+  useEffect(() => { setSelectedIds(new Set()); }, [selectedCountry, searchQuery]);
+  useEffect(() => { setSelectedIds(prev => boundedSelection(prev, cap)); }, [cap]);
+  const boundedIds = boundedSelection(selectedIds, cap);
+  const effectiveSelectionCount = boundedIds.size;
   const pageIds = contacts.map(c => c.id);
-  const allPageSelected = pageIds.length > 0 && (selectAllAcrossPages || pageIds.every(id => selectedIds.has(id)));
-  const somePageSelected = !selectAllAcrossPages && pageIds.some(id => selectedIds.has(id));
-
+  const allPageSelected = pageIds.length > 0 && pageIds.every(id => boundedIds.has(id));
+  const somePageSelected = pageIds.some(id => boundedIds.has(id));
   const toggleRow = (id: string, checked: boolean) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (selectAllAcrossPages) {
-        // Switch out of "all" mode: we don't track individual ids in that mode,
-        // so toggling a row simply clears the global mode and starts fresh from page ids minus this one.
-        setSelectAllAcrossPages(false);
-        pageIds.forEach(pid => next.add(pid));
-      }
-      if (checked) next.add(id);
-      else next.delete(id);
-      return next;
-    });
+    if (operationRef.current) return;
+    setSelectedIds(prev => updateSelection(prev, [id], checked, cap));
   };
-
   const togglePage = (checked: boolean) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (checked) {
-        pageIds.forEach(id => next.add(id));
-      } else {
-        pageIds.forEach(id => next.delete(id));
-        setSelectAllAcrossPages(false);
-      }
-      return next;
-    });
+    if (operationRef.current) return;
+    setSelectedIds(prev => updateSelection(prev, pageIds, checked, cap));
   };
-
-  const clearSelection = () => {
-    setSelectedIds(new Set());
-    setSelectAllAcrossPages(false);
+  const clearSelection = () => setSelectedIds(new Set());
+  const selectFirstContacts = async () => {
+    const country = COUNTRIES.find(c => c.code === selectedCountry);
+    const count = exportCount(cap, totalCount);
+    if (!country || !count || operationRef.current) return;
+    operationRef.current = true;
+    setSelecting(true);
+    const filter = filterRef.current;
+    try {
+      const ids = await firstResultIds(count, async (offset, limit) => {
+        if (filterRef.current !== filter) throw new Error('Filters changed');
+        const res = await (supabase.rpc as any)('search_buyer_contacts', {
+          _countries: country.dbAliases, _q: searchQuery || '', _offset: offset, _limit: limit,
+        }).select('row_data->>id');
+        if (res.error) throw res.error;
+        return (res.data ?? []).map((row: {id: string}) => row.id);
+      });
+      if (filterRef.current === filter) setSelectedIds(boundedSelection(ids, capRef.current));
+    } catch (error) {
+      toast({ title: t('common.error'), description: t('importers.loadError'), variant: 'destructive' });
+    } finally { operationRef.current = false; setSelecting(false); }
   };
 
   const handleSourcingSubmit = async () => {
@@ -294,9 +295,11 @@ const Importers = () => {
     }
   }, [selectedCountry]);
   const performExport = async (limit: number, mode: 'country' | 'selection' = 'country', format: 'csv' | 'xlsx' = 'xlsx') => {
-    if (!selectedCountry || limit <= 0) return;
+    limit = exportCount(exportCredits, Math.min(limit, mode === 'selection' ? boundedIds.size : totalCount));
+    if (!selectedCountry || limit <= 0 || operationRef.current) return;
     const country = COUNTRIES.find(c => c.code === selectedCountry);
     if (!country) return;
+    operationRef.current = true;
     setExporting(true);
     try {
       // Consume credits FIRST (atomic, server-side)
@@ -311,9 +314,9 @@ const Importers = () => {
       }
 
       let data: any[] | null = null;
-      if (mode === 'selection' && !selectAllAcrossPages) {
+      if (mode === 'selection') {
         // Fetch only selected ids (cap to `limit` after sort for partial case)
-        const ids = Array.from(selectedIds);
+        const ids = Array.from(boundedIds).slice(0, limit);
         const chunks: string[][] = [];
         for (let i = 0; i < ids.length; i += 500) chunks.push(ids.slice(i, i + 500));
         const results: any[] = [];
@@ -408,6 +411,7 @@ const Importers = () => {
       console.error('Error during export:', error);
       toast({ title: t('common.error'), description: t('importers.exportFailure'), variant: 'destructive' });
     } finally {
+      operationRef.current = false;
       setExporting(false);
     }
   };
@@ -430,16 +434,16 @@ const Importers = () => {
     }
     const count = effectiveSelectionCount;
     if (count > 0) {
-      if (count > exportCredits) {
+      if (count > cap) {
         setPartialOpen(true);
         return;
       }
-      // selectAllAcrossPages → fetch via country; otherwise via ids
-      performExport(count, selectAllAcrossPages ? 'country' : 'selection', exportFormat);
+      // Export only the bounded explicit selection
+      performExport(count, 'selection', exportFormat);
       return;
     }
-    // No selection → export the full country
-    if (totalCount > exportCredits) {
+    // No selection: bounded export of the current country results
+    if (totalCount > cap) {
       setPartialOpen(true);
       return;
     }
@@ -522,18 +526,7 @@ const Importers = () => {
 
       {/* Compact market picker + search first */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-          <SelectTrigger className="w-full sm:w-64" aria-label={t('importerProfile.countrySelectPlaceholder')}>
-            <SelectValue placeholder={t('importerProfile.countrySelectPlaceholder')} />
-          </SelectTrigger>
-          <SelectContent>
-            {COUNTRIES.map(c => (
-              <SelectItem key={c.code} value={c.code}>
-                {i18n.language.startsWith('en') ? c.englishName : c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ImporterCountryPicker value={selectedCountry} onChange={setSelectedCountry} />
         <div className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -567,14 +560,14 @@ const Importers = () => {
           {hasPaidAccess && contacts.length > 0 && (
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-xs text-muted-foreground">
-                {t('importers.exportCredits.balance', { remaining: exportCredits })}
+                {t('importers.exportCredits.balance', { remaining: cap })}
               </span>
               <div className="flex items-center">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleDownloadClick}
-                  disabled={exporting || exportCredits <= 0}
+                  disabled={exporting || selecting || cap <= 0}
                   title={exportCredits <= 0 ? t('importers.exportCredits.quotaExhausted', { date: resetDateLabel }) : undefined}
                   className="rounded-r-none"
                 >
@@ -588,7 +581,7 @@ const Importers = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={exporting || exportCredits <= 0}
+                      disabled={exporting || selecting || cap <= 0}
                       className="rounded-l-none border-l-0 px-2"
                       aria-label={t('importers.exportCredits.chooseFormat')}
                     >
@@ -621,28 +614,14 @@ const Importers = () => {
             {searchQuery ? t('importers.search.noResults') : t('importers.table.noResultsForCountry')}
           </div> : <>
             {/* Selection banner */}
-            {hasPaidAccess && (selectAllAcrossPages || (allPageSelected && totalCount > contacts.length)) && (
+            {hasPaidAccess && (
               <div className="bg-muted/50 border-b px-4 py-2 text-sm flex items-center justify-center gap-2 flex-wrap">
-                {selectAllAcrossPages ? (
-                  <>
-                    <span>{t('importers.exportCredits.allSelected', { total: totalCount })}</span>
-                    <Button variant="link" size="sm" className="h-auto p-0" onClick={clearSelection}>
-                      {t('importers.exportCredits.clearSelection')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <span>{t('importers.exportCredits.pageSelected', { count: contacts.length })}</span>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="h-auto p-0"
-                      onClick={() => { setSelectAllAcrossPages(true); setSelectedIds(new Set()); }}
-                    >
-                      {t('importers.exportCredits.selectAllList', { total: totalCount })}
-                    </Button>
-                  </>
-                )}
+                {effectiveSelectionCount > 0 && <span>{t('importerProfile.selectedCount', {count: effectiveSelectionCount})}</span>}
+                <Button variant="link" size="sm" disabled={selecting || exporting || cap === 0} onClick={selectFirstContacts}>
+                  {selecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t('importerProfile.selectUpTo', {count: exportCount(cap, totalCount)})}
+                </Button>
+                {effectiveSelectionCount > 0 && <Button variant="link" size="sm" disabled={selecting || exporting} onClick={clearSelection}>{t('importers.exportCredits.clearSelection')}</Button>}
               </div>
             )}
             {/* Table */}
@@ -655,6 +634,7 @@ const Importers = () => {
                         <Checkbox
                           checked={allPageSelected ? true : (somePageSelected ? 'indeterminate' : false)}
                           onCheckedChange={(v) => togglePage(v === true)}
+                          disabled={selecting || exporting || (!allPageSelected && effectiveSelectionCount >= cap)}
                           aria-label="Select page"
                         />
                       </TableHead>
@@ -669,7 +649,7 @@ const Importers = () => {
                 <TableBody>
                   {contacts.map(contact => {
                     const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
-                    const rowChecked = selectAllAcrossPages || selectedIds.has(contact.id);
+                    const rowChecked = boundedIds.has(contact.id);
                     return (
                       <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50" onClick={(event) => {
                         const target = event.target;
@@ -680,6 +660,7 @@ const Importers = () => {
                           <TableCell className="w-10">
                             <Checkbox
                               checked={rowChecked}
+                              disabled={selecting || exporting || (!rowChecked && effectiveSelectionCount >= cap)}
                               onCheckedChange={(v) => toggleRow(contact.id, v === true)}
                               aria-label={`Select ${contact.company_name}`}
                             />
@@ -689,6 +670,7 @@ const Importers = () => {
                           <Button variant="link" className="h-auto justify-start whitespace-normal p-0 text-left font-medium" onClick={() => setActiveContact(contact)} aria-label={t('importerProfile.open', { name: contact.company_name || t('importerProfile.unnamed') })}>
                             {contact.company_name || t('importerProfile.unnamed')}
                           </Button>
+                          {contact.profile_highlights?.length ? <p className="mt-1 max-w-xs truncate text-xs font-normal text-muted-foreground" title={contact.profile_highlights.slice(0,3).join(' · ')}>{contact.profile_highlights.slice(0,3).join(' · ')}</p> : null}
                           {(contact as any).is_enriched && (
                             <span className="mt-1 flex w-fit items-center gap-1 rounded-full bg-enriched-badge px-2 py-0.5 text-[11px] font-semibold text-enriched-badge-foreground">
                               <Sparkles className="h-3 w-3" aria-hidden="true" />
@@ -808,8 +790,8 @@ const Importers = () => {
             <AlertDialogTitle>{t('importers.exportCredits.partialTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {effectiveSelectionCount > 0
-                ? t('importers.exportCredits.partialDescriptionSelection', { total: effectiveSelectionCount, remaining: exportCredits })
-                : t('importers.exportCredits.partialDescription', { total: totalCount, remaining: exportCredits })}
+                ? t('importers.exportCredits.partialDescriptionSelection', { total: effectiveSelectionCount, remaining: cap })
+                : t('importers.exportCredits.partialDescription', { total: totalCount, remaining: cap })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -817,11 +799,11 @@ const Importers = () => {
             <AlertDialogAction
               onClick={() => {
                 setPartialOpen(false);
-                const mode = effectiveSelectionCount > 0 && !selectAllAcrossPages ? 'selection' : 'country';
-                performExport(exportCredits, mode, exportFormat);
+                const mode = effectiveSelectionCount > 0 ? 'selection' : 'country';
+                performExport(cap, mode, exportFormat);
               }}
             >
-              {t('importers.exportCredits.partialConfirm', { remaining: exportCredits })}
+              {t('importers.exportCredits.partialConfirm', { remaining: cap })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
