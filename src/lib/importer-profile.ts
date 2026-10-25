@@ -33,6 +33,7 @@ export interface ImporterEnrichment {
   featured_producers?: string[];
   distribution_channels?: string[];
   direct_import_status?: string | null;
+  commercial_notes?: string | null;
   source_urls?: string[];
 }
 export interface ImporterPerson {
@@ -126,6 +127,8 @@ export function hasReliableDescription(enrichment: ImporterEnrichment | null): b
     && (enrichment.source_urls ?? []).some(url => Boolean(safeExternalUrl(url)));
 }
 export function importLabel(enrichment: ImporterEnrichment, evidence: ImporterEvidence[]): 'confirmed' | 'reported' | 'unconfirmed' {
+  // `confirmed` is the explicit confirmation value used by current records.
+  if (enrichment.direct_import_status === 'confirmed') return 'confirmed';
   if (enrichment.direct_import_status === 'confirmed_direct_import') {
     const explicit = evidence.some(e => e.field_name === 'direct_import_status'
       && e.field_value === 'confirmed_direct_import' && e.confidence === 'high'
@@ -133,6 +136,18 @@ export function importLabel(enrichment: ImporterEnrichment, evidence: ImporterEv
     if (explicit) return 'confirmed';
   }
   return ['confirmed_direct_import', 'reported_direct_import'].includes(enrichment.direct_import_status ?? '') ? 'reported' : 'unconfirmed';
+}
+// Keep structured professional emails even without a source URL; never infer
+// a person's email from the company's general contact or from free-text notes.
+export function additionalProfileEmails(data: ImporterProfileData, primaryEmail?: string | null): ImporterEmail[] {
+  const normalize = (email?: string | null) => email?.trim().toLowerCase() ?? '';
+  const seen = new Set([normalize(primaryEmail), ...data.people.map(p => normalize(p.business_email))].filter(Boolean));
+  return data.emails.flatMap(email => {
+    const key = normalize(email.email);
+    if (!key || seen.has(key)) return [];
+    seen.add(key);
+    return [{ ...email, email: email.email.trim() }];
+  });
 }
 export function profileSources(data: ImporterProfileData): string[] {
   return [...new Set([

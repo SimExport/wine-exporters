@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { hasReliableDescription, importLabel, descriptionFor, mapProfileResponse, safeExternalUrl, type ImporterEnrichment } from './importer-profile';
+import { hasReliableDescription, importLabel, descriptionFor, mapProfileResponse, safeExternalUrl, additionalProfileEmails, type ImporterEnrichment } from './importer-profile';
 
 const verified: ImporterEnrichment = {
   description_fr: 'Description complète\n\nDernier paragraphe.', description_en: 'Full description.',
@@ -13,6 +13,31 @@ const expect = (actual: unknown) => ({
   toBeNull: () => assert.equal(actual, null),
 });
 describe('Importer profile factual safeguards', () => {
+  test('database confirmed status is displayed as confirmed, including Wuttke', () => {
+    expect(importLabel({ ...verified, direct_import_status: 'confirmed' }, [])).toBe('confirmed');
+    expect(importLabel({ ...verified, direct_import_status: 'not_confirmed' }, [])).toBe('unconfirmed');
+  });
+  test('three structured people retain their original roles and commercial notes separately', () => {
+    const result = mapProfileResponse({ enrichment: { commercial_notes: 'General company contact' }, people: [
+      { id: '1', full_name: 'Wolfgang Wuttke', job_title: 'Propriétaire', confidence: 'high' },
+      { id: '2', full_name: 'Florian Wuttke', job_title: 'Développement de la société', confidence: 'high' },
+      { id: '3', full_name: 'Christine Buchborn', job_title: 'Responsable administrative', confidence: 'medium' },
+    ] });
+    assert.equal(result.status, 'ready');
+    if (result.status !== 'ready') return;
+    assert.equal(result.data.people.length, 3);
+    assert.deepEqual(result.data.people.map(p => p.job_title), ['Propriétaire', 'Développement de la société', 'Responsable administrative']);
+    assert.equal(result.data.people[0].business_email, undefined);
+    assert.equal(result.data.enrichment?.commercial_notes, 'General company contact');
+  });
+  test('structured emails are trimmed and deduplicated against primary and person emails without requiring a source', () => {
+    const result = mapProfileResponse({ people: [{ business_email: 'Buyer@example.com' }], emails: [
+      { id: '1', email: ' MAIN@example.com ' }, { id: '2', email: 'buyer@example.com' },
+      { id: '3', email: ' Sales@example.com ' }, { id: '4', email: 'sales@EXAMPLE.com' }, { id: '5', email: ' ' },
+    ] });
+    if (result.status !== 'ready') assert.fail('Expected ready profile');
+    assert.deepEqual(additionalProfileEmails(result.data, 'main@example.com').map(e => e.email), ['Sales@example.com']);
+  });
   test('a badge needs a reliable description, not only enrichment metadata', () => {
     expect(hasReliableDescription(verified)).toBe(true);
     expect(hasReliableDescription({ ...verified, description_fr: '', description_en: '' })).toBe(false);
