@@ -610,19 +610,6 @@ const Importers = () => {
         </div>
       )}
 
-      {selectedCountry && (
-        <div className="relative mb-3 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder={t('importers.search.placeholder')}
-            aria-label={t('importers.search.placeholder')}
-            className="pl-9"
-          />
-        </div>
-      )}
-
       {/* Main Content */}
       <Card>
         {!selectedCountry ? <div className="p-12 text-center text-muted-foreground">
@@ -673,19 +660,14 @@ const Importers = () => {
                       </TableHead>
                     )}
                     <TableHead>{t('importers.table.company')}</TableHead>
-                    <TableHead>{t('importers.table.country')}</TableHead>
-                    <TableHead>{t('importers.table.address')}</TableHead>
-                    <TableHead>{t('importers.table.email')}</TableHead>
-                    <TableHead>{t('importers.table.phone')}</TableHead>
+                    <TableHead>{t('importerProfile.tableLocation')}</TableHead>
+                    <TableHead>{t('importerProfile.tableContact')}</TableHead>
                     <TableHead>{t('importers.table.website')}</TableHead>
-                    <TableHead>{t('importers.table.facebook')}</TableHead>
-                    <TableHead>{t('importers.table.instagram')}</TableHead>
-                    <TableHead>{t('importers.table.linkedin')}</TableHead>
+                    <TableHead>{t('importerProfile.tableActions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {contacts.map(contact => {
-                    const fullAddress = formatAddress(contact);
                     const formattedPhone = contact.phone ? (contact.phone.startsWith('+') ? contact.phone : `+${contact.phone}`) : '-';
                     const rowChecked = selectAllAcrossPages || selectedIds.has(contact.id);
                     return (
