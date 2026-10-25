@@ -697,24 +697,23 @@ const Importers = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          {translateCountry(contact.country)}
-                        </TableCell>
-                        <TableCell className="min-w-[300px] whitespace-normal">
-                          {fullAddress}
+                          {contact.city ? `${contact.city}, ${translateCountry(contact.country)}` : translateCountry(contact.country)}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-0.5">
-                            <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
-                              <Mail className="h-3 w-3" />
-                              {contact.email}
-                            </a>
-                            <CopyButton value={contact.email} />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-0.5">
-                            <span>{formattedPhone}</span>
-                            {contact.phone && <CopyButton value={formattedPhone} />}
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-0.5">
+                              <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
+                                <Mail className="h-3 w-3" />
+                                {contact.email}
+                              </a>
+                              <CopyButton value={contact.email} />
+                            </div>
+                            {contact.phone && (
+                              <div className="flex items-center gap-0.5">
+                                <span>{formattedPhone}</span>
+                                <CopyButton value={formattedPhone} />
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">
@@ -728,25 +727,25 @@ const Importers = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          {contact.Facebook ? (
-                            <a href={contact.Facebook} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
-                              <Facebook className="h-4 w-4" />
-                            </a>
-                          ) : <span className="text-muted-foreground">—</span>}
-                        </TableCell>
-                        <TableCell>
-                          {contact.Instagram ? (
-                            <a href={contact.Instagram} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
-                              <Instagram className="h-4 w-4" />
-                            </a>
-                          ) : <span className="text-muted-foreground">—</span>}
-                        </TableCell>
-                        <TableCell>
-                          {contact.LinkedIn ? (
-                            <a href={contact.LinkedIn} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
-                              <Linkedin className="h-4 w-4" />
-                            </a>
-                          ) : <span className="text-muted-foreground">—</span>}
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setActiveContact(contact)} aria-label={t('importerProfile.open', { name: contact.company_name || t('importerProfile.unnamed') })}>
+                              {t('importerProfile.viewProfile')}
+                            </Button>
+                            {(() => {
+                              const crmState = crmStateFor(contact.id);
+                              return (
+                                <Button
+                                  variant={crmState === 'added' ? 'secondary' : 'outline'}
+                                  size="sm"
+                                  disabled={crmState !== 'idle'}
+                                  onClick={() => addToCrm(contact)}
+                                >
+                                  {crmState === 'adding' ? <Loader2 className="h-4 w-4 animate-spin" /> : crmState === 'added' ? <Check className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                                  <span className="ml-1">{crmState === 'added' ? t('importerProfile.crmAdded') : t('importerProfile.crmAdd')}</span>
+                                </Button>
+                              );
+                            })()}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -777,6 +776,26 @@ const Importers = () => {
             </div>
           </>}
       </Card>
+
+      {/* Secondary: enrichment activity banner + full country exploration, collapsed by default */}
+      <div className="mt-6">
+        <EnrichmentActivityCard variant="banner" onSelectCountry={setSelectedCountry} />
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              {t('importerProfile.exploreTitle')}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent forceMount className="mt-4 data-[state=closed]:hidden">
+            <CountrySelector
+              selectedCountry={selectedCountry}
+              onSelectCountry={setSelectedCountry}
+              onTotalCountChange={setTotalDbContacts}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
 
       <ImporterProfileSheet contact={activeContact} onClose={() => setActiveContact(null)} />
       <AlertDialog open={partialOpen} onOpenChange={setPartialOpen}>
