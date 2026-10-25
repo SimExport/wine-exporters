@@ -12,6 +12,13 @@ export const importerProfileFr = {
   restricted: 'Les informations enrichies ne sont pas disponibles pour cet accès.',
   originalLanguage: 'Description disponible en {{language}}', french: 'français', english: 'anglais',
   verified: 'Vérifié le {{date}}', website: 'Site web', email: 'Email', phone: 'Téléphone', address: 'Adresse',
+  countrySelectPlaceholder: 'Choisir un pays', searchDisabledHint: 'Sélectionnez un pays pour rechercher ses importateurs.',
+  exploreTitle: 'Explorer la carte et tous les pays', tableLocation: 'Localisation', tableContact: 'Coordonnées',
+  tableActions: 'Actions', viewProfile: 'Fiche', readMore: 'Lire la suite', readLess: 'Réduire',
+  crmAdd: 'Ajouter au CRM', crmAdded: 'Déjà au CRM',
+  crmAddedToast: 'Prospect ajouté à votre CRM.', crmDuplicateToast: 'Ce prospect est déjà dans votre CRM.',
+  crmNoContainerToast: 'Votre CRM doit être initialisé depuis la page CRM avant d’ajouter des prospects.',
+  crmErrorToast: 'L’ajout au CRM a été refusé. Veuillez réessayer.',
 };
 
 export const importerProfileEn: typeof importerProfileFr = {
@@ -28,4 +35,11 @@ export const importerProfileEn: typeof importerProfileFr = {
   restricted: 'Enriched information is not available with this access.',
   originalLanguage: 'Description available in {{language}}', french: 'French', english: 'English',
   verified: 'Verified on {{date}}', website: 'Website', email: 'Email', phone: 'Phone', address: 'Address',
+  countrySelectPlaceholder: 'Choose a country', searchDisabledHint: 'Select a country to search its importers.',
+  exploreTitle: 'Explore the map and all countries', tableLocation: 'Location', tableContact: 'Contact details',
+  tableActions: 'Actions', viewProfile: 'Profile', readMore: 'Read more', readLess: 'Show less',
+  crmAdd: 'Add to CRM', crmAdded: 'Already in CRM',
+  crmAddedToast: 'Prospect added to your CRM.', crmDuplicateToast: 'This prospect is already in your CRM.',
+  crmNoContainerToast: 'Your CRM must be initialized from the CRM page before adding prospects.',
+  crmErrorToast: 'Adding to the CRM was rejected. Please try again.',
 };
