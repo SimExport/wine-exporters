@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Facebook, Instagram, Linkedin, Download, ChevronDown, Search, Sparkles } from 'lucide-react';
+import { ExternalLink, Mail, ChevronLeft, ChevronRight, Target, Loader2, Copy, Check, Download, ChevronDown, Search, Sparkles, UserPlus } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useAddImporterToCrm } from '@/components/importers/use-add-importer-to-crm';
 import { Input } from '@/components/ui/input';
 import * as XLSX from 'xlsx';
 import {
@@ -72,19 +74,6 @@ interface BuyerContact {
   updated_at: string;
 }
 
-const formatAddress = (contact: BuyerContact): string => {
-  const { street, city, postal_code, country, Address } = contact;
-  if (street && city && postal_code) {
-    return `${street}, ${postal_code} ${city}, ${translateCountry(country)}`;
-  }
-  if (city && country) {
-    return `${city}, ${translateCountry(country)}`;
-  }
-  if (Address) {
-    return Address;
-  }
-  return '—';
-};
 
 const COUNTRY_EN_TO_FR: Record<string, string> = {};
 // Built lazily after COUNTRIES is defined below
@@ -424,6 +413,7 @@ const Importers = () => {
   };
 
   const [exportFormat, setExportFormat] = useState<'xlsx' | 'csv'>('xlsx');
+  const { add: addToCrm, stateFor: crmStateFor } = useAddImporterToCrm();
 
   const handleDownloadClick = () => {
     if (!hasPaidAccess) {
