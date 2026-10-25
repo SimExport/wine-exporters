@@ -1,4 +1,6 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
+## Correction ciblée fiche importateur
+- [ ] Afficher personnes structurées, emails dédupliqués, notes commerciales et statut confirmed ; vérifier Wuttke, tests et panneau sans toucher campagnes/automatisations.
 ## WineExporters — SEO public V1 (preview uniquement)
 - [x] Point 6 BestWineImporters : audit agrégé en lecture seule, aucun chiffre retenu faute de définition/licences, blocs qualitatifs prouvés, six CTA pays vers le parcours existant ; 8 tests et rendu isolé desktop/mobile, anciens jetons et lien vérifiés (aucune publication).
 - [x] Auditer schéma, droits et séparabilité/licences ; RPC privée protégée, aucune preuve de republication, risque buyer_contacts préexistant signalé, aucune écriture.
