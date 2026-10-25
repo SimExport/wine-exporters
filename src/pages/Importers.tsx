@@ -520,14 +520,35 @@ const Importers = () => {
           </Dialog>
       </div>
 
-      <EnrichmentActivityCard variant="banner" onSelectCountry={setSelectedCountry} />
-
-      {/* Country Selector - Map + Continent List */}
-      <CountrySelector
-        selectedCountry={selectedCountry}
-        onSelectCountry={setSelectedCountry}
-        onTotalCountChange={setTotalDbContacts}
-      />
+      {/* Compact market picker + search first */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <SelectTrigger className="w-full sm:w-64" aria-label={t('importerProfile.countrySelectPlaceholder')}>
+            <SelectValue placeholder={t('importerProfile.countrySelectPlaceholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map(c => (
+              <SelectItem key={c.code} value={c.code}>
+                {i18n.language.startsWith('en') ? c.englishName : c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t('importers.search.placeholder')}
+            aria-label={t('importers.search.placeholder')}
+            disabled={!selectedCountry}
+            className="pl-9"
+          />
+        </div>
+      </div>
+      {!selectedCountry && (
+        <p className="mt-2 text-sm text-muted-foreground">{t('importerProfile.searchDisabledHint')}</p>
+      )}
 
       {/* Selected country info */}
       {selectedCountry && (
