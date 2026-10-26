@@ -15,7 +15,7 @@ const COPY = {
     seoTitle: "Trouvez vos importateurs de vin | WineExporters",
     seoDesc:
       "Recevez la brochure WineExporters et la vidéo de la plateforme utilisée par les domaines viticoles pour trouver leurs importateurs.",
-    eyebrow: "23 000+ importateurs vérifiés dans 146 pays",
+    eyebrow: "Plus de 27 000 fiches de contacts acheteurs et importateurs de vin dans 146 pays",
     title: "Trouvez vos importateurs, sans attendre qu'une agence le fasse pour vous.",
     subtitle:
       "Recevez la brochure et la vidéo de démo par email, pour voir concrètement comment ça marche avant de vous engager.",
@@ -38,7 +38,7 @@ const COPY = {
     seoTitle: "Find your wine importers | WineExporters",
     seoDesc:
       "Get the WineExporters brochure and the platform video used by wine estates to find their importers.",
-    eyebrow: "23,000+ verified importers across 146 countries",
+    eyebrow: "27,000+ wine buyer & importer contact records across 146 countries",
     title: "Find your importers, without waiting for an agency to do it for you.",
     subtitle:
       "Get the brochure and demo video by email, to see exactly how it works before you commit.",

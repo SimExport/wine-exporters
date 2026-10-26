@@ -2414,7 +2414,7 @@
       "badge": "La plateforme export des domaines viticoles",
       "titleLead": "Trouvez les bons importateurs.\n",
       "titleHighlight": "Développez vos ventes à l'export.",
-      "subtitle": "Accédez à 23 000+ importateurs vérifiés, ciblez les bons acheteurs et confiez-nous vos campagnes de prospection — le tout depuis une seule plateforme.",
+      "subtitle": "Accédez à plus de 27 000 fiches de contacts acheteurs et importateurs de vin, ciblez les bons acheteurs et confiez-nous vos campagnes de prospection — le tout depuis une seule plateforme.",
       "ctaPrimary": "Découvrir la plateforme en vidéo",
       "ctaSecondary": "Demander une démo",
       "haveAccount": "J'ai déjà un compte → Se connecter",
@@ -2424,7 +2424,7 @@
         "markets": "marchés ouverts"
       },
       "statsAttribution": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters.",
-      "database": "23 000+ importateurs vérifiés dans 145+ pays",
+      "database": "Plus de 27 000 fiches de contacts acheteurs et importateurs de vin dans 145+ pays",
       "ctaVideo": "Découvrir la plateforme en vidéo"
     },
     "pain": {
@@ -2471,11 +2471,11 @@
         "bullet3": "Historique des échanges.",
         "bullet4": "Relances centralisées."
       },
-      "databaseCallout": "23 000+ importateurs vérifiés dans 145+ pays.",
+      "databaseCallout": "Plus de 27 000 fiches de contacts acheteurs et importateurs de vin dans 145+ pays.",
       "step0": {
         "step": "ÉTAPE 1",
-        "title": "23 000+ importateurs. Pas 23 000 lignes scrapées.",
-        "text": "Explorez une base spécialisée dans le vin, construite au fil de plusieurs années de prospection et continuellement vérifiée, enrichie et mise à jour. 145+ pays, coordonnées directes, filtres par marché et profil."
+        "title": "Plus de 27 000 fiches de contacts acheteurs et importateurs de vin",
+        "text": "Explorez une base de fiches de contacts spécialisée dans le vin, construite au fil de plusieurs années de prospection. 145+ pays, coordonnées disponibles, filtres par marché et profil. Les informations disponibles et leur niveau de vérification varient selon les fiches."
       },
       "step4": {
         "step": "ÉTAPE 5",
@@ -2502,7 +2502,7 @@
       "commitment": "Sans engagement. Résiliable à tout moment.",
       "ctaStart": "Demander une démo",
       "inclusions": [
-        "Accès illimité à 23 000+ importateurs vérifiés",
+        "Accès illimité à plus de 27 000 fiches de contacts acheteurs et importateurs de vin",
         "1 recherche sur-mesure / mois",
         "1 campagne de prospection gérée / mois",
         "Accès aux opportunités",
@@ -2547,7 +2547,7 @@
     },
     "marquee": {
       "items": [
-        "23 000+ IMPORTATEURS VÉRIFIÉS",
+        "27 000+ FICHES DE CONTACTS",
         "145+ PAYS",
         "1 RECHERCHE CIBLÉE / MOIS",
         "1 CAMPAGNE GÉRÉE / MOIS"
@@ -2561,8 +2561,8 @@
       "text": "WineExporters transforme l'expérience terrain d'ExportVins en un outil accessible aux domaines qui veulent structurer et accélérer leur développement international.",
       "items": [
         {
-          "value": "23 000+",
-          "label": "Importateurs vérifiés"
+          "value": "27 000+",
+          "label": "Fiches de contacts"
         },
         {
           "value": "145+",
