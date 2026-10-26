@@ -2414,7 +2414,7 @@
       "badge": "The export platform for wine estates",
       "titleLead": "Find the right importers.\n",
       "titleHighlight": "Grow your export sales.",
-      "subtitle": "Access 23,000+ verified importers, target the right buyers and let us run your outreach campaigns — all in one platform.",
+      "subtitle": "Access 27,000+ wine buyer & importer contact records, target the right buyers and let us run your outreach campaigns — all in one platform.",
       "ctaPrimary": "Discover the platform in video",
       "ctaSecondary": "Request a demo",
       "haveAccount": "I already have an account → Sign in",
@@ -2424,7 +2424,7 @@
         "markets": "markets opened"
       },
       "statsAttribution": "Results achieved through ExportVins support and the WineExporters platform.",
-      "database": "23,000+ verified importers across 145+ countries",
+      "database": "27,000+ wine buyer & importer contact records across 145+ countries",
       "ctaVideo": "Discover the platform in video"
     },
     "pain": {
@@ -2471,11 +2471,11 @@
         "bullet3": "Full exchange history.",
         "bullet4": "Centralised follow-ups."
       },
-      "databaseCallout": "23,000+ verified importers across 145+ countries.",
+      "databaseCallout": "27,000+ wine buyer & importer contact records across 145+ countries.",
       "step0": {
         "step": "STEP 1",
-        "title": "23,000+ importers. Not 23,000 scraped rows.",
-        "text": "Explore a database dedicated to wine, built over several years of export prospecting and continuously verified, enriched and updated. 145+ countries, direct contact details, filters by market and profile."
+        "title": "27,000+ wine buyer & importer contact records",
+        "text": "Explore a database of wine contact records built over several years of export prospecting. 145+ countries, available contact details, filters by market and profile. Available information and verification levels vary by record."
       },
       "step4": {
         "step": "STEP 5",
@@ -2502,7 +2502,7 @@
       "commitment": "No commitment. Cancel anytime.",
       "ctaStart": "Request a demo",
       "inclusions": [
-        "Unlimited access to 23,000+ verified importers",
+        "Unlimited access to 27,000+ wine buyer & importer contact records",
         "1 bespoke search / month",
         "1 managed prospecting campaign / month",
         "Access to opportunities",
@@ -2547,7 +2547,7 @@
     },
     "marquee": {
       "items": [
-        "23,000+ VERIFIED IMPORTERS",
+        "27,000+ CONTACT RECORDS",
         "145+ COUNTRIES",
         "1 TARGETED SEARCH / MONTH",
         "1 MANAGED CAMPAIGN / MONTH"
@@ -2561,8 +2561,8 @@
       "text": "WineExporters turns ExportVins' field experience into a tool available to estates that want to structure and accelerate their international development.",
       "items": [
         {
-          "value": "23,000+",
-          "label": "Verified importers"
+          "value": "27,000+",
+          "label": "Contact records"
         },
         {
           "value": "145+",
