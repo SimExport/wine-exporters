@@ -1,0 +1,1 @@
+UPDATE public.app_settings SET value = 'true'::jsonb, updated_at = now() WHERE key = 'campaign_email_editor_enabled';
