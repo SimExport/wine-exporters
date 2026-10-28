@@ -4,6 +4,7 @@ import { TenderPdfImporter } from '@/components/admin/TenderPdfImporter';
 import { ImporterRequestsList } from '@/components/admin/ImporterRequestsList';
 import { TenderRequestsList } from '@/components/admin/TenderRequestsList';
 import { ImporterRequestCreateDialog } from '@/components/admin/ImporterRequestCreateDialog';
+import { ImporterSubmissionsQueue } from '@/components/admin/ImporterSubmissionsQueue';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Mail, Loader2, Plus } from 'lucide-react';
@@ -98,6 +99,7 @@ export default function AdminOpportunities() {
           <TabsTrigger value="tender">Appels d'offres (PDF)</TabsTrigger>
         </TabsList>
         <TabsContent value="tally" className="mt-4 space-y-6">
+          <ImporterSubmissionsQueue onPublished={() => setRefreshKey((k) => k + 1)} />
           <TallyCsvImporter />
           <div className="flex justify-end">
             <Button variant="outline" onClick={() => setCreateOpen(true)}>

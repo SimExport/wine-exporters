@@ -10,6 +10,7 @@ import AdminRoute from "@/components/AdminRoute";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import DemoRequest from "./pages/DemoRequest";
+import SubmitOpportunity from "./pages/SubmitOpportunity";
 import MarketAnalysis from "./pages/MarketAnalysis";
 import MarketAnalysisResult from "./pages/MarketAnalysisResult";
 import Discover from "./pages/Discover";
@@ -94,6 +95,8 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
+            <Route path="/submit-opportunity" element={<SubmitOpportunity />} />
+            <Route path="/publier-opportunite" element={<SubmitOpportunity />} />
             <Route path="/annuaire" element={<PublicDirectory />} />
             <Route path="/annuaire/:country" element={<PublicDirectory />} />
             <Route path="/annuaire/:country/:slug" element={<PublicDirectory />} />
