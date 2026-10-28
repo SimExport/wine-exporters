@@ -7,14 +7,15 @@ import { importerProfileFr, importerProfileEn } from "./locales/importer-profile
 import { campaignEmailEditorFr, campaignEmailEditorEn } from "./locales/campaign-email-editor";
 import { publicDirectoryFr, publicDirectoryEn } from "./locales/public-directory";
 import { opportunitiesUiFr, opportunitiesUiEn } from "./locales/opportunities-ui";
+import { submitOpportunityFr, submitOpportunityEn } from "./locales/submit-opportunity";
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      fr: { common: { ...fr, importerProfile: importerProfileFr, emailEditor: campaignEmailEditorFr, publicDirectory: publicDirectoryFr, opportunitiesUi: opportunitiesUiFr } },
-      en: { common: { ...en, importerProfile: importerProfileEn, emailEditor: campaignEmailEditorEn, publicDirectory: publicDirectoryEn, opportunitiesUi: opportunitiesUiEn } },
+      fr: { common: { ...fr, importerProfile: importerProfileFr, emailEditor: campaignEmailEditorFr, publicDirectory: publicDirectoryFr, opportunitiesUi: opportunitiesUiFr, submitOpportunity: submitOpportunityFr } },
+      en: { common: { ...en, importerProfile: importerProfileEn, emailEditor: campaignEmailEditorEn, publicDirectory: publicDirectoryEn, opportunitiesUi: opportunitiesUiEn, submitOpportunity: submitOpportunityEn } },
     },
     fallbackLng: "fr",
     supportedLngs: ["fr", "en"],

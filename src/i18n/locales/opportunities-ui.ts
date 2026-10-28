@@ -1,5 +1,6 @@
 export const opportunitiesUiFr = {
   heroKicker: 'Opportunités export',
+  submitLink: 'Vous êtes importateur ? Publiez votre recherche gratuitement',
   buyerRequests_one: 'demande d’acheteur', buyerRequests_other: 'demandes d’acheteurs',
   tenders_one: 'appel d’offres', tenders_other: 'appels d’offres',
   heroText: 'Les demandes d’acheteurs proviennent des besoins que les importateurs et distributeurs communiquent à WineExporters. Les appels d’offres sont publiés avec leurs dates limites.',
@@ -17,6 +18,7 @@ export const opportunitiesUiFr = {
 
 export const opportunitiesUiEn: typeof opportunitiesUiFr = {
   heroKicker: 'Export opportunities',
+  submitLink: 'Buyer? Submit a sourcing request for free',
   buyerRequests_one: 'buyer request', buyerRequests_other: 'buyer requests',
   tenders_one: 'tender', tenders_other: 'tenders',
   heroText: 'Buyer requests come from needs that importers and distributors share with WineExporters. Tenders are published with their deadlines.',
