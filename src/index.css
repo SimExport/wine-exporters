@@ -9,6 +9,8 @@ ExportVins brand color: #521F30 -> HSL: 345 45% 22%
 
 @layer base {
   :root {
+    --opportunity-badge: 354 57% 22%;
+    --opportunity-badge-foreground: 0 0% 100%;
     --background: 0 0% 100%;
     --foreground: 345 30% 10%;
 
