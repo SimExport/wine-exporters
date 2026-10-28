@@ -53,9 +53,11 @@ if (typeof document !== "undefined") {
 
 // On the importer form default, persist only a language the visitor picks explicitly.
 if (forceEnOnRoute) {
-  i18n.on("languageChanged", (lng) => {
+  const persist = (lng: string) => {
     try { window.localStorage.setItem("i18nextLng", lng.split("-")[0]); } catch { /* ignore */ }
-  });
+  };
+  const attach = () => i18n.on("languageChanged", persist);
+  if (i18n.isInitialized) attach(); else i18n.on("initialized", attach);
 }
 
 export default i18n;
