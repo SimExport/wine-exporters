@@ -527,8 +527,8 @@ export default function Opportunities() {
         path="/opportunites"
       />
       <header className="rounded-xl border border-primary/15 bg-card px-5 py-5 md:px-7 md:py-6">
-        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">{ui('heroKicker')}</div>
-        <h1 className="mt-1 text-3xl font-semibold text-foreground" style={{ fontFamily: 'Georgia, serif' }}>
+        <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] bg-[hsl(var(--opportunity-badge))] text-[hsl(var(--opportunity-badge-foreground))]">{ui('heroKicker')}</div>
+        <h1 className="mt-2 text-3xl font-semibold text-foreground" style={{ fontFamily: 'Georgia, serif' }}>
           {tr('opportunitiesPage.pageTitle')}
         </h1>
         <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
@@ -536,7 +536,6 @@ export default function Opportunities() {
           <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-primary tabular-nums">{tenders.length}</span><span className="text-[15px] text-foreground">{ui('tenders', { count: tenders.length })}</span></div>
         </div>
         <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">{ui('heroText')}</p>
-        <Link to="/submit-opportunity" className="mt-2 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">{ui('submitLink')} →</Link>
       </header>
 
       <Tabs value={tab} onValueChange={changeTab} className="w-full">
