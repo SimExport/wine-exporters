@@ -1,0 +1,33 @@
+export const opportunitiesUiFr = {
+  heroKicker: 'Opportunités export',
+  buyerRequests_one: 'demande d’acheteur', buyerRequests_other: 'demandes d’acheteurs',
+  tenders_one: 'appel d’offres', tenders_other: 'appels d’offres',
+  heroText: 'Les demandes d’acheteurs proviennent des besoins que les importateurs et distributeurs communiquent à WineExporters. Les appels d’offres sont publiés avec leurs dates limites.',
+  searchPlaceholder: 'Rechercher une entreprise, un vin, une appellation…',
+  country: 'Pays / marché', style: 'Style / catégorie', origin: 'Origine', all: 'Tous',
+  reset: 'Réinitialiser', results: '{{shown}} sur {{total}} affichées', noResults: 'Aucune opportunité ne correspond à ces filtres.',
+  showMore: 'Voir plus', showLess: 'Voir moins', need: 'Besoin',
+  prepareEmail: 'Préparer un e-mail',
+  prepareHint: 'Le message s’ouvre dans votre logiciel de messagerie : vous pouvez le modifier avant de l’envoyer.',
+  mediated: 'Cette demande est gérée par WineExporters : votre réponse est transmise à l’acheteur par notre équipe. Ses coordonnées directes ne sont pas communiquées.',
+  mailSubjectImporter: 'Réponse à votre recherche de vins – {{company}}',
+  mailSubjectTender: 'Appel d’offres {{reference}} – proposition',
+  mailBody: 'Bonjour,\n\nJ’ai vu votre demande sur WineExporters{{need}}. Notre domaine pourrait y répondre et je serais ravi(e) de vous envoyer notre présentation et nos tarifs.\n\nBien cordialement,\n',
+};
+
+export const opportunitiesUiEn: typeof opportunitiesUiFr = {
+  heroKicker: 'Export opportunities',
+  buyerRequests_one: 'buyer request', buyerRequests_other: 'buyer requests',
+  tenders_one: 'tender', tenders_other: 'tenders',
+  heroText: 'Buyer requests come from needs that importers and distributors share with WineExporters. Tenders are published with their deadlines.',
+  searchPlaceholder: 'Search a company, wine, appellation…',
+  country: 'Country / market', style: 'Style / category', origin: 'Origin', all: 'All',
+  reset: 'Reset', results: '{{shown}} of {{total}} shown', noResults: 'No opportunity matches these filters.',
+  showMore: 'Show more', showLess: 'Show less', need: 'Need',
+  prepareEmail: 'Prepare email',
+  prepareHint: 'The message opens in your email app: you can edit it before sending.',
+  mediated: 'This request is handled by WineExporters: your reply is forwarded to the buyer by our team. Their direct contact details are not shared.',
+  mailSubjectImporter: 'Reply to your wine sourcing request – {{company}}',
+  mailSubjectTender: 'Tender {{reference}} – proposal',
+  mailBody: 'Hello,\n\nI saw your request on WineExporters{{need}}. Our estate could be a good fit and I would be happy to send you our presentation and price list.\n\nBest regards,\n',
+};
