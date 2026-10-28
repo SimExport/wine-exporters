@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye, Archive, ArchiveRestore, Search, RotateCcw, Send, ShieldCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { normalizeText, canonicalCountry, countryLabel, splitMulti, buildOptions, matchesFilters, hasActiveFilters, EMPTY_FILTERS, isMediatedEmail, buildMailto, type FilterState, type FilterableItem } from '@/lib/opportunity-filters';
+import { canonicalCountry, countryLabel, splitMulti, buildOptions, matchesFilters, hasActiveFilters, EMPTY_FILTERS, isMediatedEmail, buildMailto, type FilterState, type FilterableItem } from '@/lib/opportunity-filters';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
