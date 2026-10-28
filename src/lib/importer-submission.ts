@@ -27,7 +27,10 @@ export function joinCanonical(values: string[]): string { return values.join(', 
 /** Controlled EN -> FR translation of canonical list values; unknown values are kept as-is. */
 export function translateList(csv: string | null | undefined): string | null {
   if (!csv?.trim()) return null;
-  return csv.split(',').map(v => v.trim()).filter(Boolean)
+  const whole = csv.trim();
+  const exact = ALL.find(o => o.en === whole);
+  if (exact) return exact.fr;
+  return whole.split(',').map(v => v.trim()).filter(Boolean)
     .map(v => ALL.find(o => o.en === v)?.fr ?? v).join(', ');
 }
 

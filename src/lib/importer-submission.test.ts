@@ -39,3 +39,12 @@ test('helpers', () => {
   assert.equal(translateList('Germany, Red'), 'Germany, Rouge');
   assert.equal(normalizeCompany('Nordic Vin AB'), normalizeCompany('nordic vin'));
 });
+
+describe('translateList volume ranges', () => {
+  it('translates 600–1,800 as a whole', () => {
+    expect(translateList('600–1,800 bottles / year')).toBe('600–1 800 bouteilles / an');
+  });
+  it('translates 1,800–10,000 as a whole', () => {
+    expect(translateList('1,800–10,000 bottles / year')).toBe('1 800–10 000 bouteilles / an');
+  });
+});
