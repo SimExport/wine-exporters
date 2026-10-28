@@ -1116,6 +1116,86 @@ export type Database = {
         }
         Relationships: []
       }
+      importer_opportunity_submissions: {
+        Row: {
+          company_name: string
+          consent_direct_contact: boolean
+          consent_publish: boolean
+          country: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          locale: string
+          origins: string
+          phone: string | null
+          price_range: string | null
+          public_opportunity_id: string | null
+          requirements: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sample_address: string | null
+          source: string
+          status: string
+          volume: string | null
+          wine_styles: string
+        }
+        Insert: {
+          company_name: string
+          consent_direct_contact?: boolean
+          consent_publish: boolean
+          country: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          locale?: string
+          origins: string
+          phone?: string | null
+          price_range?: string | null
+          public_opportunity_id?: string | null
+          requirements?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_address?: string | null
+          source?: string
+          status?: string
+          volume?: string | null
+          wine_styles: string
+        }
+        Update: {
+          company_name?: string
+          consent_direct_contact?: boolean
+          consent_publish?: boolean
+          country?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          locale?: string
+          origins?: string
+          phone?: string | null
+          price_range?: string | null
+          public_opportunity_id?: string | null
+          requirements?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_address?: string | null
+          source?: string
+          status?: string
+          volume?: string | null
+          wine_styles?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "importer_opportunity_submissions_public_opportunity_id_fkey"
+            columns: ["public_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "importer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       importer_requests: {
         Row: {
           company_name: string
