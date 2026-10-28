@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
+import { Link } from 'react-router-dom';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
 
@@ -535,6 +536,7 @@ export default function Opportunities() {
           <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-primary tabular-nums">{tenders.length}</span><span className="text-[15px] text-foreground">{ui('tenders', { count: tenders.length })}</span></div>
         </div>
         <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">{ui('heroText')}</p>
+        <Link to="/submit-opportunity" className="mt-2 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">{ui('submitLink')} →</Link>
       </header>
 
       <Tabs value={tab} onValueChange={changeTab} className="w-full">
