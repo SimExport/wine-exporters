@@ -353,9 +353,15 @@ const testimonials = [
   { name: "Domaine François Cartier", result: "Ouverture du marché polonais." },
   { name: "Champagne Cordeuil Père & Fille", result: "Ouverture du marché estonien." },
   { name: "Domaine Sibille", result: "Ouverture du marché italien." },
+  { name: "Domaine Saint-Cels", result: "Première commande aux Pays-Bas." },
 ];
 
 const testimonialQuotes = [
+  {
+    quote:
+      "Après avoir essayé différents outils (listings importateurs, CRM, Brevo), nous avons trouvé avec WineExporters la plateforme tout-en-un, et c'est vraiment facile. Pour le moment, nous avons lancé beaucoup de prospections ; les retours sont longs, mais nous avons eu notre première commande pour un contact en Hollande, c'est un bon début ! Nous sommes vraiment satisfaits de cet outil et souhaiterions pouvoir y consacrer plus de temps. Nous allons préparer nos salons avec WineExporters.",
+    author: "Marie Rouanet, Domaine Saint-Cels",
+  },
   {
     quote:
       "La plateforme répond à un vrai besoin pour nous, et nous connaissons la valeur et la pertinence de l'approche de Simon.",
@@ -624,7 +630,7 @@ const LandingPage = () => {
           <TestimonialsGrid />
           <div className="grid md:grid-cols-2 gap-5 mt-10">
             {testimonialQuotes.map((q, i) => (
-              <FadeIn key={q.author} delay={i * 0.05}>
+              <FadeIn key={q.author} delay={i * 0.05} className={i === 0 ? "md:col-span-2" : undefined}>
                 <Card className="h-full bg-background border border-border">
                   <CardContent className="p-6 flex flex-col gap-3">
                     <p className="text-base leading-relaxed italic">« {q.quote} »</p>
