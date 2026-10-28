@@ -6,14 +6,15 @@ import en from "./locales/en.json";
 import { importerProfileFr, importerProfileEn } from "./locales/importer-profile";
 import { campaignEmailEditorFr, campaignEmailEditorEn } from "./locales/campaign-email-editor";
 import { publicDirectoryFr, publicDirectoryEn } from "./locales/public-directory";
+import { opportunitiesUiFr, opportunitiesUiEn } from "./locales/opportunities-ui";
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      fr: { common: { ...fr, importerProfile: importerProfileFr, emailEditor: campaignEmailEditorFr, publicDirectory: publicDirectoryFr } },
-      en: { common: { ...en, importerProfile: importerProfileEn, emailEditor: campaignEmailEditorEn, publicDirectory: publicDirectoryEn } },
+      fr: { common: { ...fr, importerProfile: importerProfileFr, emailEditor: campaignEmailEditorFr, publicDirectory: publicDirectoryFr, opportunitiesUi: opportunitiesUiFr } },
+      en: { common: { ...en, importerProfile: importerProfileEn, emailEditor: campaignEmailEditorEn, publicDirectory: publicDirectoryEn, opportunitiesUi: opportunitiesUiEn } },
     },
     fallbackLng: "fr",
     supportedLngs: ["fr", "en"],
