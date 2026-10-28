@@ -9,10 +9,22 @@ import { publicDirectoryFr, publicDirectoryEn } from "./locales/public-directory
 import { opportunitiesUiFr, opportunitiesUiEn } from "./locales/opportunities-ui";
 import { submitOpportunityFr, submitOpportunityEn } from "./locales/submit-opportunity";
 
+// The public importer form targets international buyers: default to EN there
+// only when the visitor never chose a language. Not cached, so the rest of the
+// site keeps its usual default; an explicit switch is persisted below.
+const SUBMIT_ROUTES = ["/submit-opportunity", "/publier-opportunite"];
+let storedLng: string | null = null;
+try { storedLng = typeof window !== "undefined" ? window.localStorage.getItem("i18nextLng") : null; } catch { /* ignore */ }
+const forceEnOnRoute =
+  typeof window !== "undefined" &&
+  !storedLng &&
+  SUBMIT_ROUTES.some((r) => window.location.pathname.replace(/\/+$/, "") === r);
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
+    ...(forceEnOnRoute ? { lng: "en" } : {}),
     resources: {
       fr: { common: { ...fr, importerProfile: importerProfileFr, emailEditor: campaignEmailEditorFr, publicDirectory: publicDirectoryFr, opportunitiesUi: opportunitiesUiFr, submitOpportunity: submitOpportunityFr } },
       en: { common: { ...en, importerProfile: importerProfileEn, emailEditor: campaignEmailEditorEn, publicDirectory: publicDirectoryEn, opportunitiesUi: opportunitiesUiEn, submitOpportunity: submitOpportunityEn } },
@@ -24,7 +36,7 @@ i18n
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
-      caches: ["localStorage"],
+      caches: forceEnOnRoute ? [] : ["localStorage"],
       lookupLocalStorage: "i18nextLng",
     },
     returnNull: false,
@@ -37,6 +49,15 @@ if (typeof document !== "undefined") {
   };
   setLang(i18n.language || "fr");
   i18n.on("languageChanged", setLang);
+}
+
+// On the importer form default, persist only a language the visitor picks explicitly.
+if (forceEnOnRoute) {
+  const persist = (lng: string) => {
+    try { window.localStorage.setItem("i18nextLng", lng.split("-")[0]); } catch { /* ignore */ }
+  };
+  const attach = () => i18n.on("languageChanged", persist);
+  if (i18n.isInitialized) attach(); else i18n.on("initialized", attach);
 }
 
 export default i18n;

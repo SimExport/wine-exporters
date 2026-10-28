@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.notify-campaign-rejected]
 verify_jwt = false
+
+[functions.submit-importer-opportunity]
+verify_jwt = false

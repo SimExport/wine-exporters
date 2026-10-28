@@ -39,3 +39,10 @@ test('helpers', () => {
   assert.equal(translateList('Germany, Red'), 'Germany, Rouge');
   assert.equal(normalizeCompany('Nordic Vin AB'), normalizeCompany('nordic vin'));
 });
+
+test('translateList keeps 600–1,800 volume whole', () => {
+  assert.equal(translateList('600–1,800 bottles / year'), '600–1 800 bouteilles / an');
+});
+test('translateList keeps 1,800–10,000 volume whole', () => {
+  assert.equal(translateList('1,800–10,000 bottles / year'), '1 800–10 000 bouteilles / an');
+});
