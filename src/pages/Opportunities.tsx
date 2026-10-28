@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye, Archive, ArchiveRestore } from 'lucide-react';
+import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye, Archive, ArchiveRestore, Search, RotateCcw, Send, ShieldCheck } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { normalizeText, canonicalCountry, countryLabel, splitMulti, buildOptions, matchesFilters, hasActiveFilters, EMPTY_FILTERS, isMediatedEmail, buildMailto, type FilterState, type FilterableItem } from '@/lib/opportunity-filters';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -55,9 +58,24 @@ function countryFlag(input: string | null | undefined): string {
   return '🌍';
 }
 
-function splitMulti(s: string | null | undefined): string[] {
-  if (!s) return [];
-  return s.split(/[,/]| - | – /).map(x => x.trim()).filter(Boolean);
+function ExpandableText({ text, more, less }: { text: string; more: string; less: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [open, setOpen] = useState(false);
+  const [overflow, setOverflow] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el && !open) setOverflow(el.scrollHeight > el.clientHeight + 1);
+  }, [text, open]);
+  return (
+    <div>
+      <p ref={ref} className={`text-[15px] leading-relaxed text-foreground whitespace-pre-line ${open ? '' : 'line-clamp-3'}`}>{text}</p>
+      {(overflow || open) && (
+        <button type="button" className="mt-1 text-sm font-medium text-primary underline-offset-4 hover:underline" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+          {open ? less : more}
+        </button>
+      )}
+    </div>
+  );
 }
 
 interface ImporterRequest {
@@ -132,6 +150,8 @@ export default function Opportunities() {
     | { kind: 'tender'; data: TenderRequest }
     | null
   >(null);
+  const [tab, setTab] = useState('direct');
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
 
   useEffect(() => {
     if (!user) return;
@@ -297,7 +317,47 @@ export default function Opportunities() {
     return row?.[`${base}_${lang}`] ?? row?.[base] ?? null;
   };
 
-  const labelCol = "text-[10px] uppercase tracking-wide text-muted-foreground";
+  const labelCol = "text-xs font-medium uppercase tracking-wide text-muted-foreground";
+  const chip = "rounded-full px-3 py-1 text-[13px] leading-tight";
+  const ui = (k: string, o?: any) => tr(`opportunitiesUi.${k}`, o) as string;
+  const locale = lang === 'en' ? 'en' : 'fr';
+
+  const importerItem = (r: ImporterRequest): FilterableItem => ({
+    country: canonicalCountry(r.country),
+    styles: splitMulti(pick(r, 'wine_styles')),
+    origins: splitMulti(pick(r, 'origins')),
+    haystack: [r.company_name, r.country, pick(r, 'wine_styles'), pick(r, 'origins'), pick(r, 'volume'), pick(r, 'requirements'), r.wine_styles, r.origins, r.requirements].filter(Boolean).join(' '),
+  });
+  const tenderItem = (t: TenderRequest): FilterableItem => ({
+    country: canonicalCountry(t.market),
+    styles: splitMulti(pick(t, 'category')),
+    origins: splitMulti(pick(t, 'designation_origin')),
+    haystack: [t.reference, t.market, t.agent?.company, pick(t, 'category'), pick(t, 'designation_origin'), pick(t, 'style_profile'), pick(t, 'requirements'), t.vintage, t.price].filter(Boolean).join(' '),
+  });
+  const scopeItems: { item: FilterableItem; raw: string }[] = tab === 'tender'
+    ? tenders.map(t => ({ item: tenderItem(t), raw: t.market }))
+    : tab === 'direct' ? importers.map(r => ({ item: importerItem(r), raw: r.country ?? '' }))
+    : [...importers.map(r => ({ item: importerItem(r), raw: r.country ?? '' })), ...tenders.map(t => ({ item: tenderItem(t), raw: t.market }))];
+  const countryOptions = (() => {
+    const m = new Map<string, string>();
+    for (const { item, raw } of scopeItems) if (item.country && !m.has(item.country)) m.set(item.country, countryLabel(item.country, raw, locale));
+    return [...m].map(([key, label]) => ({ key, label })).sort((a, b) => a.label.localeCompare(b.label, locale));
+  })();
+  const styleOptions = buildOptions(scopeItems.map(x => x.item.styles), locale);
+  const originOptions = buildOptions(scopeItems.map(x => x.item.origins), locale);
+  const activeFilters = hasActiveFilters(filters);
+  const fImporters = (rows: ImporterRequest[]) => rows.filter(r => matchesFilters(importerItem(r), filters));
+  const fTenders = (rows: TenderRequest[]) => rows.filter(t => matchesFilters(tenderItem(t), filters));
+  const changeTab = (v: string) => { setTab(v); setFilters(f => ({ ...EMPTY_FILTERS, q: f.q })); };
+
+  const mailtoFor = (c: NonNullable<typeof contactDialog>) => {
+    if (c.kind === 'importer') {
+      const need = [pick(c.data, 'wine_styles'), pick(c.data, 'origins')].filter(Boolean).join(', ');
+      return buildMailto(c.data.email, ui('mailSubjectImporter', { company: c.data.company_name }), ui('mailBody', { need: need ? ` (${need})` : '' }));
+    }
+    const need = [pick(c.data, 'category'), pick(c.data, 'designation_origin')].filter(Boolean).join(', ');
+    return buildMailto(c.data.agent?.email ?? '', ui('mailSubjectTender', { reference: c.data.reference }), ui('mailBody', { need: ` – ${c.data.reference}${need ? ` (${need})` : ''}` }));
+  };
 
   const importersPartition = partitionOpportunities(importers, 'importer', archivedKeys);
   const tendersPartition = partitionOpportunities(tenders, 'tender', archivedKeys);
