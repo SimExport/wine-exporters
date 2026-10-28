@@ -15,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { differenceInDays, format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
-import { Link } from 'react-router-dom';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
 
