@@ -370,68 +370,66 @@ export default function Opportunities() {
                 const volumeDisplay = pick(r, 'volume');
                 return (
                   <Card key={r.id} className="flex flex-col">
-                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 font-semibold">
-                          <span className="text-2xl leading-none">{countryFlag(r.country)}</span>
-                          <span>{r.country ?? '—'}</span>
+                    <CardContent className="pt-5 px-5 pb-4 flex-1 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="text-lg font-bold leading-snug text-foreground break-words">{r.company_name || '—'}</h3>
+                          <div className="mt-0.5 flex items-center gap-1.5 text-[15px] text-muted-foreground">
+                            <span className="text-lg leading-none" aria-hidden>{countryFlag(r.country)}</span>
+                            <span>{r.country ? countryLabel(canonicalCountry(r.country), r.country, locale) : '—'}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {viewed && (
-                            <Badge variant="secondary" className="gap-1 text-[10px] px-1.5 py-0">
-                              <Eye className="h-3 w-3" />
-                              {tr('opportunitiesPage.states.seen')}
-                            </Badge>
-                          )}
+                        <div className="flex shrink-0 flex-col items-end gap-1">
                           {r.created_at && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-[13px] text-muted-foreground">
                               {format(new Date(r.created_at), 'd MMM yyyy', { locale: dateLocale })}
                             </span>
                           )}
+                          {viewed && (
+                            <Badge variant="secondary" className="gap-1 text-[13px] px-2 py-0.5 font-normal">
+                              <Eye className="h-3.5 w-3.5" />
+                              {tr('opportunitiesPage.states.seen')}
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                      {r.company_name && (
-                        <div className="text-sm font-medium">{r.company_name}</div>
-                      )}
+                      {req && <ExpandableText text={req} more={ui('showMore')} less={ui('showLess')} />}
                       {styles.length > 0 && (
                         <div>
-                          <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.search')}</div>
+                          <div className={`${labelCol} mb-1.5`}>{tr('opportunitiesPage.labels.search')}</div>
                           <div className="flex flex-wrap gap-1.5">
                             {styles.map((s, i) => (
-                              <span key={i} className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs">{s}</span>
+                              <span key={i} className={`bg-primary text-primary-foreground ${chip}`}>{s}</span>
                             ))}
                           </div>
                         </div>
                       )}
                       {origins.length > 0 && (
                         <div>
-                          <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.origin')}</div>
+                          <div className={`${labelCol} mb-1.5`}>{tr('opportunitiesPage.labels.origin')}</div>
                           <div className="flex flex-wrap gap-1.5">
                             {origins.map((s, i) => (
-                              <span key={i} className="bg-muted text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs">{s}</span>
+                              <span key={i} className={`bg-muted text-primary border border-primary/25 ${chip}`}>{s}</span>
                             ))}
                           </div>
                         </div>
                       )}
                       {r.volume && (
                         <div>
-                          <div className={`${labelCol} mb-1`}>{tr('opportunitiesPage.labels.volume')}</div>
-                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium inline-block">{volumeDisplay}</span>
+                          <div className={`${labelCol} mb-1.5`}>{tr('opportunitiesPage.labels.volume')}</div>
+                          <span className={`bg-gold text-gold-foreground font-medium inline-block ${chip}`}>{volumeDisplay}</span>
                         </div>
                       )}
-                      {req && (
-                        <p className="text-xs italic text-muted-foreground/80 leading-relaxed">{req}</p>
-                      )}
                     </CardContent>
-                    <div className="px-5 pb-5 flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { markViewed('importer', r.id); setContactDialog({ kind: 'importer', data: r }); }}>
+                    <div className="px-5 pb-2 flex gap-2">
+                      <Button variant="outline" className="flex-1 text-sm" onClick={() => { markViewed('importer', r.id); setContactDialog({ kind: 'importer', data: r }); }}>
                         {tr('opportunitiesPage.actions.reply')}
                       </Button>
-                      <Button size="sm" className="flex-1" disabled={added} onClick={() => addImporterToCrm(r)}>
+                      <Button className="flex-1 text-sm" disabled={added} onClick={() => addImporterToCrm(r)}>
                         {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
                       </Button>
                     </div>
-                    <div className="px-5 pb-4 flex justify-end">{archiveButton('importer', r.id)}</div>
+                    <div className="px-3 pb-2 flex justify-end">{archiveButton('importer', r.id)}</div>
                   </Card>
                 );
               });
@@ -446,82 +444,76 @@ export default function Opportunities() {
                 const tVolume = pick(t, 'available_volume');
                 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                   <div className="flex items-baseline gap-2">
-                    <span className={`${labelCol} w-28 shrink-0`}>{label}</span>
+                    <span className={`${labelCol} w-32 shrink-0`}>{label}</span>
                     <div className="flex-1 min-w-0">{children}</div>
                   </div>
                 );
                 return (
                   <Card key={t.id} className="flex flex-col border-primary/20">
-                    <CardContent className="pt-6 px-5 pb-5 flex-1 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 font-semibold">
-                          <span className="text-2xl leading-none">{countryFlag(t.market)}</span>
-                          <div>
-                            <div>{t.market}</div>
-                            <div className="text-xs text-muted-foreground font-mono font-normal">{t.reference}</div>
+                    <CardContent className="pt-5 px-5 pb-4 flex-1 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="text-lg font-bold leading-snug text-foreground break-words">{t.agent?.company || t.reference}</h3>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[15px] text-muted-foreground">
+                            <span className="flex items-center gap-1.5"><span className="text-lg leading-none" aria-hidden>{countryFlag(t.market)}</span>{countryLabel(canonicalCountry(t.market), t.market, locale)}</span>
+                            <span className="font-mono text-[13px]">{t.reference}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {viewed && (
-                            <Badge variant="secondary" className="gap-1 text-[10px] px-1.5 py-0">
-                              <Eye className="h-3 w-3" />
-                              {tr('opportunitiesPage.states.seen')}
-                            </Badge>
-                          )}
+                        <div className="flex shrink-0 flex-col items-end gap-1 text-[13px]">
                           {deadlineBadge(t.deadline_answer)}
                           {t.created_at && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-muted-foreground">
                               {format(new Date(t.created_at), 'd MMM yyyy', { locale: dateLocale })}
                             </span>
                           )}
+                          {viewed && (
+                            <Badge variant="secondary" className="gap-1 text-[13px] px-2 py-0.5 font-normal">
+                              <Eye className="h-3.5 w-3.5" />
+                              {tr('opportunitiesPage.states.seen')}
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                      {t.category && (
-                        <Row label={tr('opportunitiesPage.labels.category')}>
-                          <span className="bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs">{tCategory}</span>
-                        </Row>
+                      {(t.category || t.designation_origin) && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {t.category && <span className={`bg-primary text-primary-foreground ${chip}`} title={tr('opportunitiesPage.labels.category')}>{tCategory}</span>}
+                          {t.designation_origin && <span className={`bg-muted text-primary border border-primary/25 ${chip}`} title={tr('opportunitiesPage.labels.originDesignation')}>{tDesignation}</span>}
+                        </div>
                       )}
-                      {t.designation_origin && (
-                        <Row label={tr('opportunitiesPage.labels.originDesignation')}>
-                          <span className="bg-muted text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs">{tDesignation}</span>
-                        </Row>
-                      )}
-                      {t.price && (
-                        <Row label={tr('opportunitiesPage.labels.price')}>
-                          <span className="text-xs font-medium">{t.price}</span>
-                        </Row>
-                      )}
-                      {t.available_volume && (
-                        <Row label={tr('opportunitiesPage.labels.availableVolume')}>
-                          <span className="bg-gold text-gold-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">{tVolume}</span>
-                        </Row>
-                      )}
-                      {t.vintage && (
-                        <Row label={tr('opportunitiesPage.labels.vintage')}>
-                          <span className="border border-primary/30 text-primary rounded-full px-2.5 py-0.5 text-xs">{t.vintage}</span>
-                        </Row>
-                      )}
-                      {t.deadline_sample && (
-                        <Row label={tr('opportunitiesPage.labels.sampleDeadline')}>
-                          <span className="text-xs text-muted-foreground">{t.deadline_sample}</span>
-                        </Row>
-                      )}
-                      {styleProfile && (
-                        <p className="text-xs italic text-muted-foreground/80 leading-relaxed">{styleProfile}</p>
-                      )}
-                      {tReq && (
-                        <p className="text-xs text-muted-foreground/80 leading-relaxed">{tReq}</p>
-                      )}
+                      {styleProfile && <ExpandableText text={styleProfile} more={ui('showMore')} less={ui('showLess')} />}
+                      <div className="space-y-1.5 text-sm">
+                        {t.price && (
+                          <Row label={tr('opportunitiesPage.labels.price')}>
+                            <span className="font-medium text-foreground">{t.price}</span>
+                          </Row>
+                        )}
+                        {t.available_volume && (
+                          <Row label={tr('opportunitiesPage.labels.availableVolume')}>
+                            <span className={`bg-gold text-gold-foreground font-medium inline-block ${chip}`}>{tVolume}</span>
+                          </Row>
+                        )}
+                        {t.vintage && (
+                          <Row label={tr('opportunitiesPage.labels.vintage')}>
+                            <span className="text-foreground">{t.vintage}</span>
+                          </Row>
+                        )}
+                        {t.deadline_sample && (
+                          <Row label={tr('opportunitiesPage.labels.sampleDeadline')}>
+                            <span className="text-foreground">{t.deadline_sample}</span>
+                          </Row>
+                        )}
+                      </div>
+                      {tReq && <ExpandableText text={tReq} more={ui('showMore')} less={ui('showLess')} />}
                     </CardContent>
-                    <div className="px-5 pb-5 flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { markViewed('tender', t.id); setContactDialog({ kind: 'tender', data: t }); }}>
+                    <div className="px-5 pb-2 flex gap-2">
+                      <Button variant="outline" className="flex-1 text-sm" onClick={() => { markViewed('tender', t.id); setContactDialog({ kind: 'tender', data: t }); }}>
                         {tr('opportunitiesPage.actions.reply')}
                       </Button>
-                      <Button size="sm" className="flex-1" disabled={added || !t.agent} onClick={() => addTenderToCrm(t)}>
+                      <Button className="flex-1 text-sm" disabled={added || !t.agent} onClick={() => addTenderToCrm(t)}>
                         {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
                       </Button>
                     </div>
-                    <div className="px-5 pb-4 flex justify-end">{archiveButton('tender', t.id)}</div>
+                    <div className="px-3 pb-2 flex justify-end">{archiveButton('tender', t.id)}</div>
                   </Card>
                 );
               });
