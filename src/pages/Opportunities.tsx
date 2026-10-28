@@ -525,52 +525,90 @@ export default function Opportunities() {
         description={tr('opportunitiesPage.seoDescription')}
         path="/opportunites"
       />
-      <header>
-        <h1 className="text-3xl font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
+      <header className="rounded-xl border border-primary/15 bg-card px-5 py-5 md:px-7 md:py-6">
+        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">{ui('heroKicker')}</div>
+        <h1 className="mt-1 text-3xl font-semibold text-foreground" style={{ fontFamily: 'Georgia, serif' }}>
           {tr('opportunitiesPage.pageTitle')}
         </h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
-          {tr('opportunitiesPage.pageSubtitle')}
-        </p>
+        <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
+          <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-primary tabular-nums">{importers.length}</span><span className="text-[15px] text-foreground">{ui('buyerRequests', { count: importers.length })}</span></div>
+          <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-primary tabular-nums">{tenders.length}</span><span className="text-[15px] text-foreground">{ui('tenders', { count: tenders.length })}</span></div>
+        </div>
+        <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">{ui('heroText')}</p>
       </header>
 
-      <Tabs defaultValue="direct" className="w-full">
+      <Tabs value={tab} onValueChange={changeTab} className="w-full">
         <TabsList className="h-auto flex flex-wrap justify-start gap-1">
-          <TabsTrigger value="direct">{tr('opportunitiesPage.tabs.direct')} ({importersPartition.active.length})</TabsTrigger>
-          <TabsTrigger value="tender">{tr('opportunitiesPage.tabs.tender')} ({tendersPartition.active.length})</TabsTrigger>
-          <TabsTrigger value="archives"><Archive className="h-4 w-4 mr-2" />{tr('opportunitiesPage.tabs.archives')} ({importersPartition.archived.length + tendersPartition.archived.length})</TabsTrigger>
+          <TabsTrigger value="direct" className="text-sm">{tr('opportunitiesPage.tabs.direct')} ({fImporters(importersPartition.active).length})</TabsTrigger>
+          <TabsTrigger value="tender" className="text-sm">{tr('opportunitiesPage.tabs.tender')} ({fTenders(tendersPartition.active).length})</TabsTrigger>
+          <TabsTrigger value="archives" className="text-sm"><Archive className="h-4 w-4 mr-2" />{tr('opportunitiesPage.tabs.archives')} ({fImporters(importersPartition.archived).length + fTenders(tendersPartition.archived).length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="direct" className="mt-6">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
+          <div className="relative sm:col-span-2 lg:col-span-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={filters.q} onChange={e => setFilters(f => ({ ...f, q: e.target.value }))} placeholder={ui('searchPlaceholder')} aria-label={ui('searchPlaceholder')} className="h-10 pl-9 text-sm" />
+          </div>
+            <Select value={filters.country || '__all'} onValueChange={v => setFilters(f => ({ ...f, country: v === '__all' ? '' : v }))}>
+              <SelectTrigger className="h-10 text-sm" aria-label={ui('country')}><SelectValue placeholder={ui('country')} /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">{ui('country')} : {ui('all')}</SelectItem>
+                {countryOptions.map(o => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={filters.style || '__all'} onValueChange={v => setFilters(f => ({ ...f, style: v === '__all' ? '' : v }))}>
+              <SelectTrigger className="h-10 text-sm" aria-label={ui('style')}><SelectValue placeholder={ui('style')} /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">{ui('style')} : {ui('all')}</SelectItem>
+                {styleOptions.map(o => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={filters.origin || '__all'} onValueChange={v => setFilters(f => ({ ...f, origin: v === '__all' ? '' : v }))}>
+              <SelectTrigger className="h-10 text-sm" aria-label={ui('origin')}><SelectValue placeholder={ui('origin')} /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">{ui('origin')} : {ui('all')}</SelectItem>
+                {originOptions.map(o => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          <Button variant="ghost" className="h-10 gap-2 text-sm" disabled={!activeFilters} onClick={() => setFilters(EMPTY_FILTERS)}>
+            <RotateCcw className="h-4 w-4" />{ui('reset')}
+          </Button>
+        </div>
+
+        <TabsContent value="direct" className="mt-5">
           {importersPartition.active.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyDirect')}</CardContent></Card>
+          ) : fImporters(importersPartition.active).length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">{ui('noResults')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {renderImporters(importersPartition.active)}
+              {renderImporters(fImporters(importersPartition.active))}
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="tender" className="mt-6">
+        <TabsContent value="tender" className="mt-5">
           {tendersPartition.active.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyTender')}</CardContent></Card>
+          ) : fTenders(tendersPartition.active).length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">{ui('noResults')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {renderTenders(tendersPartition.active)}
+              {renderTenders(fTenders(tendersPartition.active))}
             </div>
           )}
         </TabsContent>
-        <TabsContent value="archives" className="mt-6 space-y-6">
-          {importersPartition.archived.length + tendersPartition.archived.length === 0 && (
-            <div className="py-12 text-center text-muted-foreground"><Archive className="h-8 w-8 mx-auto mb-3" />{tr('opportunitiesPage.states.emptyArchives')}</div>
+        <TabsContent value="archives" className="mt-5 space-y-6">
+          {fImporters(importersPartition.archived).length + fTenders(tendersPartition.archived).length === 0 && (
+            <div className="py-12 text-center text-muted-foreground"><Archive className="h-8 w-8 mx-auto mb-3" />{activeFilters ? ui('noResults') : tr('opportunitiesPage.states.emptyArchives')}</div>
           )}
-          {importersPartition.archived.length > 0 && <section className="space-y-4">
+          {fImporters(importersPartition.archived).length > 0 && <section className="space-y-4">
             <h2 className="font-semibold">{tr('opportunitiesPage.tabs.direct')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{renderImporters(importersPartition.archived)}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{renderImporters(fImporters(importersPartition.archived))}</div>
           </section>}
-          {tendersPartition.archived.length > 0 && <section className="space-y-4">
+          {fTenders(tendersPartition.archived).length > 0 && <section className="space-y-4">
             <h2 className="font-semibold">{tr('opportunitiesPage.tabs.tender')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{renderTenders(tendersPartition.archived)}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{renderTenders(fTenders(tendersPartition.archived))}</div>
           </section>}
         </TabsContent>
       </Tabs>
@@ -590,8 +628,11 @@ export default function Opportunities() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2 text-sm">
+                {isMediatedEmail(contactDialog.data.email) && (
+                  <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-muted/50 p-3"><ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary" /><span>{ui('mediated')}</span></div>
+                )}
                 <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /><a className="underline" href={`mailto:${contactDialog.data.email}`}>{contactDialog.data.email}</a></div>
-                {contactDialog.data.phone && (
+                {contactDialog.data.phone && !isMediatedEmail(contactDialog.data.email) && (
                   <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /><a className="underline" href={`tel:${contactDialog.data.phone}`}>{contactDialog.data.phone}</a></div>
                 )}
               </div>
@@ -617,6 +658,14 @@ export default function Opportunities() {
                 )}
               </div>
             </>
+          )}
+          {contactDialog && (contactDialog.kind === 'importer' ? contactDialog.data.email : contactDialog.data.agent?.email) && (
+            <div className="space-y-1.5 border-t pt-3">
+              <Button asChild className="w-full gap-2 text-sm">
+                <a href={mailtoFor(contactDialog)}><Send className="h-4 w-4" />{ui('prepareEmail')}</a>
+              </Button>
+              <p className="text-[13px] text-muted-foreground">{ui('prepareHint')}</p>
+            </div>
           )}
         </DialogContent>
       </Dialog>
