@@ -971,6 +971,7 @@ export default function AdminCampaigns() {
                                <CheckCircle className="h-4 w-4 mr-1" />
                                {t('adminCampaigns.table.validate')}
                              </Button>
+                             </>
                              )}
                              <Button
                                size="sm"
