@@ -879,6 +879,50 @@ export type Database = {
           },
         ]
       }
+      campaign_send_queue: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          attempted_at: string | null
+          campaign_id: string
+          created_at: string
+          error: string | null
+          sent_at: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          attempted_at?: string | null
+          campaign_id: string
+          created_at?: string
+          error?: string | null
+          sent_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          attempted_at?: string | null
+          campaign_id?: string
+          created_at?: string
+          error?: string | null
+          sent_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_send_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: true
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           admin_reviewer: string | null
@@ -2589,10 +2633,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_campaign_for_queue: { Args: { _id: string }; Returns: string }
       campaign_html_is_valid: {
         Args: { _campaign_id: string; _html: string }
         Returns: boolean
       }
+      cancel_campaign_queue: { Args: { _id: string }; Returns: boolean }
       claim_campaign_result_job: {
         Args: { _id: string }
         Returns: {
@@ -2625,6 +2671,26 @@ export type Database = {
         Args: { _id: string }
         Returns: string
       }
+      claim_campaign_send: {
+        Args: never
+        Returns: {
+          approved_at: string
+          approved_by: string | null
+          attempted_at: string | null
+          campaign_id: string
+          created_at: string
+          error: string | null
+          sent_at: string | null
+          state: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "campaign_send_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
@@ -2634,6 +2700,7 @@ export type Database = {
         Args: { _daily?: boolean }
         Returns: undefined
       }
+      dispatch_campaign_send_queue: { Args: never; Returns: undefined }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
       get_campaign_public_info: {
         Args: { _campaign_id: string }
@@ -2674,6 +2741,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      install_campaign_queue_secret: {
+        Args: { _secret: string }
         Returns: boolean
       }
       install_campaign_results_secret: {
