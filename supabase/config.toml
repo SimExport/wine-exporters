@@ -55,10 +55,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.sync-brevo-campaign]
-verify_jwt = true
+verify_jwt = false
 
 [functions.enrich-campaign-prospects]
-verify_jwt = true
+verify_jwt = false
 
 [functions.admin-invite-link]
 verify_jwt = true
@@ -82,4 +82,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.submit-importer-opportunity]
+verify_jwt = false
+
+[functions.notify-campaign-completed]
+verify_jwt = false
+
+[functions.process-campaign-results]
 verify_jwt = false

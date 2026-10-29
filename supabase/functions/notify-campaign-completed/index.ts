@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Resend } from "npm:resend@2.0.0";
+import { authorizeResults, internalJob, withResultOperation } from "../_shared/campaign-results-auth.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -29,12 +30,20 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    const access = await authorizeResults(req, admin);
+    if (!access) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    if (access === "internal" && !await internalJob(req, admin, campaignId, "notify")) return new Response(JSON.stringify({ error: "Invalid result job lease" }), { status: 409, headers: corsHeaders });
+
     const { data: campaign, error } = await admin
       .from("campaigns")
-      .select("id, user_id, name")
+      .select("id, user_id, name, status")
       .eq("id", campaignId)
       .single();
     if (error || !campaign) throw error || new Error("Campaign not found");
+    const test = await admin.rpc("is_test_campaign", { _id: campaignId });
+    if (test.error) throw test.error;
+    if (test.data) return new Response(JSON.stringify({ skipped: true }), { status: 200, headers: corsHeaders });
+    if (!preview && campaign.status !== "results") throw new Error("Results are not available");
 
     const { data: userData, error: userErr } = await admin.auth.admin.getUserById(campaign.user_id);
     if (userErr || !userData?.user?.email) throw userErr || new Error("User email not found");
@@ -49,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
     const isEn = lang === "en";
 
     // Count qualified prospects (form respondents + imported clickers)
-    const [{ count: respondentsCount }, { count: clickersCount }] = await Promise.all([
+    const [{ count: respondentsCount, error: respondentsError }, { count: clickersCount, error: clickersError }] = await Promise.all([
       admin
         .from("campaign_interested_contacts")
         .select("id", { count: "exact", head: true })
@@ -61,6 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("campaign_id", campaignId)
         .is("contact_name", null),
     ]);
+    if (respondentsError || clickersError) throw respondentsError ?? clickersError;
     const nRespondents = respondentsCount ?? 0;
     const nClickers = clickersCount ?? 0;
 
@@ -134,6 +144,20 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    const previous = await admin.from("campaign_email_logs").select("id").eq("campaign_id", campaignId).eq("event_type", "campaign_completed").eq("status", "sent").limit(1);
+    if (previous.error) throw previous.error;
+    if (previous.data?.length) return new Response(JSON.stringify({ success: true, deduplicated: true }), { status: 200, headers: corsHeaders });
+    const ensure = await admin.from("campaign_result_jobs").upsert({ campaign_id: campaignId, stage: "notify", status: "pending" }, { onConflict: "campaign_id", ignoreDuplicates: true });
+    if (ensure.error) throw ensure.error;
+    const claimed = await admin.from("campaign_result_jobs").update({ notification_state: "sending", notification_attempted_at: new Date().toISOString() }).eq("campaign_id", campaignId).eq("notification_state", "pending").select("campaign_id");
+    if (claimed.error) throw claimed.error;
+    if (!claimed.data?.length) {
+      const marker = await admin.from("campaign_result_jobs").select("notification_state").eq("campaign_id", campaignId).single();
+      if (marker.error) throw marker.error;
+      if (marker.data.notification_state === "sent") return new Response(JSON.stringify({ success: true, deduplicated: true }), { status: 200, headers: corsHeaders });
+      throw new Error("Notification outcome uncertain: reconciliation required; no automatic resend");
+    }
+    // Durable claim BEFORE sending: ambiguous failures never trigger another email.
     const sendResult = await resend.emails.send({
       from: "WineExporters <notifications@exportvins.fr>",
       to: [userEmail],
@@ -143,7 +167,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
     console.log("notify-campaign-completed resend result:", JSON.stringify(sendResult));
     const sendErr = (sendResult as any)?.error;
-    await admin.from("campaign_email_logs").insert({
+    const log = await admin.from("campaign_email_logs").insert({
       campaign_id: campaignId,
       event_type: "campaign_completed",
       recipient: userEmail,
@@ -154,8 +178,12 @@ const handler = async (req: Request): Promise<Response> => {
       resend_id: (sendResult as any)?.data?.id ?? null,
     });
     if (sendErr) {
+      const failedMarker = await admin.from("campaign_result_jobs").update({ notification_state: "uncertain", last_error: "Resend failed; reconciliation required" }).eq("campaign_id", campaignId);
+      if (failedMarker.error) console.error("Notification marker write failed", failedMarker.error.message);
       throw new Error(`Resend error: ${JSON.stringify((sendResult as any).error)}`);
     }
+    const marker = await admin.from("campaign_result_jobs").update({ notification_state: "sent", notification_sent_at: new Date().toISOString(), resend_id: (sendResult as any)?.data?.id ?? null }).eq("campaign_id", campaignId);
+    if (marker.error || log.error) throw new Error("Notification sent but persistence incomplete: reconciliation required");
 
     return new Response(JSON.stringify({ success: true, sendResult }), {
       status: 200,
@@ -170,4 +198,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+serve((req) => withResultOperation(req, handler));
