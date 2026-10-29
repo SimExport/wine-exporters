@@ -23,7 +23,7 @@ export function parisDayStart(now: Date = new Date()): Date {
 
 /** Estimated send date (Paris civil day, yyyy-mm-dd) for a campaign at `position` (1 = next) in the queue. */
 export function estimateSendDate(position: number, quotaUsedToday: boolean, now: Date = new Date()): string {
+  const [y, m, d] = PARIS_DAY.format(now).split('-').map(Number);
   const extra = (quotaUsedToday ? 1 : 0) + Math.max(0, position - 1);
-  const start = parisDayStart(now);
-  return new Date(start.getTime() + extra * 86_400_000).toISOString().slice(0, 10);
+  return new Date(Date.UTC(y, m - 1, d + extra)).toISOString().slice(0, 10);
 }
