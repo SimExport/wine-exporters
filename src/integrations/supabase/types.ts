@@ -798,6 +798,8 @@ export type Database = {
           resend_id: string | null
           stage: string
           status: string
+          sync_emails: Json | null
+          sync_process_id: string | null
           updated_at: string
         }
         Insert: {
@@ -815,6 +817,8 @@ export type Database = {
           resend_id?: string | null
           stage?: string
           status?: string
+          sync_emails?: Json | null
+          sync_process_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -832,11 +836,42 @@ export type Database = {
           resend_id?: string | null
           stage?: string
           status?: string
+          sync_emails?: Json | null
+          sync_process_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "campaign_result_jobs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: true
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_result_operation_locks: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          expires_at?: string
+          token?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          expires_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_result_operation_locks_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: true
             referencedRelation: "campaigns"
@@ -2575,6 +2610,8 @@ export type Database = {
           resend_id: string | null
           stage: string
           status: string
+          sync_emails: Json | null
+          sync_process_id: string | null
           updated_at: string
         }[]
         SetofOptions: {
@@ -2583,6 +2620,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      claim_campaign_result_operation: {
+        Args: { _id: string }
+        Returns: string
       }
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
@@ -2704,6 +2745,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      release_campaign_result_operation: {
+        Args: { _id: string; _token: string }
+        Returns: undefined
       }
       save_campaign_email: {
         Args: { _content: Json; _html: string; _id: string; _subject: string }
