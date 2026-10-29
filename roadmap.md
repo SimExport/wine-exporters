@@ -1,5 +1,8 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
+## Invitation Stripe après premier paiement
+- [ ] Webhook existant : première facture payée, prix autorisés, invitation/activation idempotente, tests simulés et déploiement de cette fonction seulement.
+
 ## Correction ciblée fiche importateur
 
 - [x] Personnes structurées, emails dédupliqués, notes commerciales via RPC existante et statut confirmed ; Wuttke confirmé en lecture seule (3 personnes, 0 email structuré), 9 tests réussis et panneau isolé ordinateur/mobile vérifié, build OK ; campagnes/automatisations inchangées.
