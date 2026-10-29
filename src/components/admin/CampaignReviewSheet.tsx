@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CalendarClock, CheckCircle, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
+import { AlertTriangle, CalendarClock, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
