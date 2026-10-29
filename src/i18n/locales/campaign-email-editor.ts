@@ -223,7 +223,7 @@ export const campaignEmailEditorEn: typeof campaignEmailEditorFr = {
     check: 'Check Brevo status', sendBrevoDraft: 'Send this Brevo draft', release: 'Unlock for a new send',
     markets: 'Markets ({{count}})', submittedAt: 'Submitted on', wines: 'Wines', documents: 'Documents', instructions: 'Producer instructions',
     rejections: 'Send-back history', email: 'Email that will be sent (exactly this content)',
-    legacyExplain: 'Legacy campaign: the email is generated at validation with the usual button in the list.',
+    legacyExplain: 'Legacy campaign with no prepared email: it cannot be scheduled. Prepare the email to preview it (nothing is sent), or use the usual button in the list.',
     validateSend: 'Validate and send', testSend: 'Test send (test list)', reject: 'Send back for changes',
     prepareEmail: 'Prepare the email for preview', preparing: 'Preparing…', prepared: 'Email prepared: check the preview before scheduling',
     confirmPrepare: 'Generate this campaign’s email once from the existing profile, wines and settings? Nothing is sent or approved; markets and wines stay unchanged.',
