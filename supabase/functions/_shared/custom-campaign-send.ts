@@ -2,7 +2,8 @@
 // and send-queued-campaign (internal secret, daily cron). No Claude, no HTML transformation.
 // Idempotent: DB lock + Brevo id persisted before sendNow; uncertain outcomes are never
 // retried automatically (manual check required). markCampaignLive notifies only on confirmed send.
-import { buildOwnerEmailHtml, mapMarketsToLists, missingEmailTags } from "./campaign-email.ts";
+import { mapMarketsToLists, missingEmailTags } from "./campaign-email.ts";
+import { buildLaunchEmail, langOf, sendOnce } from "./campaign-notify.ts";
 
 export interface SendContext {
   admin: any; // service_role Supabase client
@@ -26,17 +27,16 @@ export async function markCampaignLive(ctx: SendContext, campaign: any, brevoId:
   if (!changed?.length) return false;
   await admin.from("campaign_events").insert({ campaign_id: campaign.id, type: "sent", payload: { brevo_campaign_id: brevoId, test: !!isTest, by: ctx.reviewerId } });
   if (isTest || !ctx.resendKey) return true;
+  // Single launch email, monolingual (user_settings.ui_language), deduplicated in campaign_email_logs.
   // Notification failure is logged only: it never affects the Brevo send.
   try {
     const { data: au } = await admin.auth.admin.getUserById(campaign.user_id);
     const markets = (campaign.target_markets?.length ? campaign.target_markets : campaign.markets) ?? [];
     if (au?.user?.email) {
-      const r = await (ctx.fetchFn ?? fetch)("https://api.resend.com/emails", {
-        method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${ctx.resendKey}` },
-        body: JSON.stringify({ from: "WineExporters <simon@exportvins.fr>", to: [au.user.email], cc: ["simon@exportvins.fr"], reply_to: "simon@exportvins.fr",
-          subject: `Your campaign is live — ${campaign.name} / Votre campagne est en ligne`, html: buildOwnerEmailHtml(campaign.name, markets) }),
-      });
-      if (!r.ok) console.error("Resend notify failed:", r.status, (await r.text()).slice(0, 200));
+      const { data: st } = await admin.from("user_settings").select("ui_language").eq("user_id", campaign.user_id).maybeSingle();
+      const email = buildLaunchEmail(langOf(st?.ui_language), campaign.name, now, campaign.id, markets);
+      const r = await sendOnce(admin, ctx.resendKey, ctx.fetchFn ?? fetch, { campaignId: campaign.id, eventType: "campaign_launched", to: au.user.email, bcc: "simon@exportvins.fr", email });
+      if (r === "failed") console.error("Launch notification failed for", campaign.id);
     }
   } catch (e) { console.error("Resend notify failed:", e); }
   return true;
