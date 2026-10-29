@@ -14,8 +14,9 @@ async function simulate(options: { stage: string; locked?: boolean; failure?: nu
   const writes: Record<string, unknown>[] = [];
   globalThis.fetch = async (input, init) => {
     const url = new URL(input instanceof Request ? input.url : String(input));
-    const method = init?.method ?? 'GET';
-    const body = init?.body ? JSON.parse(String(init.body)) : {};
+    const optionsInit = init as { method?: string; body?: unknown } | undefined;
+    const method = optionsInit?.method ?? 'GET';
+    const body = optionsInit?.body ? JSON.parse(String(optionsInit.body)) : {};
     const response = (value: unknown, status = 200, headers = {}) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json', ...headers } });
     if (url.pathname.includes('/functions/v1/')) {
       operations.push(url.pathname.split('/').pop() ?? '');
