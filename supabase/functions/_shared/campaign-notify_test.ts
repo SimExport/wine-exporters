@@ -24,7 +24,7 @@ Deno.test("scheduled email FR/EN: monolingual, date, 48–72h, brand, link", () 
   assert(fr.html.includes("https://wine-exporters.com/campaigns/abc") && fr.html.includes("Test &lt;b&gt;"));
   assert(!fr.html.includes("Results") && !fr.html.includes("7 à 10"));
   const en = buildScheduledEmail("en", "X", "2026-10-30", "abc");
-  assert(en.subject.includes("approved and scheduled") && en.html.includes("Friday 30 October 2026") && en.html.includes("48–72 hours"));
+  assert(en.subject.includes("approved and scheduled") && en.html.includes("Friday, 30 October 2026") && en.html.includes("48–72 hours"));
   assert(!en.html.includes("Votre"));
 });
 Deno.test("launch email: effective Paris time, monolingual", () => {

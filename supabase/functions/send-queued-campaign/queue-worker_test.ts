@@ -6,6 +6,8 @@ interface State {
   campaigns: any[];
   queue: any[];
   campaign_events: any[];
+  user_settings?: any[];
+  campaign_email_logs?: any[];
   testCampaigns: Set<string>;
   updates: { table: string; patch: any }[];
   userEmails: Record<string, string>;
