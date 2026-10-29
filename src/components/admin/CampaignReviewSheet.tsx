@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CalendarClock, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
+import { AlertTriangle, CalendarClock, PencilLine, Sparkles, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,12 +10,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
+import { EmailPrepareStep } from '@/components/campaigns/email-editor/EmailPrepareStep';
 import { functionErrorMessage } from '@/lib/media-upload';
 import { campaignPath, canStartSend, needsBrevoCheck, sendState } from '@/lib/campaign-send-state';
 import { formatDate, formatDateTime } from '@/lib/format';
 import { estimateSendDate, parisDayStart } from '@/lib/campaign-queue';
 
-type Confirm = null | 'send' | 'test' | 'confirm_send' | 'release' | 'schedule' | 'cancel_schedule';
+type Confirm = null | 'prepare' | 'send' | 'test' | 'confirm_send' | 'release' | 'schedule' | 'cancel_schedule';
 
 interface QueueInfo { row: any | null; ahead: number; estimated: string | null }
 
@@ -42,11 +43,12 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
   const [checkResult, setCheckResult] = useState<string | null>(null);
   const [queueInfo, setQueueInfo] = useState<QueueInfo>({ row: null, ahead: 0, estimated: null });
   const [reloadKey, setReloadKey] = useState(0);
+  const [editing, setEditing] = useState(false);
   const c = campaign;
 
   useEffect(() => {
     if (!c) return;
-    setReason(''); setCheckResult(null);
+    setReason(''); setCheckResult(null); setEditing(false);
     const docIds = [c.doc_presentation, c.doc_pricelist, ...(c.doc_techs ?? [])].filter(Boolean);
     Promise.all([
       supabase.from('profiles').select('domain_name, contact_name').eq('user_id', c.user_id).maybeSingle(),
@@ -76,6 +78,10 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
   const markets: string[] = (c.target_markets?.length ? c.target_markets : c.markets) ?? [];
   const rejections = details.events.filter((e) => e.type === 'rejected');
   const isTest = details.events.some((e) => e.type === 'test_campaign');
+  const queueBlocks = !!queueInfo.row && queueInfo.row.state !== 'failed';
+  const unlocked = !c.send_started_at && !c.brevo_campaign_id && !isTest && !queueBlocks;
+  const canPrepare = unlocked && !String(c.message_html ?? '').trim() && (c.email_generation_count ?? 0) < 1;
+  const canEdit = unlocked;
 
   const call = async (mode: string, extra: Record<string, unknown> = {}) => {
     setBusy(mode); setConfirm(null);
@@ -103,12 +109,25 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
     } finally { setBusy(null); onChanged(); }
   };
 
+  // Explicit admin click only: one AI generation saved as v2, never sent, never approved.
+  const prepare = async () => {
+    setBusy('prepare'); setConfirm(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-campaign-email', { body: { campaignId: c.id, adminPrepare: true } });
+      if (error || data?.error) { toast({ title: k('errorTitle'), description: await functionErrorMessage(error, data), variant: 'destructive' }); return; }
+      toast({ title: k('prepared') });
+    } finally { setBusy(null); onChanged(); }
+  };
+
   const schedule = async () => {
     setBusy('schedule'); setConfirm(null);
     try {
       const { error } = await (supabase.rpc as any)('approve_campaign_for_queue', { _id: c.id });
       if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
       toast({ title: k('scheduledToast') });
+      // Producer email (FR/EN, deduplicated server-side). A failure never cancels the scheduling.
+      const { data: n, error: nErr } = await supabase.functions.invoke('notify-campaign-validated', { body: { campaignId: c.id, kind: 'scheduled' } });
+      if (nErr || n?.error || n?.result === 'failed') toast({ title: k('scheduledNoMail'), variant: 'destructive' });
       setReloadKey((n) => n + 1);
     } finally { setBusy(null); onChanged(); }
   };
@@ -129,6 +148,7 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
     confirm_send: k('confirmBrevoDraft'),
     release: k('confirmRelease'),
     schedule: k('confirmSchedule'),
+    prepare: k('confirmPrepare'),
     cancel_schedule: k('confirmCancelSchedule'),
   };
 
@@ -183,7 +203,36 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
               <EmailPreviewFrame html={c.message_html} subject={c.subject_selected ?? undefined} sender="WineExporters <simon@exportvins.fr>" />
             </Row>
           ) : (
-            <Alert><AlertDescription>{k('legacyExplain')}</AlertDescription></Alert>
+            <Alert>
+              <AlertDescription className="space-y-3">
+                <p>{k('legacyExplain')}</p>
+                {pending && canPrepare && (
+                  <Button size="sm" disabled={!!busy} onClick={() => setConfirm('prepare')}>
+                    {busy === 'prepare' ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                    {busy === 'prepare' ? k('preparing') : k('prepareEmail')}
+                  </Button>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {pending && path === 'custom' && canEdit && (
+            editing ? (
+              <EmailPrepareStep
+                campaignId={c.id}
+                initialContent={c.email_content}
+                initialHtml={c.message_html}
+                generationCount={c.email_generation_count ?? 1}
+                sender="WineExporters <simon@exportvins.fr>"
+                onStateChange={() => {}}
+                onBack={() => { setEditing(false); onChanged(); }}
+                onContinue={() => { setEditing(false); onChanged(); }}
+              />
+            ) : (
+              <Button size="sm" variant="outline" disabled={!!busy} onClick={() => setEditing(true)}>
+                <PencilLine className="h-4 w-4 mr-1" />{k('editEmail')}
+              </Button>
+            )
           )}
 
           {pending && path === 'custom' && (
@@ -202,7 +251,7 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
                 </Alert>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  <Button disabled={!!busy || !canStartSend(c) || isTest} onClick={() => setConfirm('schedule')}>
+                  <Button disabled={!!busy || editing || !canStartSend(c) || isTest} onClick={() => setConfirm('schedule')}>
                     {busy === 'schedule' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CalendarClock className="h-4 w-4 mr-2" />}{k('schedule')}
                   </Button>
                   <Button variant="outline" disabled={!!busy || !canStartSend(c)} onClick={() => setConfirm('test')}>
@@ -235,7 +284,8 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
             <AlertDialogFooter>
               <AlertDialogCancel>{t('emailEditor.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={() => {
-                if (confirm === 'send') call('send');
+                if (confirm === 'prepare') prepare();
+                else if (confirm === 'send') call('send');
                 else if (confirm === 'test') call('send', { test: true });
                 else if (confirm === 'confirm_send') call('confirm_send', { confirm: true });
                 else if (confirm === 'release') call('release', { confirm: true });
