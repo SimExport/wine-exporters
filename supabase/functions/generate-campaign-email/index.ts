@@ -3,7 +3,7 @@
 // template and saves it on the draft campaign. Never contacts Brevo, never
 // consumes a campaign credit.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { canGenerateCampaignEmail } from "../_shared/campaign-generation-policy.ts";
+import { adminPendingEmailBlock, canGenerateCampaignEmail } from "../_shared/campaign-generation-policy.ts";
 import {
   buildAnthropicUserMessage, contentV2FromClaude, INTEREST_BASE, missingEmailTags,
   renderEmailHtmlV2, STRUCTURED_SYSTEM_PROMPT,
@@ -107,10 +107,12 @@ Deno.serve(async (req) => {
     if (missing.length) return json(502, { error: "Generated email is missing required elements", missing });
 
     if (apply) {
-      const { error: sErr } = await admin.from("campaigns")
+      const { data: saved, error: sErr } = await admin.from("campaigns")
         .update({ email_content: content, message_html: html, subject_selected: content.subject })
-        .eq("id", campaignId).eq("status", "draft");
+        .eq("id", campaignId).eq("status", status).is("send_started_at", null).is("brevo_campaign_id", null)
+        .or("message_html.is.null,message_html.eq.").select("id");
       if (sErr) throw new Error(sErr.message);
+      if (!saved?.length) return json(409, { error: "Campaign changed during generation: nothing saved" });
     }
     generated = true;
     return json(200, { subject: content.subject, content, html, applied: apply });
