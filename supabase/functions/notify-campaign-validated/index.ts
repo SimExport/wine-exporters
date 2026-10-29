@@ -5,7 +5,15 @@
 // A mail failure never cancels scheduling: it is logged only.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { buildScheduledEmail, buildLaunchEmail, estimateQueueDay, langOf, sendOnce } from "../_shared/campaign-notify.ts";
-import { countRealSendsToday } from "../send-queued-campaign/queue-worker.ts";
+import { parisDayBoundsUtc } from "../_shared/paris-day.ts";
+
+// Same rule as send-queued-campaign: real campaigns live today (Paris); test sends end archived.
+async function countRealSendsToday(admin: any, now: Date): Promise<number> {
+  const { start, end } = parisDayBoundsUtc(now);
+  const { count } = await admin.from("campaigns").select("id", { count: "exact", head: true })
+    .in("status", ["active", "sending", "results"]).gte("launched_at", start.toISOString()).lt("launched_at", end.toISOString());
+  return count ?? 0;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
