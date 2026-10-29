@@ -107,10 +107,12 @@ Deno.serve(async (req) => {
     if (missing.length) return json(502, { error: "Generated email is missing required elements", missing });
 
     if (apply) {
-      const { data: saved, error: sErr } = await admin.from("campaigns")
+      let sq = admin.from("campaigns")
         .update({ email_content: content, message_html: html, subject_selected: content.subject })
-        .eq("id", campaignId).eq("status", status).is("send_started_at", null).is("brevo_campaign_id", null)
-        .or("message_html.is.null,message_html.eq.").select("id");
+        .eq("id", campaignId).eq("status", status);
+      // Admin path: never overwrite an existing email, never touch a locked/sent campaign.
+      if (adminPrepare) sq = sq.is("send_started_at", null).is("brevo_campaign_id", null).or("message_html.is.null,message_html.eq.");
+      const { data: saved, error: sErr } = await sq.select("id");
       if (sErr) throw new Error(sErr.message);
       if (!saved?.length) return json(409, { error: "Campaign changed during generation: nothing saved" });
     }
