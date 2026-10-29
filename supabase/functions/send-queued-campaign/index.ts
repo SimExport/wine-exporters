@@ -12,6 +12,7 @@ export interface QueueDeps {
   brevoKey: string;
   resendKey?: string;
   now: Date;
+  fetchFn?: typeof fetch;
 }
 
 /** Real (non-test) campaigns that went live today in Europe/Paris. Test sends end archived, never counted. */
