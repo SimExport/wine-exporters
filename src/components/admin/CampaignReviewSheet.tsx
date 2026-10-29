@@ -103,11 +103,33 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
     } finally { setBusy(null); onChanged(); }
   };
 
+  const schedule = async () => {
+    setBusy('schedule'); setConfirm(null);
+    try {
+      const { error } = await (supabase.rpc as any)('approve_campaign_for_queue', { _id: c.id });
+      if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
+      toast({ title: k('scheduledToast') });
+      setReloadKey((n) => n + 1);
+    } finally { setBusy(null); onChanged(); }
+  };
+
+  const cancelQueue = async () => {
+    setBusy('cancel_schedule'); setConfirm(null);
+    try {
+      const { error } = await (supabase.rpc as any)('cancel_campaign_queue', { _id: c.id });
+      if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
+      toast({ title: k('scheduleCancelled') });
+      setReloadKey((n) => n + 1);
+    } finally { setBusy(null); onChanged(); }
+  };
+
   const confirmText: Record<Exclude<Confirm, null>, string> = {
     send: k('confirmSend', { count: markets.length }),
     test: k('confirmTest'),
     confirm_send: k('confirmBrevoDraft'),
     release: k('confirmRelease'),
+    schedule: k('confirmSchedule'),
+    cancel_schedule: k('confirmCancelSchedule'),
   };
 
   return (
