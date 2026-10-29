@@ -782,6 +782,68 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_result_jobs: {
+        Row: {
+          attempts: number
+          campaign_id: string
+          created_at: string
+          hops: number
+          last_error: string | null
+          lease_token: string | null
+          lease_until: string | null
+          next_attempt_at: string
+          notification_attempted_at: string | null
+          notification_sent_at: string | null
+          notification_state: string
+          resend_id: string | null
+          stage: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          campaign_id: string
+          created_at?: string
+          hops?: number
+          last_error?: string | null
+          lease_token?: string | null
+          lease_until?: string | null
+          next_attempt_at?: string
+          notification_attempted_at?: string | null
+          notification_sent_at?: string | null
+          notification_state?: string
+          resend_id?: string | null
+          stage?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          campaign_id?: string
+          created_at?: string
+          hops?: number
+          last_error?: string | null
+          lease_token?: string | null
+          lease_until?: string | null
+          next_attempt_at?: string
+          notification_attempted_at?: string | null
+          notification_sent_at?: string | null
+          notification_state?: string
+          resend_id?: string | null
+          stage?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_result_jobs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: true
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           admin_reviewer: string | null
@@ -2496,11 +2558,41 @@ export type Database = {
         Args: { _campaign_id: string; _html: string }
         Returns: boolean
       }
+      claim_campaign_result_job: {
+        Args: { _id: string }
+        Returns: {
+          attempts: number
+          campaign_id: string
+          created_at: string
+          hops: number
+          last_error: string | null
+          lease_token: string | null
+          lease_until: string | null
+          next_attempt_at: string
+          notification_attempted_at: string | null
+          notification_sent_at: string | null
+          notification_state: string
+          resend_id: string | null
+          stage: string
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "campaign_result_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
       crm_access_level: { Args: { _user_id: string }; Returns: string }
       dismiss_exportvins_welcome: { Args: never; Returns: undefined }
+      dispatch_campaign_results: {
+        Args: { _daily?: boolean }
+        Returns: undefined
+      }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
       get_campaign_public_info: {
         Args: { _campaign_id: string }
@@ -2541,6 +2633,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      install_campaign_results_secret: {
+        Args: { _secret: string }
         Returns: boolean
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
