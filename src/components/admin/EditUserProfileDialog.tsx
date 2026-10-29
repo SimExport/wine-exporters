@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -84,7 +85,9 @@ export function EditUserProfileDialog({ open, onOpenChange, userId, profile, onS
     payload.social_media = { ...prevSocial, ...Object.fromEntries(SOCIALS.map((k) => [k, String(form[k] ?? '').trim()])) };
 
     setSaving(true);
-    const { data, error } = await supabase.from('profiles').update(payload).eq('user_id', userId).select('*').maybeSingle();
+    const { data, error } = await supabase.from('profiles')
+      .update(payload as Database['public']['Tables']['profiles']['Update'])
+      .eq('user_id', userId).select('*').maybeSingle();
     setSaving(false);
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
