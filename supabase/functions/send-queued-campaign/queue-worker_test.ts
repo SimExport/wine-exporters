@@ -6,6 +6,8 @@ interface State {
   campaigns: any[];
   queue: any[];
   campaign_events: any[];
+  user_settings?: any[];
+  campaign_email_logs?: any[];
   testCampaigns: Set<string>;
   updates: { table: string; patch: any }[];
   userEmails: Record<string, string>;
@@ -15,8 +17,8 @@ class MockQuery {
   filters: { col: string; op: string; val: any }[] = [];
   op: "select" | "update" | "insert" | null = null;
   patch: any; payload: any; opts: any; singleMode: "maybe" | null = null;
-  constructor(public state: State, public table: "campaigns" | "queue" | "campaign_events") {}
-  select(_cols?: any, opts?: any) { if (this.op !== "update") this.op = "select"; this.opts = opts; return this; }
+  constructor(public state: State, public table: string) {}
+  select(_cols?: any, opts?: any) { if (this.op === null) this.op = "select"; this.opts = opts; return this; }
   insert(p: any) { this.op = "insert"; this.payload = p; return this; }
   update(p: any) { this.op = "update"; this.patch = p; return this; }
   eq(c: string, v: any) { this.filters.push({ col: c, op: "eq", val: v }); return this; }
@@ -24,6 +26,7 @@ class MockQuery {
   in(c: string, vs: any[]) { this.filters.push({ col: c, op: "in", val: vs }); return this; }
   gte(c: string, v: any) { this.filters.push({ col: c, op: "gte", val: v }); return this; }
   lt(c: string, v: any) { this.filters.push({ col: c, op: "lt", val: v }); return this; }
+  limit(_n: number) { return this; }
   maybeSingle() { this.singleMode = "maybe"; return this.exec(); }
   then(onF: any, onR: any) { return this.exec().then(onF, onR); }
   private match(row: any) {
@@ -39,7 +42,7 @@ class MockQuery {
   }
   private exec(): Promise<any> {
     const rows: any[] = (this.state as any)[this.table];
-    if (this.op === "insert") { const arr = Array.isArray(this.payload) ? this.payload : [this.payload]; rows.push(...arr); return Promise.resolve({ data: arr, error: null }); }
+    if (this.op === "insert") { const arr = Array.isArray(this.payload) ? this.payload : [this.payload]; arr.forEach((r: any, i: number) => { r.id ??= `row${rows.length + i}`; }); rows.push(...arr); return Promise.resolve({ data: this.singleMode === "maybe" ? arr[0] : arr, error: null }); }
     if (this.op === "update") {
       const hit = rows.filter((r) => this.match(r));
       hit.forEach((r) => Object.assign(r, this.patch));
@@ -114,7 +117,7 @@ const queuedRow = (cid = CID, over: Record<string, any> = {}) => ({
   state: "queued", attempted_at: null, sent_at: null, error: null, ...over,
 });
 const baseState = (over: Partial<State> = {}): State => ({
-  campaigns: [], queue: [], campaign_events: [], testCampaigns: new Set(), updates: [],
+  campaigns: [], queue: [], campaign_events: [], user_settings: [], campaign_email_logs: [], testCampaigns: new Set(), updates: [],
   userEmails: { u1: "owner@example.com" }, ...over,
 });
 const deps = (state: State, fetch = mockFetch()) => ({

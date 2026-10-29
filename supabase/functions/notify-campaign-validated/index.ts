@@ -1,133 +1,71 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@2.0.0";
+// Edge Function: notify-campaign-validated (admin JWT only).
+// kind "scheduled": one FR/EN email when an admin has just queued the campaign (queue.state = queued),
+//   with the FIFO estimated send date (Europe/Paris). Deduplicated in campaign_email_logs.
+// default (legacy immediate send via create-campaign): unchanged trigger, monolingual, deduplicated.
+// A mail failure never cancels scheduling: it is logged only.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { buildScheduledEmail, buildLaunchEmail, estimateQueueDay, langOf, sendOnce } from "../_shared/campaign-notify.ts";
+import { parisDayBoundsUtc } from "../_shared/paris-day.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Same rule as send-queued-campaign: real campaigns live today (Paris); test sends end archived.
+async function countRealSendsToday(admin: any, now: Date): Promise<number> {
+  const { start, end } = parisDayBoundsUtc(now);
+  const { count } = await admin.from("campaigns").select("id", { count: "exact", head: true })
+    .in("status", ["active", "sending", "results"]).gte("launched_at", start.toISOString()).lt("launched_at", end.toISOString());
+  return count ?? 0;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-interface Payload {
-  campaignId: string;
-}
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendKey) return json(500, { error: "RESEND_API_KEY not configured" });
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-const handler = async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  if (!token) return json(401, { error: "Missing token" });
+  const { data: u } = await admin.auth.getUser(token);
+  if (!u?.user) return json(401, { error: "Invalid token" });
+  const { data: isAdmin } = await admin.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
+  if (!isAdmin) return json(403, { error: "Admin only" });
+
+  let body: any;
+  try { body = await req.json(); } catch { return json(400, { error: "Invalid JSON" }); }
+  const campaignId = String(body?.campaignId ?? "");
+  if (!UUID.test(campaignId)) return json(400, { error: "campaignId must be a UUID" });
+  const scheduled = body?.kind === "scheduled";
+
+  const { data: campaign } = await admin.from("campaigns").select("id,user_id,name,status,launched_at,target_markets,markets").eq("id", campaignId).maybeSingle();
+  if (!campaign) return json(404, { error: "Campaign not found" });
+  const { data: au } = await admin.auth.admin.getUserById(campaign.user_id);
+  const to = au?.user?.email;
+  if (!to) return json(422, { error: "User email not found" });
+  const { data: st } = await admin.from("user_settings").select("ui_language").eq("user_id", campaign.user_id).maybeSingle();
+  const lang = langOf(st?.ui_language);
+
+  if (scheduled) {
+    const { data: q } = await admin.from("campaign_send_queue").select("state").eq("campaign_id", campaignId).maybeSingle();
+    if (q?.state !== "queued" || campaign.status !== "pending_validation") return json(409, { error: "Campaign is not scheduled" });
+    const { data: queued } = await admin.from("campaign_send_queue").select("campaign_id").eq("state", "queued").order("approved_at", { ascending: true });
+    const position = Math.max(0, (queued ?? []).findIndex((x: any) => x.campaign_id === campaignId)) + 1;
+    const now = new Date();
+    const day = estimateQueueDay(position, (await countRealSendsToday(admin, now)) > 0, now);
+    const r = await sendOnce(admin, resendKey, fetch, { campaignId, eventType: "campaign_scheduled", to, bcc: "simon@exportvins.fr", email: buildScheduledEmail(lang, campaign.name, day, campaignId) });
+    return json(200, { result: r, estimatedDay: day });
   }
 
-  try {
-    const { campaignId }: Payload = await req.json();
-    if (!campaignId) throw new Error("campaignId required");
-
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: campaign, error } = await admin
-      .from("campaigns")
-      .select("id, user_id, name, target_markets, markets")
-      .eq("id", campaignId)
-      .single();
-    if (error || !campaign) throw error || new Error("Campaign not found");
-
-    const { data: userData, error: userErr } = await admin.auth.admin.getUserById(campaign.user_id);
-    if (userErr || !userData?.user?.email) throw userErr || new Error("User email not found");
-    const userEmail = userData.user.email;
-
-    const { data: settings } = await admin
-      .from("user_settings")
-      .select("ui_language")
-      .eq("user_id", campaign.user_id)
-      .maybeSingle();
-    const lang = (settings?.ui_language || "fr").toLowerCase();
-    const isEn = lang === "en";
-
-    const marketsArr: string[] = (campaign.target_markets?.length ? campaign.target_markets : campaign.markets) || [];
-    const marketsLabel = marketsArr.join(", ");
-
-    const appUrl = `https://wine-exporters.com/campaigns/${campaign.id}`;
-
-    const t = isEn
-      ? {
-          subject: `✅ Your campaign "${campaign.name}" is validated and now sending`,
-          h1: "Your campaign is live",
-          intro: `Great news! Your campaign <strong style="color:#59191F;">${campaign.name}</strong> has been validated by our team and is now being sent.`,
-          markets: marketsLabel ? `Target markets: <strong>${marketsLabel}</strong>.` : "",
-          delay: "⏱ The first results (opens, replies, prospects) will appear within <strong>7 to 10 days</strong> on average.",
-          cta: "Track my campaign",
-          footer: "— The WineExporters team",
-        }
-      : {
-          subject: `✅ Votre campagne "${campaign.name}" est validée et en cours d'envoi`,
-          h1: "Votre campagne est lancée",
-          intro: `Bonne nouvelle ! Votre campagne <strong style="color:#59191F;">${campaign.name}</strong> vient d'être validée par notre équipe et est désormais en cours d'envoi.`,
-          markets: marketsLabel ? `Marchés ciblés : <strong>${marketsLabel}</strong>.` : "",
-          delay: "⏱ Les premiers résultats (ouvertures, réponses, prospects) apparaîtront sous <strong>7 à 10 jours</strong> en moyenne.",
-          cta: "Suivre ma campagne",
-          footer: "— L'équipe WineExporters",
-        };
-
-    const html = `
-      <div style="font-family: Arial, sans-serif; background-color: #f5f1ee; padding: 32px 16px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(89,25,31,0.08);">
-          <div style="background-color: #59191F; padding: 24px 32px; text-align: center;">
-            <div style="color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;">WineExporters</div>
-            <div style="color: #e8d4d6; font-size: 12px; margin-top: 4px;">by ExportVins</div>
-          </div>
-          <div style="padding: 32px;">
-            <h1 style="color: #59191F; font-size: 22px; margin: 0 0 16px;">${t.h1}</h1>
-            <p style="color: #333333; font-size: 15px; line-height: 1.6; margin: 0 0 16px;">${t.intro}</p>
-            ${t.markets ? `<p style="color:#333;font-size:15px;line-height:1.6;margin:0 0 16px;">${t.markets}</p>` : ""}
-            <p style="color: #333333; font-size: 15px; line-height: 1.6; margin: 0 0 28px;">${t.delay}</p>
-            <p style="margin: 0 0 32px; text-align: center;">
-              <a href="${appUrl}" style="background-color: #59191F; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 15px;">
-                ${t.cta}
-              </a>
-            </p>
-            <p style="color: #888888; font-size: 12px; margin: 0; border-top: 1px solid #eeeeee; padding-top: 20px;">${t.footer}</p>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const sendResult = await resend.emails.send({
-      from: "WineExporters <notifications@exportvins.fr>",
-      to: [userEmail],
-      bcc: ["simon@exportvins.fr"],
-      subject: t.subject,
-      html,
-    });
-    console.log("notify-campaign-validated resend result:", JSON.stringify(sendResult));
-    const sendErr = (sendResult as any)?.error;
-    await admin.from("campaign_email_logs").insert({
-      campaign_id: campaignId,
-      event_type: "campaign_validated",
-      recipient: userEmail,
-      bcc: "simon@exportvins.fr",
-      subject: t.subject,
-      status: sendErr ? "failed" : "sent",
-      error_message: sendErr ? JSON.stringify(sendErr) : null,
-      resend_id: (sendResult as any)?.data?.id ?? null,
-    });
-    if (sendErr) {
-      throw new Error(`Resend error: ${JSON.stringify((sendResult as any).error)}`);
-    }
-
-    return new Response(JSON.stringify({ success: true, sendResult }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  } catch (error: any) {
-    console.error("notify-campaign-validated error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  }
-};
-
-serve(handler);
+  // Legacy path (create-campaign has just sent): confirmed launch only.
+  if (!["active", "sending", "results"].includes(campaign.status) || !campaign.launched_at) return json(409, { error: "Campaign is not launched" });
+  const markets = (campaign.target_markets?.length ? campaign.target_markets : campaign.markets) ?? [];
+  const r = await sendOnce(admin, resendKey, fetch, { campaignId, eventType: "campaign_launched", to, bcc: "simon@exportvins.fr", email: buildLaunchEmail(lang, campaign.name, campaign.launched_at, campaignId, markets) });
+  return json(200, { result: r });
+});

@@ -957,6 +957,11 @@ export default function AdminCampaigns() {
                                  {t('emailEditor.admin.checkBadge')}
                                </Button>
                              ) : (
+                             <>
+                             <Button size="sm" variant="outline" onClick={() => setReviewCampaign(campaign)}>
+                               <Eye className="h-4 w-4 mr-1" />
+                               {t('emailEditor.admin.review')}
+                             </Button>
                              <Button
                                size="sm"
                                variant="default"
@@ -966,6 +971,7 @@ export default function AdminCampaigns() {
                                <CheckCircle className="h-4 w-4 mr-1" />
                                {t('adminCampaigns.table.validate')}
                              </Button>
+                             </>
                              )}
                              <Button
                                size="sm"

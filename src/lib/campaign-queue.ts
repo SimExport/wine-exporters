@@ -1,4 +1,5 @@
 // React-free helpers for the admin send queue (one real campaign per Paris civil day, FIFO).
+import { estimateQueueDay } from '../../supabase/functions/_shared/campaign-notify';
 
 const PARIS_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' });
 const PARIS_PARTS = new Intl.DateTimeFormat('en-US', {
@@ -21,9 +22,7 @@ export function parisDayStart(now: Date = new Date()): Date {
   return new Date(start);
 }
 
-/** Estimated send date (Paris civil day, yyyy-mm-dd) for a campaign at `position` (1 = next) in the queue. */
+/** Estimated send date (Paris civil day, yyyy-mm-dd) — same rule as the producer email (08:00 UTC cron). */
 export function estimateSendDate(position: number, quotaUsedToday: boolean, now: Date = new Date()): string {
-  const [y, m, d] = PARIS_DAY.format(now).split('-').map(Number);
-  const extra = (quotaUsedToday ? 1 : 0) + Math.max(0, position - 1);
-  return new Date(Date.UTC(y, m - 1, d + extra)).toISOString().slice(0, 10);
+  return estimateQueueDay(position, quotaUsedToday, now);
 }
