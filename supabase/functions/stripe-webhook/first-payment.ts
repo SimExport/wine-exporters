@@ -55,9 +55,15 @@ export async function activatePaidAccess(admin: any, userId: string, customerId:
         { onConflict: "user_id", ignoreDuplicates: true }), "role_creation_failed");
     }
   }
-  const profiles = check(await admin.from("profiles").update({
-    subscription_plan: "monthly", stripe_customer_id: customerId,
-  }).eq("user_id", userId).select("user_id"), "profile_activation_failed");
+  // Read the plan and counter BEFORE writing: an already paying profile keeps its counter strictly,
+  // while a first activation mirrors the legacy webhook with at least one campaign, never a reset.
+  const current = check(await admin.from("profiles").select("subscription_plan, campaigns_remaining")
+    .eq("user_id", userId).maybeSingle(), "profile_lookup_failed");
+  const wasPaying = Boolean(current?.subscription_plan && current.subscription_plan !== "none");
+  const activation: Record<string, unknown> = { subscription_plan: "monthly", stripe_customer_id: customerId };
+  if (!wasPaying) activation.campaigns_remaining = Math.max(Number(current?.campaigns_remaining) || 0, 1);
+  const profiles = check(await admin.from("profiles").update(activation)
+    .eq("user_id", userId).select("user_id"), "profile_activation_failed");
   if (profiles.length !== 1) throw new Error("profile_missing");
   // Insert only missing balances, using the database defaults; never reset a balance.
   check(await admin.from("user_credits").upsert({ user_id: userId },

@@ -127,3 +127,27 @@ Deno.test("direct activation never resets credits", async () => {
   const f = fixture(true); await activatePaidAccess(f.admin, "u1", "cus_test");
   assertEquals(f.tables.user_credits[0].export_credits, 42);
 });
+Deno.test("newly invited buyer gets one campaign on first payment", async () => {
+  const f = fixture();
+  assertEquals(await processFirstPayment(f.stripe, f.admin, f.invoice), "completed");
+  assertEquals(f.tables.profiles[0].campaigns_remaining, 1);
+});
+Deno.test("first activation grants at least one campaign", async () => {
+  const f = fixture(true); f.tables.profiles[0].campaigns_remaining = 0;
+  await activatePaidAccess(f.admin, "u1", "cus_test");
+  assertEquals(f.tables.profiles[0].campaigns_remaining, 1);
+});
+Deno.test("first activation never lowers an existing campaign counter", async () => {
+  const f = fixture(true); f.tables.profiles[0].campaigns_remaining = 3;
+  await activatePaidAccess(f.admin, "u1", "cus_test");
+  assertEquals(f.tables.profiles[0].campaigns_remaining, 3);
+});
+Deno.test("already paying profile keeps its campaign counter strictly", async () => {
+  const f = fixture(true); f.tables.profiles[0].subscription_plan = "monthly";
+  f.tables.profiles[0].campaigns_remaining = 4;
+  await activatePaidAccess(f.admin, "u1", "cus_test");
+  assertEquals(f.tables.profiles[0].campaigns_remaining, 4);
+  f.tables.profiles[0].campaigns_remaining = 0;
+  await activatePaidAccess(f.admin, "u1", "cus_test");
+  assertEquals(f.tables.profiles[0].campaigns_remaining, 0);
+});
