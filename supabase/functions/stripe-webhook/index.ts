@@ -59,6 +59,10 @@ serve(async (req) => {
         if (!invoiceId) break;
         const paidInvoice = await stripe.invoices.retrieve(invoiceId);
         if (paidInvoice.customer !== customerId || !await paidWineSubscription(stripe, paidInvoice)) break;
+        if (paidInvoice.billing_reason === "subscription_create") {
+          await processFirstPayment(stripe, supabaseAdmin, paidInvoice);
+          break;
+        }
         await activatePaidAccess(supabaseAdmin, userId, customerId);
         break;
       }

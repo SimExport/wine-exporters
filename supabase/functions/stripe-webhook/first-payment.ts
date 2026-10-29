@@ -111,14 +111,10 @@ export async function processFirstPayment(stripe: any, admin: any, eventInvoice:
   let notificationInFlight = false;
   try {
     let user = await findUser(admin, email);
-    // Recover a completed invite whose acknowledgement could not be saved.
-    // An uncertain magic-link outcome cannot be inferred: leave failed for manual recovery.
+    // Auth user timestamps are not delivery receipts. An uncertain outcome needs
+    // manual reconciliation, for both invites and magic links.
     if (!job.invite_sent && (job.last_error?.startsWith(SENDING) || job.last_error?.startsWith(UNCERTAIN))) {
-      if (job.last_error.endsWith("invite") && user?.invited_at) {
-        await save({ invite_sent: true, user_id: user.id, last_error: null });
-      } else {
-        throw new Error("notification_outcome_unknown:manual_reconciliation_required");
-      }
+      throw new Error("notification_outcome_unknown:manual_reconciliation_required");
     }
     if (job.invite_sent && !user) throw new Error("invited_user_missing");
 
@@ -126,13 +122,15 @@ export async function processFirstPayment(stripe: any, admin: any, eventInvoice:
     const profile = user ? check(await admin.from("profiles").select("subscription_plan").eq("user_id", user.id).maybeSingle(), "profile_lookup_failed") : null;
     const hadAccess = existingRoles.some((r: any) => r.role === "paid" || r.role === "admin") ||
       Boolean(profile?.subscription_plan && profile.subscription_plan !== "none");
-    // Previous successful invite (including manual fallback) must never send again.
+    // A pre-existing pending invitation uses the manual fallback; never resend it
+    // or declare this invoice completed based only on an Auth timestamp.
     if (user?.invited_at && !user.last_sign_in_at && !job.invite_sent) {
-      await save({ invite_sent: true, user_id: user.id, last_error: null });
+      throw new Error("notification_outcome_unknown:existing_invitation_requires_reconciliation");
     }
     if (!job.invite_sent && (!user || !hadAccess)) {
       const invitation = check(await admin.from("admin_invitations").insert({
         email, invitation_type: "classic", status: "pending", invited_user_id: user?.id ?? null,
+        error_message: "stripe_invoice:" + invoice.id,
       }).select("id").single(), "invitation_log_failed");
       invitationId = invitation.id;
       // Durable marker BEFORE the non-transactional mail call. Never retry uncertain sends blindly.
@@ -159,7 +157,8 @@ export async function processFirstPayment(stripe: any, admin: any, eventInvoice:
     await activatePaidAccess(admin, user.id, customerId);
     // Repair the matching invitation log after a partial failure, without touching manual logs.
     check(await admin.from("admin_invitations").update({ status: "sent", invited_user_id: user.id, error_message: null })
-      .eq("email", email).eq("invitation_type", "classic").eq("status", "pending"), "invitation_log_finalize_failed");
+      .eq("email", email).eq("invitation_type", "classic").eq("status", "pending")
+      .eq("error_message", "stripe_invoice:" + invoice.id), "invitation_log_finalize_failed");
     await save({ status: "completed", last_error: null });
     return "completed";
   } catch (error) {
