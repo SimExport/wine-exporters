@@ -2710,6 +2710,7 @@ export type Database = {
           producer_name: string
         }[]
       }
+      get_campaign_queue_secret: { Args: never; Returns: string }
       get_enrichment_activity: {
         Args: { _days: number }
         Returns: {

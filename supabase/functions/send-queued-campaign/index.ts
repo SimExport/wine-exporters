@@ -11,7 +11,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return resultJson(405, { error: "Method not allowed" });
   let admin: any;
   try { admin = serviceClient(); } catch (e) { return resultJson(500, { error: (e as Error).message }); }
-  if (!matchesInternalSecret(req.headers.get("x-campaign-queue-secret"), Deno.env.get("CAMPAIGN_QUEUE_INTERNAL_SECRET"))) {
+  // The shared secret lives only in the Vault (service_role RPC) — never in env vars or code.
+  const { data: expected } = await admin.rpc("get_campaign_queue_secret");
+  if (!matchesInternalSecret(req.headers.get("x-campaign-queue-secret"), expected ?? undefined)) {
     return resultJson(401, { error: "Unauthorized" });
   }
   const brevoKey = Deno.env.get("BREVO_API_KEY");
