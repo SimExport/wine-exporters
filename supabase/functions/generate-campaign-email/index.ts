@@ -45,9 +45,22 @@ Deno.serve(async (req) => {
   // Lot B: restricted rollout until lot C (admins + explicitly allowed accounts).
   const { data: allowed } = await admin.rpc("has_campaign_editor_access", { _user_id: callerId });
   if (!allowed) return json(403, { error: "Email editor not enabled for this account" });
+  // Admin-only path: prepare the v2 email of a pending legacy campaign (explicit click, saved directly,
+  // never sent, never approved, targets/wines untouched). Producers keep the draft-only rules below.
+  const adminPrepare = body?.adminPrepare === true;
+  let status = "draft";
+  if (adminPrepare) {
+    const [{ data: q }, { data: ev }] = await Promise.all([
+      admin.from("campaign_send_queue").select("state").eq("campaign_id", campaignId).maybeSingle(),
+      admin.from("campaign_events").select("id").eq("campaign_id", campaignId).eq("type", "test_campaign").limit(1),
+    ]);
+    const block = adminPendingEmailBlock(campaign, { isAdmin: !!isAdmin, isTest: !!ev?.length, queueState: q?.state ?? null }, "prepare");
+    if (block) return json(block === "admin_only" ? 403 : 409, { error: `Preparation refused: ${block}` });
+    status = "pending_validation";
+  }
   // apply=false (default): return the proposal only, the saved email is untouched until the user accepts it.
-  const apply = body?.apply === true;
-  if (campaign.status !== "draft") return json(409, { error: "Only draft campaigns can be generated" });
+  const apply = adminPrepare || body?.apply === true;
+  if (!adminPrepare && campaign.status !== "draft") return json(409, { error: "Only draft campaigns can be generated" });
   if (!canGenerateCampaignEmail(campaign.email_generation_count)) return json(429, { error: "This email has already been generated. You can edit it manually." });
   if (campaign.email_generated_at && Date.now() - new Date(campaign.email_generated_at).getTime() < COOLDOWN_MS) {
     return json(429, { error: "Please wait a few seconds before generating again" });
@@ -57,7 +70,7 @@ Deno.serve(async (req) => {
   const prevCount = campaign.email_generation_count ?? 0;
   const { data: reserved } = await admin.from("campaigns")
     .update({ email_generated_at: new Date().toISOString(), email_generation_count: prevCount + 1 })
-    .eq("id", campaignId).eq("status", "draft").eq("email_generation_count", prevCount).select("id");
+    .eq("id", campaignId).eq("status", status).eq("email_generation_count", prevCount).select("id");
   if (!reserved?.length) return json(409, { error: "Another generation is in progress" });
 
   let generated = false;
