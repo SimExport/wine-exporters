@@ -188,14 +188,34 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
 
           {pending && path === 'custom' && (
             <div className="space-y-3 border-t pt-4">
-              <div className="flex flex-wrap gap-2">
-                <Button disabled={!!busy || !canStartSend(c) || isTest} onClick={() => setConfirm('send')}>
-                  {busy === 'send' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}{k('validateSend')}
-                </Button>
-                <Button variant="outline" disabled={!!busy || !canStartSend(c)} onClick={() => setConfirm('test')}>
-                  <FlaskConical className="h-4 w-4 mr-2" />{k('testSend')}
-                </Button>
-              </div>
+              {queueInfo.row?.state === 'queued' ? (
+                <Alert>
+                  <CalendarClock className="h-4 w-4" />
+                  <AlertDescription className="space-y-2">
+                    <p className="font-medium">{k('scheduledBadge')}</p>
+                    {queueInfo.estimated && <p className="text-sm">{k('estimatedStart', { date: formatDate(`${queueInfo.estimated}T12:00:00Z`) })}</p>}
+                    {queueInfo.ahead > 0 && <p className="text-sm">{k('queueAhead', { count: queueInfo.ahead })}</p>}
+                    <Button size="sm" variant="outline" disabled={!!busy} onClick={() => setConfirm('cancel_schedule')}>
+                      {busy === 'cancel_schedule' && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}{k('cancelSchedule')}
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Button disabled={!!busy || !canStartSend(c) || isTest} onClick={() => setConfirm('schedule')}>
+                    {busy === 'schedule' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CalendarClock className="h-4 w-4 mr-2" />}{k('schedule')}
+                  </Button>
+                  <Button variant="outline" disabled={!!busy || !canStartSend(c)} onClick={() => setConfirm('test')}>
+                    <FlaskConical className="h-4 w-4 mr-2" />{k('testSend')}
+                  </Button>
+                </div>
+              )}
+              {queueInfo.row?.state === 'failed' && (
+                <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{k('queueFailed', { error: queueInfo.row.error })}</AlertDescription></Alert>
+              )}
+              {queueInfo.row?.state === 'needs_review' && (
+                <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{k('queueNeedsReview')}</AlertDescription></Alert>
+              )}
               <div className="space-y-2">
                 <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} maxLength={2000} placeholder={k('reasonPlaceholder')} aria-label={k('reason')} />
                 <Button variant="destructive" disabled={!!busy || state !== 'idle' && state !== 'failed'} onClick={reject}>
@@ -219,6 +239,8 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
                 else if (confirm === 'test') call('send', { test: true });
                 else if (confirm === 'confirm_send') call('confirm_send', { confirm: true });
                 else if (confirm === 'release') call('release', { confirm: true });
+                else if (confirm === 'schedule') schedule();
+                else if (confirm === 'cancel_schedule') cancelQueue();
               }}>{k('confirmAction')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
