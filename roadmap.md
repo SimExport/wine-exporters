@@ -1,5 +1,8 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
+## Résultats automatiques J+2
+- [x] Traitement J+2 et quatre fonctions déployés ; secret interne installé dans Vault, file et verrous protégés, cron quotidien actif à 08:00 UTC, drain uniquement pendant la file. Dix tests simulés, types et build OK ; appels non authentifiés refusés, dry-run sans fournisseurs. 53 résultats historiques et campagne active inchangés ; première exécution réelle attend le prochain cron. Envoi incertain : réconciliation obligatoire.
+
 ## Invitation Stripe après premier paiement
 - [x] Webhook existant : première facture payée, trois prix autorisés, jobs conditionnels, invitation/activation sans réinitialiser les crédits ; 13 tests simulés et contrôle Deno réussis, stripe-webhook seul déployé ; endpoint actif refuse un appel non signé (400). Aucun paiement ni email réel de test. Lecture indépendante du code distant non disponible ; envoi de mail incertain conservé en échec pour réconciliation manuelle.
 

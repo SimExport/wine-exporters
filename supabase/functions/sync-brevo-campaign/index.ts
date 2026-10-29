@@ -1,6 +1,6 @@
 // Sync Brevo campaign: pull global stats and/or import clickers as CRM leads.
 // Requires admin role. Body: { campaign_id: string, mode: 'stats' | 'clicks' | 'both' }
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { authorizeResults, serviceClient, internalJob, withResultOperation } from "../_shared/campaign-results-auth.ts";
 import { findBuyerContact } from "../_shared/buyer-match.ts";
 import { normalizeCountry } from "../_shared/country.ts";
 
@@ -198,36 +198,16 @@ No prose, no code fences. Le champ "description" doit impérativement être réd
   }
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
 
   const BREVO_KEY = Deno.env.get("BREVO_API_KEY");
   if (!BREVO_KEY) return json(500, { error: "BREVO_API_KEY not configured" });
 
-  // Auth
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return json(401, { error: "Unauthorized" });
-  const jwt = authHeader.replace("Bearer ", "");
-
-  const authClient = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: authHeader } } },
-  );
-  const { data: claims, error: claimsErr } = await authClient.auth.getClaims(jwt);
-  if (claimsErr || !claims?.claims?.sub) return json(401, { error: "Unauthorized" });
-  const userId = claims.claims.sub as string;
-
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-  const { data: isAdmin, error: roleErr } = await admin.rpc("has_role", {
-    _user_id: userId,
-    _role: "admin",
-  });
-  if (roleErr || !isAdmin) return json(403, { error: "Forbidden" });
+  const admin = serviceClient();
+  const access = await authorizeResults(req, admin);
+  if (!access) return json(401, { error: "Unauthorized" });
 
   let body: any;
   try {
@@ -242,6 +222,11 @@ Deno.serve(async (req) => {
     | "clicks"
     | "both";
   if (!campaign_id) return json(400, { error: "Missing campaign_id" });
+  if (body.defer_enrichment && access !== "internal") return json(403, { error: "Internal mode only" });
+  const job = access === "internal" ? await internalJob(req, admin, campaign_id, "sync") : null;
+  if (access === "internal" && !job) return json(409, { error: "Invalid result job lease" });
+  const deferred = access === "internal";
+
 
   const { data: campaign, error: campErr } = await admin
     .from("campaigns")
@@ -252,7 +237,8 @@ Deno.serve(async (req) => {
   if (!campaign.brevo_campaign_id) return json(400, { error: "Missing brevo_campaign_id on campaign" });
   // Lot C: internal test campaigns never feed client results, prospects or CRM.
   {
-    const { data: testCamp } = await admin.rpc("is_test_campaign", { _id: campaign.id });
+    const { data: testCamp, error: testErr } = await admin.rpc("is_test_campaign", { _id: campaign.id });
+    if (testErr) return json(500, { error: testErr.message });
     if (testCamp === true) return json(200, { skipped: true, reason: "test_campaign" });
   }
 
@@ -269,15 +255,40 @@ Deno.serve(async (req) => {
     if (mode === "stats" || mode === "both") {
       const payload = await brevoGet(`/emailCampaigns/${brevoId}?statistics=globalStats`, BREVO_KEY);
       const { opens, clicks } = extractStats(payload);
-      await admin
+      const statsWrite = await admin
         .from("campaigns")
         .update({ stats_opens: opens, stats_clicks: clicks })
         .eq("id", campaign_id);
+      if (statsWrite.error) throw statsWrite.error;
       result.opens = opens;
       result.clicks = clicks;
     }
 
     if (mode === "clicks" || mode === "both") {
+      let emails: string[];
+      if (deferred && job) {
+        const saveSync = async (values: Record<string, unknown>) => {
+          const saved = await admin.from("campaign_result_jobs").update(values).eq("campaign_id", campaign_id).eq("lease_token", job.lease_token);
+          if (saved.error) throw saved.error;
+        };
+        if (Array.isArray(job.sync_emails)) emails = job.sync_emails;
+        else if (!job.sync_process_id) {
+          const exported = await brevoPost(`/emailCampaigns/${brevoId}/exportRecipients`, BREVO_KEY, { recipientsType: "clickers" });
+          const processId = exported.processId ?? exported.id ?? exported.process_id;
+          if (!processId) throw new Error("Brevo export missing process id");
+          await saveSync({ sync_process_id: String(processId) });
+          return json(200, { ok: true, pending: true });
+        } else {
+          const process = await brevoGet(`/processes/${job.sync_process_id}`, BREVO_KEY);
+          if (["failed", "error"].includes(String(process.status).toLowerCase())) throw new Error("Brevo export failed");
+          const url = process.export_url ?? process.exportUrl ?? process.link_to_recipients_export;
+          if (String(process.status).toLowerCase() !== "completed" || !url) return json(200, { ok: true, pending: true });
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Brevo export download ${response.status}`);
+          emails = parseEmailsFromCsv(await response.text());
+          await saveSync({ sync_emails: emails });
+        }
+      } else {
       // 1) Ask Brevo to export clickers → returns processId
       const exportResp = await brevoPost(
         `/emailCampaigns/${brevoId}/exportRecipients`,
@@ -294,7 +305,8 @@ Deno.serve(async (req) => {
       const csvResp = await fetch(exportUrl);
       if (!csvResp.ok) throw new Error(`Download export failed ${csvResp.status}`);
       const csv = await csvResp.text();
-      const emails = parseEmailsFromCsv(csv);
+      emails = parseEmailsFromCsv(csv);
+      }
       result.total_clickers = emails.length;
 
       if (emails.length === 0) {
@@ -311,13 +323,14 @@ Deno.serve(async (req) => {
           "web.de", "naver.com", "seznam.cz", "orange.fr", "free.fr", "wanadoo.fr",
         ]);
         const domainOf = (email: string) => (email.split("@")[1] ?? "").toLowerCase();
-        const [{ data: interested }, { data: existingLeads }] = await Promise.all([
+        const [{ data: interested, error: interestedErr }, { data: existingLeads, error: leadsErr }] = await Promise.all([
           admin
             .from("campaign_interested_contacts")
             .select("email")
             .eq("campaign_id", campaign_id),
           admin.from("leads").select("email").eq("campaign_id", campaign_id),
         ]);
+        if (interestedErr || leadsErr) throw interestedErr ?? leadsErr;
         const known = new Set<string>();
         const knownDomains = new Set<string>();
         for (const r of [...(interested ?? []), ...(existingLeads ?? [])]) {
@@ -342,7 +355,7 @@ Deno.serve(async (req) => {
         if (campaign.user_id) {
           const { data: profile } = await admin
             .from("profiles")
-            .select("domain_name, aoc, city, country, target_buyer, strong_points")
+            .select("domain_name, aoc, location, target_buyer_description, strengths")
             .eq("user_id", campaign.user_id)
             .maybeSingle();
           if (profile) producer_profile = profile as Record<string, unknown>;
@@ -372,8 +385,9 @@ Deno.serve(async (req) => {
           // wrongly stamping the campaign's first target market.
           return null;
         };
-        for (const email of newEmails) {
-          const enriched = await enrichClickerWithAI({
+        const importBatch = deferred ? newEmails.slice(0, 20) : newEmails;
+        for (const email of importBatch) {
+          const enriched = deferred ? { description: null, score: 5, matched_company: await findBuyerContact(admin, email, null) } : await enrichClickerWithAI({
             admin,
             email,
             producer_name,
@@ -416,7 +430,8 @@ Deno.serve(async (req) => {
         }
         result.imported_leads = imported;
         result.skipped = emails.length - newEmails.length;
-        if (failed.length) (result as any).failed = failed.length;
+        if (failed.length) return json(500, { error: "Clicker import incomplete", failed: failed.length });
+        if (deferred && newEmails.length > importBatch.length) return json(200, { ok: true, pending: true, ...result });
       }
     }
 
@@ -425,4 +440,5 @@ Deno.serve(async (req) => {
     console.error("sync-brevo-campaign error:", err?.message ?? err);
     return json(500, { error: err?.message ?? "Unknown error", ...result });
   }
-});
+};
+Deno.serve((req) => withResultOperation(req, handler));

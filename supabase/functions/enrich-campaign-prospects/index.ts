@@ -1,6 +1,6 @@
 // Enrich campaign qualified prospects (form respondents and clickers) that have
 // no AI description yet. Admin only. Body: { campaign_id: string }
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { authorizeResults, serviceClient, internalJob, withResultOperation } from "../_shared/campaign-results-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,9 +32,9 @@ function stripCitations(text: string): string {
 import { findBuyerContact } from "../_shared/buyer-match.ts";
 import { normalizeCountry } from "../_shared/country.ts";
 
-async function askClaude(prompt: string, useWebSearch = false): Promise<any | null> {
+async function askClaude(prompt: string, useWebSearch = false, strict = false): Promise<any | null> {
   const key = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!key) return null;
+  if (!key) { if (strict) throw new Error("Claude 401: configuration missing"); return null; }
   try {
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -59,10 +59,13 @@ async function askClaude(prompt: string, useWebSearch = false): Promise<any | nu
       }),
     });
     if (!resp.ok) {
-      console.error("Anthropic error", resp.status, await resp.text().catch(() => ""));
+      const details = await resp.text();
+      if (strict) throw new Error(`Claude ${resp.status}: request failed`);
+      console.error("Anthropic error", resp.status, details);
       return null;
     }
     const data = await resp.json();
+    if (strict && (data.stop_reason === "refusal" || data.content?.some((b: any) => b.type === "refusal"))) throw new Error("Claude 422: content refusal");
     const textBlocks = Array.isArray(data?.content)
       ? data.content.filter((b: any) => b?.type === "text" && typeof b?.text === "string")
       : [];
@@ -71,38 +74,19 @@ async function askClaude(prompt: string, useWebSearch = false): Promise<any | nu
     const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "");
     return JSON.parse(cleaned);
   } catch (e) {
+    if (strict) throw e;
     console.error("Claude call failed:", e);
     return null;
   }
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
 
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return json(401, { error: "Unauthorized" });
-  const jwt = authHeader.replace("Bearer ", "");
-
-  const authClient = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: authHeader } } },
-  );
-  const { data: claims, error: claimsErr } = await authClient.auth.getClaims(jwt);
-  if (claimsErr || !claims?.claims?.sub) return json(401, { error: "Unauthorized" });
-  const userId = claims.claims.sub as string;
-
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-  const { data: isAdmin, error: roleErr } = await admin.rpc("has_role", {
-    _user_id: userId,
-    _role: "admin",
-  });
-  if (roleErr || !isAdmin) return json(403, { error: "Forbidden" });
-
+  const admin = serviceClient();
+  const access = await authorizeResults(req, admin);
+  if (!access) return json(401, { error: "Unauthorized" });
   let body: any;
   try {
     body = await req.json();
@@ -111,19 +95,21 @@ Deno.serve(async (req) => {
   }
   const campaign_id = typeof body?.campaign_id === "string" ? body.campaign_id : null;
   if (!campaign_id) return json(400, { error: "Missing campaign_id" });
+  if (access === "internal" && !await internalJob(req, admin, campaign_id, "enrich")) return json(409, { error: "Invalid result job lease" });
   // Lot C: internal test campaigns never feed client results, prospects or CRM.
   {
-    const { data: testCamp } = await admin.rpc("is_test_campaign", { _id: campaign_id });
+    const { data: testCamp, error: testErr } = await admin.rpc("is_test_campaign", { _id: campaign_id });
+    if (testErr) return json(500, { error: testErr.message });
     if (testCamp === true) return json(200, { skipped: true, reason: "test_campaign" });
   }
-  const force = body?.force === true;
-  const limit = Number.isFinite(Number(body?.limit))
+  const force = access === "admin" && body?.force === true;
+  const limit = access === "internal" ? 1 : Number.isFinite(Number(body?.limit))
     ? Math.min(20, Math.max(1, Math.round(Number(body.limit))))
     : 5;
   const offset = Number.isFinite(Number(body?.offset))
     ? Math.max(0, Math.round(Number(body.offset)))
     : 0;
-  const excludeIds: string[] = Array.isArray(body?.exclude_ids)
+  const excludeIds: string[] = access === "internal" ? [] : Array.isArray(body?.exclude_ids)
     ? body.exclude_ids.filter((v: unknown) => typeof v === "string")
     : [];
   const excluded = new Set(excludeIds);
@@ -169,6 +155,7 @@ Deno.serve(async (req) => {
   const batch = todo.slice(0, limit);
   const startedAt = Date.now();
   const TIME_BUDGET_MS = 60_000;
+  let providerStatus = 500;
 
   let enriched = 0;
   const failed: string[] = [];
@@ -251,7 +238,8 @@ No prose, no code fences.
 
 STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolue d'employer « probable », « probablement », « vraisemblablement », « semble », « paraît », « pourrait », « peut-être », « suggère », « il est possible que », « a priori », « sans doute », ou toute autre marque d'hésitation. Affirmer au présent.`;
 
-    const parsed = await askClaude(prompt, origin === "click" && !matched);
+    const parsed = await askClaude(prompt, origin === "click" && !matched, access === "internal");
+    if (access === "internal" && !parsed?.description?.trim()) throw new Error("Claude 422: invalid enrichment response");
     console.log(
       `enriched contact ${row.id} <${email || "no-email"}> origin=${origin} source=${
         origin === "click" ? (matched ? "buyer_contacts" : "web_search") : "form"
@@ -342,6 +330,8 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
         try {
           await processRow(row);
         } catch (e) {
+          const match = String(e).match(/Claude (\d{3})/);
+          if (match) providerStatus = Number(match[1]);
           console.error("Enrichment failed for", row.id, e);
           failed.push(row.id);
         }
@@ -353,8 +343,8 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
 
   const remaining = Math.max(0, todo.length - processed);
 
-  return json(200, {
-    ok: true,
+  return json(access === "internal" && failed.length ? providerStatus : 200, {
+    ok: failed.length === 0,
     total: (rows ?? []).length,
     candidates: allTodo.length,
     enriched,
@@ -364,5 +354,5 @@ STYLE OBLIGATOIRE : écrire de façon directive et assurée. Interdiction absolu
     remaining,
     next_offset: offset,
     stopped_early: stoppedEarly,
-  });
-});
+  });};
+Deno.serve((req) => withResultOperation(req, handler));

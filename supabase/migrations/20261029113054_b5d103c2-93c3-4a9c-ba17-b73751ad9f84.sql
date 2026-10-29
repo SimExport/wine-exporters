@@ -1,0 +1,1 @@
+CREATE POLICY "Server owns operation locks" ON public.campaign_result_operation_locks FOR ALL TO service_role USING(true) WITH CHECK(true);
