@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
+import { AlertTriangle, CalendarClock, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +12,12 @@ import { toast } from '@/hooks/use-toast';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
 import { functionErrorMessage } from '@/lib/media-upload';
 import { campaignPath, canStartSend, needsBrevoCheck, sendState } from '@/lib/campaign-send-state';
-import { formatDateTime } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
+import { estimateSendDate, parisDayStart } from '@/lib/campaign-queue';
 
-type Confirm = null | 'send' | 'test' | 'confirm_send' | 'release';
+type Confirm = null | 'send' | 'test' | 'confirm_send' | 'release' | 'schedule' | 'cancel_schedule';
+
+interface QueueInfo { row: any | null; ahead: number; estimated: string | null }
 
 interface Props {
   campaign: any | null;
@@ -37,6 +40,8 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [reason, setReason] = useState('');
   const [checkResult, setCheckResult] = useState<string | null>(null);
+  const [queueInfo, setQueueInfo] = useState<QueueInfo>({ row: null, ahead: 0, estimated: null });
+  const [reloadKey, setReloadKey] = useState(0);
   const c = campaign;
 
   useEffect(() => {
@@ -48,11 +53,21 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
       (c.selected_wines?.length ? supabase.from('wines').select('name').in('id', c.selected_wines) : Promise.resolve({ data: [] as any[] })),
       (docIds.length ? supabase.from('documents').select('title').in('id', docIds) : Promise.resolve({ data: [] as any[] })),
       supabase.from('campaign_events').select('type, payload, created_at').eq('campaign_id', c.id).order('created_at', { ascending: false }),
-    ]).then(([p, w, d, e]: any[]) => setDetails({
-      domain: p.data?.domain_name, contact: p.data?.contact_name,
-      wines: (w.data ?? []).map((x: any) => x.name), docs: (d.data ?? []).map((x: any) => x.title), events: e.data ?? [],
-    }));
-  }, [c]);
+      (supabase.from as any)('campaign_send_queue').select('campaign_id,state,approved_at,error').eq('campaign_id', c.id).maybeSingle(),
+      (supabase.from as any)('campaign_send_queue').select('campaign_id,approved_at').eq('state', 'queued').order('approved_at', { ascending: true }),
+      supabase.from('campaigns').select('id', { count: 'exact', head: true }).in('status', ['active', 'sending', 'results']).gte('launched_at', parisDayStart().toISOString()),
+    ]).then(([p, w, d, e, q, l, cnt]: any[]) => {
+      setDetails({
+        domain: p.data?.domain_name, contact: p.data?.contact_name,
+        wines: (w.data ?? []).map((x: any) => x.name), docs: (d.data ?? []).map((x: any) => x.title), events: e.data ?? [],
+      });
+      const row = q.data ?? null;
+      const queuedRows = l.data ?? [];
+      const ahead = row?.state === 'queued' ? Math.max(0, queuedRows.findIndex((x: any) => x.campaign_id === c.id)) : 0;
+      const estimated = row?.state === 'queued' ? estimateSendDate(ahead + 1, (cnt.count ?? 0) > 0) : null;
+      setQueueInfo({ row, ahead, estimated });
+    });
+  }, [c, reloadKey]);
 
   if (!c) return null;
   const path = campaignPath(c);
@@ -88,11 +103,33 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
     } finally { setBusy(null); onChanged(); }
   };
 
+  const schedule = async () => {
+    setBusy('schedule'); setConfirm(null);
+    try {
+      const { error } = await (supabase.rpc as any)('approve_campaign_for_queue', { _id: c.id });
+      if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
+      toast({ title: k('scheduledToast') });
+      setReloadKey((n) => n + 1);
+    } finally { setBusy(null); onChanged(); }
+  };
+
+  const cancelQueue = async () => {
+    setBusy('cancel_schedule'); setConfirm(null);
+    try {
+      const { error } = await (supabase.rpc as any)('cancel_campaign_queue', { _id: c.id });
+      if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
+      toast({ title: k('scheduleCancelled') });
+      setReloadKey((n) => n + 1);
+    } finally { setBusy(null); onChanged(); }
+  };
+
   const confirmText: Record<Exclude<Confirm, null>, string> = {
     send: k('confirmSend', { count: markets.length }),
     test: k('confirmTest'),
     confirm_send: k('confirmBrevoDraft'),
     release: k('confirmRelease'),
+    schedule: k('confirmSchedule'),
+    cancel_schedule: k('confirmCancelSchedule'),
   };
 
   return (
@@ -151,14 +188,34 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
 
           {pending && path === 'custom' && (
             <div className="space-y-3 border-t pt-4">
-              <div className="flex flex-wrap gap-2">
-                <Button disabled={!!busy || !canStartSend(c) || isTest} onClick={() => setConfirm('send')}>
-                  {busy === 'send' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}{k('validateSend')}
-                </Button>
-                <Button variant="outline" disabled={!!busy || !canStartSend(c)} onClick={() => setConfirm('test')}>
-                  <FlaskConical className="h-4 w-4 mr-2" />{k('testSend')}
-                </Button>
-              </div>
+              {queueInfo.row?.state === 'queued' ? (
+                <Alert>
+                  <CalendarClock className="h-4 w-4" />
+                  <AlertDescription className="space-y-2">
+                    <p className="font-medium">{k('scheduledBadge')}</p>
+                    {queueInfo.estimated && <p className="text-sm">{k('estimatedStart', { date: formatDate(`${queueInfo.estimated}T12:00:00Z`) })}</p>}
+                    {queueInfo.ahead > 0 && <p className="text-sm">{k('queueAhead', { count: queueInfo.ahead })}</p>}
+                    <Button size="sm" variant="outline" disabled={!!busy} onClick={() => setConfirm('cancel_schedule')}>
+                      {busy === 'cancel_schedule' && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}{k('cancelSchedule')}
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Button disabled={!!busy || !canStartSend(c) || isTest} onClick={() => setConfirm('schedule')}>
+                    {busy === 'schedule' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CalendarClock className="h-4 w-4 mr-2" />}{k('schedule')}
+                  </Button>
+                  <Button variant="outline" disabled={!!busy || !canStartSend(c)} onClick={() => setConfirm('test')}>
+                    <FlaskConical className="h-4 w-4 mr-2" />{k('testSend')}
+                  </Button>
+                </div>
+              )}
+              {queueInfo.row?.state === 'failed' && (
+                <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{k('queueFailed', { error: queueInfo.row.error })}</AlertDescription></Alert>
+              )}
+              {queueInfo.row?.state === 'needs_review' && (
+                <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{k('queueNeedsReview')}</AlertDescription></Alert>
+              )}
               <div className="space-y-2">
                 <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} maxLength={2000} placeholder={k('reasonPlaceholder')} aria-label={k('reason')} />
                 <Button variant="destructive" disabled={!!busy || state !== 'idle' && state !== 'failed'} onClick={reject}>
@@ -182,6 +239,8 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
                 else if (confirm === 'test') call('send', { test: true });
                 else if (confirm === 'confirm_send') call('confirm_send', { confirm: true });
                 else if (confirm === 'release') call('release', { confirm: true });
+                else if (confirm === 'schedule') schedule();
+                else if (confirm === 'cancel_schedule') cancelQueue();
               }}>{k('confirmAction')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
