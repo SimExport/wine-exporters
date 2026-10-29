@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CheckCircle, FlaskConical, Loader2, RotateCcw, Search, Send, Unlock } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +12,12 @@ import { toast } from '@/hooks/use-toast';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
 import { functionErrorMessage } from '@/lib/media-upload';
 import { campaignPath, canStartSend, needsBrevoCheck, sendState } from '@/lib/campaign-send-state';
-import { formatDateTime } from '@/lib/format';
+import { formatDate, formatDateTime } from '@/lib/format';
+import { estimateSendDate, parisDayStart } from '@/lib/campaign-queue';
 
-type Confirm = null | 'send' | 'test' | 'confirm_send' | 'release';
+type Confirm = null | 'send' | 'test' | 'confirm_send' | 'release' | 'schedule' | 'cancel_schedule';
+
+interface QueueInfo { row: any | null; ahead: number; estimated: string | null }
 
 interface Props {
   campaign: any | null;
@@ -37,6 +40,8 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [reason, setReason] = useState('');
   const [checkResult, setCheckResult] = useState<string | null>(null);
+  const [queueInfo, setQueueInfo] = useState<QueueInfo>({ row: null, ahead: 0, estimated: null });
+  const [reloadKey, setReloadKey] = useState(0);
   const c = campaign;
 
   useEffect(() => {
@@ -48,11 +53,21 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
       (c.selected_wines?.length ? supabase.from('wines').select('name').in('id', c.selected_wines) : Promise.resolve({ data: [] as any[] })),
       (docIds.length ? supabase.from('documents').select('title').in('id', docIds) : Promise.resolve({ data: [] as any[] })),
       supabase.from('campaign_events').select('type, payload, created_at').eq('campaign_id', c.id).order('created_at', { ascending: false }),
-    ]).then(([p, w, d, e]: any[]) => setDetails({
-      domain: p.data?.domain_name, contact: p.data?.contact_name,
-      wines: (w.data ?? []).map((x: any) => x.name), docs: (d.data ?? []).map((x: any) => x.title), events: e.data ?? [],
-    }));
-  }, [c]);
+      (supabase.from as any)('campaign_send_queue').select('campaign_id,state,approved_at,error').eq('campaign_id', c.id).maybeSingle(),
+      (supabase.from as any)('campaign_send_queue').select('campaign_id,approved_at').eq('state', 'queued').order('approved_at', { ascending: true }),
+      supabase.from('campaigns').select('id', { count: 'exact', head: true }).in('status', ['active', 'sending', 'results']).gte('launched_at', parisDayStart().toISOString()),
+    ]).then(([p, w, d, e, q, l, cnt]: any[]) => {
+      setDetails({
+        domain: p.data?.domain_name, contact: p.data?.contact_name,
+        wines: (w.data ?? []).map((x: any) => x.name), docs: (d.data ?? []).map((x: any) => x.title), events: e.data ?? [],
+      });
+      const row = q.data ?? null;
+      const queuedRows = l.data ?? [];
+      const ahead = row?.state === 'queued' ? Math.max(0, queuedRows.findIndex((x: any) => x.campaign_id === c.id)) : 0;
+      const estimated = row?.state === 'queued' ? estimateSendDate(ahead + 1, (cnt.count ?? 0) > 0) : null;
+      setQueueInfo({ row, ahead, estimated });
+    });
+  }, [c, reloadKey]);
 
   if (!c) return null;
   const path = campaignPath(c);
