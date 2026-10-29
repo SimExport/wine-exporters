@@ -440,4 +440,5 @@ const handler = async (req: Request) => {
     console.error("sync-brevo-campaign error:", err?.message ?? err);
     return json(500, { error: err?.message ?? "Unknown error", ...result });
   }
-});
+};
+Deno.serve((req) => withResultOperation(req, handler));
