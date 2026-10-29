@@ -2019,6 +2019,45 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_invitation_jobs: {
+        Row: {
+          attempts: number
+          created_at: string
+          email: string
+          invite_sent: boolean
+          invoice_id: string
+          last_error: string | null
+          status: string
+          stripe_customer_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          email: string
+          invite_sent?: boolean
+          invoice_id: string
+          last_error?: string | null
+          status?: string
+          stripe_customer_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          email?: string
+          invite_sent?: boolean
+          invoice_id?: string
+          last_error?: string | null
+          status?: string
+          stripe_customer_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           category: string
