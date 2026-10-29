@@ -1,11 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { activatePaidAccess, paidWineSubscription, processFirstPayment } from "./first-payment.ts";
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -38,9 +35,11 @@ serve(async (req) => {
     });
   }
 
+  let signatureValidated = false;
   try {
     const body = await req.text();
     const event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+    signatureValidated = true;
 
     logStep("Event received", { type: event.type, id: event.id });
 
@@ -50,46 +49,33 @@ serve(async (req) => {
         const userId = session.metadata?.user_id || session.client_reference_id;
         const customerId = session.customer as string;
 
-        if (!userId) {
-          logStep("ERROR", { message: "No user_id found in session", sessionId: session.id });
+        // Payment Links have no user_id: first paid invoice handles their invitation.
+        // A completed checkout can still be unpaid for delayed payment methods.
+        if (session.payment_status !== "paid" || !userId || !customerId) break;
+        const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
+        if (!subscriptionId) break;
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const invoiceId = typeof subscription.latest_invoice === "string" ? subscription.latest_invoice : subscription.latest_invoice?.id;
+        if (!invoiceId) break;
+        const paidInvoice = await stripe.invoices.retrieve(invoiceId);
+        if (paidInvoice.customer !== customerId || !await paidWineSubscription(stripe, paidInvoice)) break;
+        if (paidInvoice.billing_reason === "subscription_create") {
+          await processFirstPayment(stripe, supabaseAdmin, paidInvoice);
           break;
         }
-
-        logStep("checkout.session.completed", { userId, customerId, sessionId: session.id });
-
-        // Update profiles: set subscription_plan, campaigns_remaining, stripe_customer_id
-        const { error: profileError } = await supabaseAdmin
-          .from("profiles")
-          .update({
-            subscription_plan: "monthly",
-            campaigns_remaining: 1,
-            stripe_customer_id: customerId,
-          })
-          .eq("user_id", userId);
-
-        if (profileError) {
-          logStep("ERROR updating profiles", { error: profileError.message });
-        } else {
-          logStep("Profile updated successfully", { userId });
-        }
-
-        // Upsert user_roles: ensure role is 'paid' (one row per user)
-        const { error: roleUpsertError } = await supabaseAdmin
-          .from("user_roles")
-          .upsert({ user_id: userId, role: "paid" }, { onConflict: "user_id" });
-
-        if (roleUpsertError) {
-          logStep("ERROR upserting user_roles", { error: roleUpsertError.message });
-        } else {
-          logStep("User role set to paid", { userId });
-        }
-
+        await activatePaidAccess(supabaseAdmin, userId, customerId);
         break;
       }
 
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
+
+        if (invoice.billing_reason === "subscription_create") {
+          const result = await processFirstPayment(stripe, supabaseAdmin, invoice);
+          logStep("First payment", { invoiceId: invoice.id, result });
+          break;
+        }
 
         // Only process subscription renewal invoices (not the first one)
         if (invoice.billing_reason !== "subscription_cycle") {
@@ -168,7 +154,8 @@ serve(async (req) => {
         const { error: roleError } = await supabaseAdmin
           .from("user_roles")
           .update({ role: "free" })
-          .eq("user_id", userId);
+          .eq("user_id", userId)
+          .neq("role", "admin");
 
         if (roleError) {
           logStep("ERROR updating role on cancellation", { error: roleError.message });
@@ -188,11 +175,11 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    // Do not log upstream errors that could contain credentials or customer details.
+    logStep("ERROR", { message: signatureValidated ? "Processing failed; retry required" : "Invalid signature" });
+    return new Response(JSON.stringify({ error: signatureValidated ? "processing_failed" : "invalid_signature" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
+      status: signatureValidated ? 503 : 400,
     });
   }
 });

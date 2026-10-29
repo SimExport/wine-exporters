@@ -1,5 +1,8 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
+## Invitation Stripe après premier paiement
+- [x] Webhook existant : première facture payée, trois prix autorisés, jobs conditionnels, invitation/activation sans réinitialiser les crédits ; 13 tests simulés et contrôle Deno réussis, stripe-webhook seul déployé ; endpoint actif refuse un appel non signé (400). Aucun paiement ni email réel de test. Lecture indépendante du code distant non disponible ; envoi de mail incertain conservé en échec pour réconciliation manuelle.
+
 ## Correction ciblée fiche importateur
 
 - [x] Personnes structurées, emails dédupliqués, notes commerciales via RPC existante et statut confirmed ; Wuttke confirmé en lecture seule (3 personnes, 0 email structuré), 9 tests réussis et panneau isolé ordinateur/mobile vérifié, build OK ; campagnes/automatisations inchangées.
