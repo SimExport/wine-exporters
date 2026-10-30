@@ -3,7 +3,7 @@
 // template and saves it on the draft campaign. Never contacts Brevo, never
 // consumes a campaign credit.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { adminPendingEmailBlock, canGenerateCampaignEmail } from "../_shared/campaign-generation-policy.ts";
+import { adminPendingEmailBlock, canGenerateCampaignEmail, generationState } from "../_shared/campaign-generation-policy.ts";
 import {
   buildAnthropicUserMessage, contentV2FromClaude, INTEREST_BASE, missingEmailTags,
   renderEmailHtmlV2, STRUCTURED_SYSTEM_PROMPT,
@@ -59,18 +59,26 @@ Deno.serve(async (req) => {
     status = "pending_validation";
   }
   // apply=false (default): return the proposal only, the saved email is untouched until the user accepts it.
-  const apply = adminPrepare || body?.apply === true;
+  const hasEmail = !!campaign.email_content || String(campaign.message_html ?? "").trim().length > 0;
+  // With no saved email yet, the proposal is saved directly so it survives a page leave.
+  const apply = adminPrepare || body?.apply === true || !hasEmail;
   if (!adminPrepare && campaign.status !== "draft") return json(409, { error: "Only draft campaigns can be generated" });
-  if (!canGenerateCampaignEmail(campaign.email_generation_count)) return json(429, { error: "This email has already been generated. You can edit it manually." });
+  const genState = generationState(campaign.email_generation_count, { hasEmail, generatedAt: campaign.email_generated_at });
+  if (genState === "in_progress") return json(409, { error: "Generation already in progress, please wait" });
+  if (!canGenerateCampaignEmail(campaign.email_generation_count, { hasEmail, generatedAt: campaign.email_generated_at })) return json(429, { error: "This email has already been generated. You can edit it manually." });
   if (campaign.email_generated_at && Date.now() - new Date(campaign.email_generated_at).getTime() < COOLDOWN_MS) {
     return json(429, { error: "Please wait a few seconds before generating again" });
   }
 
   // Reserve the single generation atomically; failed proposals release the slot.
-  const prevCount = campaign.email_generation_count ?? 0;
-  const { data: reserved } = await admin.from("campaigns")
+  // Retry of an interrupted generation: same slot, claimed on the previous timestamp (no extra count).
+  const retry = genState === "interrupted";
+  const prevCount = retry ? (campaign.email_generation_count ?? 1) - 1 : (campaign.email_generation_count ?? 0);
+  let rq = admin.from("campaigns")
     .update({ email_generated_at: new Date().toISOString(), email_generation_count: prevCount + 1 })
-    .eq("id", campaignId).eq("status", status).eq("email_generation_count", prevCount).select("id");
+    .eq("id", campaignId).eq("status", status).eq("email_generation_count", campaign.email_generation_count ?? 0);
+  rq = campaign.email_generated_at ? rq.eq("email_generated_at", campaign.email_generated_at) : rq.is("email_generated_at", null);
+  const { data: reserved } = await rq.select("id");
   if (!reserved?.length) return json(409, { error: "Another generation is in progress" });
 
   let generated = false;
@@ -111,6 +119,7 @@ Deno.serve(async (req) => {
         .update({ email_content: content, message_html: html, subject_selected: content.subject })
         .eq("id", campaignId).eq("status", status);
       // Admin path: never overwrite an existing email, never touch a locked/sent campaign.
+      if (!adminPrepare && body?.apply !== true) sq = sq.is("email_content", null).or("message_html.is.null,message_html.eq.");
       if (adminPrepare) sq = sq.is("send_started_at", null).is("brevo_campaign_id", null).or("message_html.is.null,message_html.eq.");
       const { data: saved, error: sErr } = await sq.select("id");
       if (sErr) throw new Error(sErr.message);

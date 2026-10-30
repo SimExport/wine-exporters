@@ -92,15 +92,15 @@ const CreateCampaign = () => {
   // Lot B: email preparation step, restricted rollout until lot C (also enforced server-side).
   const { enabled: editorEnabled, loading: editorLoading } = useCampaignEditorAccess();
   const recapStep = editorEnabled ? 3 : 2;
-  const [emailInfo, setEmailInfo] = useState<{ content: unknown; html: string | null; count: number }>({ content: null, html: null, count: 0 });
+  const [emailInfo, setEmailInfo] = useState<{ content: unknown; html: string | null; count: number; at?: string | null }>({ content: null, html: null, count: 0 });
   const [emailState, setEmailState] = useState<EmailStepState>({ dirty: false, hasSavedEmail: false });
   const [wasRejected, setWasRejected] = useState(false);
   const [rejectReason, setRejectReason] = useState<string | null>(null);
   const onEmailState = React.useCallback((s: EmailStepState) => setEmailState(s), []);
   const loadEmail = async (id: string) => {
-    const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count').eq('id', id).maybeSingle();
+    const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count,email_generated_at').eq('id', id).maybeSingle();
     if (data) {
-      setEmailInfo({ content: data.email_content, html: data.message_html || null, count: data.email_generation_count ?? 0 });
+      setEmailInfo({ content: data.email_content, html: data.message_html || null, count: data.email_generation_count ?? 0, at: data.email_generated_at });
       setEmailState({ dirty: false, hasSavedEmail: !!(data.message_html && String(data.message_html).trim()) });
     }
   };
@@ -159,7 +159,7 @@ const CreateCampaign = () => {
       setTechDocs(data.doc_techs || []);
       setTechsLink(data.techs_link || '');
       setClientNote(data.client_note || '');
-      setEmailInfo({ content: (data as any).email_content ?? null, html: (data as any).message_html || null, count: (data as any).email_generation_count ?? 0 });
+      setEmailInfo({ content: (data as any).email_content ?? null, html: (data as any).message_html || null, count: (data as any).email_generation_count ?? 0, at: (data as any).email_generated_at ?? null });
       setEmailState({ dirty: false, hasSavedEmail: !!((data as any).message_html && String((data as any).message_html).trim()) });
       setWasRejected(Boolean((data as any).credit_consumed_at));
       const { data: ev } = await supabase.from('campaign_events').select('payload').eq('campaign_id', data.id).eq('type', 'rejected').order('created_at', { ascending: false }).limit(1).maybeSingle();
@@ -752,6 +752,7 @@ const CreateCampaign = () => {
             initialContent={emailInfo.content}
             initialHtml={emailInfo.html}
             generationCount={emailInfo.count}
+            generatedAt={emailInfo.at}
             onStateChange={onEmailState}
             onBack={() => setStep(1)}
             onContinue={async () => { await loadEmail(campaignId); setStep(3); }}

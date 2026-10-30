@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { canGenerateCampaignEmail, MAX_EMAIL_GENERATIONS } from '../../supabase/functions/_shared/campaign-generation-policy';
+import { canGenerateCampaignEmail, generationState, MAX_EMAIL_GENERATIONS } from '../../supabase/functions/_shared/campaign-generation-policy';
 
 test('one generation per email: unused allowed, used and historical counts blocked', () => {
   assert.equal(MAX_EMAIL_GENERATIONS, 1);
@@ -31,4 +31,13 @@ test('manual admin edit only once a v2 email exists, never while queued', () => 
   assert.equal(adminPendingEmailBlock(legacy, ok, 'edit'), 'no_email');
   assert.equal(adminPendingEmailBlock(v2, ok, 'edit'), null);
   assert.equal(adminPendingEmailBlock(v2, { ...ok, queueState: 'queued' }, 'edit'), 'already_queued');
+});
+
+test('interrupted generation (no saved email after 3 min) can be retried; in progress or saved cannot', () => {
+  const now = Date.parse('2026-10-30T14:00:00Z');
+  assert.equal(generationState(1, { hasEmail: false, generatedAt: '2026-10-30T13:58:30Z', now }), 'in_progress');
+  assert.equal(generationState(1, { hasEmail: false, generatedAt: '2026-10-30T13:56:00Z', now }), 'interrupted');
+  assert.equal(canGenerateCampaignEmail(1, { hasEmail: false, generatedAt: '2026-10-30T13:56:00Z', now }), true);
+  assert.equal(canGenerateCampaignEmail(1, { hasEmail: true, generatedAt: '2026-10-30T13:56:00Z', now }), false);
+  assert.equal(canGenerateCampaignEmail(1, { hasEmail: false, generatedAt: '2026-10-30T13:59:00Z', now }), false);
 });
