@@ -27,6 +27,10 @@ const INTERNAL_PATTERNS: RegExp[] = [
   /did\s+not\s+authori[sz]e/i,
   /r[ée]ponses?\s+centralis[ée]/i,
   /adresse\s+d[’']exp[ée]dition|shipping\s+address/i,
+  /adresse\s+(fournie|de\s+livraison|pour\s+les\s+[ée]chantillons)/i,
+  /(sample|delivery)\s+address|address\s+(provided|for\s+(the\s+)?samples)/i,
+  /avant\s+exp[ée]dition|before\s+(shipping|dispatch)/i,
+  /site\s+(web\s+)?de\s+l[’']entreprise\s+indique|company[’']?s?\s+website\s+(states|shows|lists|indicates)/i,
 ];
 
 export function isInternalNote(sentence: string): boolean {

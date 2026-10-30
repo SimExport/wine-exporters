@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { cleanBuyerRequirements, isInternalNote } from './opportunity-display.ts';
+import { matchesFilters, EMPTY_FILTERS } from './opportunity-filters.ts';
 
 describe('cleanBuyerRequirements', () => {
   it('removes French mediation and form notes entirely', () => {
@@ -30,5 +31,16 @@ describe('cleanBuyerRequirements', () => {
   it('handles empty input', () => {
     assert.equal(cleanBuyerRequirements(null), '');
     assert.equal(isInternalNote('Maximum retail price of €20/bottle'), false);
+  });
+  it('drops DONNA IRENE sample-address notes and keeps the buyer need', () => {
+    const note = 'Adresse fournie pour les échantillons : Piazzale Santa Croce, 13, 35123 Padoue (PD), Italie. Confirmer l’adresse de livraison avant expédition : le site de l’entreprise indique Via Umberto I, 89.';
+    const need = 'Vins rouges italiens, 8-12 € EXW, 5 000 bouteilles par an.';
+    assert.equal(cleanBuyerRequirements(note), '');
+    assert.equal(cleanBuyerRequirements(`${need} ${note}`), need);
+    assert.equal(cleanBuyerRequirements('Sample address provided: Via Roma 1. Confirm delivery address before shipping.'), '');
+    const item = { country: 'IT', styles: [], origins: [], haystack: cleanBuyerRequirements(`${need} ${note}`) };
+    assert.equal(matchesFilters(item, { ...EMPTY_FILTERS, q: 'Padoue' }), false);
+    assert.equal(matchesFilters(item, { ...EMPTY_FILTERS, q: 'Umberto' }), false);
+    assert.equal(matchesFilters(item, { ...EMPTY_FILTERS, q: 'rouges italiens' }), true);
   });
 });
