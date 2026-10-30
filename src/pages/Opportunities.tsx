@@ -17,6 +17,7 @@ import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
+import { cleanBuyerRequirements } from '@/lib/opportunity-display';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'suede': '🇸🇪', 'suède': '🇸🇪', 'sweden': '🇸🇪',
@@ -261,7 +262,7 @@ export default function Opportunities() {
         created_by: user.id,
         source: 'opportunity_direct',
         source_ref: r.id,
-        message_snippet: [r.wine_styles, r.origins, r.volume, r.requirements].filter(Boolean).join(' · '),
+        message_snippet: [r.wine_styles, r.origins, r.volume, cleanBuyerRequirements(r.requirements)].filter(Boolean).join(' · '),
       } as any);
       if (error) throw error;
       setAddedRefs(prev => new Set(prev).add(r.id));
@@ -291,7 +292,7 @@ export default function Opportunities() {
         created_by: user.id,
         source: 'opportunity_tender',
         source_ref: t.id,
-        owner_notes: `Appel d'offres ${t.reference} — ${t.designation_origin ?? ''}\nPrix cible : ${t.price ?? '—'}\nVolume : ${t.available_volume ?? '—'}\nDeadline réponse : ${t.deadline_answer ?? '—'}\nDeadline échantillon : ${t.deadline_sample ?? '—'}\n\nProfil : ${t.style_profile ?? '—'}\nExigences : ${t.requirements ?? '—'}`,
+        owner_notes: `Appel d'offres ${t.reference} — ${t.designation_origin ?? ''}\nPrix cible : ${t.price ?? '—'}\nVolume : ${t.available_volume ?? '—'}\nDeadline réponse : ${t.deadline_answer ?? '—'}\nDeadline échantillon : ${t.deadline_sample ?? '—'}\n\nProfil : ${t.style_profile ?? '—'}\nExigences : ${cleanBuyerRequirements(t.requirements) || '—'}`,
       } as any);
       if (error) throw error;
       setAddedRefs(prev => new Set(prev).add(t.id));
@@ -326,13 +327,13 @@ export default function Opportunities() {
     country: canonicalCountry(r.country),
     styles: splitMulti(pick(r, 'wine_styles')),
     origins: splitMulti(pick(r, 'origins')),
-    haystack: [r.company_name, r.country, pick(r, 'wine_styles'), pick(r, 'origins'), pick(r, 'volume'), pick(r, 'requirements'), r.wine_styles, r.origins, r.requirements].filter(Boolean).join(' '),
+    haystack: [r.company_name, r.country, pick(r, 'wine_styles'), pick(r, 'origins'), pick(r, 'volume'), cleanBuyerRequirements(pick(r, 'requirements')), r.wine_styles, r.origins, cleanBuyerRequirements(r.requirements)].filter(Boolean).join(' '),
   });
   const tenderItem = (t: TenderRequest): FilterableItem => ({
     country: canonicalCountry(t.market),
     styles: splitMulti(pick(t, 'category')),
     origins: splitMulti(pick(t, 'designation_origin')),
-    haystack: [t.reference, t.market, t.agent?.company, pick(t, 'category'), pick(t, 'designation_origin'), pick(t, 'style_profile'), pick(t, 'requirements'), t.vintage, t.price].filter(Boolean).join(' '),
+    haystack: [t.reference, t.market, t.agent?.company, pick(t, 'category'), pick(t, 'designation_origin'), pick(t, 'style_profile'), cleanBuyerRequirements(pick(t, 'requirements')), t.vintage, t.price].filter(Boolean).join(' '),
   });
   const scopeItems: { item: FilterableItem; raw: string }[] = tab === 'tender'
     ? tenders.map(t => ({ item: tenderItem(t), raw: t.market }))
@@ -364,7 +365,7 @@ export default function Opportunities() {
   const renderImporters = (rows: ImporterRequest[]) => rows.map(r => {
                 const added = addedRefs.has(r.id);
                 const viewed = viewedKeys.has(`importer:${r.id}`);
-                const req = (pick(r, 'requirements') ?? '').trim();
+                const req = cleanBuyerRequirements(pick(r, 'requirements'));
                 const styles = splitMulti(pick(r, 'wine_styles'));
                 const origins = splitMulti(pick(r, 'origins'));
                 const volumeDisplay = pick(r, 'volume');
@@ -380,9 +381,10 @@ export default function Opportunities() {
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">
+                          <Badge className="text-[12px] font-semibold">{ui('badgeBuyer')}</Badge>
                           {r.created_at && (
                             <span className="text-[13px] text-muted-foreground">
-                              {format(new Date(r.created_at), 'd MMM yyyy', { locale: dateLocale })}
+                              {ui('publishedOn', { date: format(new Date(r.created_at), 'd MMM yyyy', { locale: dateLocale }) })}
                             </span>
                           )}
                           {viewed && (
@@ -423,7 +425,7 @@ export default function Opportunities() {
                     </CardContent>
                     <div className="px-5 pb-2 flex gap-2">
                       <Button variant="outline" className="flex-1 text-sm" onClick={() => { markViewed('importer', r.id); setContactDialog({ kind: 'importer', data: r }); }}>
-                        {tr('opportunitiesPage.actions.reply')}
+                        {ui('replyRequest')}
                       </Button>
                       <Button className="flex-1 text-sm" disabled={added} onClick={() => addImporterToCrm(r)}>
                         {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
@@ -438,7 +440,7 @@ export default function Opportunities() {
                 const added = addedRefs.has(t.id);
                 const viewed = viewedKeys.has(`tender:${t.id}`);
                 const styleProfile = (pick(t, 'style_profile') ?? '').trim();
-                const tReq = (pick(t, 'requirements') ?? '').trim();
+                const tReq = cleanBuyerRequirements(pick(t, 'requirements'));
                 const tCategory = pick(t, 'category');
                 const tDesignation = pick(t, 'designation_origin');
                 const tVolume = pick(t, 'available_volume');
@@ -460,10 +462,11 @@ export default function Opportunities() {
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1 text-[13px]">
+                          <Badge variant="outline" className="border-primary/40 text-primary text-[12px] font-semibold">{ui('badgeTender')}</Badge>
                           {deadlineBadge(t.deadline_answer)}
                           {t.created_at && (
                             <span className="text-muted-foreground">
-                              {format(new Date(t.created_at), 'd MMM yyyy', { locale: dateLocale })}
+                              {ui('publishedOn', { date: format(new Date(t.created_at), 'd MMM yyyy', { locale: dateLocale }) })}
                             </span>
                           )}
                           {viewed && (
@@ -507,7 +510,7 @@ export default function Opportunities() {
                     </CardContent>
                     <div className="px-5 pb-2 flex gap-2">
                       <Button variant="outline" className="flex-1 text-sm" onClick={() => { markViewed('tender', t.id); setContactDialog({ kind: 'tender', data: t }); }}>
-                        {tr('opportunitiesPage.actions.reply')}
+                        {ui('replyTender')}
                       </Button>
                       <Button className="flex-1 text-sm" disabled={added || !t.agent} onClick={() => addTenderToCrm(t)}>
                         {added ? <><CheckCircle2 className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.added')}</> : <><Plus className="h-4 w-4 mr-1" />{tr('opportunitiesPage.actions.addToCrm')}</>}
@@ -528,13 +531,14 @@ export default function Opportunities() {
       <header className="rounded-xl border border-primary/15 bg-card px-5 py-5 md:px-7 md:py-6">
         <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] bg-[hsl(var(--opportunity-badge))] text-[hsl(var(--opportunity-badge-foreground))]">{ui('heroKicker')}</div>
         <h1 className="mt-2 text-3xl font-semibold text-foreground" style={{ fontFamily: 'Georgia, serif' }}>
-          {tr('opportunitiesPage.pageTitle')}
+          {ui('pageTitle')}
         </h1>
+        <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-foreground">{ui('heroSubtitle')}</p>
         <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
           <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-primary tabular-nums">{importers.length}</span><span className="text-[15px] text-foreground">{ui('buyerRequests', { count: importers.length })}</span></div>
           <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-primary tabular-nums">{tenders.length}</span><span className="text-[15px] text-foreground">{ui('tenders', { count: tenders.length })}</span></div>
         </div>
-        <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">{ui('heroText')}</p>
+        <p className="mt-3 flex max-w-3xl items-start gap-2 text-sm leading-relaxed text-muted-foreground"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{ui('reassurance')}</p>
       </header>
 
       <Tabs value={tab} onValueChange={changeTab} className="w-full">
@@ -662,9 +666,9 @@ export default function Opportunities() {
           {contactDialog && (contactDialog.kind === 'importer' ? contactDialog.data.email : contactDialog.data.agent?.email) && (
             <div className="space-y-1.5 border-t pt-3">
               <Button asChild className="w-full gap-2 text-sm">
-                <a href={mailtoFor(contactDialog)}><Send className="h-4 w-4" />{ui('prepareEmail')}</a>
+                <a href={mailtoFor(contactDialog)} onClick={() => toast({ title: ui('preparedToast'), description: ui('preparedToastDesc') })}><Send className="h-4 w-4" />{ui('prepareEmail')}</a>
               </Button>
-              <p className="text-[13px] text-muted-foreground">{ui('prepareHint')}</p>
+              <p className="text-[13px] text-muted-foreground">{ui('prepareHintFull')}</p>
             </div>
           )}
         </DialogContent>

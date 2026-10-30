@@ -14,6 +14,15 @@ export const opportunitiesUiFr = {
   mailSubjectImporter: 'Réponse à votre recherche de vins – {{company}}',
   mailSubjectTender: 'Appel d’offres {{reference}} – proposition',
   mailBody: 'Bonjour,\n\nJ’ai vu votre demande sur WineExporters{{need}}. Notre domaine pourrait y répondre et je serais ravi(e) de vous envoyer notre présentation et nos tarifs.\n\nBien cordialement,\n',
+  pageTitle: 'Des importateurs recherchent de nouveaux vins',
+  heroSubtitle: 'Consultez les besoins partagés par des acheteurs et les appels d’offres en cours, puis proposez vos vins en quelques clics.',
+  reassurance: 'WineExporters sélectionne les demandes avant de les publier. L’acheteur reste libre de donner suite aux propositions reçues.',
+  badgeBuyer: 'Demande d’acheteur', badgeTender: 'Appel d’offres',
+  publishedOn: 'Publiée le {{date}}',
+  replyRequest: 'Répondre à la demande', replyTender: 'Consulter et répondre',
+  preparedToast: 'E-mail préparé dans votre messagerie',
+  preparedToastDesc: 'Rien n’est envoyé depuis WineExporters : pensez à envoyer le message depuis votre messagerie.',
+  prepareHintFull: 'Ce bouton prépare un e-mail à envoyer depuis votre messagerie. Vous pouvez le modifier avant l’envoi ; WineExporters ne transmet pas le message à votre place.',
 };
 
 export const opportunitiesUiEn: typeof opportunitiesUiFr = {
@@ -32,4 +41,13 @@ export const opportunitiesUiEn: typeof opportunitiesUiFr = {
   mailSubjectImporter: 'Reply to your wine sourcing request – {{company}}',
   mailSubjectTender: 'Tender {{reference}} – proposal',
   mailBody: 'Hello,\n\nI saw your request on WineExporters{{need}}. Our estate could be a good fit and I would be happy to send you our presentation and price list.\n\nBest regards,\n',
+  pageTitle: 'Importers are looking for new wines',
+  heroSubtitle: 'Browse the needs shared by buyers and the open tenders, then put your wines forward in a few clicks.',
+  reassurance: 'WineExporters selects requests before publishing them. Buyers remain free to decide whether to follow up on the proposals they receive.',
+  badgeBuyer: 'Buyer request', badgeTender: 'Tender',
+  publishedOn: 'Published on {{date}}',
+  replyRequest: 'Reply to the request', replyTender: 'View and reply',
+  preparedToast: 'Email prepared in your email app',
+  preparedToastDesc: 'Nothing is sent from WineExporters: remember to send the message from your email app.',
+  prepareHintFull: 'This button prepares an email to send from your own email app. You can edit it before sending; WineExporters does not send it for you.',
 };
