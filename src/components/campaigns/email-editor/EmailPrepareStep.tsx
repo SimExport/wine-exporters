@@ -18,7 +18,7 @@ import {
   insertBlock, MAX_CTA, MAX_IMAGES, moveBlock, newId, removeBlock, SUBJECT_PREFIX, type DraftBlock, type EmailDraft,
 } from '@/lib/email-draft';
 
-import { canGenerateCampaignEmail } from '../../../../supabase/functions/_shared/campaign-generation-policy';
+import { canGenerateCampaignEmail, generationState } from '../../../../supabase/functions/_shared/campaign-generation-policy';
 
 export interface EmailStepState { dirty: boolean; hasSavedEmail: boolean }
 
@@ -27,13 +27,14 @@ interface Props {
   initialContent: unknown;
   initialHtml: string | null;
   generationCount: number;
+  generatedAt?: string | null;
   sender?: string;
   onStateChange: (s: EmailStepState) => void;
   onBack: () => void;
   onContinue: () => void;
 }
 
-export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, generationCount, sender, onStateChange, onBack, onContinue }: Props) => {
+export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, generationCount, generatedAt, sender, onStateChange, onBack, onContinue }: Props) => {
   const { t } = useTranslation();
   const initial = useMemo(() => draftFromContent(initialContent), [initialContent]);
   const [draft, setDraft] = useState<EmailDraft>(initial ?? emptyDraft());
@@ -43,6 +44,8 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const [previewHtml, setPreviewHtml] = useState<string | null>(initial && initialHtml ? initialHtml : null);
   const [previewKey, setPreviewKey] = useState<string | null>(initial && initialHtml ? draftKey(initial) : null);
   const [generations, setGenerations] = useState(generationCount);
+  const [genAt, setGenAt] = useState<string | null>(generatedAt ?? null);
+  const [tick, setTick] = useState(0);
   const [busy, setBusy] = useState<null | 'generate' | 'save' | 'preview'>(null);
   const [isProposal, setIsProposal] = useState(false);
   const [pickerAt, setPickerAt] = useState<number | null>(null);
@@ -52,7 +55,26 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const dirty = hasContent && key !== savedKey;
   const stale = !!previewHtml && key !== previewKey;
   const problems = draftProblems(draft);
-  const canGenerate = canGenerateCampaignEmail(generations) && !hasContent;
+  const genSt = { hasEmail: !!savedHtml || hasContent, generatedAt: genAt };
+  const gState = generationState(generations, genSt);
+  const canGenerate = canGenerateCampaignEmail(generations, genSt) && !hasContent;
+  void tick;
+
+  // A generation started elsewhere (page left): poll until its saved email appears or it is marked interrupted.
+  useEffect(() => {
+    if (gState !== 'in_progress' || busy) return;
+    const iv = setInterval(async () => {
+      const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count,email_generated_at').eq('id', campaignId).maybeSingle();
+      if (!data) return;
+      const d = draftFromContent(data.email_content);
+      if (d && data.message_html) {
+        setDraft(d); setSavedDraft(d); setSavedKey(draftKey(d)); setSavedHtml(data.message_html);
+        setPreviewHtml(data.message_html); setPreviewKey(draftKey(d));
+      }
+      setGenerations(data.email_generation_count ?? 0); setGenAt(data.email_generated_at ?? null); setTick((x) => x + 1);
+    }, 10_000);
+    return () => clearInterval(iv);
+  }, [gState, busy, campaignId]);
 
   useEffect(() => { onStateChange({ dirty, hasSavedEmail: !!savedHtml }); }, [dirty, savedHtml, onStateChange]);
   useEffect(() => {
@@ -77,11 +99,12 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       setDraft(d);
       setPreviewHtml(data.html);
       setPreviewKey(draftKey(d));
-      setIsProposal(true);
+      setIsProposal(!data.applied);
+      if (data.applied) { setSavedDraft(d); setSavedKey(draftKey(d)); setSavedHtml(data.html); }
       setGenerations(1);
     } finally {
-      const { data } = await supabase.from('campaigns').select('email_generation_count').eq('id', campaignId).maybeSingle();
-      if (data) setGenerations(data.email_generation_count ?? 0);
+      const { data } = await supabase.from('campaigns').select('email_generation_count,email_generated_at').eq('id', campaignId).maybeSingle();
+      if (data) { setGenerations(data.email_generation_count ?? 0); setGenAt(data.email_generated_at ?? null); }
       setBusy(null);
     }
   };
@@ -172,7 +195,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       {!hasContent ? (
         <Card><CardContent className="py-12 text-center space-y-2">
           <p className="font-medium">{t('emailEditor.emptyTitle')}</p>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">{t(canGenerate ? 'emailEditor.emptyBody' : 'emailEditor.generationUsed')}</p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">{t(gState === 'in_progress' ? 'emailEditor.generationInProgress' : gState === 'interrupted' ? 'emailEditor.generationInterrupted' : canGenerate ? 'emailEditor.emptyBody' : 'emailEditor.generationUsed')}</p>
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

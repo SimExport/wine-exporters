@@ -1,8 +1,24 @@
 /** One reserved AI generation per campaign email; manual saves are independent. */
 export const MAX_EMAIL_GENERATIONS = 1;
 
-export const canGenerateCampaignEmail = (count: number | null | undefined): boolean =>
-  (count ?? 0) < MAX_EMAIL_GENERATIONS;
+/** A reserved generation that produced no saved email after this delay is considered interrupted. */
+export const STALE_GENERATION_MS = 3 * 60_000;
+
+export interface GenerationState { hasEmail?: boolean; generatedAt?: string | null; now?: number }
+
+/** "interrupted": the slot was used but no email was saved (page left, timeout) and can be retried. */
+export function generationState(count: number | null | undefined, st: GenerationState = {}): "available" | "in_progress" | "interrupted" | "used" {
+  if ((count ?? 0) < MAX_EMAIL_GENERATIONS) return "available";
+  if (st.hasEmail || st.hasEmail === undefined) return "used";
+  const at = st.generatedAt ? new Date(st.generatedAt).getTime() : NaN;
+  if (Number.isFinite(at) && (st.now ?? Date.now()) - at < STALE_GENERATION_MS) return "in_progress";
+  return "interrupted";
+}
+
+export const canGenerateCampaignEmail = (count: number | null | undefined, st?: GenerationState): boolean => {
+  const g = generationState(count, st);
+  return g === "available" || g === "interrupted";
+};
 
 export interface AdminPendingCheck {
   isAdmin: boolean;
