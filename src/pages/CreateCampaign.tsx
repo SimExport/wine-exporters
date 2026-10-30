@@ -125,11 +125,13 @@ const CreateCampaign = () => {
       fetchWines();
       fetchDocuments();
     }
-  }, [user]);
+    // Only reload when the account really changes, not on session refresh (tab focus).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
   useEffect(() => {
     if (user && editId) loadCampaign(editId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, editId]);
+  }, [user?.id, editId]);
   const loadCampaign = async (id: string) => {
     setLoadingDraft(true);
     try {
