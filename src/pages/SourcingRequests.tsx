@@ -323,6 +323,9 @@ export default function SourcingRequests() {
                 <Badge variant={searchCredits > 0 ? 'default' : 'secondary'}>{searchCredits} / 1</Badge>
               </div>
               {searchCredits <= 0 && <p className="text-sm text-destructive">{noCreditsMessage('search')}</p>}
+              {searchCredits > 0 && !market && (
+                <p className="text-sm text-muted-foreground text-center">{t('sourcing.dialog.selectMarketHint')}</p>
+              )}
               <Button className="w-full" disabled={!market || searchCredits <= 0 || submitting || (needsStates && states.length === 0)} onClick={handleSubmit}>
                 {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
                 {t('sourcing.dialog.submit')}

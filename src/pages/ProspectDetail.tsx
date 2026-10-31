@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -821,6 +821,51 @@ export default function ProspectDetail() {
           </DropdownMenu>
         </div>
       </div>
+
+      <Dialog open={statusDialog !== null} onOpenChange={(open) => { if (!open && !statusDialogSaving) setStatusDialog(null) }}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {statusDialog === 'won' ? t('prospectDetail.statusDialog.wonTitle') : t('prospectDetail.statusDialog.lostTitle')}
+            </DialogTitle>
+            <DialogDescription>
+              {statusDialog === 'won' ? t('prospectDetail.statusDialog.wonDescription') : t('prospectDetail.statusDialog.lostDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const raw = statusDialogValue.trim()
+            const n = Number(raw.replace(',', '.'))
+            const valid = statusDialog === 'won' ? raw !== '' && Number.isFinite(n) && n > 0 : raw !== ''
+            return (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="status-dialog-value">
+                    {statusDialog === 'won' ? t('prospectDetail.statusDialog.wonLabel') : t('prospectDetail.statusDialog.lostLabel')}
+                  </Label>
+                  {statusDialog === 'won' ? (
+                    <Input id="status-dialog-value" type="number" inputMode="decimal" min="0" step="0.01" autoFocus
+                      value={statusDialogValue} onChange={(e) => setStatusDialogValue(e.target.value)} />
+                  ) : (
+                    <Textarea id="status-dialog-value" rows={4} autoFocus
+                      value={statusDialogValue} onChange={(e) => setStatusDialogValue(e.target.value)} />
+                  )}
+                  {!valid && statusDialogValue !== '' && (
+                    <p className="text-sm text-destructive">{t('prospectDetail.statusDialog.invalid')}</p>
+                  )}
+                </div>
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" disabled={statusDialogSaving} onClick={() => setStatusDialog(null)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button disabled={!valid || statusDialogSaving} onClick={handleConfirmStatusDialog}>
+                    {t('prospectDetail.statusDialog.confirm')}
+                  </Button>
+                </DialogFooter>
+              </>
+            )
+          })()}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={confirmAction !== null} onOpenChange={(open) => !open && setConfirmAction(null)}>
         <AlertDialogContent>
