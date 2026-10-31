@@ -133,6 +133,9 @@ export default function ProspectDetail() {
   const [editingSampleId, setEditingSampleId] = useState<string | null>(null)
   const [deletingSample, setDeletingSample] = useState<SampleItem | null>(null)
   const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
+  const [statusDialog, setStatusDialog] = useState<null | 'won' | 'lost'>(null)
+  const [statusDialogValue, setStatusDialogValue] = useState('')
+  const [statusDialogSaving, setStatusDialogSaving] = useState(false)
   const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
@@ -293,14 +296,15 @@ export default function ProspectDetail() {
       setProspect(prev => prev ? { 
         ...prev, 
         prospect_status: newStatus as any,
-        last_activity_at: new Date().toISOString()
+        last_activity_at: now,
+        ...extra,
       } : null)
 
       toast({
         title: t('prospectDetail.toasts.statusUpdated.title'),
         description: t('prospectDetail.toasts.statusUpdated.description', { label: t(`crm.statuses.${newStatus}`) }),
       })
-
+      return true
     } catch (error) {
       console.error('Error updating status:', error)
       toast({
@@ -308,6 +312,7 @@ export default function ProspectDetail() {
         description: t('prospectDetail.toasts.statusError.description'),
         variant: "destructive",
       })
+      return false
     }
   }
 
