@@ -239,33 +239,54 @@ export default function ProspectDetail() {
   const handleUpdateStatus = async (newStatus: string) => {
     if (!prospect) return
 
-    // Validate required fields for won/lost
-    if (newStatus === 'won' && !prospect.estimated_amount) {
-      toast({
-        title: t('prospectDetail.toasts.amountRequired.title'),
-        description: t('prospectDetail.toasts.amountRequired.description'),
-        variant: "destructive",
-      })
+    // won/lost require a value: ask for it in a dialog instead of blocking.
+    if (newStatus === 'won' || newStatus === 'lost') {
+      setStatusDialogValue(
+        newStatus === 'won'
+          ? (prospect.estimated_amount ? String(prospect.estimated_amount) : '')
+          : (prospect.lost_reason ?? '')
+      )
+      setStatusDialog(newStatus)
       return
     }
 
-    if (newStatus === 'lost' && !prospect.lost_reason) {
-      toast({
-        title: t('prospectDetail.toasts.reasonRequired.title'),
-        description: t('prospectDetail.toasts.reasonRequired.description'),
-        variant: "destructive",
-      })
-      return
-    }
+    await commitStatus(newStatus, {})
+  }
 
+  const handleConfirmStatusDialog = async () => {
+    if (!statusDialog) return
+    const raw = statusDialogValue.trim()
+    let extra: { lost_reason?: string; estimated_amount?: number } = {}
+    if (statusDialog === 'lost') {
+      if (!raw) return
+      extra = { lost_reason: raw }
+    } else {
+      const amount = Number(raw.replace(',', '.'))
+      if (!Number.isFinite(amount) || amount <= 0) return
+      extra = { estimated_amount: amount }
+    }
+    setStatusDialogSaving(true)
+    const ok = await commitStatus(statusDialog, extra)
+    setStatusDialogSaving(false)
+    if (ok) setStatusDialog(null)
+  }
+
+  const commitStatus = async (
+    newStatus: string,
+    extra: { lost_reason?: string; estimated_amount?: number },
+  ): Promise<boolean> => {
+    if (!prospect) return false
+    const now = new Date().toISOString()
     try {
       const { error } = await supabase
         .from('leads')
         .update({ 
           prospect_status: newStatus as any,
-          last_activity_at: new Date().toISOString()
+          last_activity_at: now,
+          ...extra,
         })
         .eq('id', prospect.id)
+
 
       if (error) throw error
 
