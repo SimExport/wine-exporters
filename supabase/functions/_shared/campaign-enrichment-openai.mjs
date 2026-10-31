@@ -33,7 +33,7 @@ export function requestBody(context){
     ...(canSearch(context)?{tools:[{type:'web_search'}],max_tool_calls:1}:{}),
     text:{format:{type:'json_schema',name:'campaign_prospect',strict:true,schema:SCHEMA}}};
 }
-const clean=s=>s.replace(/<\/?cite[^>]*>/gi,'').replace(/cite[^]*?/g,'').trim();
+const clean=s=>s.replace(/<\/?cite[^>]*>/gi,'').replace(/cite[^]*/g,'').trim();
 export function parseResponse(data,context){
   if(data.status!=='completed')throw new Error('OpenAI 422: incomplete response');
   const blocks=(data.output||[]).filter(x=>x.type==='message').flatMap(x=>x.content||[]);
