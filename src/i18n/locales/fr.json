@@ -2259,6 +2259,16 @@
       "save": "Enregistrer",
       "cancel": "Annuler",
       "empty": "Aucune information pour le moment."
+    },
+    "statusDialog": {
+      "lostTitle": "Marquer comme perdu",
+      "lostDescription": "Indiquez le motif de perte pour enregistrer ce statut.",
+      "lostLabel": "Motif de perte",
+      "wonTitle": "Marquer comme gagné",
+      "wonDescription": "Indiquez le montant estimé pour enregistrer ce statut.",
+      "wonLabel": "Montant estimé (€)",
+      "invalid": "Valeur requise : motif non vide ou montant supérieur à 0.",
+      "confirm": "Confirmer"
     }
   },
   "billing": {
@@ -2948,7 +2958,8 @@
       "marketLabel": "Marché ciblé",
       "marketPlaceholder": "Sélectionnez un pays",
       "creditRemaining": "Crédit restant ce mois",
-      "submit": "Lancer la recherche"
+      "submit": "Lancer la recherche",
+      "selectMarketHint": "Sélectionnez un pays pour lancer votre recherche"
     },
     "status": {
       "pending": "En attente",
