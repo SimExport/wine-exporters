@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,6 +133,9 @@ export default function ProspectDetail() {
   const [editingSampleId, setEditingSampleId] = useState<string | null>(null)
   const [deletingSample, setDeletingSample] = useState<SampleItem | null>(null)
   const [confirmAction, setConfirmAction] = useState<null | 'archive' | 'delete'>(null)
+  const [statusDialog, setStatusDialog] = useState<null | 'won' | 'lost'>(null)
+  const [statusDialogValue, setStatusDialogValue] = useState('')
+  const [statusDialogSaving, setStatusDialogSaving] = useState(false)
   const [processingAction, setProcessingAction] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
@@ -239,47 +242,69 @@ export default function ProspectDetail() {
   const handleUpdateStatus = async (newStatus: string) => {
     if (!prospect) return
 
-    // Validate required fields for won/lost
-    if (newStatus === 'won' && !prospect.estimated_amount) {
-      toast({
-        title: t('prospectDetail.toasts.amountRequired.title'),
-        description: t('prospectDetail.toasts.amountRequired.description'),
-        variant: "destructive",
-      })
+    // won/lost require a value: ask for it in a dialog instead of blocking.
+    if (newStatus === 'won' || newStatus === 'lost') {
+      setStatusDialogValue(
+        newStatus === 'won'
+          ? (prospect.estimated_amount ? String(prospect.estimated_amount) : '')
+          : (prospect.lost_reason ?? '')
+      )
+      setStatusDialog(newStatus)
       return
     }
 
-    if (newStatus === 'lost' && !prospect.lost_reason) {
-      toast({
-        title: t('prospectDetail.toasts.reasonRequired.title'),
-        description: t('prospectDetail.toasts.reasonRequired.description'),
-        variant: "destructive",
-      })
-      return
-    }
+    await commitStatus(newStatus, {})
+  }
 
+  const handleConfirmStatusDialog = async () => {
+    if (!statusDialog) return
+    const raw = statusDialogValue.trim()
+    let extra: { lost_reason?: string; estimated_amount?: number } = {}
+    if (statusDialog === 'lost') {
+      if (!raw) return
+      extra = { lost_reason: raw }
+    } else {
+      const amount = Number(raw.replace(',', '.'))
+      if (!Number.isFinite(amount) || amount <= 0) return
+      extra = { estimated_amount: amount }
+    }
+    setStatusDialogSaving(true)
+    const ok = await commitStatus(statusDialog, extra)
+    setStatusDialogSaving(false)
+    if (ok) setStatusDialog(null)
+  }
+
+  const commitStatus = async (
+    newStatus: string,
+    extra: { lost_reason?: string; estimated_amount?: number },
+  ): Promise<boolean> => {
+    if (!prospect) return false
+    const now = new Date().toISOString()
     try {
       const { error } = await supabase
         .from('leads')
         .update({ 
           prospect_status: newStatus as any,
-          last_activity_at: new Date().toISOString()
+          last_activity_at: now,
+          ...extra,
         })
         .eq('id', prospect.id)
+
 
       if (error) throw error
 
       setProspect(prev => prev ? { 
         ...prev, 
         prospect_status: newStatus as any,
-        last_activity_at: new Date().toISOString()
+        last_activity_at: now,
+        ...extra,
       } : null)
 
       toast({
         title: t('prospectDetail.toasts.statusUpdated.title'),
         description: t('prospectDetail.toasts.statusUpdated.description', { label: t(`crm.statuses.${newStatus}`) }),
       })
-
+      return true
     } catch (error) {
       console.error('Error updating status:', error)
       toast({
@@ -287,6 +312,7 @@ export default function ProspectDetail() {
         description: t('prospectDetail.toasts.statusError.description'),
         variant: "destructive",
       })
+      return false
     }
   }
 
@@ -795,6 +821,51 @@ export default function ProspectDetail() {
           </DropdownMenu>
         </div>
       </div>
+
+      <Dialog open={statusDialog !== null} onOpenChange={(open) => { if (!open && !statusDialogSaving) setStatusDialog(null) }}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {statusDialog === 'won' ? t('prospectDetail.statusDialog.wonTitle') : t('prospectDetail.statusDialog.lostTitle')}
+            </DialogTitle>
+            <DialogDescription>
+              {statusDialog === 'won' ? t('prospectDetail.statusDialog.wonDescription') : t('prospectDetail.statusDialog.lostDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const raw = statusDialogValue.trim()
+            const n = Number(raw.replace(',', '.'))
+            const valid = statusDialog === 'won' ? raw !== '' && Number.isFinite(n) && n > 0 : raw !== ''
+            return (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="status-dialog-value">
+                    {statusDialog === 'won' ? t('prospectDetail.statusDialog.wonLabel') : t('prospectDetail.statusDialog.lostLabel')}
+                  </Label>
+                  {statusDialog === 'won' ? (
+                    <Input id="status-dialog-value" type="number" inputMode="decimal" min="0" step="0.01" autoFocus
+                      value={statusDialogValue} onChange={(e) => setStatusDialogValue(e.target.value)} />
+                  ) : (
+                    <Textarea id="status-dialog-value" rows={4} autoFocus
+                      value={statusDialogValue} onChange={(e) => setStatusDialogValue(e.target.value)} />
+                  )}
+                  {!valid && statusDialogValue !== '' && (
+                    <p className="text-sm text-destructive">{t('prospectDetail.statusDialog.invalid')}</p>
+                  )}
+                </div>
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" disabled={statusDialogSaving} onClick={() => setStatusDialog(null)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button disabled={!valid || statusDialogSaving} onClick={handleConfirmStatusDialog}>
+                    {t('prospectDetail.statusDialog.confirm')}
+                  </Button>
+                </DialogFooter>
+              </>
+            )
+          })()}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={confirmAction !== null} onOpenChange={(open) => !open && setConfirmAction(null)}>
         <AlertDialogContent>

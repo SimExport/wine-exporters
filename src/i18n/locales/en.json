@@ -2259,6 +2259,16 @@
       "save": "Save",
       "cancel": "Cancel",
       "empty": "No information yet."
+    },
+    "statusDialog": {
+      "lostTitle": "Mark as lost",
+      "lostDescription": "Enter the reason for losing this prospect to save this status.",
+      "lostLabel": "Loss reason",
+      "wonTitle": "Mark as won",
+      "wonDescription": "Enter the estimated amount to save this status.",
+      "wonLabel": "Estimated amount (€)",
+      "invalid": "Required: a non-empty reason or an amount above 0.",
+      "confirm": "Confirm"
     }
   },
   "billing": {
@@ -2948,7 +2958,8 @@
       "marketLabel": "Target market",
       "marketPlaceholder": "Select a country",
       "creditRemaining": "Credit remaining this month",
-      "submit": "Start search"
+      "submit": "Start search",
+      "selectMarketHint": "Select a country to start your search"
     },
     "status": {
       "pending": "Pending",
