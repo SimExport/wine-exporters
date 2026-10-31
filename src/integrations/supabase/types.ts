@@ -684,6 +684,38 @@ export type Database = {
           },
         ]
       }
+      campaign_excluded_contacts: {
+        Row: {
+          campaign_id: string
+          contact_data: Json
+          excluded_at: string
+          exclusion_reason: string
+          id: string
+        }
+        Insert: {
+          campaign_id: string
+          contact_data: Json
+          excluded_at?: string
+          exclusion_reason: string
+          id: string
+        }
+        Update: {
+          campaign_id?: string
+          contact_data?: Json
+          excluded_at?: string
+          exclusion_reason?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_excluded_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_interested_contacts: {
         Row: {
           added_to_crm_by: string[]
@@ -2702,6 +2734,13 @@ export type Database = {
       }
       dispatch_campaign_send_queue: { Args: never; Returns: undefined }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
+      finalize_campaign_contact_quality: {
+        Args: { _campaign_id: string; _minimum_score?: number }
+        Returns: {
+          excluded_count: number
+          retained_count: number
+        }[]
+      }
       get_campaign_public_info: {
         Args: { _campaign_id: string }
         Returns: {
