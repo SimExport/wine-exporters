@@ -889,6 +889,30 @@
       },
       "loadError": "Some data could not be loaded. Reload the page to try again.",
       "unavailable": "Unavailable"
+    },
+    "priority": {
+      "title": "Priority actions",
+      "unavailable": "Follow-ups unavailable right now. Reload the page to try again.",
+      "empty": "No pending follow-ups.",
+      "openCrm": "Open CRM",
+      "unnamed": "Unnamed prospect",
+      "overdue": "Overdue",
+      "today": "Today",
+      "kind": {
+        "reminder": "Scheduled reminder",
+        "nextAction": "Planned next action"
+      },
+      "more_one": "+{{count}} more action to handle",
+      "more_other": "+{{count}} more actions to handle"
+    },
+    "qualified": {
+      "title": "Latest qualified prospects",
+      "unavailable": "Prospects unavailable right now.",
+      "empty": "No qualified prospects in your campaign results yet.",
+      "cta": "See my campaigns",
+      "form": "Form response",
+      "click": "Email click",
+      "addedOn": "added {{date}}"
     }
   },
   "billingSummary": {
