@@ -889,6 +889,30 @@
       },
       "loadError": "Certaines données n'ont pas pu être chargées. Rechargez la page pour réessayer.",
       "unavailable": "Indisponible"
+    },
+    "priority": {
+      "title": "Actions prioritaires",
+      "unavailable": "Relances indisponibles pour le moment. Rechargez la page pour réessayer.",
+      "empty": "Aucune relance en attente.",
+      "openCrm": "Ouvrir le CRM",
+      "unnamed": "Prospect sans nom",
+      "overdue": "En retard",
+      "today": "Aujourd’hui",
+      "kind": {
+        "reminder": "Rappel programmé",
+        "nextAction": "Prochaine action prévue"
+      },
+      "more_one": "+{{count}} autre action à traiter",
+      "more_other": "+{{count}} autres actions à traiter"
+    },
+    "qualified": {
+      "title": "Derniers prospects qualifiés",
+      "unavailable": "Prospects indisponibles pour le moment.",
+      "empty": "Aucun prospect qualifié dans les résultats de vos campagnes pour l’instant.",
+      "cta": "Voir mes campagnes",
+      "form": "Réponse au formulaire",
+      "click": "Clic sur l’email",
+      "addedOn": "ajouté le {{date}}"
     }
   },
   "billingSummary": {

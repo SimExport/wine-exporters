@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { Grape, Search, Send, Store, Kanban, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
 import { useCredits } from '@/hooks/useCredits';
 import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard';
+import { PriorityActions } from '@/components/dashboard/PriorityActions';
+import { QualifiedProspects } from '@/components/dashboard/QualifiedProspects';
+import { getPriorityActions, pickQualifiedProspects, type ActionLead, type InterestedContact, type PriorityAction } from '@/lib/dashboard-actions';
 import { EnrichmentActivityCard } from '@/components/importers/EnrichmentActivityCard';
 import { pickCampaignCard, isSubmittedCampaign, summarizePipeline, countActiveOpportunities, isProfileComplete, type DashboardCampaign, type PipelineSummary } from '@/lib/dashboard-summary';
 
@@ -36,6 +39,9 @@ const Dashboard = () => {
   const [errors, setErrors] = useState({ campaigns: false, pipeline: false, opportunities: false });
   const [steps, setSteps] = useState<Record<'opportunities' | 'search' | 'campaign' | 'crm', boolean | null>>({ opportunities: false, search: false, campaign: false, crm: false });
   const [profileError, setProfileError] = useState(false);
+  const [priorityActions, setPriorityActions] = useState<PriorityAction[] | null>([]);
+  const [qualified, setQualified] = useState<InterestedContact[] | null>([]);
+  const [campaignNames, setCampaignNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,11 +67,24 @@ const Dashboard = () => {
         const campaignIds = allCampaigns.map(c => c.id);
         let statuses: Array<string | null> = [];
         let leadsError = !!allCampaignsRes.error;
-        if (campaignIds.length > 0) {
-          const { data, error } = await supabase.from('leads').select('prospect_status').in('campaign_id', campaignIds);
-          if (error) leadsError = true;
-          statuses = (data ?? []).map(l => l.prospect_status as string | null);
-        }
+        let leadRows: ActionLead[] = [];
+        // Explicit filter on the producer's own campaigns (incl. manual CRM containers): RLS alone would let admins see everyone's leads.
+        const resultsIds = allCampaigns.filter(c => c.status === 'results').map(c => c.id);
+        const [leadsRes, interestedRes] = await Promise.all([
+          campaignIds.length
+            ? supabase.from('leads').select('id,company_name,first_name,last_name,country,prospect_status,archived_at,remind_at,remind_note,next_action,next_action_at').in('campaign_id', campaignIds)
+            : Promise.resolve({ data: [], error: null }),
+          resultsIds.length
+            ? supabase.from('campaign_interested_contacts').select('id,campaign_id,company_name,country,score,origin,description,created_at')
+                .in('campaign_id', resultsIds).gte('score', 6).in('origin', ['click', 'form']).order('created_at', { ascending: false }).limit(50)
+            : Promise.resolve({ data: [], error: null }),
+        ]);
+        if (leadsRes.error) leadsError = true;
+        leadRows = (leadsRes.data ?? []) as ActionLead[];
+        statuses = leadRows.map(l => l.prospect_status as string | null);
+        setPriorityActions(leadsError ? null : getPriorityActions(leadRows));
+        setQualified(allCampaignsRes.error || interestedRes.error ? null : pickQualifiedProspects((interestedRes.data ?? []) as InterestedContact[], new Set(resultsIds)));
+        setCampaignNames(Object.fromEntries(allCampaigns.map(c => [c.id, c.name])));
         setPipeline(summarizePipeline(statuses));
         setErrors({ campaigns: !!allCampaignsRes.error, pipeline: leadsError, opportunities: oppError });
         setSteps({
@@ -185,6 +204,8 @@ const Dashboard = () => {
 
         <GettingStartedCard done={{ profile: profileError ? null : !isProfileIncomplete, ...steps }} />
 
+        <PriorityActions actions={priorityActions} />
+
         <EnrichmentActivityCard />
 
         {/* 2x2 action cards */}
@@ -211,6 +232,8 @@ const Dashboard = () => {
             );
           })}
         </div>
+
+        <QualifiedProspects prospects={qualified} campaignNames={campaignNames} />
 
         {/* Pipeline strip */}
         <div className="rounded-xl border border-border bg-card p-5 mb-8 hover:shadow-md transition-shadow">
