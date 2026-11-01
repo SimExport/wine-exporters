@@ -3680,6 +3680,7 @@
       "s4": "Préparer ma première campagne",
       "s5": "Suivre mes prospects dans le CRM",
       "done": "Fait",
+      "unavailable": "Certaines étapes n’ont pas pu être vérifiées. Rechargez la page pour réessayer.",
       "guide": "Voir le guide complet →"
     }
   },

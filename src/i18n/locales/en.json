@@ -3680,6 +3680,7 @@
       "s4": "Prepare my first campaign",
       "s5": "Track my prospects in the CRM",
       "done": "Done",
+      "unavailable": "Some steps could not be checked. Reload the page to try again.",
       "guide": "See the full guide →"
     }
   },

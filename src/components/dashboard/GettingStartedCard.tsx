@@ -3,14 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Circle, ChevronRight } from 'lucide-react';
 
 interface Props {
-  done: { profile: boolean; opportunities: boolean; search: boolean; campaign: boolean; crm: boolean };
+  /** null = could not be loaded: shown as unknown, never as done, and the card stays visible. */
+  done: { profile: boolean | null; opportunities: boolean | null; search: boolean | null; campaign: boolean | null; crm: boolean | null };
 }
 
 /** Steps are computed by the dashboard from data it already loads; the card hides once all five are done. */
 export function GettingStartedCard({ done }: Props) {
   const { t } = useTranslation();
 
-  const items: { key: string; to: string; done?: boolean }[] = [
+  const items: { key: string; to: string; done: boolean | null }[] = [
     { key: 's1', to: '/profile', done: done.profile },
     { key: 's2', to: '/opportunites', done: done.opportunities },
     { key: 's3', to: '/recherches', done: done.search },
@@ -18,7 +19,8 @@ export function GettingStartedCard({ done }: Props) {
     { key: 's5', to: '/pipeline', done: done.crm },
   ];
 
-  if (items.every((it) => it.done)) return null;
+  if (items.every((it) => it.done === true)) return null;
+  const anyUnknown = items.some((it) => it.done === null);
 
   return (
     <div className="mb-8 rounded-xl border border-border bg-card p-5">
@@ -43,6 +45,7 @@ export function GettingStartedCard({ done }: Props) {
           </li>
         ))}
       </ol>
+      {anyUnknown && <p className="mt-2 text-xs text-muted-foreground">{t('gettingStarted.dashboard.unavailable')}</p>}
     </div>
   );
 }
