@@ -829,25 +829,40 @@
         "available_other": "{{count}} available"
       },
       "campaign": {
-        "title": "Active campaign",
+        "title": "My campaign",
         "active": "Active",
         "none": "None",
         "emptyDesc": "No active campaign yet.",
         "ctaView": "View campaign",
-        "ctaCreate": "Create a campaign"
+        "ctaCreate": "Create a campaign",
+        "states": {
+          "sending": "Sending",
+          "active": "Sent",
+          "approved": "Validated",
+          "pending_validation": "Under review",
+          "results": "Results available"
+        },
+        "hints": {
+          "sending": "Sending to importers is in progress.",
+          "active": "Results arrive about 48–72 h after sending.",
+          "approved": "Your campaign has been validated by our team.",
+          "pending_validation": "Our team is reviewing your campaign before validating it.",
+          "results": "See the clickers and qualified prospects of your latest campaign."
+        },
+        "ctaResults": "View results"
       },
       "importers": {
         "title": "Importers",
         "badge": "Full database",
-        "desc": "Browse 20,000+ contacts across 140+ countries.",
+        "desc": "Explore 27,000+ importer and distributor contact records.",
         "cta": "Explore database"
       },
       "pipeline": {
         "title": "Export pipeline",
         "desc": "Track your follow-ups, samples and negotiations.",
         "cta": "View pipeline",
-        "opportunities": "{{count}} opportunity",
-        "opportunities_other": "{{count}} opportunities"
+        "opportunities": "{{count}} prospect in progress",
+        "opportunities_other": "{{count}} prospects in progress"
       },
       "opportunities": {
         "title": "Opportunities",
@@ -864,10 +879,16 @@
         "followUps": "Follow-ups",
         "negotiation": "Negotiation",
         "contactedSub": "importers",
-        "samplesSub": "pending",
+        "samplesSub": "requested, sent or tasted",
         "followUpsSub": "scheduled",
-        "negotiationSub": "in progress"
-      }
+        "negotiationSub": "in progress",
+        "newProspects": "New prospects",
+        "newProspectsSub": "to qualify",
+        "won": "Won",
+        "wonSub": "deals closed"
+      },
+      "loadError": "Some data could not be loaded. Reload the page to try again.",
+      "unavailable": "Unavailable"
     }
   },
   "billingSummary": {
