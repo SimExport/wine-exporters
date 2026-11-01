@@ -829,25 +829,40 @@
         "available_other": "{{count}} disponibles"
       },
       "campaign": {
-        "title": "Campagne en cours",
+        "title": "Ma campagne",
         "active": "Active",
         "none": "Aucune",
         "emptyDesc": "Aucune campagne active pour le moment.",
         "ctaView": "Voir la campagne",
-        "ctaCreate": "Créer une campagne"
+        "ctaCreate": "Créer une campagne",
+        "states": {
+          "sending": "Envoi en cours",
+          "active": "Envoyée",
+          "approved": "Validée",
+          "pending_validation": "En validation",
+          "results": "Résultats disponibles"
+        },
+        "hints": {
+          "sending": "L'envoi est en cours auprès des importateurs.",
+          "active": "Les résultats arrivent environ 48–72 h après l'envoi.",
+          "approved": "Votre campagne est validée par notre équipe.",
+          "pending_validation": "Notre équipe relit votre campagne avant de la valider.",
+          "results": "Consultez les cliqueurs et prospects qualifiés de votre dernière campagne."
+        },
+        "ctaResults": "Voir les résultats"
       },
       "importers": {
         "title": "Importateurs",
         "badge": "Base complète",
-        "desc": "Explorez +20 000 contacts dans +140 pays.",
+        "desc": "Explorez 27 000+ fiches de contacts d'importateurs et distributeurs.",
         "cta": "Explorer la base"
       },
       "pipeline": {
         "title": "Pipeline export",
         "desc": "Suivez vos relances, échantillons et négociations.",
         "cta": "Voir le pipeline",
-        "opportunities": "{{count}} opportunité",
-        "opportunities_other": "{{count}} opportunités"
+        "opportunities": "{{count}} prospect en cours",
+        "opportunities_other": "{{count}} prospects en cours"
       },
       "opportunities": {
         "title": "Opportunités",
@@ -864,10 +879,16 @@
         "followUps": "Relances",
         "negotiation": "Négociation",
         "contactedSub": "importateurs",
-        "samplesSub": "en attente",
+        "samplesSub": "demandés, envoyés ou dégustés",
         "followUpsSub": "programmées",
-        "negotiationSub": "en cours"
-      }
+        "negotiationSub": "en cours",
+        "newProspects": "Nouveaux prospects",
+        "newProspectsSub": "à qualifier",
+        "won": "Gagnés",
+        "wonSub": "affaires conclues"
+      },
+      "loadError": "Certaines données n'ont pas pu être chargées. Rechargez la page pour réessayer.",
+      "unavailable": "Indisponible"
     }
   },
   "billingSummary": {
