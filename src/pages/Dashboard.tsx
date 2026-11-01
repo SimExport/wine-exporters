@@ -9,6 +9,7 @@ import { Grape, Search, Send, Store, Kanban, ArrowRight, AlertCircle, Sparkles }
 import { useCredits } from '@/hooks/useCredits';
 import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard';
 import { EnrichmentActivityCard } from '@/components/importers/EnrichmentActivityCard';
+import { pickCampaignCard, isSubmittedCampaign, summarizePipeline, countActiveOpportunities, isProfileComplete, type DashboardCampaign, type PipelineSummary } from '@/lib/dashboard-summary';
 
 interface Profile {
   domain_name: string | null;
@@ -29,55 +30,48 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { searchCredits, campaignCredits } = useCredits();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
-  const [pipelineCounts, setPipelineCounts] = useState({
-    contacted: 0,
-    samples: 0,
-    followUps: 0,
-    negotiation: 0,
-    openOpportunities: 0,
-  });
+  const [campaignCard, setCampaignCard] = useState<ReturnType<typeof pickCampaignCard>>({ state: 'none', campaign: null });
+  const [pipeline, setPipeline] = useState<PipelineSummary>({ newProspects: 0, samples: 0, negotiation: 0, won: 0, open: 0 });
   const [opportunitiesCount, setOpportunitiesCount] = useState(0);
+  const [errors, setErrors] = useState({ campaigns: false, pipeline: false, opportunities: false });
+  const [steps, setSteps] = useState({ opportunities: false, search: false, campaign: false, crm: false });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
-        const [profileRes, allCampaignsRes, importerCountRes, tenderCountRes] = await Promise.all([
+        const [profileRes, allCampaignsRes, importerCountRes, tendersRes, viewsRes, searchRes] = await Promise.all([
           supabase.from('profiles').select('domain_name,contact_name,location,priority_markets').eq('user_id', user.id).maybeSingle(),
-          supabase.from('campaigns').select('id,name,status,target_markets,launched_at,created_at').eq('user_id', user.id),
-          supabase.from('importer_requests').select('*', { count: 'exact', head: true }).eq('status', 'published'),
-          supabase.from('tender_requests').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+          supabase.from('campaigns').select('id,name,status,target_markets,launched_at,created_at,validation_requested_at').eq('user_id', user.id),
+          supabase.from('importer_requests').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+          supabase.from('tender_requests').select('deadline_answer').eq('status', 'published'),
+          supabase.from('opportunity_views').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+          supabase.from('sourcing_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         ]);
         setProfile(profileRes.data as Profile);
-        setOpportunitiesCount((importerCountRes.count ?? 0) + (tenderCountRes.count ?? 0));
+        const oppError = !!(importerCountRes.error || tendersRes.error);
+        setOpportunitiesCount(oppError ? 0 : countActiveOpportunities(importerCountRes.count ?? 0, (tendersRes.data ?? []).map(t => t.deadline_answer)));
 
-        const allCampaigns = (allCampaignsRes.data ?? []) as Array<Campaign & { launched_at: string | null; created_at: string }>;
-        const active = allCampaigns
-          .filter(c => c.status === 'active')
-          .sort((a, b) => new Date(b.launched_at ?? b.created_at).getTime() - new Date(a.launched_at ?? a.created_at).getTime())[0];
-        setActiveCampaign(active ?? null);
+        const allCampaigns = (allCampaignsRes.data ?? []) as DashboardCampaign[];
+        setCampaignCard(pickCampaignCard(allCampaigns));
 
         const campaignIds = allCampaigns.map(c => c.id);
-        let leads: Array<{ prospect_status: string | null }> = [];
+        let statuses: Array<string | null> = [];
+        let leadsError = !!allCampaignsRes.error;
         if (campaignIds.length > 0) {
-          const { data } = await supabase
-            .from('leads')
-            .select('prospect_status')
-            .in('campaign_id', campaignIds);
-          leads = (data ?? []) as Array<{ prospect_status: string | null }>;
+          const { data, error } = await supabase.from('leads').select('prospect_status').in('campaign_id', campaignIds);
+          if (error) leadsError = true;
+          statuses = (data ?? []).map(l => l.prospect_status as string | null);
         }
-        const counts = { contacted: 0, samples: 0, followUps: 0, negotiation: 0, openOpportunities: 0 };
-        for (const l of leads) {
-          const s = l.prospect_status;
-          if (s === 'new') counts.contacted++;
-          else if (s === 'samples_requested' || s === 'samples_sent') counts.samples++;
-          else if (s === 'received' || s === 'tasted') counts.followUps++;
-          else if (s === 'negotiation') counts.negotiation++;
-          if (s !== 'won' && s !== 'lost') counts.openOpportunities++;
-        }
-        setPipelineCounts(counts);
+        setPipeline(summarizePipeline(statuses));
+        setErrors({ campaigns: !!allCampaignsRes.error, pipeline: leadsError, opportunities: oppError });
+        setSteps({
+          opportunities: (viewsRes.count ?? 0) > 0,
+          search: (searchRes.count ?? 0) > 0,
+          campaign: allCampaigns.some(isSubmittedCampaign),
+          crm: statuses.length > 0,
+        });
       } finally {
         setLoading(false);
       }
@@ -95,11 +89,9 @@ const Dashboard = () => {
     );
   }
 
-  const isProfileIncomplete =
-    !profile?.domain_name ||
-    !profile?.contact_name ||
-    !profile?.location ||
-    !profile?.priority_markets;
+  const isProfileIncomplete = !isProfileComplete(profile);
+  const { state: campaignState, campaign: shownCampaign } = campaignCard;
+  const unavailable = t('dashboardPage.hub.unavailable');
 
   const firstName = profile?.contact_name?.split(' ')[0] ?? t('dashboardPage.welcomeFallback');
 
@@ -118,17 +110,21 @@ const Dashboard = () => {
       key: 'campaign',
       icon: Send,
       title: t('dashboardPage.hub.campaign.title'),
-      desc: activeCampaign
-        ? `${activeCampaign.name} — ${(activeCampaign.target_markets ?? []).join(', ')}`
+      desc: errors.campaigns
+        ? t('dashboardPage.hub.loadError')
+        : shownCampaign
+        ? `${shownCampaign.name}${(shownCampaign.target_markets ?? []).length ? ` — ${(shownCampaign.target_markets ?? []).join(', ')}` : ''}. ${t(`dashboardPage.hub.campaign.hints.${campaignState}`)}`
         : t('dashboardPage.hub.campaign.emptyDesc'),
-      badge: activeCampaign
-        ? t('dashboardPage.hub.campaign.active')
+      badge: errors.campaigns
+        ? unavailable
+        : shownCampaign
+        ? t(`dashboardPage.hub.campaign.states.${campaignState}`)
         : campaignCredits > 0
           ? t('dashboardPage.hub.search.available', { count: campaignCredits })
           : t('dashboardPage.hub.campaign.none'),
-      badgeVariant: activeCampaign ? ('success' as const) : campaignCredits > 0 ? ('info' as const) : ('muted' as const),
-      cta: activeCampaign ? t('dashboardPage.hub.campaign.ctaView') : t('dashboardPage.hub.campaign.ctaCreate'),
-      to: activeCampaign ? '/campaigns' : '/create-campaign',
+      badgeVariant: shownCampaign ? ('success' as const) : campaignCredits > 0 ? ('info' as const) : ('muted' as const),
+      cta: !shownCampaign ? t('dashboardPage.hub.campaign.ctaCreate') : campaignState === 'results' ? t('dashboardPage.hub.campaign.ctaResults') : t('dashboardPage.hub.campaign.ctaView'),
+      to: shownCampaign ? `/campaigns/${shownCampaign.id}` : errors.campaigns ? '/campaigns' : '/create-campaign',
     },
     {
       key: 'importers',
@@ -145,7 +141,7 @@ const Dashboard = () => {
       icon: Kanban,
       title: t('dashboardPage.hub.pipeline.title'),
       desc: t('dashboardPage.hub.pipeline.desc'),
-      badge: t('dashboardPage.hub.pipeline.opportunities', { count: pipelineCounts.openOpportunities }),
+      badge: errors.pipeline ? unavailable : t('dashboardPage.hub.pipeline.opportunities', { count: pipeline.open }),
       badgeVariant: 'muted' as const,
       cta: t('dashboardPage.hub.pipeline.cta'),
       to: '/pipeline',
@@ -154,9 +150,9 @@ const Dashboard = () => {
 
   const badgeClass = (v: 'success' | 'info' | 'muted') =>
     v === 'success'
-      ? 'bg-green-100 text-green-800 border-green-200'
+      ? 'bg-primary text-primary-foreground border-transparent'
       : v === 'info'
-      ? 'bg-blue-50 text-blue-700 border-blue-200'
+      ? 'bg-secondary text-primary border-border'
       : 'bg-muted text-muted-foreground border-transparent';
 
   return (
@@ -185,7 +181,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        <GettingStartedCard profileDone={!!(profile?.domain_name && profile?.location)} />
+        <GettingStartedCard done={{ profile: !isProfileIncomplete, ...steps }} />
 
         <EnrichmentActivityCard />
 
@@ -220,8 +216,8 @@ const Dashboard = () => {
             <div className="bg-secondary/60 rounded-lg p-2.5">
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50 font-medium" variant="outline">
-              {t('dashboardPage.hub.opportunities.available', { count: opportunitiesCount })}
+            <Badge className="bg-secondary text-primary border-border hover:bg-secondary font-medium" variant="outline">
+              {errors.opportunities ? unavailable : t('dashboardPage.hub.opportunities.available', { count: opportunitiesCount })}
             </Badge>
           </div>
           <h3 className="font-semibold text-foreground mb-1">{t('dashboardPage.hub.opportunities.title')}</h3>
@@ -241,18 +237,19 @@ const Dashboard = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: t('dashboardPage.hub.pipelineStrip.contacted'), sub: t('dashboardPage.hub.pipelineStrip.contactedSub'), value: pipelineCounts.contacted },
-              { label: t('dashboardPage.hub.pipelineStrip.samples'), sub: t('dashboardPage.hub.pipelineStrip.samplesSub'), value: pipelineCounts.samples },
-              { label: t('dashboardPage.hub.pipelineStrip.followUps'), sub: t('dashboardPage.hub.pipelineStrip.followUpsSub'), value: pipelineCounts.followUps },
-              { label: t('dashboardPage.hub.pipelineStrip.negotiation'), sub: t('dashboardPage.hub.pipelineStrip.negotiationSub'), value: pipelineCounts.negotiation },
+              { label: t('dashboardPage.hub.pipelineStrip.newProspects'), sub: t('dashboardPage.hub.pipelineStrip.newProspectsSub'), value: pipeline.newProspects },
+              { label: t('dashboardPage.hub.pipelineStrip.samples'), sub: t('dashboardPage.hub.pipelineStrip.samplesSub'), value: pipeline.samples },
+              { label: t('dashboardPage.hub.pipelineStrip.negotiation'), sub: t('dashboardPage.hub.pipelineStrip.negotiationSub'), value: pipeline.negotiation },
+              { label: t('dashboardPage.hub.pipelineStrip.won'), sub: t('dashboardPage.hub.pipelineStrip.wonSub'), value: pipeline.won },
             ].map((col) => (
               <div key={col.label} className="rounded-lg bg-secondary/40 p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{col.label}</p>
-                <p className="text-3xl font-bold text-foreground leading-none">{col.value}</p>
+                <p className="text-3xl font-bold text-foreground leading-none">{errors.pipeline ? '—' : col.value}</p>
                 <p className="text-xs text-muted-foreground mt-1">{col.sub}</p>
               </div>
             ))}
           </div>
+          {errors.pipeline && <p className="mt-3 text-sm text-destructive">{t('dashboardPage.hub.loadError')}</p>}
         </div>
       </main>
     </div>
