@@ -50,3 +50,7 @@
 - [ ] Ajouter le secret BREVO_TEST_LIST_ID (liste Brevo interne) avant la recette
 - [ ] Recette fonctionnelle globale A+B+C (par l'utilisateur)
 - [ ] Activer le nouveau parcours pour tous après recette (interrupteur admin)
+
+## Dashboard producteur — Lot A
+- [x] Carte campagne par statut, pipeline (nouveaux/échantillons/négociation/gagnés), opportunités sans appels d’offres clos, 27 000+ contacts, Bien démarrer fidèle et masqué une fois terminé, erreurs visibles ; 7 tests + typecheck.
+- [ ] Rendu connecté non vérifié (session indisponible sur Supabase externe) ; date de programmation non affichable (file d’envoi réservée aux admins).
