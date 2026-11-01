@@ -1,37 +1,24 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Circle, ChevronRight } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 
-interface Props { profileDone: boolean }
+interface Props {
+  done: { profile: boolean; opportunities: boolean; search: boolean; campaign: boolean; crm: boolean };
+}
 
-export function GettingStartedCard({ profileDone }: Props) {
+/** Steps are computed by the dashboard from data it already loads; the card hides once all five are done. */
+export function GettingStartedCard({ done }: Props) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const [done, setDone] = useState({ search: false, campaign: false, crm: false });
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const [s, c, l] = await Promise.all([
-        supabase.from('sourcing_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('campaigns').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        // leads has no user_id column — count leads reachable through the user's campaigns
-        supabase.from('leads').select('id, campaigns!inner(user_id)', { count: 'exact', head: true }).eq('campaigns.user_id', user.id),
-      ]);
-      setDone({ search: (s.count ?? 0) > 0, campaign: (c.count ?? 0) > 0, crm: (l.count ?? 0) > 0 });
-    })();
-  }, [user]);
 
   const items: { key: string; to: string; done?: boolean }[] = [
-    { key: 's1', to: '/profile', done: profileDone },
-    { key: 's2', to: '/opportunites' },
+    { key: 's1', to: '/profile', done: done.profile },
+    { key: 's2', to: '/opportunites', done: done.opportunities },
     { key: 's3', to: '/recherches', done: done.search },
     { key: 's4', to: '/campaigns', done: done.campaign },
     { key: 's5', to: '/pipeline', done: done.crm },
   ];
+
+  if (items.every((it) => it.done)) return null;
 
   return (
     <div className="mb-8 rounded-xl border border-border bg-card p-5">
