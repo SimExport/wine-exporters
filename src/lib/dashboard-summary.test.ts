@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { pickCampaignCard, isSubmittedCampaign, summarizePipeline, countActiveOpportunities, isProfileComplete, type DashboardCampaign } from './dashboard-summary';
+import { pickCampaignCard, isSubmittedCampaign, summarizePipeline, countActiveOpportunities, isProfileComplete, isTenderClosed, type DashboardCampaign } from './dashboard-summary';
 
 const c = (id: string, status: string, created_at = '2026-10-01T00:00:00Z'): DashboardCampaign =>
   ({ id, name: id, status, target_markets: [], launched_at: null, created_at });
@@ -13,8 +13,10 @@ test('latest results shown when nothing is in progress', () => {
   assert.equal(r.state, 'results');
   assert.equal(r.campaign?.id, 'new');
 });
-test('active beats pending and results; drafts/manual alone give none', () => {
-  assert.equal(pickCampaignCard([c('r', 'results'), c('p', 'pending_validation'), c('a', 'active')]).state, 'active');
+test('in-flight beats results; newest in-flight wins; drafts/manual alone give none', () => {
+  assert.equal(pickCampaignCard([c('r', 'results', '2026-10-05T00:00:00Z'), c('a', 'active')]).state, 'active');
+  const r = pickCampaignCard([c('a', 'active', '2026-09-01T00:00:00Z'), c('p', 'pending_validation', '2026-10-20T00:00:00Z')]);
+  assert.equal(r.campaign?.id, 'p');
   assert.equal(pickCampaignCard([c('d', 'draft'), c('m', 'manual')]).state, 'none');
 });
 test('draft and manual containers are never submitted campaigns', () => {
@@ -35,4 +37,11 @@ test('tenders with a past answer deadline are excluded from active opportunities
 test('profile complete requires the four banner fields', () => {
   assert.equal(isProfileComplete({ domain_name: 'D', contact_name: 'C', location: 'L', priority_markets: null }), false);
   assert.equal(isProfileComplete({ domain_name: 'D', contact_name: 'C', location: 'L', priority_markets: 'US' }), true);
+});
+
+test('tender deadline: today open, yesterday closed (local day)', () => {
+  const now = new Date(2026, 10, 1, 23, 30);
+  assert.equal(isTenderClosed('2026-11-01', now), false);
+  assert.equal(isTenderClosed('2026-10-31', now), true);
+  assert.equal(isTenderClosed(null, now), false);
 });

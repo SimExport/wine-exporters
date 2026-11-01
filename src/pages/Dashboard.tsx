@@ -34,7 +34,8 @@ const Dashboard = () => {
   const [pipeline, setPipeline] = useState<PipelineSummary>({ newProspects: 0, samples: 0, negotiation: 0, won: 0, open: 0 });
   const [opportunitiesCount, setOpportunitiesCount] = useState(0);
   const [errors, setErrors] = useState({ campaigns: false, pipeline: false, opportunities: false });
-  const [steps, setSteps] = useState({ opportunities: false, search: false, campaign: false, crm: false });
+  const [steps, setSteps] = useState<Record<'opportunities' | 'search' | 'campaign' | 'crm', boolean | null>>({ opportunities: false, search: false, campaign: false, crm: false });
+  const [profileError, setProfileError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +51,7 @@ const Dashboard = () => {
           supabase.from('sourcing_requests').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         ]);
         setProfile(profileRes.data as Profile);
+        setProfileError(!!profileRes.error);
         const oppError = !!(importerCountRes.error || tendersRes.error);
         setOpportunitiesCount(oppError ? 0 : countActiveOpportunities(importerCountRes.count ?? 0, (tendersRes.data ?? []).map(t => t.deadline_answer)));
 
@@ -67,10 +69,10 @@ const Dashboard = () => {
         setPipeline(summarizePipeline(statuses));
         setErrors({ campaigns: !!allCampaignsRes.error, pipeline: leadsError, opportunities: oppError });
         setSteps({
-          opportunities: (viewsRes.count ?? 0) > 0,
-          search: (searchRes.count ?? 0) > 0,
-          campaign: allCampaigns.some(isSubmittedCampaign),
-          crm: statuses.length > 0,
+          opportunities: viewsRes.error ? null : (viewsRes.count ?? 0) > 0,
+          search: searchRes.error ? null : (searchRes.count ?? 0) > 0,
+          campaign: allCampaignsRes.error ? null : allCampaigns.some(isSubmittedCampaign),
+          crm: leadsError ? null : statuses.length > 0,
         });
       } finally {
         setLoading(false);
@@ -89,7 +91,7 @@ const Dashboard = () => {
     );
   }
 
-  const isProfileIncomplete = !isProfileComplete(profile);
+  const isProfileIncomplete = !profileError && !isProfileComplete(profile);
   const { state: campaignState, campaign: shownCampaign } = campaignCard;
   const unavailable = t('dashboardPage.hub.unavailable');
 
@@ -181,7 +183,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        <GettingStartedCard done={{ profile: !isProfileIncomplete, ...steps }} />
+        <GettingStartedCard done={{ profile: profileError ? null : !isProfileIncomplete, ...steps }} />
 
         <EnrichmentActivityCard />
 

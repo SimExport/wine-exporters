@@ -1,5 +1,5 @@
 // React-free helpers for the producer dashboard (Lot A). Pure, unit-tested.
-import { differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 
 export interface DashboardCampaign {
   id: string;
@@ -13,16 +13,15 @@ export interface DashboardCampaign {
 
 export type CampaignCardState = 'sending' | 'active' | 'approved' | 'pending_validation' | 'results' | 'none';
 
-const ts = (c: DashboardCampaign) => new Date(c.launched_at ?? c.created_at).getTime();
+const ts = (c: DashboardCampaign) => new Date(c.created_at).getTime();
 const latest = (list: DashboardCampaign[]) => [...list].sort((a, b) => ts(b) - ts(a))[0];
+const IN_FLIGHT = new Set(['sending', 'active', 'approved', 'pending_validation']);
 
-/** Most relevant campaign for the producer: in progress > validated > awaiting validation > latest results. */
+/** Most recently created in-flight campaign (sending/active/approved/pending); otherwise the latest results. */
 export function pickCampaignCard(campaigns: DashboardCampaign[]): { state: CampaignCardState; campaign: DashboardCampaign | null } {
-  for (const state of ['sending', 'active', 'approved', 'pending_validation', 'results'] as const) {
-    const match = campaigns.filter((c) => c.status === state);
-    if (match.length) return { state, campaign: latest(match) };
-  }
-  return { state: 'none', campaign: null };
+  const inFlight = campaigns.filter((c) => IN_FLIGHT.has(c.status));
+  const pick = inFlight.length ? latest(inFlight) : latest(campaigns.filter((c) => c.status === 'results'));
+  return pick ? { state: pick.status as CampaignCardState, campaign: pick } : { state: 'none', campaign: null };
 }
 
 const NOT_SUBMITTED = new Set(['draft', 'manual']);
@@ -47,10 +46,11 @@ export function summarizePipeline(statuses: Array<string | null>): PipelineSumma
   return s;
 }
 
-/** Same rule as the deadline badge on /opportunites: closed once differenceInDays(deadline, now) < 0. */
+/** Closed once the deadline day is before today's local calendar day (a deadline today is still open). */
 export function isTenderClosed(deadline: string | null, now: Date = new Date()): boolean {
   if (!deadline) return false;
-  return differenceInDays(new Date(deadline), now) < 0;
+  const day = /^\d{4}-\d{2}-\d{2}/.test(deadline) ? deadline.slice(0, 10) : format(new Date(deadline), 'yyyy-MM-dd');
+  return day < format(now, 'yyyy-MM-dd');
 }
 
 export function countActiveOpportunities(importerCount: number, tenderDeadlines: Array<string | null>, now: Date = new Date()): number {
