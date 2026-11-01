@@ -76,7 +76,7 @@ const Dashboard = () => {
             : Promise.resolve({ data: [], error: null }),
           resultsIds.length
             ? supabase.from('campaign_interested_contacts').select('id,campaign_id,company_name,country,score,origin,description,created_at')
-                .in('campaign_id', resultsIds).gte('score', 6).in('origin', ['click', 'form']).order('created_at', { ascending: false }).limit(50)
+                .in('campaign_id', resultsIds).gte('score', 6).in('origin', ['click', 'form']).not('description', 'is', null).neq('description', '').order('created_at', { ascending: false }).limit(50)
             : Promise.resolve({ data: [], error: null }),
         ]);
         if (leadsRes.error) leadsError = true;
