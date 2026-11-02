@@ -5,28 +5,31 @@ import { ArrowLeft, ArrowRight, BookOpen, Building2, ChevronRight, ExternalLink 
 import { Button } from '@/components/ui/button';
 import { SEO } from '@/components/SEO';
 import PublicLayout from '@/components/resources/PublicLayout';
-import { DIRECTORY_COUNTRIES, directoryCountry, companyPath, type PublicDirectoryCompany } from '@/lib/directory-countries';
+import { DIRECTORY_COUNTRIES, DIRECTORY_HOME_PATH, directoryCountry, directoryPath, companyPath, countryPath, readEmbeddedDirectory, stripHtmlSuffix, type PublicDirectoryCompany } from '@/lib/directory-countries';
 import { articlePath, DEMO_URL, fetchPublishedArticles, type SeoArticleSummary } from '@/lib/seo-articles';
 
 const PublicDirectory = () => {
-  const { country: countrySlug, slug } = useParams();
+  const params = useParams();
+  const countrySlug = stripHtmlSuffix(params.country);
+  const slug = stripHtmlSuffix(params.slug);
   const { t, i18n } = useTranslation();
-  const [companies, setCompanies] = useState<PublicDirectoryCompany[]>([]);
+  const [embedded] = useState(readEmbeddedDirectory);
+  const [companies, setCompanies] = useState<PublicDirectoryCompany[]>(embedded ?? []);
   const [articles, setArticles] = useState<SeoArticleSummary[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(Boolean(embedded));
   const country = countrySlug ? directoryCountry(countrySlug) : undefined;
   const name = country ? (i18n.language.startsWith('en') ? country.en : country.fr) : '';
   const company = slug && country ? companies.find(row => row.countryCode === country.code && row.slug === slug) : undefined;
   const missing = Boolean((countrySlug && !country) || (slug && loaded && !company));
   const countryCompanies = country ? companies.filter(row => row.countryCode === country.code) : companies;
   const relatedArticles = articles.filter(article => DIRECTORY_COUNTRIES.some(row => (!country || row.code === country.code) && row.articleSlug === article.slug));
-  const path = countrySlug ? `/annuaire/${countrySlug}${slug ? `/${slug}` : ''}` : '/annuaire';
+  const path = directoryPath(countrySlug, slug);
   const title = missing ? t('publicDirectory.notFound') : company?.name || (country ? t('publicDirectory.countryTitle', { country: name }) : t('publicDirectory.title'));
   const description = company?.description || (country ? t('publicDirectory.countryDescription', { country: name }) : t('publicDirectory.description'));
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/directory-public.json', { signal: controller.signal })
+    if (!embedded) fetch('/directory-public.json', { signal: controller.signal })
       .then(response => { if (!response.ok) throw new Error('Public directory unavailable'); return response.json(); })
       .then(data => { if (!controller.signal.aborted && Array.isArray(data)) setCompanies(data); })
       .finally(() => { if (!controller.signal.aborted) setLoaded(true); })
@@ -35,7 +38,7 @@ const PublicDirectory = () => {
       .then(data => { if (!controller.signal.aborted) setArticles(data); })
       .catch(error => { if (!controller.signal.aborted) console.error('Public directory guides unavailable', error); });
     return () => controller.abort();
-  }, []);
+  }, [embedded]);
 
   return (
     <PublicLayout>
@@ -45,8 +48,8 @@ const PublicDirectory = () => {
         <nav aria-label="breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground">{t('publicDirectory.home')}</Link>
           <ChevronRight className="h-3 w-3" />
-          <Link to="/annuaire" className="hover:text-foreground">{t('publicDirectory.nav')}</Link>
-          {country && <><ChevronRight className="h-3 w-3" /><Link to={`/annuaire/${country.slug}`} className="hover:text-foreground">{name}</Link></>}
+          <Link to={DIRECTORY_HOME_PATH} className="hover:text-foreground">{t('publicDirectory.nav')}</Link>
+          {country && <><ChevronRight className="h-3 w-3" /><Link to={countryPath(country)} className="hover:text-foreground">{name}</Link></>}
           {company && <><ChevronRight className="h-3 w-3" /><span>{company.name}</span></>}
         </nav>
         <header className="max-w-3xl">
@@ -61,7 +64,7 @@ const PublicDirectory = () => {
               <h2 className="mb-4 font-display text-xl font-semibold">{t('publicDirectory.countries')}</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {DIRECTORY_COUNTRIES.map(row => (
-                  <Link key={row.code} to={`/annuaire/${row.slug}`} className="flex min-h-24 items-center gap-4 rounded-lg border bg-card p-5 transition-colors hover:bg-secondary">
+                  <Link key={row.code} to={countryPath(row)} className="flex min-h-24 items-center gap-4 rounded-lg border bg-card p-5 transition-colors hover:bg-secondary">
                     <span className="text-3xl" aria-hidden="true">{row.flag}</span>
                     <div className="min-w-0 flex-1"><h3 className="font-semibold text-foreground">{i18n.language.startsWith('en') ? row.en : row.fr}</h3><p className="mt-1 text-sm text-muted-foreground">{t('publicDirectory.count', { count: companies.filter(company => company.countryCode === row.code).length })}</p></div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
@@ -101,7 +104,7 @@ const PublicDirectory = () => {
             <Button asChild variant="outline"><a href={DEMO_URL} target="_blank" rel="noopener noreferrer">{t('publicDirectory.demo')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button>
           </div>
         </section>
-        {(countrySlug || missing) && <Link to="/annuaire" className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-primary"><ArrowLeft className="h-4 w-4" />{t('publicDirectory.back')}</Link>}
+        {(countrySlug || missing) && <Link to={DIRECTORY_HOME_PATH} className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-primary"><ArrowLeft className="h-4 w-4" />{t('publicDirectory.back')}</Link>}
       </div>
     </PublicLayout>
   );

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -79,13 +80,16 @@ const AuthenticatedApp = () => {
   return <LandingPage />;
 };
 
-const App = () => (
+type RouterComponent = (props: { children?: ReactNode }) => JSX.Element | null;
+
+/** `Router` is injectable so the directory prerender can render the same tree with a StaticRouter. */
+const App = ({ Router = BrowserRouter as RouterComponent }: { Router?: RouterComponent }) => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <Router>
           <Routes>
             <Route path="/" element={<AuthenticatedApp />} />
             <Route path="/auth" element={<Auth />} />
@@ -98,6 +102,7 @@ const App = () => (
             <Route path="/submit-opportunity" element={<SubmitOpportunity />} />
             <Route path="/publier-opportunite" element={<SubmitOpportunity />} />
             <Route path="/annuaire" element={<PublicDirectory />} />
+            <Route path="/annuaire.html" element={<PublicDirectory />} />
             <Route path="/annuaire/:country" element={<PublicDirectory />} />
             <Route path="/annuaire/:country/:slug" element={<PublicDirectory />} />
             <Route path="/decouvrir" element={<Discover />} />
@@ -200,7 +205,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
+        </Router>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
