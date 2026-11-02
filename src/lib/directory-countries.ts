@@ -32,8 +32,10 @@ export const DIRECTORY_EMBED_ID = EMBED_ID;
 export function readEmbeddedDirectory(): PublicDirectoryCompany[] | null {
   const fromServer = (globalThis as { __PUBLIC_DIRECTORY__?: PublicDirectoryCompany[] }).__PUBLIC_DIRECTORY__;
   if (Array.isArray(fromServer)) return fromServer;
-  if (typeof document === 'undefined') return null;
-  const node = document.getElementById(EMBED_ID);
+  // Typed structurally: this module is also compiled by the Node (build scripts) tsconfig, which has no DOM lib.
+  const doc = (globalThis as { document?: { getElementById: (id: string) => { textContent: string | null } | null } }).document;
+  if (!doc) return null;
+  const node = doc.getElementById(EMBED_ID);
   if (!node?.textContent) return null;
   try { const data = JSON.parse(node.textContent); return Array.isArray(data) ? data : null; } catch { return null; }
 }
