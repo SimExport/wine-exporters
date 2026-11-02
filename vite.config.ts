@@ -4,6 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 import { directoryPublicationPlugin } from './scripts/public-directory';
+import { directoryPrerenderPlugin } from './scripts/directory-prerender';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -17,6 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' &&
     componentTagger(),
     mcpPlugin(),
+    directoryPrerenderPlugin(),
   ].filter(Boolean),
   resolve: {
     alias: {

@@ -49,8 +49,21 @@ test('missing evidence, sparse descriptions and contact-like text fail closed', 
   const { readFileSync } = await import('node:fs');
   const xml = readFileSync(new URL('../public/sitemap.xml', import.meta.url), 'utf8');
   const listed = [...xml.matchAll(/<loc>https:\/\/wine-exporters\.com(\/annuaire[^<]*)<\/loc>/g)].map(m => m[1]).sort();
-  const expected = ['/annuaire', ...DIRECTORY_COUNTRIES.map(c => `/annuaire/${c.slug}`), ...projectPublicDirectory(APPROVED_PUBLIC_COMPANIES).map(r => `/annuaire/${DIRECTORY_COUNTRIES.find(c => c.code === r.countryCode)!.slug}/${r.slug}`)].sort();
+  const expected = ['/annuaire.html', ...DIRECTORY_COUNTRIES.map(c => `/annuaire/${c.slug}.html`), ...projectPublicDirectory(APPROVED_PUBLIC_COMPANIES).map(r => `/annuaire/${DIRECTORY_COUNTRIES.find(c => c.code === r.countryCode)!.slug}/${r.slug}.html`)].sort();
   assert.deepEqual(listed, expected);
   assert.equal(listed.length, 42);
   assert.ok(!/<url>\s*<loc>[^<]*\/annuaire[^<]*<\/loc>\s*<lastmod>/.test(xml));
+});
+
+test('sitemap no longer lists sign-in or redirect-only pages', async () => {
+  const { readFileSync } = await import('node:fs');
+  const xml = readFileSync(new URL('../public/sitemap.xml', import.meta.url), 'utf8');
+  for (const route of ['/auth', '/login', '/set-password', '/register', '/signup']) assert.ok(!xml.includes(`<loc>https://wine-exporters.com${route}</loc>`), route);
+});
+test('prerendered directory files match the sitemap URLs exactly', async () => {
+  const { directoryPrerenderPaths } = await import('./directory-prerender');
+  const { readFileSync } = await import('node:fs');
+  const xml = readFileSync(new URL('../public/sitemap.xml', import.meta.url), 'utf8');
+  const listed = [...xml.matchAll(/<loc>https:\/\/wine-exporters\.com(\/annuaire[^<]*)<\/loc>/g)].map(m => m[1]).sort();
+  assert.deepEqual([...directoryPrerenderPaths()].sort(), listed);
 });
