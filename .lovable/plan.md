@@ -1,53 +1,65 @@
-# Audit Dashboard producteur (/dashboard) — aucun changement de code
+# Plan technique — pages publiques indexables sans JavaScript
 
-## Partie 1 — Audit factuel (état actuel)
+Aucun code dans ce plan. Constats vérifiés : Vite 5 + React 18 + `react-helmet-async` (dans `main.tsx`) + i18next ; `vite build` seul ; le plugin `scripts/public-directory.ts` émet déjà `directory-public.json` au build ; routes publiques déclarées dans `App.tsx` (`/`, `/demande-demo`, `/annuaire*`, `/market-analysis`, `/ressources`, `/ressources/:slug`).
 
-Fichiers : `src/pages/Dashboard.tsx`, `src/components/dashboard/GettingStartedCard.tsx`, `src/components/importers/EnrichmentActivityCard.tsx`, `useCredits`, textes `dashboardPage.*` / `gettingStarted.*` (fr.json / en.json). Route : `DashboardLayout > TrialHomeRedirect > Dashboard` (les essais ExportVins sont redirigés ailleurs).
+## 1. Méthode proposée : pré-rendu maison au build (SSR Vite + `renderToString`)
 
-### Données chargées (navigateur, au montage)
-- `profiles` : domain_name, contact_name, location, priority_markets.
-- `campaigns` : toutes les campagnes de l'utilisateur (id, name, status, target_markets, launched_at, created_at).
-- `importer_requests` + `tender_requests` : comptage `status='published'` (aucun filtre d'échéance).
-- `leads` : `prospect_status` des leads liés aux campagnes de l'utilisateur (inclut donc le conteneur manuel CRM).
-- `user_credits` via `useCredits` (searchCredits, campaignCredits).
-- GettingStartedCard : comptages `sourcing_requests`, `campaigns`, `leads` (jointure campaigns).
-- EnrichmentActivityCard : RPC `get_enrichment_activity` (chiffres par pays, aujourd'hui sinon 7 jours).
-- Chargement : écran plein « Chargement… » ; aucun état d'erreur (une requête en échec donne des zéros silencieux).
+- Ajouter un point d'entrée serveur `src/entry-prerender.tsx` qui rend l'arbre public avec `StaticRouter`, `HelmetProvider` (contexte récupéré), une instance i18next créée par page (FR par défaut, ressources chargées de façon synchrone) et un QueryClient pré-rempli.
+- Script `scripts/prerender.ts` exécuté après `vite build` : `vite build --ssr src/entry-prerender.tsx`, puis pour chaque URL de la liste : rendu HTML, injection dans `dist/index.html` du `<title>`, des meta/canonical/JSON-LD issus de Helmet, et du HTML dans `#root`, écriture du fichier.
+- Côté client : `hydrateRoot` uniquement si `#root` contient du HTML pré-rendu, sinon `createRoot` inchangé (pages applicatives intactes).
+- Pourquoi pas les alternatives :
+  - `react-snap` / Puppeteer : navigateur headless au build, lent, fragile, abandonné.
+  - `vite-plugin-ssr`/`vike`, `vite-react-ssg` : imposent leur routeur/structure, refonte de `App.tsx`.
+  - Migration TanStack Start : vraie SSR et vrais 404, mais chantier global touchant aussi les routes applicatives ; hors périmètre ici, à garder comme option si le point 2 échoue.
+- Garde-fous : constante `MAX_PRERENDER_PAGES` (ex. 500), contrôle que le rendu ne touche ni `window` ni Supabase Auth (les composants publics lisant le navigateur seront protégés par un test `typeof window`).
 
-### Blocs, dans l'ordre
-1. **Salutation** « Bonjour, {prénom} » (repli « Vigneron »).
-2. **Bandeau profil incomplet** si l'un de domain_name / contact_name / location / priority_markets manque → CTA « Compléter mon profil » (/profile).
-3. **Bien démarrer** (5 étapes cochables) : profil (domain_name + location seulement), opportunités (jamais cochée), recherche (≥1 sourcing_request), campagne (≥1 campagne, même brouillon), CRM (≥1 lead). Lien guide /ressources/bien-demarrer. Toujours affiché, même tout coché.
-4. **Activité d'enrichissement** (prospects enrichis par pays, max 6 + « +N »).
-5. **Grille 2×2** :
-   - Recherche sur-mesure : badge « N disponibles » (searchCredits) → /recherches.
-   - Campagne en cours : uniquement la plus récente `status='active'` ; sinon « Aucune campagne active » + badge crédits ou « Aucune » → /create-campaign. Les statuts pending_validation, programmée (file d'envoi) et results ne sont pas montrés.
-   - Importateurs : texte statique « +20 000 contacts dans +140 pays » → /importers.
-   - Pipeline export : badge « N opportunités » = leads non won/lost → /pipeline.
-6. **Opportunités** : badge « N opportunités disponibles » (demandes + appels d'offres publiés, expirés inclus) → /opportunites.
-7. **État du pipeline** (4 tuiles) : Contactés = statut `new` ; Échantillons = samples_requested + samples_sent (« en attente ») ; Relances = received + tasted (« programmées ») ; Négociation = negotiation. Won/lost non affichés.
+## 2. Hébergement Lovable : fichier par URL avant fallback
 
-### Écarts et risques constatés
-- **Chiffres trompeurs** : « Contactés » compte les leads `new` (souvent des cliqueurs/prospects importés, pas des contacts réalisés) ; « Relances programmées » compte des échantillons reçus/dégustés, sans lien avec `remind_at` ; le badge « opportunités » du pipeline (leads ouverts) porte le même mot que les opportunités export publiées.
-- **Volume incohérent** : « +20 000 contacts » alors que la formulation validée est 27 000+ fiches de contacts.
-- **Opportunités** : le compteur inclut les échéances passées, alors que /opportunites ne présente plus les expirées comme « en cours ».
-- **Campagnes** : une campagne en validation, programmée (date estimée) ou avec résultats disponibles n'apparaît pas ; le producteur voit « Aucune campagne active ».
-- **Onboarding** : l'étape 2 ne se coche jamais ; « campagne » cochée par un simple brouillon ; la carte ne disparaît jamais.
-- **Aucune action datée** : les rappels CRM (`remind_at`, `next_action_at`) et les ventes gagnées ne sont pas exploités.
-- **Charte** : badges en couleurs codées en dur (vert/bleu) au lieu des jetons ; emoji dans le titre.
-- **Performance** : requêtes leads/campagnes dupliquées entre Dashboard et GettingStartedCard.
+- Documenté : l'hébergement vérifie si le chemin correspond à un fichier réel, sinon sert `index.html`.
+- Non documenté, donc non confirmé : la résolution de `/annuaire/royaume-uni/liberty-wines` vers `.../liberty-wines/index.html` (index de dossier), et le comportement avec/sans slash final.
+- Étape 0 obligatoire (canari) : publier un seul fichier statique de test sous les deux formes (`dist/annuaire/_canari/index.html` et `dist/annuaire/_canari.html`), puis `curl` sans JS sur le domaine `wine-exporters.com` : statut, `<title>`, corps, redirection éventuelle vers slash final.
+- Si aucune forme n'est servie : alternative = migration TanStack Start (SSR natif). Une Edge Function ne peut pas servir le HTML sur le domaine personnalisé, donc ne constitue pas une alternative.
+- Canonical toujours sans slash final, cohérent avec le sitemap actuel.
 
-## Partie 2 — Recommandations prioritaires (expérience actuelle conservée)
+## 3. Articles `seo_articles` au build
 
-1. **Carte campagne « vraie situation »** — coût léger. Afficher la campagne la plus récente selon le statut : En validation / Programmée (date estimée, déjà calculée côté file) / En cours d'envoi / Résultats disponibles (« Voir mes cliqueurs et prospects qualifiés », libellés existants inchangés). Impact : réassurance, moins de tickets « où est ma campagne ».
-2. **Corriger les libellés du pipeline** — coût léger. « Contactés » → « Nouveaux prospects » ; « Relances » → « Échantillons reçus / dégustés » ; badge pipeline → « N prospects en cours » ; ajouter une tuile « Gagnés ». Aucun nouveau calcul de clic : un cliqueur reste un prospect à qualifier, jamais « intéressé ».
-3. **Bloc « À faire aujourd'hui »** — coût moyen. 3 lignes max à partir de `leads.remind_at` / `next_action_at` échus (requête existante enrichie) avec lien vers la fiche prospect ; état vide positif (« Aucune relance prévue »). Plus forte valeur commerciale.
-4. **Opportunités fiables** — coût léger. Réutiliser la règle d'expiration de /opportunites pour ne compter que les opportunités ouvertes ; afficher « nouvelles depuis votre dernière visite » via `opportunity_views` si simple, sinon seulement le total ouvert.
-5. **Onboarding qui avance et s'efface** — coût léger. Cocher l'étape Opportunités via `opportunity_views`, cocher Campagne seulement si soumise (pas brouillon), masquer la carte (ou la replier) quand les 5 étapes sont faites ; aligner le critère profil avec le bandeau.
-6. **Cohérence chiffres et charte** — coût léger. « +20 000 » → « 27 000+ fiches de contacts » (FR/EN) ; badges sur jetons du thème (#59191F primaire) ; état d'erreur discret au lieu de zéros silencieux.
+- Lecture anonyme avec l'URL et la clé publique déjà présentes dans le projet, via les helpers React-free de `src/lib/seo-articles.ts` (prévus pour ce cas), filtre `status = published`, champs strictement nécessaires.
+- Les données sont injectées dans le QueryClient du rendu et sérialisées dans la page (`window.__PRERENDER_DATA__`) pour éviter le clignotement à l'hydratation.
+- Échec réseau au build : le build continue, les articles retombent en SPA (journal d'avertissement), jamais de page vide publiée.
+- Limite : un article publié après le build n'est pré-rendu qu'au prochain publish ; il reste accessible en SPA et listé par `sitemap-articles`.
+- Les 8 routes privées `/ressources/<fixe>` restent exclues.
 
-Ordre conseillé : 2, 6, 1, 4, 5 (lot léger unique), puis 3 (lot moyen). Toutes les nouvelles chaînes en FR/EN ; aucune modification de base de données requise pour 1, 2, 4, 5, 6.
+## 4. Vrai statut 404
 
-## Hypothèses / non vérifié
-- Audit fait sur le code ; je n'ai pas ouvert le Dashboard dans un navigateur ni interrogé les données réelles.
-- Le statut exact « programmée » se lit dans `campaign_send_queue` (RLS à confirmer pour le producteur avant le point 1).
+- L'hébergement ne documente aucune configuration de statut : un chemin inconnu reçoit `index.html` en 200. Un vrai 404 n'est pas atteignable sur ce stack.
+- Mesure réaliste : URL inconnues (pays/entreprise/article absents) → `noindex` côté client (déjà en place pour l'annuaire), absentes du sitemap, et `dist/404.html` généré au cas où l'hébergement l'utiliserait (vérifié au canari).
+- Vrai 404 = uniquement avec la migration TanStack Start.
+
+## 5. Impacts et risques
+
+- Build : +1 build SSR (~10–20 s) + rendu de quelques dizaines de pages (<5 s). Fichiers ajoutés : ~40–80, très loin de la limite de 50 000.
+- Déploiement : inchangé (Publish). Aucun changement Supabase, RLS ou Edge Function.
+- Pages applicatives : non pré-rendues, gardent `index.html` et `createRoot`.
+- Risques :
+  - Écarts d'hydratation (dates locales, langue détectée depuis localStorage, animations framer-motion) → rendu FR fixe, dates formatées de façon déterministe, test d'absence d'avertissement d'hydratation.
+  - Visiteur EN : page servie en FR puis basculée en EN après hydratation (léger flash) ; pas d'URL EN séparée dans cette version.
+  - Code public accédant à `window`/`localStorage` au rendu → plantage du script, détecté au build.
+  - `/` affiche `AuthenticatedApp` : le pré-rendu sert la landing ; un utilisateur connecté verra brièvement la landing avant redirection.
+
+## 6. Étapes indépendantes et vérifiables
+
+```text
+0. Canari hébergement      -> curl sur wine-exporters.com, décide de la suite
+1. Annuaire seul           -> /annuaire, 6 pays, entreprises approuvées
+2. Pages statiques         -> /demande-demo, /market-analysis
+3. Ressources              -> /ressources + articles publiés
+4. Accueil                 -> /
+5. 404.html + sitemap      -> cohérence sitemap / pages générées
+```
+
+Pour chaque étape : tests unitaires (liste d'URL issue du registre, plafond respecté, title/description/canonical/H1 présents dans le HTML sans JS), `npm run build`, vérification Playwright avec JavaScript désactivé, puis après publication `curl` sur le domaine. L'étape 1 réutilise le registre de `scripts/public-directory.ts` comme seule source des URL et est livrable seule.
+
+## Détails techniques
+
+- Fichiers nouveaux : `src/entry-prerender.tsx`, `scripts/prerender.ts` (+ test), script npm `build` = `vite build && vite build --ssr ... && bun scripts/prerender.ts` (à confirmer compatible avec le build Lovable, vérifié à l'étape 0).
+- Fichiers modifiés : `src/main.tsx` (hydrate conditionnel), éventuellement `src/i18n` (fabrique d'instance), composants publics listés seulement si un accès navigateur bloque le rendu.
