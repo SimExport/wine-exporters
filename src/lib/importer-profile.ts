@@ -141,7 +141,9 @@ export function importLabel(enrichment: ImporterEnrichment, evidence: ImporterEv
 // a person's email from the company's general contact or from free-text notes.
 export function additionalProfileEmails(data: ImporterProfileData, primaryEmail?: string | null): ImporterEmail[] {
   const normalize = (email?: string | null) => email?.trim().toLowerCase() ?? '';
-  const seen = new Set([normalize(primaryEmail), ...data.people.map(p => normalize(p.business_email))].filter(Boolean));
+  // The historic primary field may still hold several newline-separated addresses.
+  const primaries = (primaryEmail ?? '').split(/[\s,;]+/).map(normalize);
+  const seen = new Set([...primaries, ...data.people.map(p => normalize(p.business_email))].filter(Boolean));
   return data.emails.flatMap(email => {
     const key = normalize(email.email);
     if (!key || seen.has(key)) return [];

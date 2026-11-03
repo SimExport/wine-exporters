@@ -2757,6 +2757,15 @@ export type Database = {
           enriched_count: number
         }[]
       }
+      get_importer_export_contacts: {
+        Args: { _ids: string[] }
+        Returns: {
+          additional_emails: string[]
+          buyer_contact_id: string
+          decision_maker_emails: string[]
+          decision_makers: string[]
+        }[]
+      }
       get_importer_profile: {
         Args: { _buyer_contact_id: string }
         Returns: Json
