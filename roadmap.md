@@ -54,3 +54,7 @@
 ## Dashboard producteur — Lot A
 - [x] Carte campagne par statut, pipeline (nouveaux/échantillons/négociation/gagnés), opportunités sans appels d’offres clos, 27 000+ contacts, Bien démarrer fidèle et masqué une fois terminé, erreurs visibles ; 7 tests + typecheck.
 - [ ] Rendu connecté non vérifié (session indisponible sur Supabase externe) ; date de programmation non affichable (file d’envoi réservée aux admins).
+
+## Emails multiples importateurs
+- [x] Export : colonnes emails_additionnels / decideurs / emails_decideurs via RPC batch get_importer_export_contacts ; emails historiques séparés dans tableau et fiche. Tests, typecheck, build OK.
+- [ ] Nettoyage des 1 636 fiches — fait séparément par Simon après validation.
