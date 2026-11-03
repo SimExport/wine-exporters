@@ -7,8 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { addSourcingProspects, sourcingSelectionIndices, formatSourcingSummary } from '@/lib/sourcing-results';
-import { Download, ExternalLink, Mail, Phone, UserPlus, Check, ChevronDown, ChevronLeft, ChevronRight, UsersRound, Loader2, FileText } from 'lucide-react';
+import { addSourcingProspects, sourcingSelectionIndices, formatSourcingSummary, buyerContactId, buildSourcingLead, channelsOf, EXPORT_HEADERS, exportRow, hasConfirmedDirectImport, portfolioOf, primaryPerson, reasonOf, safeWebsiteUrl, scoreOf, text, toCsv, toProfileContact, websiteOf, type SourcingContactRow, type SourcingShortlistItem } from '@/lib/sourcing-results';
+import { ImporterProfileSheet } from '@/components/importers/ImporterProfileSheet';
+import { Download, ExternalLink, Mail, Phone, UserPlus, Check, ChevronDown, ChevronLeft, ChevronRight, UsersRound, Loader2, FileText, Eye, User } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
   DropdownMenu,
@@ -22,14 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 
-interface ShortlistItem {
-  company_name: string;
-  email?: string | null;
-  phone?: string | null;
-  website_url?: string | null;
-  score: number;
-  reason: string;
-}
+type ShortlistItem = SourcingShortlistItem;
 
 interface Props {
   open: boolean;
@@ -41,7 +35,7 @@ interface Props {
 }
 
 export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson, marketLabel, requestId }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [addedIdx, setAddedIdx] = useState<Set<number>>(new Set());
@@ -49,12 +43,14 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
   const busy = useRef(false);
   const [selectedIdx, setSelectedIdx] = useState<Set<number>>(new Set());
   const [page, setPage] = useState(0);
+  const [profileIdx, setProfileIdx] = useState<number | null>(null);
   const shortlist = useMemo(() => resultJson?.shortlist ?? [], [resultJson]);
 
   useEffect(() => {
     setAddedIdx(new Set());
     setSelectedIdx(new Set());
     setPage(0);
+    setProfileIdx(null);
   }, [requestId, resultJson, user?.id]);
 
   const available = sourcingSelectionIndices(shortlist.length, addedIdx);
@@ -71,82 +67,34 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
 
   const addToCrm = async (item: ShortlistItem, campaignId: string) => {
     if (!user) throw new Error(t('common.error'));
-    const identity = item.email || item.company_name;
+    const contactId = buyerContactId(item);
+    const email = text(item.email);
     const duplicateQuery = supabase.from('leads').select('id').eq('campaign_id', campaignId);
-    const { data: existing, error: duplicateError } = await (item.email
-      ? duplicateQuery.eq('email', item.email)
-      : duplicateQuery.eq('buyer_id', identity)).limit(1);
+    const { data: existing, error: duplicateError } = await (contactId
+      ? duplicateQuery.eq('buyer_contact_id', contactId)
+      : email ? duplicateQuery.eq('email', email) : duplicateQuery.eq('buyer_id', item.company_name)).limit(1);
     if (duplicateError) throw duplicateError;
     if (existing?.length) return 'existing' as const;
-      // Enrich from buyer_contacts (address fields not present in LLM shortlist)
-      let contact: {
-        street: string | null;
-        city: string | null;
-        postal_code: string | null;
-        country: string | null;
-        phone: string | null;
-        website_url: string | null;
-        email: string | null;
-        state: string | null;
-        full_address: string | null;
-        Address: string | null;
-      } | null = null;
-      const contactCols = 'street, city, postal_code, country, phone, website_url, email, state, full_address, Address';
-      if (item.email) {
-        const { data } = await supabase
-          .from('buyer_contacts')
-          .select(contactCols)
-          .eq('email', item.email)
-          .maybeSingle();
-        contact = (data as any) ?? null;
+    const contactCols = 'street, city, postal_code, country, phone, website_url, email, state, full_address, Address';
+    let contact: SourcingContactRow | null = null;
+    if (contactId) {
+      // Same buyer_contacts row only: no ambiguous name/email lookup.
+      const { data } = await supabase.from('buyer_contacts').select(contactCols).eq('id', contactId).maybeSingle();
+      contact = (data as SourcingContactRow | null) ?? null;
+    } else {
+      if (email) {
+        const { data } = await supabase.from('buyer_contacts').select(contactCols).eq('email', email).maybeSingle();
+        contact = (data as SourcingContactRow | null) ?? null;
       }
       if (!contact && item.company_name) {
-        const { data } = await supabase
-          .from('buyer_contacts')
-          .select(contactCols)
-          .eq('company_name', item.company_name)
-          .limit(1)
-          .maybeSingle();
-        contact = (data as any) ?? null;
+        const { data } = await supabase.from('buyer_contacts').select(contactCols).eq('company_name', item.company_name).limit(1).maybeSingle();
+        contact = (data as SourcingContactRow | null) ?? null;
       }
-      // Fallback street from full_address / Address (first segment before the comma)
-      let street = contact?.street || null;
-      if (!street) {
-        const raw = contact?.full_address || contact?.Address || null;
-        if (raw) {
-          const first = raw.split(',')[0]?.trim();
-          if (first && !/^\d{4,}$/.test(first) && first.toLowerCase() !== (contact?.city || '').toLowerCase()) {
-            street = first;
-          }
-        }
-      }
-      const { error } = await supabase.from('leads').insert({
-        campaign_id: campaignId,
-        company_name: item.company_name,
-        first_name: null,
-        last_name: null,
-        email: item.email || contact?.email || null,
-        phone: item.phone || contact?.phone || null,
-        website_url: item.website_url || contact?.website_url || null,
-        address_line1: street,
-        address_line2: contact?.state || null,
-        city: contact?.city || null,
-        postal_code: contact?.postal_code || null,
-        country: contact?.country || marketLabel || null,
-        buyer_id: item.email || item.company_name,
-        market: marketLabel,
-        message_snippet: item.reason,
-        owner_notes: 'Issu de Recherche sur-mesure',
-        prospect_status: 'new' as any,
-        last_activity_at: new Date().toISOString(),
-        created_by: user.id,
-        source: 'sourcing',
-        source_ref: requestId ?? null,
-        source_score: typeof item.score === 'number' ? item.score : null,
-        source_relevance: item.reason ?? null,
-      });
-      if (error) throw error;
-      return 'added' as const;
+    }
+    const lead = buildSourcingLead({ item, contact, campaignId, marketLabel, requestId: requestId ?? null, userId: user.id, now: new Date().toISOString() });
+    const { error } = await supabase.from('leads').insert(lead as any);
+    if (error) throw error;
+    return 'added' as const;
   };
 
   const addMultiple = async (indices: number[]) => {
@@ -176,15 +124,15 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
     }
   };
 
-  const headers = ['company_name', 'email', 'phone', 'website_url', 'score', 'reason'];
+  const exportAoa = () => [
+    [...EXPORT_HEADERS] as string[],
+    ...shortlist.map(r => exportRow(r, i18n.language, t('sourcing.results.directImport'))),
+  ];
 
   const exportXlsx = () => {
-    const aoa = [
-      headers,
-      ...shortlist.map(r => headers.map(h => (r as any)[h] ?? '')),
-    ];
+    const aoa = exportAoa();
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = headers.map((h, i) => ({
+    ws['!cols'] = aoa[0].map((h, i) => ({
       wch: Math.min(60, Math.max(h.length + 2, ...aoa.slice(1).map(row => String(row[i] ?? '').length + 2))),
     }));
     const wb = XLSX.utils.book_new();
@@ -194,16 +142,7 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
 
   const exportCsv = () => {
     const delimiter = ';';
-    const lines = [headers.join(delimiter)];
-    for (const r of shortlist) {
-      const row = headers.map(h => {
-        const v = (r as any)[h] ?? '';
-        const s = String(v).replace(/"/g, '""');
-        return `"${s}"`;
-      });
-      lines.push(row.join(delimiter));
-    }
-    const content = `sep=${delimiter}\r\n` + lines.join('\r\n');
+    const content = `sep=${delimiter}\r\n` + toCsv(exportAoa(), delimiter);
     const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -213,9 +152,58 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
     URL.revokeObjectURL(url);
   };
 
+  const profileContact = profileIdx === null ? null : toProfileContact(shortlist[profileIdx] ?? { company_name: '' }, marketLabel);
+  const scoreBadge = (r: ShortlistItem) => {
+    const score = scoreOf(r);
+    if (score === null) return null;
+    return <Badge variant={score >= 8 ? 'default' : score >= 5 ? 'secondary' : 'outline'}>{score}/10</Badge>;
+  };
+  const actions = (r: ShortlistItem, i: number) => (
+    <div className="flex flex-wrap gap-2">
+      {buyerContactId(r) && <Button size="sm" variant="ghost" onClick={() => setProfileIdx(i)}><Eye className="h-3 w-3 mr-1" />{t('sourcing.results.viewProfile')}</Button>}
+      {addedIdx.has(i) ? (
+        <Badge variant="secondary" className="gap-1"><Check className="h-3 w-3" />{t('sourcing.results.added')}</Badge>
+      ) : (
+        <Button size="sm" variant="outline" disabled={adding || !user} onClick={() => addMultiple([i])}>
+          <UserPlus className="h-3 w-3 mr-1" />{t('sourcing.results.addToCrm')}
+        </Button>
+      )}
+    </div>
+  );
+  const contactBlock = (r: ShortlistItem) => {
+    const p = primaryPerson(r);
+    const email = p?.business_email || text(r.email);
+    const site = safeWebsiteUrl(websiteOf(r));
+    const phone = text(r.phone);
+    return (
+      <div className="flex min-w-0 flex-col gap-1 text-xs">
+        {p?.full_name && <span className="flex items-center gap-1 font-medium text-foreground"><User className="h-3 w-3 shrink-0" /><span className="truncate">{p.full_name}</span></span>}
+        {p?.job_title && <span className="truncate text-muted-foreground">{p.job_title}</span>}
+        {email && <a href={`mailto:${email}`} className="flex items-center gap-1 text-primary hover:underline"><Mail className="h-3 w-3 shrink-0" /><span className="truncate">{email}</span></a>}
+        <span className="flex items-center gap-3">
+          {phone && <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} aria-label={phone} title={phone} className="text-muted-foreground hover:text-primary"><Phone className="h-3.5 w-3.5" /></a>}
+          {site && <a href={site} target="_blank" rel="noopener noreferrer" aria-label={t('sourcing.results.website')} title={site} className="text-muted-foreground hover:text-primary"><ExternalLink className="h-3.5 w-3.5" /></a>}
+        </span>
+      </div>
+    );
+  };
+  const companyBlock = (r: ShortlistItem) => (
+    <div className="min-w-0">
+      <p className="font-medium text-foreground line-clamp-2">{r.company_name}</p>
+      {(text(r.city) || text(r.company_type)) && <p className="text-xs text-muted-foreground truncate">{[text(r.city), text(r.company_type)].filter(Boolean).join(' · ')}</p>}
+    </div>
+  );
+  const tags = (values: string[], extra?: string) => values.length || extra ? (
+    <div className="flex flex-wrap gap-1">
+      {values.map(v => <Badge key={v} variant="outline" className="max-w-[10rem] truncate font-normal">{v}</Badge>)}
+      {extra && <Badge variant="secondary" className="font-normal">{extra}</Badge>}
+    </div>
+  ) : <span className="text-xs text-muted-foreground">—</span>;
+  const directLabel = (r: ShortlistItem) => hasConfirmedDirectImport(r) ? t('sourcing.results.directImport') : undefined;
+
   return (
     <Dialog open={open} onOpenChange={value => { if (!busy.current) onOpenChange(value); }}>
-      <DialogContent className="w-[calc(100%-2rem)] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>{t('sourcing.results.title', { market: marketLabel })}</DialogTitle>
         </DialogHeader>
@@ -284,47 +272,54 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-auto">
-            <Table>
+            <ul className="space-y-3 md:hidden">
+              {visible.map((r, offset) => {
+                const i = page * 10 + offset;
+                return (
+                  <li key={i} className="rounded-lg border bg-card p-3 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Checkbox className="mt-1" aria-label={t('sourcing.results.selectProspect', { name: r.company_name })} checked={selectedIdx.has(i)} disabled={adding || addedIdx.has(i)} onCheckedChange={checked => toggleSelection(i, checked === true)} />
+                      <div className="flex-1 min-w-0">{companyBlock(r)}</div>
+                      {scoreBadge(r)}
+                    </div>
+                    {reasonOf(r) && <p className="text-sm text-muted-foreground line-clamp-3">{reasonOf(r)}</p>}
+                    {portfolioOf(r).length > 0 && tags(portfolioOf(r))}
+                    {(channelsOf(r).length > 0 || directLabel(r)) && tags(channelsOf(r), directLabel(r))}
+                    {contactBlock(r)}
+                    {actions(r, i)}
+                  </li>
+                );
+              })}
+            </ul>
+            <Table className="hidden md:table table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"><span className="sr-only">{t('sourcing.results.selectAll')}</span></TableHead>
-                  <TableHead>{t('sourcing.results.col.company')}</TableHead>
-                  <TableHead>{t('sourcing.results.col.contact')}</TableHead>
-                  <TableHead className="w-20">{t('sourcing.results.score')}</TableHead>
+                  <TableHead className="w-[17%]">{t('sourcing.results.col.company')}</TableHead>
+                  <TableHead className="w-[16%]">{t('sourcing.results.col.portfolio')}</TableHead>
+                  <TableHead className="w-[14%]">{t('sourcing.results.col.distribution')}</TableHead>
+                  <TableHead className="w-[18%]">{t('sourcing.results.col.contact')}</TableHead>
                   <TableHead>{t('sourcing.results.col.reason')}</TableHead>
-                  <TableHead className="w-40">{t('sourcing.results.col.action', { defaultValue: 'Action' })}</TableHead>
+                  <TableHead className="w-36">{t('sourcing.results.col.action')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {visible.map((r, offset) => {
                   const i = page * 10 + offset;
                   return (
-                  <TableRow key={i} data-state={selectedIdx.has(i) ? 'selected' : undefined}>
+                  <TableRow key={i} data-state={selectedIdx.has(i) ? 'selected' : undefined} className="align-top">
                     <TableCell><Checkbox aria-label={t('sourcing.results.selectProspect', { name: r.company_name })} checked={selectedIdx.has(i)} disabled={adding || addedIdx.has(i)} onCheckedChange={checked => toggleSelection(i, checked === true)} /></TableCell>
-                    <TableCell className="font-medium">{r.company_name}</TableCell>
+                    <TableCell>{companyBlock(r)}</TableCell>
+                    <TableCell>{tags(portfolioOf(r))}</TableCell>
+                    <TableCell>{tags(channelsOf(r), directLabel(r))}</TableCell>
+                    <TableCell>{contactBlock(r)}</TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1 text-xs">
-                        {r.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{r.email}</span>}
-                        {r.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{r.phone}</span>}
-                        {r.website_url && <a href={r.website_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary hover:underline"><ExternalLink className="h-3 w-3" />{r.website_url}</a>}
+                      <div className="space-y-1">
+                        {scoreBadge(r)}
+                        {reasonOf(r) && <p className="text-xs text-muted-foreground line-clamp-3" title={reasonOf(r)}>{reasonOf(r)}</p>}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={r.score >= 8 ? 'default' : r.score >= 5 ? 'secondary' : 'outline'}>
-                        {r.score}/10
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{r.reason}</TableCell>
-                    <TableCell>
-                      {addedIdx.has(i) ? (
-                        <Badge variant="secondary" className="gap-1"><Check className="h-3 w-3" />{t('sourcing.results.added', { defaultValue: 'Ajouté' })}</Badge>
-                      ) : (
-                        <Button size="sm" variant="outline" disabled={adding || !user} onClick={() => addMultiple([i])}>
-                          <UserPlus className="h-3 w-3 mr-1" />
-                          {t('sourcing.results.addToCrm', { defaultValue: 'Ajouter au CRM' })}
-                        </Button>
-                      )}
-                    </TableCell>
+                    <TableCell>{actions(r, i)}</TableCell>
                   </TableRow>
                 ); })}
               </TableBody>
@@ -360,6 +355,14 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
           </TabsContent>
         </Tabs>
       </DialogContent>
+      <ImporterProfileSheet
+        contact={profileContact}
+        onClose={() => setProfileIdx(null)}
+        crmAction={profileIdx === null ? undefined : {
+          state: addedIdx.has(profileIdx) ? 'added' : adding ? 'adding' : 'idle',
+          onAdd: () => addMultiple([profileIdx]),
+        }}
+      />
     </Dialog>
   );
 }
