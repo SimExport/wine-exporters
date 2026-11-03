@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { ImporterCountryPicker } from '@/components/importers/ImporterCountryPicker';
 import { exportCap, exportCount, boundedSelection, updateSelection, firstResultIds } from '@/components/importers/importer-selection';
 import * as XLSX from 'xlsx';
+import { buildExportEmailColumns, isUuid, splitEmails } from '@/lib/contact-emails';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -363,7 +364,20 @@ const Importers = () => {
         data = rows;
       }
 
-      const headers = ['company_name', 'country', 'city', 'email', 'phone', 'website_url', 'street', 'postal_code', 'state'];
+      // One batch RPC (max 500 ids per call) for enrichment emails; never per-contact profile calls.
+      const exportIds = (data || []).map(c => c?.id).filter(isUuid);
+      const enrichmentById = new Map<string, any>();
+      for (let i = 0; i < exportIds.length; i += 500) {
+        const { data: extra, error: extraError } = await (supabase.rpc as any)('get_importer_export_contacts', { _ids: exportIds.slice(i, i + 500) });
+        if (extraError) {
+          console.error('Error fetching export enrichment:', extraError);
+          toast({ title: t('common.error'), description: t('importers.exportError'), variant: 'destructive' });
+          return;
+        }
+        for (const row of extra ?? []) enrichmentById.set(row.buyer_contact_id, row);
+      }
+      data = (data || []).map(c => ({ ...c, ...buildExportEmailColumns(c?.email, enrichmentById.get(c?.id)) }));
+      const headers = ['company_name', 'country', 'city', 'email', 'emails_additionnels', 'decideurs', 'emails_decideurs', 'phone', 'website_url', 'street', 'postal_code', 'state'];
       const fileBase = `contacts_${selectedCountry}_${new Date().toISOString().split('T')[0]}`;
 
       if (format === 'xlsx') {
@@ -683,13 +697,15 @@ const Importers = () => {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <div className="flex items-center gap-0.5">
-                              <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
-                                <Mail className="h-3 w-3" />
-                                {contact.email}
-                              </a>
-                              <CopyButton value={contact.email} />
-                            </div>
+                            {splitEmails(contact.email).map(email => (
+                              <div key={email} className="flex items-center gap-0.5">
+                                <a href={`mailto:${email}`} className="flex items-center gap-1 text-primary hover:underline">
+                                  <Mail className="h-3 w-3" />
+                                  {email}
+                                </a>
+                                <CopyButton value={email} />
+                              </div>
+                            ))}
                             {contact.phone && (
                               <div className="flex items-center gap-0.5">
                                 <span>{formattedPhone}</span>
