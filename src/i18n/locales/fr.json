@@ -3057,8 +3057,14 @@
       "col": {
         "company": "Société",
         "contact": "Contact",
-        "reason": "Pertinence"
-      }
+        "reason": "Pertinence",
+        "portfolio": "Portefeuille",
+        "distribution": "Distribution",
+        "action": "Actions"
+      },
+      "viewProfile": "Voir la fiche",
+      "directImport": "Importation directe",
+      "website": "Site web"
     }
   },
   "adminSourcing": {

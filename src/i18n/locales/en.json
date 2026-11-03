@@ -3057,8 +3057,14 @@
       "col": {
         "company": "Company",
         "contact": "Contact",
-        "reason": "Match"
-      }
+        "reason": "Relevance",
+        "portfolio": "Portfolio",
+        "distribution": "Distribution",
+        "action": "Actions"
+      },
+      "viewProfile": "View profile",
+      "directImport": "Direct import",
+      "website": "Website"
     }
   },
   "adminSourcing": {
