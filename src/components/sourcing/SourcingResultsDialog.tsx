@@ -291,34 +291,56 @@ export function SourcingResultsDialog({ open, onOpenChange, summary, resultJson,
                 );
               })}
             </ul>
-            <Table className="hidden md:table table-fixed">
+            <Table className="hidden md:table min-w-[1500px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"><span className="sr-only">{t('sourcing.results.selectAll')}</span></TableHead>
-                  <TableHead className="w-[17%]">{t('sourcing.results.col.company')}</TableHead>
-                  <TableHead className="w-[16%]">{t('sourcing.results.col.portfolio')}</TableHead>
-                  <TableHead className="w-[14%]">{t('sourcing.results.col.distribution')}</TableHead>
-                  <TableHead className="w-[18%]">{t('sourcing.results.col.contact')}</TableHead>
-                  <TableHead>{t('sourcing.results.col.reason')}</TableHead>
+                  <TableHead className="w-[170px]">{t('sourcing.results.col.company')}</TableHead>
+                  <TableHead className="w-[150px]">{t('sourcing.results.col.portfolio')}</TableHead>
+                  <TableHead className="w-[140px]">{t('sourcing.results.col.distribution')}</TableHead>
+                  <TableHead className="w-[150px]">{t('sourcing.results.col.decisionMaker')}</TableHead>
+                  <TableHead className="w-[190px]">{t('sourcing.results.col.email')}</TableHead>
+                  <TableHead className="w-[130px]">{t('sourcing.results.col.phone')}</TableHead>
+                  <TableHead className="w-[160px]">{t('sourcing.results.col.website')}</TableHead>
+                  <TableHead className="w-[80px]">{t('sourcing.results.col.score')}</TableHead>
+                  <TableHead className="min-w-[280px]">{t('sourcing.results.col.justification')}</TableHead>
                   <TableHead className="w-36">{t('sourcing.results.col.action')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {visible.map((r, offset) => {
                   const i = page * 10 + offset;
+                  const p = primaryPerson(r);
+                  const email = p?.business_email || text(r.email);
+                  const phone = text(r.phone);
+                  const rawSite = websiteOf(r);
+                  const site = safeWebsiteUrl(rawSite);
+                  const dash = <span className="text-xs text-muted-foreground">—</span>;
                   return (
                   <TableRow key={i} data-state={selectedIdx.has(i) ? 'selected' : undefined} className="align-top">
                     <TableCell><Checkbox aria-label={t('sourcing.results.selectProspect', { name: r.company_name })} checked={selectedIdx.has(i)} disabled={adding || addedIdx.has(i)} onCheckedChange={checked => toggleSelection(i, checked === true)} /></TableCell>
                     <TableCell>{companyBlock(r)}</TableCell>
                     <TableCell>{tags(portfolioOf(r))}</TableCell>
                     <TableCell>{tags(channelsOf(r), directLabel(r))}</TableCell>
-                    <TableCell>{contactBlock(r)}</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {scoreBadge(r)}
-                        {reasonOf(r) && <p className="text-xs text-muted-foreground line-clamp-3" title={reasonOf(r)}>{reasonOf(r)}</p>}
-                      </div>
+                    <TableCell className="text-xs">
+                      {p?.full_name || p?.job_title ? (
+                        <div className="space-y-0.5">
+                          {p?.full_name && <p className="font-medium text-foreground">{p.full_name}</p>}
+                          {p?.job_title && <p className="text-muted-foreground">{p.job_title}</p>}
+                        </div>
+                      ) : dash}
                     </TableCell>
+                    <TableCell className="text-xs">
+                      {email ? <a href={`mailto:${email}`} className="text-primary hover:underline break-all">{email}</a> : dash}
+                    </TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">
+                      {phone ? <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="hover:text-primary">{phone}</a> : dash}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {site ? <a href={site} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{(rawSite || site).replace(/^https?:\/\//i, '').replace(/\/$/, '')}</a> : dash}
+                    </TableCell>
+                    <TableCell>{scoreBadge(r)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-pre-line">{reasonOf(r) || dash}</TableCell>
                     <TableCell>{actions(r, i)}</TableCell>
                   </TableRow>
                 ); })}

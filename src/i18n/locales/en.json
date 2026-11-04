@@ -3060,7 +3060,13 @@
         "reason": "Relevance",
         "portfolio": "Portfolio",
         "distribution": "Distribution",
-        "action": "Actions"
+        "action": "Actions",
+        "decisionMaker": "Decision maker",
+        "email": "Email",
+        "phone": "Phone",
+        "website": "Website",
+        "score": "Score",
+        "justification": "Relevance rationale"
       },
       "viewProfile": "View profile",
       "directImport": "Direct import",
