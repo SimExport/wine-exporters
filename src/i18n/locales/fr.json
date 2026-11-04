@@ -3060,7 +3060,13 @@
         "reason": "Pertinence",
         "portfolio": "Portefeuille",
         "distribution": "Distribution",
-        "action": "Actions"
+        "action": "Actions",
+        "decisionMaker": "Décisionnaire",
+        "email": "Email",
+        "phone": "Téléphone",
+        "website": "Site web",
+        "score": "Score",
+        "justification": "Justification de pertinence"
       },
       "viewProfile": "Voir la fiche",
       "directImport": "Importation directe",
