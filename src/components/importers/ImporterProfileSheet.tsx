@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { COUNTRIES } from '@/components/importers/country-data';
 import { getCountryFlag } from '@/lib/country-flag';
 import { safeWebsiteUrl } from '@/lib/website-url';
-import { importerProfileRepository, safeExternalUrl, cleanValues, descriptionFor, hasReliableDescription, importLabel, profileSources, additionalProfileEmails, type ImporterContact, type ImporterProfileRepository, type ImporterProfileResult } from '@/lib/importer-profile';
+import { importerProfileRepository, cleanValues, descriptionFor, hasReliableDescription, importLabel, profileSources, additionalProfileEmails, type ImporterContact, type ImporterProfileRepository, type ImporterProfileResult } from '@/lib/importer-profile';
 import { splitEmails } from '@/lib/contact-emails';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {

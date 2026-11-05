@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { hasReliableDescription, importLabel, descriptionFor, mapProfileResponse, safeExternalUrl, additionalProfileEmails, type ImporterEnrichment } from './importer-profile';
+import { hasReliableDescription, importLabel, descriptionFor, mapProfileResponse, safeExternalUrl, additionalProfileEmails, profileSources, type ImporterEnrichment } from './importer-profile';
 
 const verified: ImporterEnrichment = {
   description_fr: 'Description complète\n\nDernier paragraphe.', description_en: 'Full description.',
@@ -73,6 +73,16 @@ describe('Importer profile factual safeguards', () => {
     expect(result.data.enrichment?.status).toBe('review_needed');
     expect(result.data.people.length).toBe(1);
     expect(result.data.evidence.length).toBe(1);
+  });
+  test('profile sources accept bare domains and deduplicate, keeping dangerous links out', () => {
+    const data = mapProfileResponse({
+      enrichment: { ...verified, source_urls: ['123weine.de', 'https://example.com/about', 'javascript:alert(1)', 'https://example.com/about'] },
+      people: [{ id: 'p1', full_name: 'Jane', confidence: 'medium', source_url: 'https://example.com/about' }],
+      emails: [{ id: 'e1', email: 'sales@example.com', source_url: null }],
+      evidence: [{ field_name: 'x', field_value: 'y', confidence: 'high', source_url: 'https://example.com/about' }],
+    });
+    if (data.status !== 'ready') assert.fail('Expected ready profile');
+    assert.deepEqual(profileSources(data.data), ['https://123weine.de/', 'https://example.com/about']);
   });
   test('empty or malformed RPC payloads become a neutral empty profile', () => {
     for (const payload of [null, undefined, {}, { enrichment: null, people: null }]) {

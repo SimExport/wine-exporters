@@ -3,6 +3,8 @@
 // (SECURITY DEFINER, auth.uid() required, trial accounts excluded, field
 // allowlist, EXECUTE granted to authenticated only). Never query the protected
 // enrichment tables directly from the browser.
+import { safeWebsiteUrl } from './website-url';
+
 export interface ImporterContact {
   id: string;
   company_name?: string | null;
@@ -155,5 +157,5 @@ export function profileSources(data: ImporterProfileData): string[] {
   return [...new Set([
     ...(data.enrichment?.source_urls ?? []), ...data.people.map(p => p.source_url),
     ...data.emails.map(e => e.source_url), ...data.evidence.map(e => e.source_url),
-  ].map(safeExternalUrl).filter((v): v is string => Boolean(v)))];
+  ].map(safeWebsiteUrl).filter((v): v is string => Boolean(v)))];
 }
