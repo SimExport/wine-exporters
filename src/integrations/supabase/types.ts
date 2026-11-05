@@ -2750,6 +2750,13 @@ export type Database = {
         }[]
       }
       get_campaign_queue_secret: { Args: never; Returns: string }
+      get_enriched_country_counts: {
+        Args: never
+        Returns: {
+          country: string
+          enriched_count: number
+        }[]
+      }
       get_enrichment_activity: {
         Args: { _days: number }
         Returns: {
