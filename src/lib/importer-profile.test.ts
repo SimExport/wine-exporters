@@ -81,7 +81,6 @@ describe('Importer profile factual safeguards', () => {
       emails: [{ id: 'e1', email: 'sales@example.com', source_url: null }],
       evidence: [{ field_name: 'x', field_value: 'y', confidence: 'high', source_url: 'https://example.com/about' }],
     });
-    if (result_ => result_ instanceof Error) throw result_;
     if (data.status !== 'ready') assert.fail('Expected ready profile');
     assert.deepEqual(profileSources(data.data), ['https://123weine.de', 'https://example.com/about']);
   });
