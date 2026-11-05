@@ -270,7 +270,7 @@ export default function SourcingRequests() {
             <div className="space-y-4 pt-2">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">{t('sourcing.dialog.marketLabel')}</label>
-                <Popover open={marketOpen} onOpenChange={setMarketOpen}>
+                <Popover modal open={marketOpen} onOpenChange={setMarketOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={marketOpen} className="w-full justify-between font-normal">
                       <span className={market ? '' : 'text-muted-foreground'}>
@@ -282,7 +282,7 @@ export default function SourcingRequests() {
                   <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                     <Command>
                       <CommandInput placeholder={t('sourcing.dialog.marketSearch')} />
-                      <CommandList className="max-h-[280px]">
+                      <CommandList className="max-h-[280px]" onWheel={(e) => e.stopPropagation()}>
                         <CommandEmpty>{t('sourcing.dialog.marketNoResult')}</CommandEmpty>
                         <CommandGroup>
                           {[...countryOptions]
