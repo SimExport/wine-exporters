@@ -1,3 +1,4 @@
+import { safeWebsiteUrl } from '@/lib/website-url';
 import { useState, useEffect } from 'react'
 import { getLeadOriginLabel } from '@/lib/lead-origin'
 import ImporterInsights from '@/components/prospect/ImporterInsights'
@@ -1009,7 +1010,7 @@ export default function ProspectDetail() {
                   {prospect.website_url && (
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4" />
-                      <a href={prospect.website_url} target="_blank" rel="noopener noreferrer" 
+                      <a href={safeWebsiteUrl(prospect.website_url) ?? undefined} target="_blank" rel="noopener noreferrer" 
                          className="text-primary hover:underline">
                         {prospect.website_url}
                       </a>
