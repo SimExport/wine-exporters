@@ -3,6 +3,8 @@
 // (SECURITY DEFINER, auth.uid() required, trial accounts excluded, field
 // allowlist, EXECUTE granted to authenticated only). Never query the protected
 // enrichment tables directly from the browser.
+import { safeWebsiteUrl } from './website-url';
+
 export interface ImporterContact {
   id: string;
   company_name?: string | null;
