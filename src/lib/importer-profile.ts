@@ -155,5 +155,5 @@ export function profileSources(data: ImporterProfileData): string[] {
   return [...new Set([
     ...(data.enrichment?.source_urls ?? []), ...data.people.map(p => p.source_url),
     ...data.emails.map(e => e.source_url), ...data.evidence.map(e => e.source_url),
-  ].map(safeExternalUrl).filter((v): v is string => Boolean(v)))];
+  ].map(safeWebsiteUrl).filter((v): v is string => Boolean(v)))];
 }
