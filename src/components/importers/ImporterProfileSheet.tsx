@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { COUNTRIES } from '@/components/importers/country-data';
 import { getCountryFlag } from '@/lib/country-flag';
+import { safeWebsiteUrl } from '@/lib/website-url';
 import { importerProfileRepository, safeExternalUrl, cleanValues, descriptionFor, hasReliableDescription, importLabel, profileSources, additionalProfileEmails, type ImporterContact, type ImporterProfileRepository, type ImporterProfileResult } from '@/lib/importer-profile';
 import { splitEmails } from '@/lib/contact-emails';
 
@@ -18,7 +19,7 @@ function Values({ label, values }: { label: string; values?: string[] }) {
   return <div><h4 className="mb-2 text-sm font-medium text-muted-foreground">{label}</h4><ul className="flex flex-wrap gap-x-5 gap-y-2">{items.map(v => <li key={v} className="text-base leading-7">{v}</li>)}</ul></div>;
 }
 function SourceLink({ url, label }: { url?: string | null; label: string }) {
-  const safe = safeExternalUrl(url);
+  const safe = safeWebsiteUrl(url);
   if (!safe) return null;
   return <a href={safe} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"><ExternalLink className="h-3.5 w-3.5 shrink-0" /><span className="break-all">{label}</span></a>;
 }
@@ -73,8 +74,8 @@ export function ImporterProfileSheet({ contact, onClose, repository = importerPr
               {contact?.email && <div className="flex items-start gap-3"><dt className="pt-1 text-muted-foreground"><Mail className="h-4 w-4" /><span className="sr-only">{t('importerProfile.email')}</span></dt><dd className="min-w-0 space-y-1 break-all">{splitEmails(contact.email).map(email => <a key={email} className="block text-primary hover:underline" href={`mailto:${email}`}>{email}</a>)}</dd></div>}
               {contact?.phone && <div className="flex items-start gap-3"><dt className="pt-1 text-muted-foreground"><Phone className="h-4 w-4" /><span className="sr-only">{t('importerProfile.phone')}</span></dt><dd><a className="hover:underline" href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`}>{contact.phone}</a></dd></div>}
               {address && <div className="flex items-start gap-3"><dt className="pt-1 text-muted-foreground"><MapPin className="h-4 w-4" /><span className="sr-only">{t('importerProfile.address')}</span></dt><dd className="min-w-0 break-words">{address}</dd></div>}
-              {safeExternalUrl(contact?.website_url) && <div className="flex items-start gap-3"><dt className="pt-1 text-muted-foreground"><Globe className="h-4 w-4" /><span className="sr-only">{t('importerProfile.website')}</span></dt><dd className="min-w-0"><SourceLink url={contact?.website_url} label={contact?.website_url?.replace(/^https?:\/\/(www\.)?/, '') ?? ''} /></dd></div>}
-              {[['Facebook', contact?.Facebook], ['Instagram', contact?.Instagram], ['LinkedIn', contact?.LinkedIn]].filter(([, url]) => safeExternalUrl(url)).map(([label, url]) => <div key={label}><SourceLink url={url} label={label ?? ''} /></div>)}
+              {safeWebsiteUrl(contact?.website_url) && <div className="flex items-start gap-3"><dt className="pt-1 text-muted-foreground"><Globe className="h-4 w-4" /><span className="sr-only">{t('importerProfile.website')}</span></dt><dd className="min-w-0"><SourceLink url={contact?.website_url} label={contact?.website_url?.replace(/^https?:\/\/(www\.)?/, '') ?? ''} /></dd></div>}
+              {[['Facebook', contact?.Facebook], ['Instagram', contact?.Instagram], ['LinkedIn', contact?.LinkedIn]].filter(([, url]) => safeWebsiteUrl(url)).map(([label, url]) => <div key={label}><SourceLink url={url} label={label ?? ''} /></div>)}
             </dl>
             {crmAction && <div className="pt-2">
               <Button

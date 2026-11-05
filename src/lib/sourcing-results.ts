@@ -101,20 +101,8 @@ export function scoreOf(item: SourcingShortlistItem): number | null {
   return typeof item.score === 'number' && Number.isFinite(item.score) ? item.score : null;
 }
 
-/** Accepts bare domains (e.g. "leons-weinhaus.de"); returns only safe http(s) URLs. */
-export function safeWebsiteUrl(value?: string | null): string | null {
-  let raw = text(value);
-  if (!raw) return null;
-  if (!/^[a-z][a-z\d+.-]*:/i.test(raw)) {
-    if (raw.startsWith('//')) raw = raw.slice(2);
-    if (!/^[\w-]+(\.[\w-]+)+([/:?#].*)?$/.test(raw)) return null;
-    raw = `https://${raw}`;
-  }
-  try {
-    const url = new URL(raw);
-    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password && url.hostname.includes('.') ? url.href : null;
-  } catch { return null; }
-}
+export { safeWebsiteUrl } from './website-url';
+import { safeWebsiteUrl } from './website-url';
 
 export function websiteOf(item: SourcingShortlistItem): string {
   return text(item.website_url) || text(item.website);

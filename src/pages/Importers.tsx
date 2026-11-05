@@ -37,6 +37,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCredits } from '@/hooks/useCredits';
 import { useTranslation } from 'react-i18next';
+import { safeWebsiteUrl } from '@/lib/website-url';
 import { ImporterProfileSheet } from '@/components/importers/ImporterProfileSheet';
 import { EnrichmentActivityCard } from '@/components/importers/EnrichmentActivityCard';
 const CopyButton = ({ value }: { value: string }) => {
@@ -715,8 +716,8 @@ const Importers = () => {
                           </div>
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">
-                          {contact.website_url ? (
-                            <a href={contact.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                          {safeWebsiteUrl(contact.website_url) ? (
+                            <a href={safeWebsiteUrl(contact.website_url)!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
                               <ExternalLink className="h-3 w-3 shrink-0" />
                               <span className="truncate">{contact.website_url.replace(/^https?:\/\/(www\.)?/, '')}</span>
                             </a>
