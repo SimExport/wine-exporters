@@ -3004,7 +3004,9 @@
       "marketPlaceholder": "Select a country",
       "creditRemaining": "Credit remaining this month",
       "submit": "Start search",
-      "selectMarketHint": "Select a country to start your search"
+      "selectMarketHint": "Select a country to start your search",
+      "marketSearch": "Search a country…",
+      "marketNoResult": "No country found"
     },
     "status": {
       "pending": "Pending",

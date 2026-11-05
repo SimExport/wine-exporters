@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, Loader2, Clock, CheckCircle2, Archive, FileSearch, Eye } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Target, Loader2, Clock, CheckCircle2, Archive, FileSearch, Eye, Check, ChevronsUpDown } from 'lucide-react';
 import { StatesMultiSelect } from '@/components/sourcing/StatesMultiSelect';
 import { SourcingResultsDialog } from '@/components/sourcing/SourcingResultsDialog';
 import { PremiumOnlyState } from '@/components/PremiumOnlyState';
@@ -53,6 +54,9 @@ function translateCountry(raw: string, lang: string): string {
   if (!entry) return raw;
   return lang.startsWith('en') ? entry.en : entry.fr;
 }
+
+/** Minimum enriched importer profiles for a market to be offered. */
+const MIN_ENRICHED_PER_COUNTRY = 50;
 
 interface SourcingRequest {
   id: string;
@@ -99,52 +103,33 @@ export default function SourcingRequests() {
   const [states, setStates] = useState<string[]>([]);
   const [resultsOpen, setResultsOpen] = useState(false);
   const [activeReq, setActiveReq] = useState<SourcingRequest | null>(null);
+  const [marketOpen, setMarketOpen] = useState(false);
   const [countryOptions, setCountryOptions] = useState<{ canonical: string; variants: string[] }[]>([]);
 
-  // Load distinct countries directly from buyer_contacts to guarantee consistency
+  // Only markets with at least MIN_ENRICHED_PER_COUNTRY enriched importer
+  // profiles are offered; new markets appear automatically once they qualify.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // PostgREST caps responses at 1000 rows by default; paginate to fetch all countries
-      const PAGE_SIZE = 1000;
-      const groups = new Map<string, { canonical: string; variants: Set<string> }>();
-      let from = 0;
-      // Hard safety cap to avoid infinite loops
-      for (let i = 0; i < 200; i++) {
-        const { data, error } = await supabase
-          .from('buyer_contacts')
-          .select('country')
-          .not('country', 'is', null)
-          .order('country', { ascending: true })
-          .range(from, from + PAGE_SIZE - 1);
-        if (cancelled) return;
-        if (error || !data) break;
-        for (const row of data as { country: string }[]) {
-          const raw = row.country;
-          if (!raw) continue;
-          const trimmed = raw.trim();
-          if (!trimmed) continue;
-          // Merge variants that point to the same canonical country via
-          // COUNTRIES.dbAliases (e.g. "United States" + "USA"). Fallback to
-          // the trimmed value when the country is unknown to our list.
-          const lower = trimmed.toLowerCase();
-          const groupKey = (COUNTRY_GROUP_KEY[lower] ?? trimmed).toLowerCase();
-          if (!groups.has(groupKey)) {
-            groups.set(groupKey, {
-              canonical: COUNTRY_GROUP_KEY[lower] ?? trimmed,
-              variants: new Set(),
-            });
-          }
-          groups.get(groupKey)!.variants.add(raw);
-        }
-        if (data.length < PAGE_SIZE) break;
-        from += PAGE_SIZE;
+      const { data, error } = await (supabase.rpc as any)('get_enriched_country_counts');
+      if (cancelled || error || !data) return;
+      const groups = new Map<string, { canonical: string; variants: Set<string>; count: number }>();
+      for (const row of data as { country: string; enriched_count: number }[]) {
+        const raw = row.country;
+        const trimmed = raw?.trim();
+        if (!trimmed) continue;
+        const canonical = COUNTRY_GROUP_KEY[trimmed.toLowerCase()] ?? trimmed;
+        const key = canonical.toLowerCase();
+        if (!groups.has(key)) groups.set(key, { canonical, variants: new Set(), count: 0 });
+        const g = groups.get(key)!;
+        g.variants.add(raw);
+        g.count += Number(row.enriched_count) || 0;
       }
-      if (cancelled) return;
-      const list = Array.from(groups.values())
-        .map(g => ({ canonical: g.canonical, variants: Array.from(g.variants) }))
-        .sort((a, b) => a.canonical.localeCompare(b.canonical));
-      setCountryOptions(list);
+      setCountryOptions(
+        Array.from(groups.values())
+          .filter(g => g.count >= MIN_ENRICHED_PER_COUNTRY)
+          .map(g => ({ canonical: g.canonical, variants: Array.from(g.variants) })),
+      );
     })();
     return () => { cancelled = true; };
   }, []);
@@ -285,25 +270,43 @@ export default function SourcingRequests() {
             <div className="space-y-4 pt-2">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">{t('sourcing.dialog.marketLabel')}</label>
-                <Select value={market} onValueChange={(v) => { setMarket(v); setStates([]); }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('sourcing.dialog.marketPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[280px] overflow-y-auto">
-                    {[...countryOptions]
-                      .sort((a, b) =>
-                        translateCountry(a.canonical, i18n.language).localeCompare(
-                          translateCountry(b.canonical, i18n.language),
-                          i18n.language
-                        )
-                      )
-                      .map(c => (
-                        <SelectItem key={c.canonical} value={c.canonical}>
-                          {translateCountry(c.canonical, i18n.language)}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={marketOpen} onOpenChange={setMarketOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" aria-expanded={marketOpen} className="w-full justify-between font-normal">
+                      <span className={market ? '' : 'text-muted-foreground'}>
+                        {market ? translateCountry(market, i18n.language) : t('sourcing.dialog.marketPlaceholder')}
+                      </span>
+                      <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder={t('sourcing.dialog.marketSearch')} />
+                      <CommandList className="max-h-[280px]">
+                        <CommandEmpty>{t('sourcing.dialog.marketNoResult')}</CommandEmpty>
+                        <CommandGroup>
+                          {[...countryOptions]
+                            .sort((a, b) =>
+                              translateCountry(a.canonical, i18n.language).localeCompare(
+                                translateCountry(b.canonical, i18n.language),
+                                i18n.language
+                              )
+                            )
+                            .map(c => (
+                              <CommandItem
+                                key={c.canonical}
+                                value={translateCountry(c.canonical, i18n.language)}
+                                onSelect={() => { setMarket(c.canonical); setStates([]); setMarketOpen(false); }}
+                              >
+                                <Check className={`mr-2 h-4 w-4 ${market === c.canonical ? 'opacity-100' : 'opacity-0'}`} />
+                                {translateCountry(c.canonical, i18n.language)}
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               {needsStates && (
                 <div>
