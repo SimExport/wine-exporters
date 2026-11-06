@@ -2637,7 +2637,12 @@
       "description": "Presentation spot in French (no English version).",
       "cta": "Find my importers for free",
       "error": "The video could not be loaded. Please try again later.",
-      "soon": "Video spot coming soon"
+      "soon": "Video spot coming soon",
+      "pageTitle": "WineExporters in 30 seconds — Video",
+      "pageDescription": "Discover WineExporters in 30 seconds: find the right wine importers abroad. Video in French.",
+      "share": "Copy link",
+      "copied": "Link copied",
+      "home": "Back to home"
     },
     "demo": {
       "title": "Explore the platform — Interactive demo",

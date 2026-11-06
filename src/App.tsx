@@ -11,6 +11,7 @@ import AdminRoute from "@/components/AdminRoute";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import DemoRequest from "./pages/DemoRequest";
+import SpotVideoPage from "./pages/SpotVideoPage";
 import SubmitOpportunity from "./pages/SubmitOpportunity";
 import MarketAnalysis from "./pages/MarketAnalysis";
 import MarketAnalysisResult from "./pages/MarketAnalysisResult";
@@ -99,6 +100,7 @@ const App = ({ Router = BrowserRouter as RouterComponent }: { Router?: RouterCom
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/demande-demo" element={<DemoRequest />} />
+            <Route path="/video" element={<SpotVideoPage />} />
             <Route path="/submit-opportunity" element={<SubmitOpportunity />} />
             <Route path="/publier-opportunite" element={<SubmitOpportunity />} />
             <Route path="/annuaire" element={<PublicDirectory />} />

@@ -471,9 +471,9 @@ const LandingPage = () => {
           }} />
 
         <div className={SPOT_VIDEO_ENABLED
-          ? "relative max-w-6xl mx-auto px-6 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center"
+          ? "relative max-w-4xl mx-auto px-6 py-16 lg:py-24 flex flex-col gap-12"
           : "relative max-w-3xl mx-auto px-6 text-center py-24"}>
-        <div className={SPOT_VIDEO_ENABLED ? "text-center lg:text-left" : ""}>
+        <div className={"text-center"}>
           <FadeIn>
             <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5">
               {t("landing.hero.badge")}
@@ -488,13 +488,13 @@ const LandingPage = () => {
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className={`text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto ${SPOT_VIDEO_ENABLED ? "lg:mx-0" : ""} mb-10 leading-relaxed whitespace-pre-line`}>
+            <p className={`text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed whitespace-pre-line`}>
               {t("landing.hero.subtitle")}
             </p>
           </FadeIn>
           <FadeIn delay={0.35}>
-            <div className={`flex flex-col items-center justify-center gap-4 ${SPOT_VIDEO_ENABLED ? "lg:items-start" : ""}`}>
-              <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 ${SPOT_VIDEO_ENABLED ? "lg:justify-start" : ""}`}>
+            <div className={`flex flex-col items-center justify-center gap-4`}>
+              <div className={`flex flex-col sm:flex-row items-center justify-center gap-4`}>
                 <Button size="lg" asChild className="text-base sm:text-lg px-6 sm:px-8 h-auto py-3 whitespace-normal text-center max-w-full">
                   <Link to="/market-analysis">
                     {t("landing.hero.ctaPrimary")}
@@ -515,7 +515,7 @@ const LandingPage = () => {
         </div>
         {SPOT_VIDEO_ENABLED && (
           <FadeIn delay={0.25}>
-            <SpotVideo />
+            <div className="w-full max-w-3xl mx-auto"><SpotVideo /></div>
           </FadeIn>
         )}
         </div>
