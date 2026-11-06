@@ -58,3 +58,4 @@
 ## Emails multiples importateurs
 - [x] Export : colonnes emails_additionnels / decideurs / emails_decideurs via RPC batch get_importer_export_contacts ; emails historiques séparés dans tableau et fiche. Tests, typecheck, build OK.
 - [ ] Nettoyage des 1 636 fiches — fait séparément par Simon après validation.
+- [ ] Spot 30 s dans le hero de l'accueil (structure faite ; en attente du fichier MP4 dans public/videos/)
