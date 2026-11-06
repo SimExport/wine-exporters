@@ -2637,7 +2637,12 @@
       "description": "Spot de présentation en français.",
       "cta": "Trouver mes importateurs gratuitement",
       "error": "La vidéo n'a pas pu être chargée. Vous pouvez réessayer plus tard.",
-      "soon": "Spot vidéo bientôt disponible"
+      "soon": "Spot vidéo bientôt disponible",
+      "pageTitle": "WineExporters en 30 secondes — Spot vidéo",
+      "pageDescription": "Découvrez WineExporters en 30 secondes : trouvez les bons importateurs de vin à l'étranger.",
+      "share": "Copier le lien",
+      "copied": "Lien copié",
+      "home": "Retour à l'accueil"
     },
     "demo": {
       "title": "Explorer la plateforme — Démo interactive",
