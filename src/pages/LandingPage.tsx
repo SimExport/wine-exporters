@@ -495,7 +495,7 @@ const LandingPage = () => {
           <FadeIn delay={0.35}>
             <div className={`flex flex-col items-center justify-center gap-4 ${SPOT_VIDEO_ENABLED ? "lg:items-start" : ""}`}>
               <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 ${SPOT_VIDEO_ENABLED ? "lg:justify-start" : ""}`}>
-                <Button size="lg" asChild className="text-lg px-8">
+                <Button size="lg" asChild className="text-base sm:text-lg px-6 sm:px-8 h-auto py-3 whitespace-normal text-center max-w-full">
                   <Link to="/market-analysis">
                     {t("landing.hero.ctaPrimary")}
                     <ArrowRight className="ml-2 h-5 w-5" />
