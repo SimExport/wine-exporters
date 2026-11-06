@@ -10,20 +10,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/**
- * TODO(spot): set to true once WineExporters_spot_30s_V6.mp4 is really hosted
- * at public/videos/. While false, no player and no clickable thumbnail render.
- */
-export const SPOT_VIDEO_ENABLED = false;
-export const SPOT_VIDEO_SRC = "/videos/WineExporters_spot_30s_V6.mp4";
+import spotAsset from "@/assets/WineExporters_spot_30s_V6.mp4.asset.json";
+import spotPoster from "@/assets/spot-poster.jpg";
+
+export const SPOT_VIDEO_ENABLED = true;
+export const SPOT_VIDEO_SRC = spotAsset.url;
 
 /** No analytics tool is installed; this hook point stays a no-op. */
 const trackSpot = (_event: "open" | "play" | "ended" | "cta") => {};
 
 const Thumbnail = ({ label }: { label: string }) => (
-  <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80 flex flex-col items-center justify-center text-primary-foreground">
-    <span className="font-display text-2xl sm:text-3xl font-bold tracking-tight">WineExporters</span>
-    <span className="mt-2 text-sm opacity-80">{label}</span>
+  <div className="absolute inset-0">
+    <img src={spotPoster} alt="" loading="lazy" className="h-full w-full object-cover" />
+    <span className="absolute bottom-3 left-3 rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-foreground">{label}</span>
   </div>
 );
 
@@ -51,7 +50,7 @@ export const SpotVideo = () => {
       >
         <Thumbnail label={t("landing.spot.label")} />
         <span className="absolute inset-0 flex items-center justify-center">
-          <span className="mt-24 sm:mt-28 flex h-16 w-16 items-center justify-center rounded-full bg-background text-primary shadow-lg transition-transform group-hover:scale-110">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-background text-primary shadow-lg transition-transform group-hover:scale-110">
             <Play className="h-7 w-7 ml-1" fill="currentColor" />
           </span>
         </span>
@@ -73,7 +72,9 @@ export const SpotVideo = () => {
                   src={SPOT_VIDEO_SRC}
                   controls
                   playsInline
-                  preload="none"
+                  preload="metadata"
+                  autoPlay
+                  poster={spotPoster}
                   lang="fr"
                   className="h-full w-full"
                   onPlay={() => trackSpot("play")}
