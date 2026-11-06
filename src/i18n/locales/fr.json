@@ -2470,7 +2470,7 @@
       "titleLead": "Trouvez les bons importateurs.\n",
       "titleHighlight": "Développez vos ventes à l'export.",
       "subtitle": "Accédez à plus de 27 000 fiches de contacts acheteurs et importateurs de vin, ciblez les bons acheteurs et confiez-nous vos campagnes de prospection — le tout depuis une seule plateforme.",
-      "ctaPrimary": "Découvrir la plateforme en vidéo",
+      "ctaPrimary": "Trouver mes importateurs gratuitement",
       "ctaSecondary": "Demander une démo",
       "haveAccount": "J'ai déjà un compte → Se connecter",
       "stats": {
@@ -2480,7 +2480,8 @@
       },
       "statsAttribution": "Résultats obtenus via l'accompagnement ExportVins et la plateforme WineExporters.",
       "database": "Plus de 27 000 fiches de contacts acheteurs et importateurs de vin dans 145+ pays",
-      "ctaVideo": "Découvrir la plateforme en vidéo"
+      "ctaVideo": "Explorer la plateforme — Démo interactive",
+      "demoShort": "Démo interactive"
     },
     "pain": {
       "title": "Vous savez produire vos vins. Trouver les bons importateurs est une autre histoire.",
@@ -2628,6 +2629,19 @@
           "label": "Recherche ciblée + campagne gérée chaque mois"
         }
       ]
+    },
+    "spot": {
+      "label": "Spot 30 s · en français",
+      "play": "Regarder le spot WineExporters (30 secondes, en français)",
+      "title": "WineExporters en 30 secondes",
+      "description": "Spot de présentation en français.",
+      "cta": "Trouver mes importateurs gratuitement",
+      "error": "La vidéo n'a pas pu être chargée. Vous pouvez réessayer plus tard.",
+      "soon": "Spot vidéo bientôt disponible"
+    },
+    "demo": {
+      "title": "Explorer la plateforme — Démo interactive",
+      "subtitle": "Parcourez vous-même les écrans de WineExporters, à votre rythme."
     }
   },
   "adminCampaigns": {

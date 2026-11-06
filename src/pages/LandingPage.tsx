@@ -9,6 +9,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { SpotVideo, SPOT_VIDEO_ENABLED } from "@/components/landing/SpotVideo";
 import {
   Accordion,
   AccordionContent,
@@ -449,7 +450,7 @@ const LandingPage = () => {
             <LanguageSwitcher />
             <Button onClick={openDemo} className="hidden sm:inline-flex">
               <PlayCircle className="mr-2 h-4 w-4" />
-              {t("landing.hero.ctaVideo")}
+              {t("landing.hero.demoShort")}
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/auth" className="text-muted-foreground">{t("landing.nav.signIn")}</Link>
@@ -469,7 +470,10 @@ const LandingPage = () => {
             "url(\"data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23000' stroke-width='.5'/%3E%3C/svg%3E\")"
           }} />
 
-        <div className="relative max-w-3xl mx-auto px-6 text-center py-24">
+        <div className={SPOT_VIDEO_ENABLED
+          ? "relative max-w-6xl mx-auto px-6 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center"
+          : "relative max-w-3xl mx-auto px-6 text-center py-24"}>
+        <div className={SPOT_VIDEO_ENABLED ? "text-center lg:text-left" : ""}>
           <FadeIn>
             <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5">
               {t("landing.hero.badge")}
@@ -484,14 +488,19 @@ const LandingPage = () => {
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed whitespace-pre-line">
+            <p className={`text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto ${SPOT_VIDEO_ENABLED ? "lg:mx-0" : ""} mb-10 leading-relaxed whitespace-pre-line`}>
               {t("landing.hero.subtitle")}
             </p>
           </FadeIn>
           <FadeIn delay={0.35}>
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <VideoCtaButton label={t("landing.hero.ctaPrimary")} />
+            <div className={`flex flex-col items-center justify-center gap-4 ${SPOT_VIDEO_ENABLED ? "lg:items-start" : ""}`}>
+              <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 ${SPOT_VIDEO_ENABLED ? "lg:justify-start" : ""}`}>
+                <Button size="lg" asChild className="text-base sm:text-lg px-6 sm:px-8 h-auto py-3 whitespace-normal text-center max-w-full">
+                  <Link to="/market-analysis">
+                    {t("landing.hero.ctaPrimary")}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
                 <Button size="lg" variant="outline" asChild className="text-lg px-8">
                   <Link to="/decouvrir">
                     {t("landing.hero.ctaSecondary")}
@@ -503,6 +512,12 @@ const LandingPage = () => {
               </Link>
             </div>
           </FadeIn>
+        </div>
+        {SPOT_VIDEO_ENABLED && (
+          <FadeIn delay={0.25}>
+            <SpotVideo />
+          </FadeIn>
+        )}
         </div>
       </section>
 
@@ -590,6 +605,17 @@ const LandingPage = () => {
 
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ── B. DÉMO INTERACTIVE (Supademo) ── */}
+      <section id="demo" className="py-20 scroll-mt-20 bg-muted/50">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <FadeIn>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("landing.demo.title")}</h2>
+            <p className="text-lg text-muted-foreground mb-8">{t("landing.demo.subtitle")}</p>
+            <VideoCtaButton label={t("landing.hero.demoShort")} />
+          </FadeIn>
         </div>
       </section>
 
