@@ -1022,8 +1022,9 @@
       "pageOf": "Page {{current}} sur {{total}}"
     },
     "search": {
-      "placeholder": "Rechercher une société, une ville, un email…",
-      "noResults": "Aucun importateur ne correspond à votre recherche."
+      "placeholder": "Rechercher une entreprise, une région, un cépage… ex. Bourgogne, Champagne, bio",
+      "noResults": "Aucun importateur ne correspond à votre recherche.",
+      "coverageHint": "La recherche couvre aussi les descriptions et spécialités des professionnels. Une correspondance textuelle ne garantit pas que l'entreprise achète ces vins."
     }
   },
   "profile": {

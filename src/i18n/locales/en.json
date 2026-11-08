@@ -1022,7 +1022,8 @@
       "pageOf": "Page {{current}} of {{total}}"
     },
     "search": {
-      "placeholder": "Search a company, city, email…",
+      "placeholder": "Search a company, region, grape variety… e.g. Burgundy, Champagne, organic",
+      "coverageHint": "Search also covers professionals' descriptions and specialties. A text match does not guarantee the company buys these wines.",
       "noResults": "No importer matches your search."
     }
   },

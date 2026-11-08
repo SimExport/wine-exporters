@@ -557,6 +557,9 @@ const Importers = () => {
       {!selectedCountry && (
         <p className="mt-2 text-sm text-muted-foreground">{t('importerProfile.searchDisabledHint')}</p>
       )}
+      {selectedCountry && (
+        <p className="mt-2 text-xs text-muted-foreground">{t('importers.search.coverageHint')}</p>
+      )}
 
       {/* Selected country info */}
       {selectedCountry && (
