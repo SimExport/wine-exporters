@@ -43,6 +43,7 @@ export function AppSidebar() {
   const {
     isAdmin
   } = useRole();
+  const openBlocking = useOpenBlockingIncidents(isAdmin);
   const {
     hasPaidAccess,
     campaignsRemaining,

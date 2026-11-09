@@ -31,6 +31,7 @@ import {
   UsersRound,
   LogOut,
   BookOpen,
+  HeartPulse,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
 
