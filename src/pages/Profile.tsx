@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
 import { resumableUpload } from '@/lib/resumable-upload';
 import { TechSheetRow } from '@/components/profile/TechSheetRow';
+import { validatePriceListFile } from '@/lib/price-list-file';
 
 const sanitizeStorageKey = (name: string) => {
   const dot = name.lastIndexOf('.');
@@ -551,7 +552,10 @@ const Profile = () => {
       other: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv', 'text/plain', 'application/csv', 'text/x-csv', 'application/x-csv', 'text/comma-separated-values', 'text/x-comma-separated-values', 'application/excel', 'application/x-excel', 'application/x-msexcel'],
       tech_sheet: ['application/pdf']
     };
-    if (!allowedTypes[category].includes(file.type)) {
+    const typeRejected = category === 'price_list'
+      ? validatePriceListFile(file) !== null
+      : !allowedTypes[category].includes(file.type);
+    if (typeRejected) {
       toast({
         title: t('profile.documents.wrongTypeTitle'),
         description: t('profile.documents.wrongTypeDesc'),
