@@ -2264,6 +2264,93 @@ export type Database = {
         }
         Relationships: []
       }
+      system_incidents: {
+        Row: {
+          alert_attempts: number
+          alert_error: string | null
+          alert_sent_at: string | null
+          alert_state: string
+          category: string
+          created_at: string
+          dedupe_key: string
+          first_seen_at: string
+          human_message: string
+          human_title: string
+          id: string
+          last_seen_at: string
+          occurrences: number
+          resolved_alert_attempts: number
+          resolved_alert_error: string | null
+          resolved_alert_sent_at: string | null
+          resolved_alert_state: string
+          resolved_at: string | null
+          resource_id: string | null
+          resource_name: string | null
+          resource_type: string | null
+          severity: string
+          source: string
+          status: string
+          technical_message: string | null
+          updated_at: string
+        }
+        Insert: {
+          alert_attempts?: number
+          alert_error?: string | null
+          alert_sent_at?: string | null
+          alert_state?: string
+          category: string
+          created_at?: string
+          dedupe_key: string
+          first_seen_at?: string
+          human_message: string
+          human_title: string
+          id?: string
+          last_seen_at?: string
+          occurrences?: number
+          resolved_alert_attempts?: number
+          resolved_alert_error?: string | null
+          resolved_alert_sent_at?: string | null
+          resolved_alert_state?: string
+          resolved_at?: string | null
+          resource_id?: string | null
+          resource_name?: string | null
+          resource_type?: string | null
+          severity: string
+          source: string
+          status?: string
+          technical_message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alert_attempts?: number
+          alert_error?: string | null
+          alert_sent_at?: string | null
+          alert_state?: string
+          category?: string
+          created_at?: string
+          dedupe_key?: string
+          first_seen_at?: string
+          human_message?: string
+          human_title?: string
+          id?: string
+          last_seen_at?: string
+          occurrences?: number
+          resolved_alert_attempts?: number
+          resolved_alert_error?: string | null
+          resolved_alert_sent_at?: string | null
+          resolved_alert_state?: string
+          resolved_at?: string | null
+          resource_id?: string | null
+          resource_name?: string | null
+          resource_type?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          technical_message?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tender_agents: {
         Row: {
           address: string | null
@@ -2733,6 +2820,7 @@ export type Database = {
         Returns: undefined
       }
       dispatch_campaign_send_queue: { Args: never; Returns: undefined }
+      dispatch_system_monitor: { Args: never; Returns: undefined }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
       finalize_campaign_contact_quality: {
         Args: { _campaign_id: string; _minimum_score?: number }
@@ -2809,6 +2897,24 @@ export type Database = {
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
       is_test_campaign: { Args: { _id: string }; Returns: boolean }
+      record_system_incident: {
+        Args: {
+          _category: string
+          _key: string
+          _message: string
+          _resource_id: string
+          _resource_name: string
+          _resource_type: string
+          _severity: string
+          _source: string
+          _technical: string
+          _title: string
+        }
+        Returns: {
+          id: string
+          inserted: boolean
+        }[]
+      }
       reject_campaign: {
         Args: { _id: string; _reason: string }
         Returns: {
