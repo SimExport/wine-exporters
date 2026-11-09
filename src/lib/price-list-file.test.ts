@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { validatePriceListFile, priceListStoragePath, PRICE_LIST_MAX_BYTES } from './price-list-file.ts';
+import { validatePriceListFile, priceListStoragePath, PRICE_LIST_MAX_BYTES } from './price-list-file';
 
 test('accepts PDF/XLS/XLSX/CSV even with empty or generic MIME', () => {
   assert.equal(validatePriceListFile({ name: 'Tarifs.PDF', size: 10, type: '' }), null);
