@@ -1637,6 +1637,18 @@
       "presentationPlaceholder": "Sélectionner une présentation",
       "pricelistLabel": "Liste des prix export *",
       "pricelistPlaceholder": "Sélectionner une liste de prix",
+      "pricelistUpload": {
+        "hint": "Choisissez une liste déjà importée ou importez-en une nouvelle (PDF, XLS, XLSX ou CSV, 15 Mo max).",
+        "button": "Ajouter une liste de prix",
+        "uploading": "Import en cours…",
+        "invalidTitle": "Fichier non accepté",
+        "tooLarge": "Le fichier dépasse 15 Mo.",
+        "wrongType": "Formats acceptés : PDF, XLS, XLSX ou CSV.",
+        "successTitle": "Liste de prix ajoutée",
+        "successDesc": "Elle est sélectionnée pour cette campagne.",
+        "errorTitle": "Import impossible",
+        "errorDesc": "Réessayez dans un instant."
+      },
       "techDocsLabel": "Fiches techniques (facultatif)",
       "techDocsPlaceholder": "Sélectionner une fiche technique",
       "clientNoteLabel": "Note à l'équipe (optionnel)",

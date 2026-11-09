@@ -1637,6 +1637,18 @@
       "presentationPlaceholder": "Select a presentation",
       "pricelistLabel": "Export price list *",
       "pricelistPlaceholder": "Select a price list",
+      "pricelistUpload": {
+        "hint": "Choose a price list you already uploaded or upload a new one (PDF, XLS, XLSX or CSV, 15 MB max).",
+        "button": "Add a price list",
+        "uploading": "Uploading…",
+        "invalidTitle": "File not accepted",
+        "tooLarge": "The file is larger than 15 MB.",
+        "wrongType": "Accepted formats: PDF, XLS, XLSX or CSV.",
+        "successTitle": "Price list added",
+        "successDesc": "It is selected for this campaign.",
+        "errorTitle": "Upload failed",
+        "errorDesc": "Please try again in a moment."
+      },
       "techDocsLabel": "Tech sheets (optional)",
       "techDocsPlaceholder": "Select a tech sheet",
       "clientNoteLabel": "Note to the team (optional)",
