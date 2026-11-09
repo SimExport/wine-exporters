@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, FileText, Globe, Wine, Lightbulb, Check } from 'lucide-react';
+import { validatePriceListFile, priceListStoragePath, PRICE_LIST_ACCEPT } from '@/lib/price-list-file';
+import { Upload, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -115,6 +117,8 @@ const CreateCampaign = () => {
   const [selectedWines, setSelectedWines] = useState<string[]>([]);
   const [presentationDoc, setPresentationDoc] = useState('');
   const [pricelistDoc, setPricelistDoc] = useState('');
+  const [uploadingPriceList, setUploadingPriceList] = useState(false);
+  const priceListInputRef = React.useRef<HTMLInputElement>(null);
   const [techDocs, setTechDocs] = useState<string[]>([]);
   const [techsLink, setTechsLink] = useState('');
   const [clientNote, setClientNote] = useState('');
@@ -188,6 +192,57 @@ const CreateCampaign = () => {
       setWines(data || []);
     } catch (error) {
       console.error('Error fetching wines:', error);
+    }
+  };
+  const handlePriceListUpload = async (file: File) => {
+    if (!user || uploadingPriceList) return;
+    const invalid = validatePriceListFile(file);
+    if (invalid) {
+      toast({
+        title: t('createCampaign.step1.pricelistUpload.invalidTitle'),
+        description: t(invalid === 'too_large' ? 'createCampaign.step1.pricelistUpload.tooLarge' : 'createCampaign.step1.pricelistUpload.wrongType'),
+        variant: 'destructive'
+      });
+      return;
+    }
+    setUploadingPriceList(true);
+    const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const filePath = priceListStoragePath(user.id, file.name, unique);
+    let uploaded = false;
+    try {
+      const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file, { upsert: false });
+      if (uploadError) throw uploadError;
+      uploaded = true;
+      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(filePath);
+      const { data: inserted, error: dbError } = await supabase.from('documents').insert({
+        user_id: user.id,
+        title: file.name,
+        category: 'price_list',
+        file_url: publicUrl,
+        file_name: file.name,
+        file_size: file.size
+      }).select('id').single();
+      if (dbError || !inserted) throw dbError ?? new Error('insert failed');
+      await fetchDocuments();
+      setPricelistDoc(inserted.id);
+      toast({
+        title: t('createCampaign.step1.pricelistUpload.successTitle'),
+        description: t('createCampaign.step1.pricelistUpload.successDesc')
+      });
+    } catch (error: any) {
+      console.error('Price list upload error:', error);
+      if (uploaded) {
+        const { error: removeError } = await supabase.storage.from('documents').remove([filePath]);
+        if (removeError) console.error('Price list cleanup error:', removeError);
+      }
+      toast({
+        title: t('createCampaign.step1.pricelistUpload.errorTitle'),
+        description: error?.message || t('createCampaign.step1.pricelistUpload.errorDesc'),
+        variant: 'destructive'
+      });
+    } finally {
+      setUploadingPriceList(false);
+      if (priceListInputRef.current) priceListInputRef.current.value = '';
     }
   };
   const fetchDocuments = async () => {
@@ -467,11 +522,11 @@ const CreateCampaign = () => {
           </div>
           
           <div className="flex gap-2">
-            <Button variant="outline" onClick={saveDraft} disabled={loading}>
+            <Button variant="outline" onClick={saveDraft} disabled={loading || uploadingPriceList}>
               <Save className="h-4 w-4 mr-2" />
               {t('createCampaign.saveDraft')}
             </Button>
-            {step === recapStep && <Button onClick={submitForValidation} disabled={loading}>
+            {step === recapStep && <Button onClick={submitForValidation} disabled={loading || uploadingPriceList}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 {t('createCampaign.submit')}
               </Button>}
@@ -673,6 +728,15 @@ const CreateCampaign = () => {
                           </SelectItem>)}
                       </SelectContent>
                     </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">{t('createCampaign.step1.pricelistUpload.hint')}</p>
+                    <input ref={priceListInputRef} type="file" accept={PRICE_LIST_ACCEPT} className="hidden" onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) handlePriceListUpload(f);
+                    }} />
+                    <Button type="button" variant="outline" size="sm" className="mt-2" disabled={uploadingPriceList} onClick={() => priceListInputRef.current?.click()}>
+                      {uploadingPriceList ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                      {uploadingPriceList ? t('createCampaign.step1.pricelistUpload.uploading') : t('createCampaign.step1.pricelistUpload.button')}
+                    </Button>
                   </div>
 
                   {/* Tech docs */}
@@ -740,7 +804,7 @@ const CreateCampaign = () => {
                   </div>
                 </div>
 
-                <Button onClick={goToEmailStep} disabled={loading} className="w-full">
+                <Button onClick={goToEmailStep} disabled={loading || uploadingPriceList} className="w-full">
                   {t('createCampaign.step1.continueBtn')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -826,7 +890,7 @@ const CreateCampaign = () => {
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     {t('createCampaign.step2.backToStep1')}
                   </Button>
-                  <Button onClick={submitForValidation} disabled={loading} className="flex-1">
+                  <Button onClick={submitForValidation} disabled={loading || uploadingPriceList} className="flex-1">
                     <CheckCircle className="h-4 w-4 mr-2" />
                     {t('createCampaign.submit')}
                   </Button>
