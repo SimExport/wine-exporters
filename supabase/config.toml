@@ -92,3 +92,6 @@ verify_jwt = false
 
 [functions.send-queued-campaign]
 verify_jwt = false
+
+[functions.monitor-system-incidents]
+verify_jwt = false
