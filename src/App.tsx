@@ -33,6 +33,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminUserProfile from "./pages/AdminUserProfile";
 import AdminOpportunities from "./pages/AdminOpportunities";
 import AdminMarketAnalyses from "./pages/AdminMarketAnalyses";
+import AdminSystemHealth from "./pages/AdminSystemHealth";
 import Opportunities from "./pages/Opportunities";
 import SourcingRequests from "./pages/SourcingRequests";
 import SetPassword from "./pages/SetPassword";
@@ -194,6 +195,13 @@ const App = ({ Router = BrowserRouter as RouterComponent }: { Router?: RouterCom
               <DashboardLayout>
                 <AdminRoute>
                   <AdminMarketAnalyses />
+                </AdminRoute>
+              </DashboardLayout>
+            } />
+            <Route path="/admin/system-health" element={
+              <DashboardLayout>
+                <AdminRoute>
+                  <AdminSystemHealth />
                 </AdminRoute>
               </DashboardLayout>
             } />

@@ -1,4 +1,4 @@
-import { User, Database, Target, Settings, CreditCard, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch, UsersRound, Sparkles, BookOpen } from "lucide-react";
+import { User, Database, Target, Settings, CreditCard, LogOut, Shield, Kanban, Zap, Rocket, Bell, Megaphone, Users, CheckCheck, Trash2, HelpCircle, UserPlus, FileSearch, UsersRound, Sparkles, BookOpen, HeartPulse } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { formatRelative } from '@/lib/format';
 import { BrandLogo } from '@/components/BrandLogo';
+import { useOpenBlockingIncidents } from '@/hooks/useOpenBlockingIncidents';
 
 const navigationItems = [
   { key: "dashboard", url: "/dashboard", icon: Target },
@@ -42,6 +43,7 @@ export function AppSidebar() {
   const {
     isAdmin
   } = useRole();
+  const openBlocking = useOpenBlockingIncidents(isAdmin);
   const {
     hasPaidAccess,
     campaignsRemaining,
@@ -150,6 +152,15 @@ export function AppSidebar() {
                     <NavLink to="/admin/market-analyses" end className={getNavCls}>
                       <FileSearch className="h-4 w-4" />
                       <span>{t('nav.adminMarketAnalyses')}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin/system-health" end className={getNavCls}>
+                      <HeartPulse className="h-4 w-4" />
+                      <span>{t('nav.adminSystemHealth')}</span>
+                      {openBlocking > 0 && <Badge variant="destructive" className="ml-auto h-5 px-1.5 text-[10px]">{openBlocking}</Badge>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
