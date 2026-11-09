@@ -6,7 +6,7 @@ export function resultFailureStatus(status: number, message: string) {
   return 'retry';
 }
 export function nextResultStage(stage: string, response: { failed?: number; pending?: boolean; remaining?: number; skipped?: boolean; ok?: boolean }) {
-  if (response.skipped || response.failed || response.ok === false) throw new Error('Incomplete campaign operation');
+  if (response.skipped === true || response.failed || response.ok === false) throw new Error('Incomplete campaign operation');
   if (stage === 'sync') return response.pending ? 'sync' : 'enrich';
   if (stage === 'enrich') return response.remaining ? 'enrich' : 'notify';
   return 'done';

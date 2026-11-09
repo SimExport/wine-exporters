@@ -61,7 +61,7 @@ export async function handler(req: Request): Promise<Response> {
     const response = await fetch(`${url}/functions/v1/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-campaign-results-secret': secret, 'x-campaign-results-lease': token ?? '' }, body: JSON.stringify(payload), signal: AbortSignal.timeout(110_000) });
     upstreamStatus = response.status;
     const data = await response.json();
-    if (!response.ok || data.failed || data.skipped) throw new Error(data.error ?? `Operation failed (${response.status})`);
+    if (!response.ok || data.failed || data.skipped === true) throw new Error(data.error ?? `Operation failed (${response.status})`);
     const stage = nextResultStage(job.stage, data);
     const saved = await admin.from('campaign_result_jobs').update({ stage, status: stage === 'done' ? 'completed' : 'pending', lease_until: null, lease_token: null, next_attempt_at: new Date(Date.now() + 60_000).toISOString(), last_error: null }).eq('campaign_id', id).eq('lease_token', token);
     if (saved.error) throw saved.error;
