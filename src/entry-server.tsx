@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 import i18n from './i18n';
 import App from './App';
 
+export { fetchPublishedDirectoryGuides } from './lib/directory-guides';
+
 export async function render(url: string) {
   await i18n.changeLanguage('fr');
   const helmetContext: { helmet?: HelmetServerState } = {};

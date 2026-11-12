@@ -1190,6 +1190,75 @@ export type Database = {
         }
         Relationships: []
       }
+      directory_country_guides: {
+        Row: {
+          country_code: string
+          created_at: string
+          demand_notes: string | null
+          faq: Json
+          h1: string
+          how_to_approach: string | null
+          id: string
+          importer_types: string | null
+          intro: string
+          key_figures: Json
+          language: string
+          market_overview: string
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          related_article_slugs: string[]
+          sources: Json
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          demand_notes?: string | null
+          faq?: Json
+          h1: string
+          how_to_approach?: string | null
+          id?: string
+          importer_types?: string | null
+          intro: string
+          key_figures?: Json
+          language?: string
+          market_overview: string
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          related_article_slugs?: string[]
+          sources?: Json
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          demand_notes?: string | null
+          faq?: Json
+          h1?: string
+          how_to_approach?: string | null
+          id?: string
+          importer_types?: string | null
+          intro?: string
+          key_figures?: Json
+          language?: string
+          market_overview?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          related_article_slugs?: string[]
+          sources?: Json
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string
