@@ -27,7 +27,8 @@ test('initial directory HTML includes a published guide, and all historical rout
     assert.ok(published.html.includes(guide.h1));
     assert.ok(published.html.includes('Contenu fictif visible sans JavaScript.'));
     assert.ok(published.html.includes('/market-analysis'));
-    assert.ok(published.html.includes('FAQ'));
+    assert.ok(published.html.includes('Question fictive ?'));
+    assert.ok(published.html.includes('Réponse fictive.'));
     for (const company of companies.filter(row => row.countryCode === 'DE')) assert.ok(published.html.includes(company.name), company.name);
     assert.ok(published.head.includes('FAQPage'));
     assert.ok(published.head.includes('ItemList'));
