@@ -1,9 +1,10 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
 ## Guides de marché de l’annuaire public
-- [ ] Ajouter `directory_country_guides` avec lecture publique des seuls guides publiés et écriture admin calquée sur `seo_articles`, sans seed ni publication.
-- [ ] Afficher le guide FR/EN validé sur les pages pays, avec sources, FAQ/JSON-LD, articles publiés liés et CTA analyse ; conserver le rendu historique sinon.
-- [ ] Embarquer les guides publiés dans le pré-rendu `.html`, tester les deux états et vérifier build, pages existantes et absence d’appels privés ; ne rien déployer.
+- [x] `directory_country_guides` créée et laissée vide ; lecture publique des seuls guides publiés et écriture admin calquée sur `seo_articles`, sans seed ni publication.
+- [x] Guide FR/EN validé sur les pages pays, avec sources, FAQ/JSON-LD, articles publiés liés et CTA analyse ; rendu historique conservé sinon.
+- [x] Guides publiés embarqués dans le pré-rendu `.html` ; 17 tests, TypeScript, build des 42 pages et parcours public ordinateur/mobile vérifiés sans appels privés ni déploiement.
+- [ ] Rédaction, revue et publication des guides réels — en attente de validation éditoriale de Simon ; aucun contenu inséré dans la table.
 
 ## Résultats automatiques J+2
 - [x] Traitement J+2 et quatre fonctions déployés ; secret interne installé dans Vault, file et verrous protégés, cron quotidien actif à 08:00 UTC, drain uniquement pendant la file. Dix tests simulés, types et build OK ; appels non authentifiés refusés, dry-run sans fournisseurs. 53 résultats historiques et campagne active inchangés ; première exécution réelle attend le prochain cron. Envoi incertain : réconciliation obligatoire.
