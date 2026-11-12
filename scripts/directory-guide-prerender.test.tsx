@@ -49,6 +49,9 @@ test('initial directory HTML includes a published guide, and all historical rout
     assert.ok(company.html.includes('75cl Distribution'));
     assert.ok(company.html.includes('https://75cl.wine/'));
     assert.ok(!company.html.includes(guide.h1));
+    const unknownCompany = await render('/annuaire/allemagne/inconnu.html');
+    assert.ok(!unknownCompany.html.includes(guide.h1));
+    assert.ok(unknownCompany.head.includes('noindex'));
   } finally {
     delete globals.__PUBLIC_DIRECTORY__;
     delete globals.__PUBLIC_DIRECTORY_GUIDES__;
