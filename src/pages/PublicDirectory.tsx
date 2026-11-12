@@ -101,7 +101,7 @@ const PublicDirectory = () => {
   const company = slug && country ? companies.find(row => row.countryCode === country.code && row.slug === slug) : undefined;
   const missing = Boolean((countrySlug && !country) || (slug && loaded && !company));
   const countryCompanies = country ? companies.filter(row => row.countryCode === country.code) : companies;
-  const guide = country && !company ? guideForCountry(guides, country.code, i18n.language) : null;
+  const guide = country && !slug ? guideForCountry(guides, country.code, i18n.language) : null;
   const relatedArticles = guide
     ? guideArticles(guide, articles)
     : articles.filter(article => DIRECTORY_COUNTRIES.some(row => (!country || row.code === country.code) && row.articleSlug === article.slug));
