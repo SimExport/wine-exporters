@@ -28,6 +28,7 @@ export const directoryPath = (countrySlug?: string, slug?: string) =>
 
 const EMBED_ID = 'public-directory-data';
 export const DIRECTORY_EMBED_ID = EMBED_ID;
+export const DIRECTORY_GUIDES_EMBED_ID = 'public-directory-guides-data';
 /** Directory rows embedded in prerendered HTML (or provided by the prerender), so the first render matches the static markup. */
 export function readEmbeddedDirectory(): PublicDirectoryCompany[] | null {
   const fromServer = (globalThis as { __PUBLIC_DIRECTORY__?: PublicDirectoryCompany[] }).__PUBLIC_DIRECTORY__;
