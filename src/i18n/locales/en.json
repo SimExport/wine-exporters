@@ -914,6 +914,31 @@
       "form": "Form response",
       "click": "Email click",
       "addedOn": "added {{date}}"
+    },
+    "weekly": {
+      "title": "Your importers of the week",
+      "loading": "Loading suggestions…",
+      "purchaseRequest": "Purchase request",
+      "contacted": "Contacted",
+      "prepare": "Prepare my email",
+      "dismiss": "Dismiss",
+      "dialogDesc": "Review and adjust this message before sending it from your own mailbox.",
+      "drafting": "Drafting…",
+      "to": "Recipient",
+      "noEmail": "No known email address",
+      "subject": "Subject",
+      "body": "Message",
+      "openMail": "Open in my mailbox",
+      "copy": "Copy",
+      "copied": "Address, subject and message copied",
+      "sentHint": "Click only once you have actually sent the email: the importer will be added to your CRM and marked as contacted. Nothing is sent automatically.",
+      "markSent": "Email actually sent · Add to CRM",
+      "crmAdded": "Added to your CRM and marked as contacted",
+      "crmDuplicate": "Already in your CRM, marked as contacted",
+      "draftError": "The draft could not be prepared. Please try again later.",
+      "actionError": "Something went wrong. Please try again.",
+      "completeProfile": "Complete your markets and wines to get more relevant suggestions.",
+      "completeLink": "Complete my profile"
     }
   },
   "billingSummary": {

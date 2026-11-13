@@ -204,7 +204,7 @@ const Dashboard = () => {
 
         <GettingStartedCard done={{ profile: profileError ? null : !isProfileIncomplete, ...steps }} />
 
-        <PriorityActions actions={priorityActions} />
+        <PriorityActions actions={priorityActions} profileIncomplete={isProfileIncomplete} />
 
         <EnrichmentActivityCard />
 

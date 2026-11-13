@@ -914,6 +914,31 @@
       "form": "Réponse au formulaire",
       "click": "Clic sur l’email",
       "addedOn": "ajouté le {{date}}"
+    },
+    "weekly": {
+      "title": "Vos importateurs de la semaine",
+      "loading": "Chargement des suggestions…",
+      "purchaseRequest": "Demande d'achat",
+      "contacted": "Contacté",
+      "prepare": "Préparer mon email",
+      "dismiss": "Ignorer",
+      "dialogDesc": "Relisez et adaptez ce message avant de l'envoyer depuis votre messagerie.",
+      "drafting": "Rédaction du brouillon…",
+      "to": "Destinataire",
+      "noEmail": "Aucune adresse email connue",
+      "subject": "Objet",
+      "body": "Message",
+      "openMail": "Ouvrir dans ma messagerie",
+      "copy": "Copier",
+      "copied": "Adresse, objet et message copiés",
+      "sentHint": "Cliquez seulement après avoir réellement envoyé l'email : l'importateur sera ajouté à votre CRM et marqué comme contacté. Rien n'est envoyé automatiquement.",
+      "markSent": "Email réellement envoyé · Ajouter au CRM",
+      "crmAdded": "Ajouté à votre CRM et marqué comme contacté",
+      "crmDuplicate": "Déjà dans votre CRM, marqué comme contacté",
+      "draftError": "Le brouillon n'a pas pu être préparé. Réessayez plus tard.",
+      "actionError": "Une erreur est survenue. Réessayez.",
+      "completeProfile": "Complétez vos marchés et vos vins pour recevoir des suggestions plus justes.",
+      "completeLink": "Compléter mon profil"
     }
   },
   "billingSummary": {
