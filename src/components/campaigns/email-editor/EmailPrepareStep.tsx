@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ImagePlus, Loader2, RefreshCw, Save, Sparkles, Trash2, Type, Heading1, Lock, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { RichTextBlock } from './RichTextBlock';
 import { EmailPreviewFrame } from './EmailPreviewFrame';
 import { MediaPickerDialog } from './MediaPickerDialog';
 import { functionErrorMessage } from '@/lib/media-upload';
+import { clearSnapshotIf, createAutosaver, readSnapshot, removeSnapshot, shouldOfferRecovery, writeSnapshot, type DraftSnapshot, type SaveStatus } from '@/lib/email-autosave';
 import {
   contentFromDraft, draftFromContent, draftKey, draftProblems, emptyDraft, hasAdjacentImages, imageCount,
   insertBlock, MAX_CTA, MAX_IMAGES, moveBlock, newId, removeBlock, SUBJECT_PREFIX, type DraftBlock, type EmailDraft,
@@ -29,12 +30,19 @@ interface Props {
   generationCount: number;
   generatedAt?: string | null;
   sender?: string;
+  userId?: string;
+  /** campaigns.updated_at of the loaded row, used to decide whether a local copy is newer. */
+  serverUpdatedAt?: string | null;
+  /** Called after each server-confirmed save so the parent never keeps a stale copy. */
+  onSaved?: (content: unknown, html: string) => void;
+  /** Lets the parent save pending edits (global "Save draft" button). */
+  registerFlush?: (fn: (() => Promise<boolean>) | null) => void;
   onStateChange: (s: EmailStepState) => void;
   onBack: () => void;
   onContinue: () => void;
 }
 
-export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, generationCount, generatedAt, sender, onStateChange, onBack, onContinue }: Props) => {
+export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, generationCount, generatedAt, sender, userId, serverUpdatedAt, onSaved, registerFlush, onStateChange, onBack, onContinue }: Props) => {
   const { t } = useTranslation();
   const initial = useMemo(() => draftFromContent(initialContent), [initialContent]);
   const [draft, setDraft] = useState<EmailDraft>(initial ?? emptyDraft());
@@ -49,6 +57,27 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const [busy, setBusy] = useState<null | 'generate' | 'save' | 'preview'>(null);
   const [isProposal, setIsProposal] = useState(false);
   const [pickerAt, setPickerAt] = useState<number | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [recovery, setRecovery] = useState<DraftSnapshot<EmailDraft> | null>(() => {
+    if (!userId || typeof window === 'undefined') return null;
+    const snap = readSnapshot<EmailDraft>(window.localStorage, userId, campaignId);
+    return shouldOfferRecovery(snap, initial ? draftKey(initial) : null, serverUpdatedAt) && draftFromContent(contentFromDraft(snap!.draft)) ? snap : null;
+  });
+
+  // Serialized autosave (2 s after the last edit). The ref always calls the latest closure.
+  const hasSavedRef = useRef(!!(initial && initialHtml));
+  hasSavedRef.current = hasSavedRef.current || !!savedHtml;
+  const saveRef = useRef<(d: EmailDraft, k: string) => Promise<boolean>>(async () => false);
+  const autosaver = useRef<ReturnType<typeof createAutosaver<EmailDraft>> | null>(null);
+  if (!autosaver.current) {
+    autosaver.current = createAutosaver<EmailDraft>({
+      keyOf: draftKey,
+      isValid: (d) => draftProblems(d).length === 0,
+      save: (d, k) => saveRef.current(d, k),
+      onStatus: setSaveStatus,
+    });
+    autosaver.current.markSaved(initial ? draftKey(initial) : null);
+  }
 
   const key = draftKey(draft);
   const hasContent = draft.blocks.length > 0;
@@ -70,6 +99,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       if (d && data.message_html) {
         setDraft(d); setSavedDraft(d); setSavedKey(draftKey(d)); setSavedHtml(data.message_html);
         setPreviewHtml(data.message_html); setPreviewKey(draftKey(d));
+        autosaver.current!.markSaved(draftKey(d)); onSaved?.(data.email_content, data.message_html);
       }
       setGenerations(data.email_generation_count ?? 0); setGenAt(data.email_generated_at ?? null); setTick((x) => x + 1);
     }, 10_000);
@@ -88,6 +118,47 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
     toast({ title: t('emailEditor.errors.title'), description: await functionErrorMessage(error, data), variant: 'destructive' });
   };
 
+  saveRef.current = async (d: EmailDraft, k: string) => {
+    const { data, error } = await supabase.functions.invoke('save-campaign-email', { body: { campaignId, mode: 'save', content: contentFromDraft(d) } });
+    if (error || data?.error) { await fail(error, data); return false; }
+    // Only the version that was sent is marked saved; the text being typed meanwhile is never replaced.
+    setSavedKey(k); setSavedDraft(d); setSavedHtml(data.html); hasSavedRef.current = true;
+    setPreviewHtml(data.html); setPreviewKey(k);
+    if (userId) clearSnapshotIf(window.localStorage, userId, campaignId, k);
+    onSaved?.(contentFromDraft(d), data.html);
+    return true;
+  };
+
+  // Feed every edit (subject, blocks, CTA, images, order) to the autosaver; AI proposals wait for an explicit save.
+  useEffect(() => {
+    if (!hasContent || isProposal) return;
+    autosaver.current!.edit(draft);
+    if (userId && key !== savedKey) writeSnapshot(window.localStorage, userId, campaignId, draft, key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, isProposal, hasContent]);
+
+  const flush = useCallback(() => autosaver.current!.flush(), []);
+  useEffect(() => { registerFlush?.(flush); return () => registerFlush?.(null); }, [registerFlush, flush]);
+  // Leaving the tab saves right away; unmounting saves pending edits and keeps the local copy newest.
+  const draftRef = useRef(draft); draftRef.current = draft;
+  useEffect(() => {
+    const onVis = () => { if (document.visibilityState === 'hidden') void flush(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      const a = autosaver.current!;
+      if (!a.isSaved()) {
+        if (userId) writeSnapshot(window.localStorage, userId, campaignId, draftRef.current, draftKey(draftRef.current));
+        void a.flush();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flush]);
+
+  const restoreLocal = () => { if (recovery) { setIsProposal(false); setDraft(recovery.draft); } setRecovery(null); };
+  const discardLocal = () => { if (userId) removeSnapshot(window.localStorage, userId, campaignId); setRecovery(null); };
+  const writeWithoutAi = () => setDraft({ ...emptyDraft(), blocks: [{ id: newId(), type: 'text', html: '' }] });
+
   const generate = async () => {
     if (busy || !canGenerate) return;
     setBusy('generate');
@@ -100,7 +171,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       setPreviewHtml(data.html);
       setPreviewKey(draftKey(d));
       setIsProposal(!data.applied);
-      if (data.applied) { setSavedDraft(d); setSavedKey(draftKey(d)); setSavedHtml(data.html); }
+      if (data.applied) { setSavedDraft(d); setSavedKey(draftKey(d)); setSavedHtml(data.html); autosaver.current!.markSaved(draftKey(d)); onSaved?.(data.content, data.html); }
       setGenerations(1);
     } finally {
       const { data } = await supabase.from('campaigns').select('email_generation_count,email_generated_at').eq('id', campaignId).maybeSingle();
@@ -109,11 +180,22 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
     }
   };
 
-  const callSave = async (mode: 'preview' | 'save') => {
-    if (problems.length) {
-      toast({ title: t('emailEditor.errors.title'), description: problems.map((p) => t(`emailEditor.problems.${p}`)).join(' '), variant: 'destructive' });
-      return false;
-    }
+  const showProblems = () => {
+    toast({ title: t('emailEditor.errors.title'), description: problems.map((p) => t(`emailEditor.problems.${p}`)).join(' '), variant: 'destructive' });
+  };
+  const saveNow = async () => {
+    if (problems.length) { showProblems(); return false; }
+    setBusy('save');
+    try {
+      autosaver.current!.edit(draft);
+      const ok = await autosaver.current!.flush();
+      if (ok) { setIsProposal(false); toast({ title: t('emailEditor.saved') }); }
+      return ok;
+    } finally { setBusy(null); }
+  };
+
+  const callSave = async (mode: 'preview') => {
+    if (problems.length) { showProblems(); return false; }
     setBusy(mode);
     try {
       const sentKey = key;
@@ -121,13 +203,6 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
       if (error || data?.error) { await fail(error, data); return false; }
       setPreviewHtml(data.html);
       setPreviewKey(sentKey);
-      if (mode === 'save') {
-        setSavedKey(sentKey);
-        setSavedDraft(draft);
-        setSavedHtml(data.html);
-        setIsProposal(false);
-        toast({ title: t('emailEditor.saved') });
-      }
       return true;
     } finally { setBusy(null); }
   };
@@ -148,11 +223,26 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
     setPickerAt(after ?? draft.blocks.length - 1);
   };
 
-  const continueNext = () => {
-    if (dirty || !savedHtml) { toast({ title: t('emailEditor.mustSave'), variant: 'destructive' }); return; }
+  const continueNext = async () => {
+    if (isProposal) { toast({ title: t('emailEditor.mustSave'), variant: 'destructive' }); return; }
+    setBusy('save');
+    let ok = false;
+    try { ok = await autosaver.current!.flush(); } finally { setBusy(null); }
+    if (!ok || !autosaver.current!.isSaved() || !hasSavedRef.current) { toast({ title: t('emailEditor.mustSave'), variant: 'destructive' }); return; }
     onContinue();
   };
-  const goBack = () => { if (dirty && !window.confirm(t('emailEditor.leaveConfirm'))) return; onBack(); };
+  const goBack = async () => {
+    if (isProposal) { if (!window.confirm(t('emailEditor.leaveConfirm'))) return; onBack(); return; }
+    const ok = await autosaver.current!.flush();
+    if (!ok && !window.confirm(t('emailEditor.flushFailed'))) return;
+    onBack();
+  };
+  const statusLabel = isProposal ? t('emailEditor.unsaved')
+    : saveStatus === 'saving' ? t('emailEditor.autoSaving')
+    : saveStatus === 'error' ? t('emailEditor.autoFailed')
+    : saveStatus === 'invalid' ? t('emailEditor.autoIncomplete')
+    : dirty ? t('emailEditor.unsaved')
+    : t('emailEditor.autoSaved');
 
   return (
     <div className="space-y-4">
@@ -172,9 +262,24 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
             {busy === 'generate' ? t('emailEditor.generating') : t('emailEditor.generate')}
           </Button>
           </div>}
+          {!hasContent && !savedHtml && gState !== 'in_progress' && busy !== 'generate' && <div className="text-center">
+            <Button type="button" variant="link" size="sm" onClick={writeWithoutAi} title={t('emailEditor.writeWithoutAiHelp')}>{t('emailEditor.writeWithoutAi')}</Button>
+          </div>}
+          {recovery && <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+              <span>{t('emailEditor.recoveryTitle')}</span>
+              <span className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={restoreLocal}>{t('emailEditor.recoveryRestore')}</Button>
+                <Button size="sm" variant="ghost" onClick={discardLocal}>{t('emailEditor.recoveryDiscard')}</Button>
+              </span>
+            </AlertDescription>
+          </Alert>}
           {hasContent && <div className="flex flex-wrap justify-end items-center gap-2">
-            {hasContent && <span className={dirty ? 'text-xs font-medium text-destructive' : 'text-xs text-muted-foreground'}>{dirty ? t('emailEditor.unsaved') : t('emailEditor.allSaved')}</span>}
-            <Button onClick={() => callSave('save')} disabled={!!busy || !dirty}>
+            <span role="status" aria-live="polite" className={saveStatus === 'error' || saveStatus === 'invalid' || isProposal ? 'text-xs font-medium text-destructive flex items-center gap-1' : 'text-xs text-muted-foreground flex items-center gap-1'}>
+              {saveStatus === 'saving' && <Loader2 className="h-3 w-3 animate-spin" />}{statusLabel}
+            </span>
+            <Button onClick={saveNow} disabled={!!busy || !dirty || saveStatus === 'saving'}>
               {busy === 'save' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
               {busy === 'save' ? t('emailEditor.saving') : t('emailEditor.save')}
             </Button>

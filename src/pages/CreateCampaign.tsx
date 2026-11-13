@@ -94,15 +94,21 @@ const CreateCampaign = () => {
   // Lot B: email preparation step, restricted rollout until lot C (also enforced server-side).
   const { enabled: editorEnabled, loading: editorLoading } = useCampaignEditorAccess();
   const recapStep = editorEnabled ? 3 : 2;
-  const [emailInfo, setEmailInfo] = useState<{ content: unknown; html: string | null; count: number; at?: string | null }>({ content: null, html: null, count: 0 });
+  const [emailInfo, setEmailInfo] = useState<{ content: unknown; html: string | null; count: number; at?: string | null; updatedAt?: string | null }>({ content: null, html: null, count: 0 });
+  // Email editor's flush (pending autosave), set while step 2 is mounted.
+  const emailFlushRef = React.useRef<(() => Promise<boolean>) | null>(null);
+  const registerEmailFlush = React.useCallback((fn: (() => Promise<boolean>) | null) => { emailFlushRef.current = fn; }, []);
+  const onEmailSaved = React.useCallback((content: unknown, html: string) => {
+    setEmailInfo((prev) => ({ ...prev, content, html, updatedAt: new Date().toISOString() }));
+  }, []);
   const [emailState, setEmailState] = useState<EmailStepState>({ dirty: false, hasSavedEmail: false });
   const [wasRejected, setWasRejected] = useState(false);
   const [rejectReason, setRejectReason] = useState<string | null>(null);
   const onEmailState = React.useCallback((s: EmailStepState) => setEmailState(s), []);
   const loadEmail = async (id: string) => {
-    const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count,email_generated_at').eq('id', id).maybeSingle();
+    const { data } = await supabase.from('campaigns').select('email_content,message_html,email_generation_count,email_generated_at,updated_at').eq('id', id).maybeSingle();
     if (data) {
-      setEmailInfo({ content: data.email_content, html: data.message_html || null, count: data.email_generation_count ?? 0, at: data.email_generated_at });
+      setEmailInfo({ content: data.email_content, html: data.message_html || null, count: data.email_generation_count ?? 0, at: data.email_generated_at, updatedAt: data.updated_at });
       setEmailState({ dirty: false, hasSavedEmail: !!(data.message_html && String(data.message_html).trim()) });
     }
   };
@@ -313,9 +319,13 @@ const CreateCampaign = () => {
       });
       return;
     }
-    if (emailState.dirty && !window.confirm(t('emailEditor.leaveConfirm'))) return;
     setLoading(true);
     try {
+      // Save the email being edited first; never confirm a draft whose email did not reach the server.
+      if (step === 2 && emailFlushRef.current) {
+        const emailOk = await emailFlushRef.current();
+        if (!emailOk && !window.confirm(t('emailEditor.flushFailed'))) return;
+      }
       await persistDraft();
       toast({
         title: t('createCampaign.toasts.draftSaved.title'),
@@ -819,8 +829,12 @@ const CreateCampaign = () => {
             initialHtml={emailInfo.html}
             generationCount={emailInfo.count}
             generatedAt={emailInfo.at}
+            userId={user?.id}
+            serverUpdatedAt={emailInfo.updatedAt}
+            onSaved={onEmailSaved}
+            registerFlush={registerEmailFlush}
             onStateChange={onEmailState}
-            onBack={() => setStep(1)}
+            onBack={() => { void loadEmail(campaignId); setStep(1); }}
             onContinue={async () => { await loadEmail(campaignId); setStep(3); }}
           />}
 
