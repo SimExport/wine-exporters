@@ -120,3 +120,18 @@ describe('local safety net', () => {
     assert.equal(readSnapshot(s, 'u', 'c'), null);
   });
 });
+
+test('regression: parent flush saves an unapplied AI proposal instead of reporting a false success', async () => {
+  const { createAutosaver, flushCurrent } = await import('./email-autosave');
+  const saved: string[] = [];
+  const mk = () => createAutosaver<{ v: string }>({ keyOf: (d) => d.v, isValid: (d) => d.v !== '', save: async (d) => { saved.push(d.v); return true; }, onStatus: () => {}, setTimer: () => 1, clearTimer: () => {} });
+  const bare = mk();
+  assert.equal(await bare.flush(), true); // the old bug: nothing written yet "success"
+  assert.deepEqual(saved, []);
+  const a = mk();
+  assert.equal(await flushCurrent(a, { v: 'proposal' }, true), true);
+  assert.deepEqual(saved, ['proposal']);
+  assert.equal(a.isSaved(), true);
+  const b = mk();
+  assert.equal(await flushCurrent(b, { v: '' }, true), false); // invalid proposal refuses
+});

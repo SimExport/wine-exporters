@@ -84,6 +84,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const dirty = hasContent && key !== savedKey;
   const stale = !!previewHtml && key !== previewKey;
   const problems = draftProblems(draft);
+  const draftRef = useRef(draft); draftRef.current = draft;
   const genSt = { hasEmail: !!savedHtml || hasContent, generatedAt: genAt };
   const gState = generationState(generations, genSt);
   const canGenerate = canGenerateCampaignEmail(generations, genSt) && !hasContent;
@@ -139,7 +140,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   }, [key, isProposal, hasContent]);
 
   const isProposalRef = useRef(isProposal); isProposalRef.current = isProposal;
-  const problemsRef = useRef<string[]>([]);
+  const problemsRef = useRef(problems); problemsRef.current = problems;
   // Parent "save draft": also persists an unapplied AI proposal; refuses (false) when it cannot be saved.
   const flush = useCallback(async () => {
     const held = isProposalRef.current;
