@@ -65,6 +65,8 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   });
 
   // Serialized autosave (2 s after the last edit). The ref always calls the latest closure.
+  const hasSavedRef = useRef(!!(initial && initialHtml));
+  hasSavedRef.current = hasSavedRef.current || !!savedHtml;
   const saveRef = useRef<(d: EmailDraft, k: string) => Promise<boolean>>(async () => false);
   const autosaver = useRef<ReturnType<typeof createAutosaver<EmailDraft>> | null>(null);
   if (!autosaver.current) {
@@ -120,7 +122,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
     const { data, error } = await supabase.functions.invoke('save-campaign-email', { body: { campaignId, mode: 'save', content: contentFromDraft(d) } });
     if (error || data?.error) { await fail(error, data); return false; }
     // Only the version that was sent is marked saved; the text being typed meanwhile is never replaced.
-    setSavedKey(k); setSavedDraft(d); setSavedHtml(data.html);
+    setSavedKey(k); setSavedDraft(d); setSavedHtml(data.html); hasSavedRef.current = true;
     setPreviewHtml(data.html); setPreviewKey(k);
     if (userId) clearSnapshotIf(window.localStorage, userId, campaignId, k);
     onSaved?.(contentFromDraft(d), data.html);
@@ -222,10 +224,11 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   };
 
   const continueNext = async () => {
+    if (isProposal) { toast({ title: t('emailEditor.mustSave'), variant: 'destructive' }); return; }
     setBusy('save');
-    const ok = isProposal ? false : await autosaver.current!.flush().finally(() => setBusy(null));
-    if (isProposal) setBusy(null);
-    if (!ok || !autosaver.current!.isSaved() || !(savedHtml || ok && hasContent)) { toast({ title: t('emailEditor.mustSave'), variant: 'destructive' }); return; }
+    let ok = false;
+    try { ok = await autosaver.current!.flush(); } finally { setBusy(null); }
+    if (!ok || !autosaver.current!.isSaved() || !hasSavedRef.current) { toast({ title: t('emailEditor.mustSave'), variant: 'destructive' }); return; }
     onContinue();
   };
   const goBack = async () => {
