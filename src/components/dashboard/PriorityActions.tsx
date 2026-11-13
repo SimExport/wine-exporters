@@ -4,10 +4,11 @@ import { format } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 import { BellRing, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { WeeklyImporterRecommendations } from '@/components/dashboard/WeeklyImporterRecommendations';
 import { leadDisplayName, type PriorityAction } from '@/lib/dashboard-actions';
 
 /** actions === null means the CRM could not be loaded (shown as unavailable, never as "0"). */
-export function PriorityActions({ actions }: { actions: PriorityAction[] | null }) {
+export function PriorityActions({ actions, profileIncomplete }: { actions: PriorityAction[] | null; profileIncomplete?: boolean }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language?.startsWith('en') ? enUS : fr;
   const shown = actions?.slice(0, 3) ?? [];
@@ -61,6 +62,7 @@ export function PriorityActions({ actions }: { actions: PriorityAction[] | null 
           </div>
         </>
       )}
+      <WeeklyImporterRecommendations profileIncomplete={profileIncomplete} />
     </section>
   );
 }
