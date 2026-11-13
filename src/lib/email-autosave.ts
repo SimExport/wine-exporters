@@ -40,6 +40,8 @@ export function createAutosaver<D>(o: AutosaverOptions<D>) {
       try { ok = await o.save(sent, k); } catch { ok = false; }
       if (!ok) { emit(latestKey === savedKey ? 'saved' : 'error'); return latestKey === savedKey; }
       savedKey = k;
+      // Still typing: let the debounce timer pick up the newer version instead of saving on every keystroke.
+      if (timer !== null && latestKey !== savedKey) { emit('pending'); return false; }
     }
   };
   const run = () => (chain = chain.then(step, step));
