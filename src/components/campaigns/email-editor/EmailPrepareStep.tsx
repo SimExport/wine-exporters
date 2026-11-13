@@ -13,7 +13,7 @@ import { RichTextBlock } from './RichTextBlock';
 import { EmailPreviewFrame } from './EmailPreviewFrame';
 import { MediaPickerDialog } from './MediaPickerDialog';
 import { functionErrorMessage } from '@/lib/media-upload';
-import { clearSnapshotIf, createAutosaver, readSnapshot, removeSnapshot, shouldOfferRecovery, writeSnapshot, type DraftSnapshot, type SaveStatus } from '@/lib/email-autosave';
+import { clearSnapshotIf, createAutosaver, flushCurrent, readSnapshot, removeSnapshot, shouldOfferRecovery, writeSnapshot, type DraftSnapshot, type SaveStatus } from '@/lib/email-autosave';
 import {
   contentFromDraft, draftFromContent, draftKey, draftProblems, emptyDraft, hasAdjacentImages, imageCount,
   insertBlock, MAX_CTA, MAX_IMAGES, moveBlock, newId, removeBlock, SUBJECT_PREFIX, type DraftBlock, type EmailDraft,
@@ -84,6 +84,7 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
   const dirty = hasContent && key !== savedKey;
   const stale = !!previewHtml && key !== previewKey;
   const problems = draftProblems(draft);
+  const draftRef = useRef(draft); draftRef.current = draft;
   const genSt = { hasEmail: !!savedHtml || hasContent, generatedAt: genAt };
   const gState = generationState(generations, genSt);
   const canGenerate = canGenerateCampaignEmail(generations, genSt) && !hasContent;
@@ -131,26 +132,37 @@ export const EmailPrepareStep = ({ campaignId, initialContent, initialHtml, gene
 
   // Feed every edit (subject, blocks, CTA, images, order) to the autosaver; AI proposals wait for an explicit save.
   useEffect(() => {
-    if (!hasContent || isProposal) return;
-    autosaver.current!.edit(draft);
+    if (!hasContent) return;
+    // Proposals are kept locally (never lost on leave) but only reach the server on an explicit save.
+    if (!isProposal) autosaver.current!.edit(draft);
     if (userId && key !== savedKey) writeSnapshot(window.localStorage, userId, campaignId, draft, key);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, isProposal, hasContent]);
 
-  const flush = useCallback(() => autosaver.current!.flush(), []);
+  const isProposalRef = useRef(isProposal); isProposalRef.current = isProposal;
+  const problemsRef = useRef(problems); problemsRef.current = problems;
+  // Parent "save draft": also persists an unapplied AI proposal; refuses (false) when it cannot be saved.
+  const flush = useCallback(async () => {
+    const held = isProposalRef.current;
+    if (held && problemsRef.current.length) { setSaveStatus('invalid'); return false; }
+    const ok = await flushCurrent(autosaver.current!, draftRef.current, held);
+    if (ok && held) setIsProposal(false);
+    return ok;
+  }, []);
   useEffect(() => { registerFlush?.(flush); return () => registerFlush?.(null); }, [registerFlush, flush]);
   // Leaving the tab saves right away; unmounting saves pending edits and keeps the local copy newest.
-  const draftRef = useRef(draft); draftRef.current = draft;
   useEffect(() => {
-    const onVis = () => { if (document.visibilityState === 'hidden') void flush(); };
+    const keepLocal = () => { if (userId) writeSnapshot(window.localStorage, userId, campaignId, draftRef.current, draftKey(draftRef.current)); };
+    const onVis = () => {
+      if (document.visibilityState !== 'hidden') return;
+      if (isProposalRef.current) keepLocal(); else void autosaver.current!.flush();
+    };
     document.addEventListener('visibilitychange', onVis);
     return () => {
       document.removeEventListener('visibilitychange', onVis);
       const a = autosaver.current!;
-      if (!a.isSaved()) {
-        if (userId) writeSnapshot(window.localStorage, userId, campaignId, draftRef.current, draftKey(draftRef.current));
-        void a.flush();
-      }
+      if (isProposalRef.current) keepLocal();
+      else if (!a.isSaved()) { keepLocal(); void a.flush(); }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flush]);
