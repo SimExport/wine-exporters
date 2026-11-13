@@ -65,6 +65,15 @@ export function createAutosaver<D>(o: AutosaverOptions<D>) {
   };
 }
 
+/**
+ * Flush used by the parent page: a draft the autosaver never received (e.g. an unapplied AI proposal) is handed to it
+ * first, so "true" always means the version on screen is confirmed by the server.
+ */
+export async function flushCurrent<D>(a: ReturnType<typeof createAutosaver<D>>, current: D | null, heldBack: boolean): Promise<boolean> {
+  if (heldBack && current !== null) a.edit(current);
+  return a.flush();
+}
+
 export interface DraftSnapshot<D> { draft: D; key: string; at: number }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem(k: string): void }
 
