@@ -2674,6 +2674,7 @@ export type Database = {
           ui_language: string
           updated_at: string
           user_id: string
+          weekly_importer_emails_enabled: boolean
         }
         Insert: {
           created_at?: string
@@ -2689,6 +2690,7 @@ export type Database = {
           ui_language?: string
           updated_at?: string
           user_id: string
+          weekly_importer_emails_enabled?: boolean
         }
         Update: {
           created_at?: string
@@ -2704,6 +2706,40 @@ export type Database = {
           ui_language?: string
           updated_at?: string
           user_id?: string
+          weekly_importer_emails_enabled?: boolean
+        }
+        Relationships: []
+      }
+      weekly_importer_notification_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          resend_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          resend_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          resend_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
         }
         Relationships: []
       }
@@ -2960,6 +2996,7 @@ export type Database = {
       }
       dispatch_campaign_send_queue: { Args: never; Returns: undefined }
       dispatch_system_monitor: { Args: never; Returns: undefined }
+      dispatch_weekly_importer_notifications: { Args: never; Returns: number }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
       finalize_campaign_contact_quality: {
         Args: { _campaign_id: string; _minimum_score?: number }
@@ -3013,6 +3050,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_weekly_importer_secret: { Args: never; Returns: string }
       has_campaign_editor_access: {
         Args: { _user_id: string }
         Returns: boolean
