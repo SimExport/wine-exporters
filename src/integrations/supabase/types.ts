@@ -2707,6 +2707,76 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_importer_recommendations: {
+        Row: {
+          buyer_contact_id: string
+          contacted_at: string | null
+          created_at: string
+          email_body: string | null
+          email_subject: string | null
+          id: string
+          opportunity_id: string | null
+          reason: string
+          status: string
+          updated_at: string
+          user_id: string
+          week_start: string
+          wine_id: string | null
+        }
+        Insert: {
+          buyer_contact_id: string
+          contacted_at?: string | null
+          created_at?: string
+          email_body?: string | null
+          email_subject?: string | null
+          id?: string
+          opportunity_id?: string | null
+          reason: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          week_start: string
+          wine_id?: string | null
+        }
+        Update: {
+          buyer_contact_id?: string
+          contacted_at?: string | null
+          created_at?: string
+          email_body?: string | null
+          email_subject?: string | null
+          id?: string
+          opportunity_id?: string | null
+          reason?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+          wine_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_importer_recommendations_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_importer_recommendations_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "importer_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_importer_recommendations_wine_id_fkey"
+            columns: ["wine_id"]
+            isOneToOne: false
+            referencedRelation: "wines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wines: {
         Row: {
           appellation: string | null
