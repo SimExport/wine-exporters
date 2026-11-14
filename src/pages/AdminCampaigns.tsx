@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { adminCategory, countByCategory, queuePosition, type AdminCategory, type QueueRowLite } from '@/lib/admin-campaign-category';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
@@ -116,6 +117,8 @@ export default function AdminCampaigns() {
   const [deletingResponse, setDeletingResponse] = useState<InterestResponse | null>(null);
   const [deletingResponseBusy, setDeletingResponseBusy] = useState(false);
   const { toast } = useToast();
+  const [queueMap, setQueueMap] = useState<Record<string, QueueRowLite>>({});
+  const [tab, setTab] = useState<AdminCategory | 'all'>('to_review');
 
   // Filters
   const [filters, setFilters] = useState({
@@ -169,7 +172,7 @@ export default function AdminCampaigns() {
 
   useEffect(() => {
     applyFilters();
-  }, [campaigns, filters]);
+  }, [campaigns, filters, tab, queueMap]);
 
   const fetchEmailLogs = async () => {
     try {
@@ -206,6 +209,16 @@ export default function AdminCampaigns() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      // Admin-only queue read; on failure nothing is shown as scheduled (safe fallback).
+      const { data: qRows, error: qErr } = await (supabase.from as any)('campaign_send_queue')
+        .select('campaign_id,state,approved_at,error');
+      if (qErr) {
+        setQueueMap({});
+        toast({ title: t('adminCampaigns.errorTitle'), description: t('adminCampaigns.queueLoadError'), variant: 'destructive' });
+      } else {
+        setQueueMap(Object.fromEntries(((qRows || []) as QueueRowLite[]).map((q) => [q.campaign_id, q])));
+      }
 
       const rows = data || [];
       const userIds = Array.from(new Set(rows.map((c: any) => c.user_id)));
@@ -272,8 +285,10 @@ export default function AdminCampaigns() {
   const applyFilters = () => {
     let filtered = campaigns;
 
-    // Status filter
-    if (filters.status.length > 0) {
+    // Category tab (admin-only view); the status select applies to the "all" tab.
+    if (tab !== 'all') {
+      filtered = filtered.filter(c => adminCategory(c as any, queueMap[c.id]) === tab);
+    } else if (filters.status.length > 0) {
       filtered = filtered.filter(campaign => 
         filters.status.includes(campaign.status)
       );
@@ -314,6 +329,14 @@ export default function AdminCampaigns() {
 
     setFilteredCampaigns(filtered);
   };
+
+  const tabCounts = useMemo(() => {
+    let base = campaigns;
+    if (filters.market && filters.market !== 'all') base = base.filter(c => c.target_markets?.includes(filters.market));
+    if (filters.search) { const s = filters.search.toLowerCase(); base = base.filter(c => c.name.toLowerCase().includes(s)); }
+    if (filters.period !== 'all') { const cut = new Date(); cut.setDate(cut.getDate() - parseInt(filters.period)); base = base.filter(c => new Date(c.created_at) >= cut); }
+    return { ...countByCategory(base as any, queueMap), all: base.length };
+  }, [campaigns, filters, queueMap]);
 
   const resetFilters = () => {
     setFilters({
@@ -732,6 +755,15 @@ export default function AdminCampaigns() {
       {/* Upload campaign report */}
       <AdminCampaignReportUpload />
 
+      <div role="tablist" className="flex flex-wrap gap-2">
+        {(['to_review', 'to_check', 'scheduled', 'sent', 'all'] as const).map((k) => (
+          <Button key={k} role="tab" aria-selected={tab === k} size="sm" variant={tab === k ? 'default' : 'outline'} onClick={() => setTab(k)}>
+            {t(`adminCampaigns.tabs.${k}`)}
+            <Badge variant="secondary" className="ml-2">{tabCounts[k]}</Badge>
+          </Button>
+        ))}
+      </div>
+
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -901,6 +933,15 @@ export default function AdminCampaigns() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {getStatusBadge(campaign.status)}
+                        {campaign.status === 'pending_validation' && queueMap[campaign.id]?.state === 'queued' && (
+                          <Badge variant="outline" className="whitespace-nowrap">{t('adminCampaigns.scheduledBadge', { position: queuePosition(campaign.id, queueMap) })}</Badge>
+                        )}
+                        {campaign.status === 'pending_validation' && queueMap[campaign.id]?.state === 'sending' && (
+                          <Badge variant="outline" className="whitespace-nowrap">{t('adminCampaigns.sendingBadge')}</Badge>
+                        )}
+                        {campaign.status === 'pending_validation' && queueMap[campaign.id]?.state === 'failed' && (
+                          <Badge variant="destructive" className="whitespace-nowrap">{t('adminCampaigns.scheduleFailedBadge')}</Badge>
+                        )}
                         <Select
                           value={campaign.status}
                           onValueChange={(v) => changeCampaignStatus(campaign.id, v, campaign.status)}
