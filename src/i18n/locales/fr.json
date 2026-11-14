@@ -2922,7 +2922,19 @@
       "scoreRange": "Le score doit être compris entre 0 et 10."
     },
     "customEmail": "Email personnalisé",
-    "customEmailHint": "Email préparé par le producteur : l'envoi sera disponible au lot C. L'ancien bouton est désactivé pour ne pas envoyer un autre texte."
+    "customEmailHint": "Email préparé par le producteur : l'envoi sera disponible au lot C. L'ancien bouton est désactivé pour ne pas envoyer un autre texte.",
+    "tabs": {
+      "to_review": "À valider",
+      "to_check": "À vérifier",
+      "scheduled": "Planifiées",
+      "sent": "Envoyées",
+      "all": "Toutes"
+    },
+    "scheduledBadge": "Planifiée · n° {{position}} dans la file",
+    "sendingBadge": "Envoi en cours",
+    "scheduleFailedBadge": "Programmation échouée",
+    "queueLoadError": "Impossible de lire la file d'envoi : aucune campagne n'est affichée comme planifiée.",
+    "scheduleNotConfirmed": "La mise en file n'a pas pu être confirmée : la campagne reste à valider."
   },
   "parseAddresses": {
     "button": "Normaliser les adresses",
