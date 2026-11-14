@@ -1,28 +1,48 @@
-# Spot vidéo 30 s dans le hero de la landing page
+# Admin campagnes : séparer « À valider », « Planifiées », « Envoyées »
 
-## Constat (lu dans le code)
-- `src/pages/LandingPage.tsx` : hero centré (badge, H1, sous-titre, 2 boutons). Le bouton principal du hero et d'autres boutons (en-tête, punchline, tarifs, fin de page) ouvrent tous la démo interactive Supademo via `openDemo`.
-- Il n'existe aucune section dédiée « Explorer la plateforme — Démo interactive » : la démo n'est qu'une fenêtre ouverte par ces boutons.
-- Aucun fichier MP4 n'a été reçu (ni dans les fichiers envoyés, ni dans les médias du projet).
-- Je n'ai trouvé aucun outil de suivi d'audience (type GA, Plausible, PostHog) dans le code du site.
+## Constat (vérifié)
+- Valider une campagne personnalisée appelle la RPC `approve_campaign_for_queue` (dans `CampaignReviewSheet.tsx`) : elle insère une ligne `campaign_send_queue` (state `queued`) mais laisse `campaigns.status = 'pending_validation'`. Le statut ne passe à `active` qu'au moment de l'envoi Brevo par `send-queued-campaign` (1/jour, 08:00 UTC).
+- `AdminCampaigns.tsx` filtre uniquement sur `campaigns.status` (défaut `['pending_validation']`) et ne lit jamais la file : les campagnes en file restent donc dans « En attente de validation ».
+- Données actuelles : 7 campagnes `pending_validation` + file `queued` (déjà validées), 2 `active` + `sent`, 10 `results` + `sent`, 54 `results` sans file (envoi historique).
+- Plusieurs Edge Functions (`send-queued-campaign`, `notify-campaign-validated`, `save-campaign-email`, `send-campaign`, `custom-campaign-send`) exigent `status = 'pending_validation'` pour une campagne en file. Changer ce statut casserait l'envoi.
 
-## Ce qui sera construit
-1. **Hero en deux colonnes sur ordinateur** (texte à gauche, vignette à droite ; empilé sur mobile, vignette sous les boutons). H1, textes, badge et lien « J'ai déjà un compte » inchangés.
-2. **Vignette du spot** : image fixe (première image ou plan clé du spot) au format 16:9, bouton lecture bordeaux, mention « Spot 30 s · en français ». Aucun lecteur vidéo n'est chargé tant qu'on ne clique pas.
-3. **Fenêtre vidéo** (dialog accessible : titre lu par les lecteurs d'écran, fermeture Échap/bouton, focus géré) : lecteur `<video controls>` qui démarre au clic seulement (pas d'autoplay sur la page), son activé, arrêt à la fermeture. Sous la vidéo : CTA « Trouver mes importateurs gratuitement » vers `/market-analysis`.
-4. **CTA du hero** : le bouton principal devient « Trouver mes importateurs gratuitement » → `/market-analysis` ; le bouton secondaire « Découvrir » reste.
-5. **Nouvelle section « Explorer la plateforme — Démo interactive »** placée après la section fonctionnalités, avec le bouton existant qui ouvre Supademo. Les autres boutons démo (en-tête, punchline, tarifs, fin) continuent d'ouvrir Supademo comme aujourd'hui.
-6. **FR/EN** : tous les nouveaux textes dans les fichiers de traduction. En anglais, la vignette indique « 30-second spot · in French » — jamais présenté comme doublé.
-7. **Si le fichier n'est pas encore disponible** : une seule constante pointe vers la vidéo. Tant qu'elle est vide, la vignette et la fenêtre ne s'affichent pas du tout ; le hero garde la mise en page actuelle avec le nouveau CTA. Si la vidéo échoue au chargement, la fenêtre affiche un message clair et le CTA, jamais un lecteur noir cassé.
-8. **Suivi d'audience** : aucun outil installé, donc rien n'est ajouté. Un petit point d'appel (ouverture du spot, lecture, fin, clic CTA) restera sans effet, prêt si un outil est ajouté plus tard.
+## Solution retenue : catégorie admin calculée, aucun changement de statut
+Ne rien changer en base ni dans le workflow. L'admin calcule une « catégorie de revue » en combinant `campaigns.status` et `campaign_send_queue.state` :
 
-## Ce dont j'ai besoin de votre part
-- Envoyer `WineExporters_spot_30s_V6.mp4` dans le chat (3,6 Mo, ça passe).
-- Optionnel : une image de vignette souhaitée ; sinon je prends une image du spot.
+```text
+pending_validation + pas de ligne file          -> À valider
+pending_validation + file 'failed'              -> À valider (badge « Programmation échouée »)
+pending_validation + file 'needs_review'        -> À vérifier (envoi incertain, contrôle Brevo)
+pending_validation + file 'queued' / 'sending'  -> Planifiées (avec date estimée)
+pending_validation + send_error/brevo id/lock   -> À vérifier (règles existantes sendState)
+active / sending / results (envoi confirmé)     -> Envoyées
+draft, archived, failed                         -> Autres (filtre existant)
+```
 
-## Détails techniques
-- MP4 téléversé via `lovable-assets` → `src/assets/wineexporters_spot_30s.mp4.asset.json` ; vignette extraite par ffmpeg (WebP, ~1280 px) également en asset. Vérification ffprobe (30 s, H.264, 1920x1080).
-- Composant `src/components/landing/SpotVideo.tsx` (vignette + Dialog shadcn), `preload="none"`, `playsInline`, `poster`, lecteur monté uniquement à l'ouverture, `onError` → état de repli.
-- Prérendu non concerné (la home n'est pas prérendue) ; aucun JS ajouté au chargement initial hors l'image.
-- Fichiers touchés : `LandingPage.tsx`, nouveau `SpotVideo.tsx`, `fr.json`, `en.json`. Aucune autre page, ni brochure, ni Supabase.
-- Vérifs : typecheck, build, capture Playwright desktop + mobile (FR et EN), ouverture/fermeture de la fenêtre, test du cas « fichier absent ».
+- « Planifiée » n'est affichée QUE si une ligne file existe avec `queued`/`sending`, relue en base après la RPC. Si la RPC échoue ou si la relecture ne trouve pas la ligne, la campagne reste « À valider » avec un message d'erreur.
+- Les 7 campagnes déjà en file passent automatiquement dans « Planifiées » sans revalidation ni écriture (la catégorie est dérivée des lignes existantes).
+- Côté vignerons : aucun changement (ils continuent à voir `pending_validation` = « En validation »).
+
+## Changements prévus (frontend admin uniquement)
+1. **Nouveau `src/lib/admin-campaign-category.ts`** (sans React) : `adminCategory(campaign, queueRow)` et `countByCategory(...)`, réutilisant `sendState` de `campaign-send-state.ts`.
+2. **`src/pages/AdminCampaigns.tsx`** :
+   - `fetchCampaigns` charge aussi `campaign_send_queue (campaign_id, state, approved_at, error)` (lecture admin déjà utilisée par le panneau de revue).
+   - Onglets avec compteurs : À valider (défaut) · À vérifier · Planifiées · Envoyées · Toutes ; filtres winery/période/marché/recherche conservés. Le sélecteur de statut existant reste pour les autres statuts (brouillon, archivé…).
+   - Compteurs calculés sur la même liste que les onglets (après filtres hors onglet) pour rester cohérents.
+   - Badge « Planifiée — envoi estimé le … » sur les lignes en file (même estimation que le panneau).
+3. **`src/components/admin/CampaignReviewSheet.tsx`** : après `approve_campaign_for_queue` réussie, relire la ligne file puis appeler le rafraîchissement parent (déjà existant via `fetchCampaigns`) pour que la campagne sorte immédiatement d'« À valider ». Même chose après `cancel_campaign_queue` (retour dans « À valider »).
+4. **Traductions FR/EN** admin (`adminCampaigns.tabs.*`, `scheduledBadge`, `scheduleFailed`).
+
+Hors périmètre / inchangé : RPC, Edge Functions, cron 08:00 UTC, règle 1 envoi/jour Paris, Brevo, notifications, relances, campagnes legacy (`create-campaign`), pages vignerons, schéma, RLS.
+
+## Effets de bord à surveiller
+- Une campagne legacy validée via `create-campaign` passe directement `active` : elle apparaît dans « Envoyées » (comportement actuel conservé).
+- Fenêtre `sending` (worker en cours) : classée « Planifiées » avec mention « envoi en cours » ; jamais de bouton Valider possible (garde-fous existants `queueBlocks`/`canStartSend`).
+- Une campagne `queued` annulée revient dans « À valider ».
+- Si la lecture de la file échoue côté admin : afficher une erreur et ne classer aucune campagne en « Planifiées » (repli sûr = « À valider »).
+
+## Tests
+- `admin-campaign-category.test.ts` (bun) : un cas par ligne du tableau ci-dessus, dont : RPC échouée/sans ligne → À valider ; `failed` → À valider ; `needs_review` → À vérifier ; `queued` → Planifiées ; `active`/`results` → Envoyées ; compteurs = somme des onglets.
+- Tests existants rejoués : `queue-worker_test.ts`, `campaign-send-state`, tests campagne ; typecheck + build.
+- Vérification lecture seule en base : les 7 campagnes en file comptées en « Planifiées », 0 écriture.
+- Non testable sans compte admin connecté dans le navigateur : à signaler si la session admin n'est pas disponible. Aucun envoi réel déclenché.
