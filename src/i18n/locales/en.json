@@ -2922,7 +2922,19 @@
       "scoreRange": "Score must be between 0 and 10."
     },
     "customEmail": "Custom email",
-    "customEmailHint": "Email prepared by the producer: sending will be available in lot C. The legacy button is disabled so no different text is sent."
+    "customEmailHint": "Email prepared by the producer: sending will be available in lot C. The legacy button is disabled so no different text is sent.",
+    "tabs": {
+      "to_review": "To review",
+      "to_check": "To check",
+      "scheduled": "Scheduled",
+      "sent": "Sent",
+      "all": "All"
+    },
+    "scheduledBadge": "Scheduled · #{{position}} in queue",
+    "sendingBadge": "Sending",
+    "scheduleFailedBadge": "Scheduling failed",
+    "queueLoadError": "Could not read the send queue: no campaign is shown as scheduled.",
+    "scheduleNotConfirmed": "Queueing could not be confirmed: the campaign stays to review."
   },
   "parseAddresses": {
     "button": "Normalize addresses",

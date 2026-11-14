@@ -124,6 +124,12 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
     try {
       const { error } = await (supabase.rpc as any)('approve_campaign_for_queue', { _id: c.id });
       if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
+      // Only report "scheduled" once the queue row is confirmed in the database.
+      const { data: row } = await (supabase.from as any)('campaign_send_queue').select('state').eq('campaign_id', c.id).maybeSingle();
+      if (row?.state !== 'queued' && row?.state !== 'sending') {
+        toast({ title: k('errorTitle'), description: t('adminCampaigns.scheduleNotConfirmed'), variant: 'destructive' });
+        setReloadKey((n) => n + 1); return;
+      }
       toast({ title: k('scheduledToast') });
       // Producer email (FR/EN, deduplicated server-side). A failure never cancels the scheduling.
       const { data: n, error: nErr } = await supabase.functions.invoke('notify-campaign-validated', { body: { campaignId: c.id, kind: 'scheduled' } });
