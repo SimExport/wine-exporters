@@ -37,18 +37,17 @@ serve(async (req) => {
       .select("role")
       .eq("user_id", userData.user.id)
       .eq("role", "admin")
-      .maybeSing    const { email, redirectTo } = await req.json();
+      .maybeSingle();
+    if (!roleRow) return json({ error: "forbidden" }, 403);
+
+    const { email, redirectTo } = await req.json();
     const cleanEmail = normalizeEmail(email);
     if (!cleanEmail) return json({ error: "invalid_email" }, 400);
     // No one-time link is generated any more (email scanners consumed them). The admin gets the
-    // inert activation page; the person requests/enters a native code there.
+    // inert activation page; the person requests and types a native Supabase code there.
     return json({ success: true, page: pageUrl(redirectTo), email: cleanEmail });
-;
-    }
-
-    return json({ success: true, type: usedType, link });
   } catch (e: any) {
     console.error("admin-invite-link error:", e?.message);
-    return json({ error: e?.message || "server_error" }, 500);
+    return json({ error: "server_error" }, 500);
   }
 });
