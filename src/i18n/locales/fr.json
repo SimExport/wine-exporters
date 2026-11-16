@@ -720,7 +720,7 @@
       "description": "Saisissez votre email, nous vous envoyons un lien pour définir un nouveau mot de passe.",
       "submit": "Envoyer le lien",
       "sending": "Envoi…",
-      "sent": "Si un compte existe pour cette adresse, un email vient d'être envoyé avec un lien de réinitialisation. Pensez à vérifier vos spams.",
+      "sent": "Si un compte existe pour cette adresse, un email contenant un code de réinitialisation vient d'être envoyé. Pensez à vérifier vos spams.",
       "backToSignIn": "Retour à la connexion"
     }
   },
