@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handleExportVins } from "./exportvins.ts";
+import { normalizeEmail, sendExistingAccountCode, sendInviteCode } from "../_shared/auth-code.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,7 +57,12 @@ serve(async (req) => {
       });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = normalizeEmail(email);
+    if (!cleanEmail) {
+      return new Response(JSON.stringify({ error: "invalid_email" }), {
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     // ExportVins branch: never grants 'paid', never touches subscription/Stripe.
     if (body.type === "exportvins") {
@@ -87,16 +93,29 @@ serve(async (req) => {
           status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
         });
       }
-      const { error: otpErr } = await admin.auth.signInWithOtp({
-        email: cleanEmail,
-        options: { emailRedirectTo: redirectTo || undefined, shouldCreateUser: false },
-      });
+      const { error: otpErr } = await sendExistingAccountCode(admin, cleanEmail, redirectTo);
       if (otpErr) {
         return new Response(JSON.stringify({ error: otpErr.message }), {
           status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
         });
       }
       return new Response(JSON.stringify({ success: true, exportvins: true }), {
+        status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Resend = a new native code for an EXISTING account only: no invitation row,
+    // no role/plan/credit change, never creates an account.
+    if (mode === "resend") {
+      const { error: otpErr } = await sendExistingAccountCode(admin, cleanEmail, redirectTo);
+      const friendly = otpErr
+        ? ((otpErr as any).status === 429 || /rate|seconds/i.test(otpErr.message)
+          ? "Un code vient déjà d'être envoyé : réessayez dans une minute."
+          : /not found|signups not allowed/i.test(otpErr.message)
+            ? "Aucun compte pour cet email : utilisez « Inviter »."
+            : otpErr.message)
+        : null;
+      return new Response(JSON.stringify(friendly ? { error: friendly } : { success: true, resent: true }), {
         status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
@@ -113,38 +132,21 @@ serve(async (req) => {
       .select("id")
       .maybeSingle();
 
-    const sendMagicLinkEmail = async () => {
-      return await admin.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          emailRedirectTo: redirectTo || undefined,
-          shouldCreateUser: false,
-        },
-      });
-    };
-
     let data: any;
     let error: any;
-
-    if (mode === "resend") {
-      const res = await sendMagicLinkEmail();
-      data = res.data;
-      error = res.error;
-    } else {
-      const res = await admin.auth.admin.inviteUserByEmail(cleanEmail, {
-        redirectTo: redirectTo || undefined,
-      });
+    {
+      const res = await sendInviteCode(admin, cleanEmail, redirectTo);
       data = res.data;
       error = res.error;
       if (error && (error as any).code === "email_exists") {
-        const res2 = await sendMagicLinkEmail();
+        const res2 = await sendExistingAccountCode(admin, cleanEmail, redirectTo);
         data = res2.data;
         error = res2.error;
       }
     }
 
     if (error) {
-      console.error("invite error:", error);
+      console.error("invite error:", (error as any)?.code ?? (error as any)?.status);
       const code = (error as any).code;
       const friendly = code === "email_exists"
         ? "Cet email est déjà enregistré."
