@@ -717,11 +717,13 @@
     "forgot": {
       "link": "Forgot your password?",
       "title": "Forgot password",
-      "description": "Enter your email and we'll send you a link to set a new password.",
-      "submit": "Send the link",
+      "description": "Enter your email and we'll send you a code to set a new password.",
+      "submit": "Get a code",
       "sending": "Sending…",
       "sent": "If an account exists for this address, an email with a reset code has just been sent. Remember to check your spam folder.",
-      "backToSignIn": "Back to sign in"
+      "backToSignIn": "Back to sign in",
+      "rateLimited": "Too many requests. Please wait a minute and try again.",
+      "failed": "The code could not be sent. Please try again in a few minutes."
     }
   },
   "credits": {
@@ -3054,7 +3056,12 @@
     "successDesc": "{{email}} will receive an email to set their password.",
     "errorTitle": "Error",
     "errorGeneric": "Couldn't send the invitation.",
-    "invalidEmail": "Invalid email."
+    "invalidEmail": "Invalid email.",
+    "instructionsButton": "Instructions",
+    "instructionsTitle": "Copy the code-based activation instructions",
+    "instructionsCopied": "Instructions copied",
+    "instructionsCopiedDesc": "Code-based activation instructions copied for {{email}}. No one-time link is generated.",
+    "instructionsClipboard": "Activate your WineExporters account: open {{page}}, enter {{email}}, click “Get a new code”, then type the code you receive by email."
   },
   "sourcing": {
     "title": "My bespoke searches",

@@ -717,11 +717,13 @@
     "forgot": {
       "link": "Mot de passe oublié ?",
       "title": "Mot de passe oublié",
-      "description": "Saisissez votre email, nous vous envoyons un lien pour définir un nouveau mot de passe.",
-      "submit": "Envoyer le lien",
+      "description": "Saisissez votre email, nous vous envoyons un code pour définir un nouveau mot de passe.",
+      "submit": "Recevoir un code",
       "sending": "Envoi…",
       "sent": "Si un compte existe pour cette adresse, un email contenant un code de réinitialisation vient d'être envoyé. Pensez à vérifier vos spams.",
-      "backToSignIn": "Retour à la connexion"
+      "backToSignIn": "Retour à la connexion",
+      "rateLimited": "Trop de demandes. Patientez une minute avant de réessayer.",
+      "failed": "L'envoi du code a échoué. Réessayez dans quelques minutes."
     }
   },
   "credits": {
@@ -3054,7 +3056,12 @@
     "successDesc": "{{email}} recevra un email pour définir son mot de passe.",
     "errorTitle": "Erreur",
     "errorGeneric": "Impossible d'envoyer l'invitation.",
-    "invalidEmail": "Email invalide."
+    "invalidEmail": "Email invalide.",
+    "instructionsButton": "Instructions",
+    "instructionsTitle": "Copier les instructions d'activation par code",
+    "instructionsCopied": "Instructions copiées",
+    "instructionsCopiedDesc": "Instructions d'activation par code copiées pour {{email}}. Aucun lien à usage unique n'est généré.",
+    "instructionsClipboard": "Activez votre compte WineExporters : ouvrez {{page}}, saisissez {{email}}, cliquez sur « Recevoir un nouveau code », puis saisissez le code reçu par email."
   },
   "sourcing": {
     "title": "Mes recherches sur-mesure",

@@ -50,3 +50,29 @@ test("legacy link outputs are detected", () => {
   assert.equal(readLegacyParams("https://wine-exporters.com/set-password#access_token=t&refresh_token=r").accessToken, "t");
   assert.equal(readLegacyParams("https://wine-exporters.com/set-password").error, null);
 });
+
+import { classifyResendError, identityOf, legacyPkceAction, sameIdentity } from "./auth-code";
+
+test("password change refused when another tab switched account", () => {
+  const proven = identityOf({ id: "u1", email: "Jane@Example.com" });
+  assert.equal(sameIdentity(proven, { id: "u1", email: "jane@example.com" }), true);
+  assert.equal(sameIdentity(proven, { id: "u2", email: "jane@example.com" }), false);
+  assert.equal(sameIdentity(proven, { id: "u1", email: "other@example.com" }), false);
+  assert.equal(sameIdentity(null, { id: "u1", email: "jane@example.com" }), false);
+});
+test("resend hides only the known no-account answers", () => {
+  assert.equal(classifyResendError(null), "sent");
+  assert.equal(classifyResendError({ status: 422, code: "otp_disabled", message: "Signups not allowed for otp" }), "sent");
+  assert.equal(classifyResendError({ status: 500, code: "unexpected_failure", message: "Error sending recovery email" }), "failed");
+  assert.equal(classifyResendError({ status: 429, code: "over_email_send_rate_limit", message: "rate limit" }), "rate_limited");
+});
+test("network exception during verification is reported, not thrown", async () => {
+  const c = { auth: { async verifyOtp() { throw new TypeError("Failed to fetch"); } } };
+  assert.deepEqual(await verifyCode(c, "a@b.co", "123456", ACTIVATION_TYPES), { ok: false, kind: "network" });
+});
+test("legacy PKCE code is never exchanged twice nor proven by an older session", () => {
+  assert.equal(legacyPkceAction(false, true), "accept_client_session");
+  assert.equal(legacyPkceAction(true, true), "exchange");
+  assert.equal(legacyPkceAction(true, false), "exchange");
+  assert.equal(legacyPkceAction(false, false), "none");
+});

@@ -28,7 +28,12 @@ type VerifyClient = { auth: { verifyOtp: (p: any) => Promise<{ data: any; error:
 export async function verifyCode(client: VerifyClient, email: string, code: string, types: VerifyType[]) {
   let last: any = null;
   for (const type of types) {
-    const { data, error } = await client.auth.verifyOtp({ email: normalizeEmail(email), token: code, type });
+    let data: any = null; let error: any = null;
+    try {
+      ({ data, error } = await client.auth.verifyOtp({ email: normalizeEmail(email), token: code, type }));
+    } catch (e: any) {
+      return { ok: false as const, kind: (classifyAuthError(e) === "rate_limited" ? "rate_limited" : "network") as CodeErrorKind };
+    }
     if (!error && data?.session) return { ok: true as const, session: data.session, type };
     last = error ?? { message: "no_session" };
     if (classifyAuthError(last) !== "invalid_or_expired") break;
@@ -48,3 +53,29 @@ export function readLegacyParams(href: string): LegacyParams {
   };
 }
 export const hasLegacyParams = (p: LegacyParams) => Boolean(p.pkceCode || p.accessToken || p.error);
+
+export type VerifiedIdentity = { id: string; email: string };
+export const identityOf = (user: { id?: string; email?: string | null } | null | undefined): VerifiedIdentity | null =>
+  user?.id && user.email ? { id: user.id, email: normalizeEmail(user.email) } : null;
+/** The password may only be changed for the exact account proven by the code / legacy link. */
+export const sameIdentity = (expected: VerifiedIdentity | null, user: { id?: string; email?: string | null } | null | undefined) =>
+  Boolean(expected && user?.id === expected.id && user.email && normalizeEmail(user.email) === expected.email);
+
+export type ResendOutcome = "sent" | "rate_limited" | "network" | "failed";
+/** Only the known "no such account" answers are shown as "sent" (no enumeration); SMTP/500 etc. are real failures. */
+export function classifyResendError(err: any): ResendOutcome {
+  if (!err) return "sent";
+  const k = classifyAuthError(err);
+  if (k === "rate_limited" || k === "network") return k;
+  const code = String(err.code ?? ""); const msg = String(err.message ?? "");
+  if (code === "user_not_found" || code === "otp_disabled" || /signups not allowed|user not found/i.test(msg)) return "sent";
+  return "failed";
+}
+
+/**
+ * Legacy ?code= links: never exchange twice. If the client already finished its own detection
+ * (the code is gone from the URL and a session exists) that session is the link's proof;
+ * otherwise (code still in the URL) a manual exchange is the only proof, a pre-existing session is not.
+ */
+export const legacyPkceAction = (codeStillInUrl: boolean, hasSession: boolean): "accept_client_session" | "exchange" | "none" =>
+  !codeStillInUrl ? (hasSession ? "accept_client_session" : "none") : "exchange";
