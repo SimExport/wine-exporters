@@ -1,4 +1,5 @@
 // This module has no runtime SDK imports so the payment flow can be tested with mocks.
+import { sendExistingAccountCode, sendInviteCode } from "../_shared/auth-code.ts";
 export const WINEEXPORTERS_PRICES = new Set([
   "price_1TI7IsK7E7uiZKC0vIcHojGh",
   "price_1SjHFEK7E7uiZKC06cBOE57l",
@@ -144,8 +145,8 @@ export async function processFirstPayment(stripe: any, admin: any, eventInvoice:
       await save({ last_error: SENDING + kind, user_id: user?.id ?? null });
       notificationInFlight = true;
       const result = user
-        ? await admin.auth.signInWithOtp({ email, options: { emailRedirectTo: PAYMENT_REDIRECT, shouldCreateUser: false } })
-        : await admin.auth.admin.inviteUserByEmail(email, { redirectTo: PAYMENT_REDIRECT });
+        ? await sendExistingAccountCode(admin, email, PAYMENT_REDIRECT)
+        : await sendInviteCode(admin, email, PAYMENT_REDIRECT);
       if (result.error) {
         // A returned upstream error may still have followed mail delivery. Conservatively freeze
         // its outcome rather than sending another email on a Stripe retry.
