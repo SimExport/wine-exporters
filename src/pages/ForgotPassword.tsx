@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { classifyAuthError, isValidEmail, normalizeEmail } from "@/lib/auth-code";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,20 +18,26 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!isValidEmail(email)) return;
+    const clean = normalizeEmail(email);
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // Native Supabase recovery email; the template shows a code, the link only opens the inert page.
+    const { error } = await supabase.auth.resetPasswordForEmail(clean, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setLoading(false);
-    if (error && !/user/i.test(error.message)) {
-      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
+    const kind = error ? classifyAuthError(error) : null;
+    if (kind === "rate_limited" || kind === "network") {
+      toast({ title: t("common.error"), description: error!.message, variant: "destructive" });
       return;
     }
+    // Same outcome whether or not the account exists (no enumeration, never creates an account).
     setSent(true);
+    navigate("/reset-password", { state: { email: clean, sent: true } });
   };
 
   return (
