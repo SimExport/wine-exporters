@@ -262,7 +262,7 @@ const AdminInvitations = () => {
                           variant="ghost"
                           onClick={() => onCopyLink(r)}
                           disabled={linkingId === r.id}
-                          title="Copier le lien de création de mot de passe"
+                          title="Copier les instructions d’activation par code"
                         >
                           <Link2 className="h-3 w-3 mr-1" />
                           {linkingId === r.id ? "…" : "Lien"}
