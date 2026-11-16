@@ -720,7 +720,7 @@
       "description": "Enter your email and we'll send you a link to set a new password.",
       "submit": "Send the link",
       "sending": "Sending…",
-      "sent": "If an account exists for this address, an email with a reset link has just been sent. Remember to check your spam folder.",
+      "sent": "If an account exists for this address, an email with a reset code has just been sent. Remember to check your spam folder.",
       "backToSignIn": "Back to sign in"
     }
   },

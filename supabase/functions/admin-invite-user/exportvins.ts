@@ -1,5 +1,6 @@
 // ExportVins Mission Performance invitation: never grants 'paid', never touches Stripe.
 import { layout, sendResend, esc, BOOKING_URL } from "../_shared/we-email.ts";
+import { pageUrl, sendExistingAccountCode } from "../_shared/auth-code.ts";
 
 type Contact = {
   company_name?: string; country?: string; contact_name?: string; email?: string;
@@ -148,23 +149,20 @@ export async function handleExportVins(admin: any, adminId: string, email: strin
     const { count } = await admin.from("leads").select("id", { count: "exact", head: true })
       .eq("campaign_id", camp.id).eq("mission_name", missionName);
 
-    // 6. Branded welcome email with a secure one-time Supabase link (never returned to the browser)
+    // 6. Branded welcome email with an inert page link (no token), then a separate native
+    // Supabase code to type on that page. Nothing consumable is ever put in an email link.
     if (!skipEmail) {
       let sendErr: string | null = null;
-      const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
-        type: "magiclink", email, options: { redirectTo: body.redirectTo || undefined },
-      });
-      const actionLink = link?.properties?.action_link;
-      if (linkErr || !actionLink) sendErr = linkErr?.message || "Lien indisponible";
-      else {
-        try {
-          const { subject, html } = welcomeEmail(lang, domainName, count ?? rows.length, actionLink);
-          const id = await sendResend(email, subject, html);
-          await admin.from("campaign_email_logs").insert({
-            event_type: "exportvins_welcome", recipient: email, subject, status: "sent", resend_id: id ?? null,
-          });
-        } catch (e: any) { sendErr = e?.message || "Envoi impossible"; }
-      }
+      const url = pageUrl(body.redirectTo);
+      try {
+        const { subject, html } = welcomeEmail(lang, domainName, count ?? rows.length, url);
+        const id = await sendResend(email, subject, html);
+        await admin.from("campaign_email_logs").insert({
+          event_type: "exportvins_welcome", recipient: email, subject, status: "sent", resend_id: id ?? null,
+        });
+        const { error: codeErr } = await sendExistingAccountCode(admin, email, body.redirectTo);
+        if (codeErr) sendErr = "code d'activation non envoyé (" + (codeErr.message || "erreur") + ") — utilisez « Renvoyer »";
+      } catch (e: any) { sendErr = e?.message || "Envoi impossible"; }
       if (sendErr) {
         await fail("Contacts importés, mais email non envoyé : " + sendErr, { invited_user_id: userId, imported_count: rows.length });
         return { error: "Contacts importés, mais l'email n'a pas pu partir : " + sendErr, imported: rows.length };
@@ -194,7 +192,7 @@ function welcomeEmail(lang: "fr" | "en", domain: string, n: number, url: string)
       ],
       ctaLabel: "Open my CRM", ctaUrl: url,
       secondary: { label: "Book a call with us", url: BOOKING_URL },
-      footer: "This link is personal and can only be used once. If it has expired, sign in from wine-exporters.com.",
+      footer: "You will receive a separate email with your personal activation code: enter it on this page, then choose your password.",
     }),
   };
   return {
@@ -209,7 +207,7 @@ function welcomeEmail(lang: "fr" | "en", domain: string, n: number, url: string)
       ],
       ctaLabel: "Accéder à mon CRM", ctaUrl: url,
       secondary: { label: "Prendre rendez-vous avec nous", url: BOOKING_URL },
-      footer: "Ce lien est personnel et utilisable une seule fois. S'il a expiré, connectez-vous depuis wine-exporters.com.",
+      footer: "Vous recevez par un email séparé votre code d'activation personnel : saisissez-le sur cette page puis choisissez votre mot de passe.",
     }),
   };
 }

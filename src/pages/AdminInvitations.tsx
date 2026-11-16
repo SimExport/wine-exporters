@@ -56,11 +56,14 @@ const AdminInvitations = () => {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      const link = (data as any)?.link as string;
-      await navigator.clipboard.writeText(link);
+      const page = (data as any)?.page as string;
+      // No one-time link anymore: share the activation page; the person requests a code there.
+      await navigator.clipboard.writeText(
+        `Activez votre compte WineExporters : ouvrez ${page}, saisissez ${row.email}, cliquez sur « Recevoir un nouveau code », puis saisissez le code reçu par email.`,
+      );
       toast({
-        title: "Lien copié",
-        description: `Lien de création de mot de passe copié pour ${row.email}. Transmettez-le directement.`,
+        title: "Instructions copiées",
+        description: `Instructions d'activation par code copiées pour ${row.email}. Aucun lien à usage unique n'est généré.`,
       });
     } catch (err: any) {
       toast({
@@ -259,7 +262,7 @@ const AdminInvitations = () => {
                           variant="ghost"
                           onClick={() => onCopyLink(r)}
                           disabled={linkingId === r.id}
-                          title="Copier le lien de création de mot de passe"
+                          title="Copier les instructions d’activation par code"
                         >
                           <Link2 className="h-3 w-3 mr-1" />
                           {linkingId === r.id ? "…" : "Lien"}

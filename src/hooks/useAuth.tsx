@@ -37,7 +37,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         setLoading(false);
         if (event === 'PASSWORD_RECOVERY') {
-          if (window.location.pathname !== '/reset-password') {
+          // Code-based activation/reset pages handle the recovery session themselves.
+          if (!['/reset-password', '/set-password'].includes(window.location.pathname)) {
             window.location.replace('/reset-password');
           }
         }

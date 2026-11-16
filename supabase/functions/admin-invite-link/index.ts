@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { normalizeEmail, pageUrl } from "../_shared/auth-code.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,40 +41,13 @@ serve(async (req) => {
     if (!roleRow) return json({ error: "forbidden" }, 403);
 
     const { email, redirectTo } = await req.json();
-    if (!email || typeof email !== "string") return json({ error: "missing_email" }, 400);
-    const cleanEmail = email.trim().toLowerCase();
-    const target = typeof redirectTo === "string" && redirectTo.startsWith("https://")
-      ? redirectTo
-      : "https://wine-exporters.com/set-password";
-
-    // Try invite (new user) -> magiclink (existing, unconfirmed) -> recovery (existing, confirmed)
-    const types = ["invite", "magiclink", "recovery"] as const;
-    let link: string | null = null;
-    let usedType: string | null = null;
-    let lastError: string | null = null;
-
-    for (const type of types) {
-      const { data, error } = await admin.auth.admin.generateLink({
-        type,
-        email: cleanEmail,
-        options: { redirectTo: target },
-      } as any);
-      if (!error && data?.properties?.action_link) {
-        link = data.properties.action_link;
-        usedType = type;
-        break;
-      }
-      lastError = error?.message ?? "unknown_error";
-    }
-
-    if (!link) {
-      console.error("generateLink failed for target user:", lastError);
-      return json({ error: lastError || "link_generation_failed" }, 200);
-    }
-
-    return json({ success: true, type: usedType, link });
+    const cleanEmail = normalizeEmail(email);
+    if (!cleanEmail) return json({ error: "invalid_email" }, 400);
+    // No one-time link is generated any more (email scanners consumed them). The admin gets the
+    // inert activation page; the person requests and types a native Supabase code there.
+    return json({ success: true, page: pageUrl(redirectTo), email: cleanEmail });
   } catch (e: any) {
     console.error("admin-invite-link error:", e?.message);
-    return json({ error: e?.message || "server_error" }, 500);
+    return json({ error: "server_error" }, 500);
   }
 });
