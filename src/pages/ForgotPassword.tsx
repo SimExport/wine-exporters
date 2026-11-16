@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { classifyAuthError, isValidEmail, normalizeEmail } from "@/lib/auth-code";
+import { classifyResendError, isValidEmail, normalizeEmail } from "@/lib/auth-code";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,15 +25,21 @@ const ForgotPassword = () => {
     if (!isValidEmail(email)) return;
     const clean = normalizeEmail(email);
     setLoading(true);
-    // Native Supabase recovery email; the template shows a code, the link only opens the inert page.
-    const { error } = await supabase.auth.resetPasswordForEmail(clean, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setLoading(false);
-    const kind = error ? classifyAuthError(error) : null;
-    if (kind === "rate_limited" || kind === "network") {
-      toast({ title: t("common.error"), description: error!.message, variant: "destructive" });
+    try {
+      // Native Supabase recovery email; the template shows a code, the link only opens the inert page.
+      const { error } = await supabase.auth.resetPasswordForEmail(clean, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      const outcome = classifyResendError(error);
+      if (outcome !== "sent") {
+        toast({ title: t("common.error"), description: t(outcome === "rate_limited" ? "auth.forgot.rateLimited" : "auth.forgot.failed"), variant: "destructive" });
+        return;
+      }
+    } catch {
+      toast({ title: t("common.error"), description: t("auth.forgot.failed"), variant: "destructive" });
       return;
+    } finally {
+      setLoading(false);
     }
     // Same outcome whether or not the account exists (no enumeration, never creates an account).
     setSent(true);

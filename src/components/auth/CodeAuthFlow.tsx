@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   ACTIVATION_TYPES, RECOVERY_TYPES, RESEND_DELAY_SECONDS, classifyAuthError, hasLegacyParams,
   isValidCode, isValidEmail, normalizeCode, normalizeEmail, readLegacyParams, verifyCode, type CodeErrorKind,
+  classifyResendError, identityOf, legacyPkceAction, sameIdentity, type VerifiedIdentity,
 } from "@/lib/auth-code";
 
 type Mode = "activation" | "recovery";
@@ -24,6 +25,7 @@ const TXT = {
     email: "Email", code: "Code reçu par email", verify: "Vérifier le code", verifying: "Vérification…",
     password: "Mot de passe", confirm: "Confirmer le mot de passe", saving: "Enregistrement…",
     resend: "Recevoir un nouveau code", resendIn: (s: number) => `Nouveau code possible dans ${s} s`,
+    resendFailed: "L'envoi du code a échoué. Réessayez dans quelques minutes.",
     resent: "Si un compte existe pour cet email, un nouveau code vient d'être envoyé. Seul le dernier code reçu est valable.",
     badEmail: "Adresse email invalide.", badCode: "Le code contient uniquement des chiffres (6 au minimum).",
     tooShort: "8 caractères minimum.", mismatch: "Les mots de passe ne correspondent pas.",
@@ -43,6 +45,7 @@ const TXT = {
     email: "Email", code: "Code received by email", verify: "Verify code", verifying: "Verifying…",
     password: "Password", confirm: "Confirm password", saving: "Saving…",
     resend: "Get a new code", resendIn: (s: number) => `New code available in ${s}s`,
+    resendFailed: "The code could not be sent. Please try again in a few minutes.",
     resent: "If an account exists for this email, a new code has just been sent. Only the latest code is valid.",
     badEmail: "Invalid email address.", badCode: "The code only contains digits (at least 6).",
     tooShort: "8 characters minimum.", mismatch: "Passwords do not match.",
@@ -71,6 +74,13 @@ export default function CodeAuthFlow({ mode }: { mode: Mode }) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
+  // Account proven by the typed code or the legacy link; only this account may get a new password.
+  const verified = useRef<VerifiedIdentity | null>(null);
+  const accept = (user: any) => {
+    verified.current = identityOf(user);
+    if (!verified.current) return false;
+    setEmail(verified.current.email); setStep("password"); return true;
+  };
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>((location.state as any)?.sent ? T.resent : null);
   const [cooldown, setCooldown] = useState((location.state as any)?.sent ? RESEND_DELAY_SECONDS : 0);
@@ -92,17 +102,23 @@ export default function CodeAuthFlow({ mode }: { mode: Mode }) {
       try {
         if (legacy.error) { setError(T.legacy); return; }
         if (legacy.pkceCode) {
-          // The client uses the implicit flow, so detectSessionInUrl ignores ?code: single manual exchange.
-          const { data, error: e } = await supabase.auth.exchangeCodeForSession(legacy.pkceCode);
-          if (!e && data?.session) { setEmail(data.session.user.email ?? ""); setStep("password"); return; }
+          // Let the client finish its own URL detection first so the code is never exchanged twice.
+          const { data: init } = await supabase.auth.getSession();
+          const stillInUrl = new URL(window.location.href).searchParams.get("code") === legacy.pkceCode;
+          const action = legacyPkceAction(stillInUrl, Boolean(init.session));
+          if (action === "accept_client_session" && accept(init.session!.user)) return;
+          if (action === "exchange") {
+            const { data, error: e } = await supabase.auth.exchangeCodeForSession(legacy.pkceCode);
+            if (!e && data?.session && accept(data.session.user)) return;
+          }
           setError(T.legacy); return;
         }
         // #access_token: detectSessionInUrl owns the exchange; just wait for it and check it is this link's session.
         const { data } = await supabase.auth.getSession();
-        if (data.session && data.session.access_token === legacy.accessToken) {
-          setEmail(data.session.user.email ?? ""); setStep("password"); return;
-        }
+        if (data.session && data.session.access_token === legacy.accessToken && accept(data.session.user)) return;
         setError(T.legacy);
+      } catch {
+        setError(T.errors.network);
       } finally {
         strip();
         setStep((s) => (s === "checking" ? "code" : s));
@@ -121,7 +137,7 @@ export default function CodeAuthFlow({ mode }: { mode: Mode }) {
     setBusy(false);
     setCode("");
     if (!r.ok) return setError(T.errors[r.kind]);
-    setStep("password");
+    if (!accept(r.session.user)) setError(T.errors.unknown);
   };
 
   const onResend = async () => {
@@ -129,16 +145,22 @@ export default function CodeAuthFlow({ mode }: { mode: Mode }) {
     if (!isValidEmail(email)) return setError(T.badEmail);
     setBusy(true);
     const clean = normalizeEmail(email);
-    const { error: e } = mode === "recovery"
-      ? await supabase.auth.resetPasswordForEmail(clean, { redirectTo: `${window.location.origin}/reset-password` })
-      : await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/set-password` } });
-    setBusy(false);
-    const kind = e ? classifyAuthError(e) : null;
-    if (kind === "rate_limited") { setError(T.errors.rate_limited); setCooldown(RESEND_DELAY_SECONDS); return; }
-    if (kind === "network") return setError(T.errors.network);
-    // Unknown accounts get the same answer (no account enumeration, no account creation).
-    setInfo(T.resent);
-    setCooldown(RESEND_DELAY_SECONDS);
+    try {
+      const { error: e } = mode === "recovery"
+        ? await supabase.auth.resetPasswordForEmail(clean, { redirectTo: `${window.location.origin}/reset-password` })
+        : await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/set-password` } });
+      const outcome = classifyResendError(e);
+      if (outcome === "rate_limited") { setError(T.errors.rate_limited); setCooldown(RESEND_DELAY_SECONDS); return; }
+      if (outcome === "network") return setError(T.errors.network);
+      if (outcome === "failed") return setError(T.resendFailed);
+      // Known "no account" answers look like success: no enumeration, no account creation.
+      setInfo(T.resent);
+      setCooldown(RESEND_DELAY_SECONDS);
+    } catch {
+      setError(T.errors.network);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const onPassword = async (e: React.FormEvent) => {
@@ -147,12 +169,20 @@ export default function CodeAuthFlow({ mode }: { mode: Mode }) {
     if (password.length < 8) return setError(T.tooShort);
     if (password !== confirm) return setError(T.mismatch);
     setBusy(true);
-    // The session must really exist (and be validated by Auth) before changing the password.
-    const { data: u, error: ue } = await supabase.auth.getUser();
-    if (ue || !u.user) { setBusy(false); setStep("code"); return setError(T.noSession); }
-    const { error: pe } = await supabase.auth.updateUser({ password });
-    setBusy(false);
-    if (pe) return setError(pe.message);
+    try {
+      // The validated session must still be the exact account proven by the code (another tab may have switched it).
+      const { data: u, error: ue } = await supabase.auth.getUser();
+      if (ue || !sameIdentity(verified.current, u.user)) {
+        verified.current = null; setPassword(""); setConfirm(""); setStep("code");
+        return setError(T.noSession);
+      }
+      const { error: pe } = await supabase.auth.updateUser({ password });
+      if (pe) return setError(T.errors.unknown);
+    } catch {
+      return setError(T.errors.network);
+    } finally {
+      setBusy(false);
+    }
     setInfo(M.done);
     navigate("/dashboard", { replace: true });
   };

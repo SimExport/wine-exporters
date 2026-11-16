@@ -58,12 +58,10 @@ const AdminInvitations = () => {
       if ((data as any)?.error) throw new Error((data as any).error);
       const page = (data as any)?.page as string;
       // No one-time link anymore: share the activation page; the person requests a code there.
-      await navigator.clipboard.writeText(
-        `Activez votre compte WineExporters : ouvrez ${page}, saisissez ${row.email}, cliquez sur « Recevoir un nouveau code », puis saisissez le code reçu par email.`,
-      );
+      await navigator.clipboard.writeText(t("adminInvitations.instructionsClipboard", { page, email: row.email }));
       toast({
-        title: "Instructions copiées",
-        description: `Instructions d'activation par code copiées pour ${row.email}. Aucun lien à usage unique n'est généré.`,
+        title: t("adminInvitations.instructionsCopied"),
+        description: t("adminInvitations.instructionsCopiedDesc", { email: row.email }),
       });
     } catch (err: any) {
       toast({
@@ -262,10 +260,10 @@ const AdminInvitations = () => {
                           variant="ghost"
                           onClick={() => onCopyLink(r)}
                           disabled={linkingId === r.id}
-                          title="Copier les instructions d’activation par code"
+                          title={t("adminInvitations.instructionsTitle")}
                         >
                           <Link2 className="h-3 w-3 mr-1" />
-                          {linkingId === r.id ? "…" : "Lien"}
+                          {linkingId === r.id ? "…" : t("adminInvitations.instructionsButton")}
                         </Button>
                         <Button
                           size="sm"
