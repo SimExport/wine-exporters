@@ -919,6 +919,7 @@ export type Database = {
           campaign_id: string
           created_at: string
           error: string | null
+          scheduled_at: string | null
           sent_at: string | null
           state: string
           updated_at: string
@@ -930,6 +931,7 @@ export type Database = {
           campaign_id: string
           created_at?: string
           error?: string | null
+          scheduled_at?: string | null
           sent_at?: string | null
           state?: string
           updated_at?: string
@@ -941,6 +943,7 @@ export type Database = {
           campaign_id?: string
           created_at?: string
           error?: string | null
+          scheduled_at?: string | null
           sent_at?: string | null
           state?: string
           updated_at?: string
@@ -2932,6 +2935,16 @@ export type Database = {
         Args: { _campaign_id: string; _html: string }
         Returns: boolean
       }
+      campaign_next_free_slot: {
+        Args: { _allow_due: boolean; _now: string }
+        Returns: string
+      }
+      campaign_queue_eligible: { Args: { _id: string }; Returns: boolean }
+      campaign_send_day_usage: {
+        Args: { _day: string; _include_queued: boolean }
+        Returns: number
+      }
+      campaign_slot_window_end: { Args: { _slot: string }; Returns: string }
       cancel_campaign_queue: { Args: { _id: string }; Returns: boolean }
       claim_campaign_result_job: {
         Args: { _id: string }
@@ -2974,6 +2987,28 @@ export type Database = {
           campaign_id: string
           created_at: string
           error: string | null
+          scheduled_at: string | null
+          sent_at: string | null
+          state: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "campaign_send_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_campaign_send_at: {
+        Args: { _now: string }
+        Returns: {
+          approved_at: string
+          approved_by: string | null
+          attempted_at: string | null
+          campaign_id: string
+          created_at: string
+          error: string | null
+          scheduled_at: string | null
           sent_at: string | null
           state: string
           updated_at: string
@@ -2995,6 +3030,7 @@ export type Database = {
         Returns: undefined
       }
       dispatch_campaign_send_queue: { Args: never; Returns: undefined }
+      dispatch_campaign_send_queue_if_due: { Args: never; Returns: undefined }
       dispatch_system_monitor: { Args: never; Returns: undefined }
       dispatch_weekly_importer_notifications: { Args: never; Returns: number }
       ensure_export_credits_reset: { Args: never; Returns: undefined }
@@ -3074,6 +3110,10 @@ export type Database = {
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
       is_test_campaign: { Args: { _id: string }; Returns: boolean }
+      reallocate_campaign_send_slots: {
+        Args: { _allow_due: boolean; _now: string }
+        Returns: number
+      }
       record_system_incident: {
         Args: {
           _category: string
