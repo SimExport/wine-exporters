@@ -14,11 +14,11 @@ import { EmailPrepareStep } from '@/components/campaigns/email-editor/EmailPrepa
 import { functionErrorMessage } from '@/lib/media-upload';
 import { campaignPath, canStartSend, needsBrevoCheck, sendState } from '@/lib/campaign-send-state';
 import { formatDate, formatDateTime } from '@/lib/format';
-import { estimateSendDate, parisDayStart } from '@/lib/campaign-queue';
+import { formatParisSlot } from '@/lib/campaign-queue';
 
 type Confirm = null | 'prepare' | 'send' | 'test' | 'confirm_send' | 'release' | 'schedule' | 'cancel_schedule';
 
-interface QueueInfo { row: any | null; ahead: number; estimated: string | null }
+interface QueueInfo { row: any | null }
 
 interface Props {
   campaign: any | null;
@@ -34,14 +34,14 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 );
 
 export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const k = (s: string, o?: any) => t(`emailEditor.admin.${s}`, o) as string;
   const [details, setDetails] = useState<{ domain?: string; contact?: string; wines: string[]; docs: string[]; events: any[] }>({ wines: [], docs: [], events: [] });
   const [busy, setBusy] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [reason, setReason] = useState('');
   const [checkResult, setCheckResult] = useState<string | null>(null);
-  const [queueInfo, setQueueInfo] = useState<QueueInfo>({ row: null, ahead: 0, estimated: null });
+  const [queueInfo, setQueueInfo] = useState<QueueInfo>({ row: null });
   const [reloadKey, setReloadKey] = useState(0);
   const [editing, setEditing] = useState(false);
   const c = campaign;
@@ -55,19 +55,13 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
       (c.selected_wines?.length ? supabase.from('wines').select('name').in('id', c.selected_wines) : Promise.resolve({ data: [] as any[] })),
       (docIds.length ? supabase.from('documents').select('title').in('id', docIds) : Promise.resolve({ data: [] as any[] })),
       supabase.from('campaign_events').select('type, payload, created_at').eq('campaign_id', c.id).order('created_at', { ascending: false }),
-      (supabase.from as any)('campaign_send_queue').select('campaign_id,state,approved_at,error').eq('campaign_id', c.id).maybeSingle(),
-      (supabase.from as any)('campaign_send_queue').select('campaign_id,approved_at').eq('state', 'queued').order('approved_at', { ascending: true }),
-      supabase.from('campaigns').select('id', { count: 'exact', head: true }).in('status', ['active', 'sending', 'results']).gte('launched_at', parisDayStart().toISOString()),
-    ]).then(([p, w, d, e, q, l, cnt]: any[]) => {
+      (supabase.from as any)('campaign_send_queue').select('campaign_id,state,approved_at,scheduled_at,error').eq('campaign_id', c.id).maybeSingle(),
+    ]).then(([p, w, d, e, q]: any[]) => {
       setDetails({
         domain: p.data?.domain_name, contact: p.data?.contact_name,
         wines: (w.data ?? []).map((x: any) => x.name), docs: (d.data ?? []).map((x: any) => x.title), events: e.data ?? [],
       });
-      const row = q.data ?? null;
-      const queuedRows = l.data ?? [];
-      const ahead = row?.state === 'queued' ? Math.max(0, queuedRows.findIndex((x: any) => x.campaign_id === c.id)) : 0;
-      const estimated = row?.state === 'queued' ? estimateSendDate(ahead + 1, (cnt.count ?? 0) > 0) : null;
-      setQueueInfo({ row, ahead, estimated });
+      setQueueInfo({ row: q.data ?? null });
     });
   }, [c, reloadKey]);
 
@@ -125,8 +119,8 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
       const { error } = await (supabase.rpc as any)('approve_campaign_for_queue', { _id: c.id });
       if (error) { toast({ title: k('errorTitle'), description: error.message, variant: 'destructive' }); return; }
       // Only report "scheduled" once the queue row is confirmed in the database.
-      const { data: row } = await (supabase.from as any)('campaign_send_queue').select('state').eq('campaign_id', c.id).maybeSingle();
-      if (row?.state !== 'queued' && row?.state !== 'sending') {
+      const { data: row } = await (supabase.from as any)('campaign_send_queue').select('state,scheduled_at').eq('campaign_id', c.id).maybeSingle();
+      if (row?.state !== 'queued' || !row?.scheduled_at) {
         toast({ title: k('errorTitle'), description: t('adminCampaigns.scheduleNotConfirmed'), variant: 'destructive' });
         setReloadKey((n) => n + 1); return;
       }
@@ -248,8 +242,7 @@ export const CampaignReviewSheet = ({ campaign, onOpenChange, onChanged }: Props
                   <CalendarClock className="h-4 w-4" />
                   <AlertDescription className="space-y-2">
                     <p className="font-medium">{k('scheduledBadge')}</p>
-                    {queueInfo.estimated && <p className="text-sm">{k('estimatedStart', { date: formatDate(`${queueInfo.estimated}T12:00:00Z`) })}</p>}
-                    {queueInfo.ahead > 0 && <p className="text-sm">{k('queueAhead', { count: queueInfo.ahead })}</p>}
+                    {formatParisSlot(queueInfo.row.scheduled_at, i18n.language) && <p className="text-sm">{k('estimatedStart', { date: formatParisSlot(queueInfo.row.scheduled_at, i18n.language) })}</p>}
                     <Button size="sm" variant="outline" disabled={!!busy} onClick={() => setConfirm('cancel_schedule')}>
                       {busy === 'cancel_schedule' && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}{k('cancelSchedule')}
                     </Button>

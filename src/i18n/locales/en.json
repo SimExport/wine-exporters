@@ -2932,7 +2932,7 @@
       "sent": "Sent",
       "all": "All"
     },
-    "scheduledBadge": "Scheduled · #{{position}} in queue",
+    "scheduledBadge": "Scheduled",
     "sendingBadge": "Sending",
     "scheduleFailedBadge": "Scheduling failed",
     "queueLoadError": "Could not read the send queue: no campaign is shown as scheduled.",

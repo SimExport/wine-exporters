@@ -26,7 +26,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
-import { adminCategory, countByCategory, queuePosition, type AdminCategory, type QueueRowLite } from '@/lib/admin-campaign-category';
+import { formatParisSlot } from '@/lib/campaign-queue';
+import { adminCategory, countByCategory, type AdminCategory, type QueueRowLite } from '@/lib/admin-campaign-category';
 import { ParseAddressesButton } from '@/components/ParseAddressesButton';
 import { AdminCampaignReportUpload } from '@/components/admin/AdminCampaignReportUpload';
 import { CampaignInterestedContactsUpload } from '@/components/admin/CampaignInterestedContactsUpload';
@@ -100,7 +101,7 @@ const COUNTRIES = [
 ];
 
 export default function AdminCampaigns() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,7 +213,7 @@ export default function AdminCampaigns() {
 
       // Admin-only queue read; on failure nothing is shown as scheduled (safe fallback).
       const { data: qRows, error: qErr } = await (supabase.from as any)('campaign_send_queue')
-        .select('campaign_id,state,approved_at,error');
+        .select('campaign_id,state,approved_at,scheduled_at,error');
       if (qErr) {
         setQueueMap({});
         toast({ title: t('adminCampaigns.errorTitle'), description: t('adminCampaigns.queueLoadError'), variant: 'destructive' });
@@ -934,7 +935,12 @@ export default function AdminCampaigns() {
                       <div className="flex items-center gap-2">
                         {getStatusBadge(campaign.status)}
                         {campaign.status === 'pending_validation' && queueMap[campaign.id]?.state === 'queued' && (
-                          <Badge variant="outline" className="whitespace-nowrap">{t('adminCampaigns.scheduledBadge', { position: queuePosition(campaign.id, queueMap) })}</Badge>
+                          <div className="flex flex-col gap-0.5">
+                            <Badge variant="outline" className="whitespace-nowrap">{t('adminCampaigns.scheduledBadge')}</Badge>
+                            {formatParisSlot(queueMap[campaign.id]?.scheduled_at, i18n.language) && (
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">{formatParisSlot(queueMap[campaign.id]?.scheduled_at, i18n.language)} (Paris)</span>
+                            )}
+                          </div>
                         )}
                         {campaign.status === 'pending_validation' && queueMap[campaign.id]?.state === 'sending' && (
                           <Badge variant="outline" className="whitespace-nowrap">{t('adminCampaigns.sendingBadge')}</Badge>

@@ -1,5 +1,5 @@
-// React-free helpers for the admin send queue (one real campaign per Paris civil day, FIFO).
-import { estimateQueueDay } from '../../supabase/functions/_shared/campaign-notify';
+// React-free helpers for the admin send queue. Slots (10:00 and 15:00 Europe/Paris) are reserved
+// server-side in campaign_send_queue.scheduled_at; the browser only displays them, never estimates.
 
 const PARIS_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' });
 const PARIS_PARTS = new Intl.DateTimeFormat('en-US', {
@@ -22,7 +22,12 @@ export function parisDayStart(now: Date = new Date()): Date {
   return new Date(start);
 }
 
-/** Estimated send date (Paris civil day, yyyy-mm-dd) — same rule as the producer email (08:00 UTC cron). */
-export function estimateSendDate(position: number, quotaUsedToday: boolean, now: Date = new Date()): string {
-  return estimateQueueDay(position, quotaUsedToday, now);
+/** Formats a reserved slot (UTC ISO) as Paris wall-clock date + time, e.g. "18/11/2026 10:00" (DST-aware). */
+export function formatParisSlot(iso: string | null | undefined, locale = 'fr-FR'): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat(locale.startsWith('en') ? 'en-GB' : 'fr-FR', {
+    timeZone: 'Europe/Paris', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(d).replace(',', '');
 }

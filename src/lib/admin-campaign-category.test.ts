@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { adminCategory, countByCategory, queuePosition } from './admin-campaign-category';
+import { adminCategory, countByCategory } from './admin-campaign-category';
 
 const pending = { status: 'pending_validation' };
 const q = (state: string, approved_at = '2026-01-01') => ({ campaign_id: 'x', state, approved_at });
@@ -20,9 +20,4 @@ test('counts sum to total', () => {
   const rows = [{ id: 'a', ...pending }, { id: 'b', ...pending }, { id: 'c', status: 'results' }];
   const c = countByCategory(rows, { b: { ...q('queued'), campaign_id: 'b' } });
   assert.deepEqual(c, { to_review: 1, to_check: 0, scheduled: 1, sent: 1, other: 0 });
-});
-test('queue position follows FIFO', () => {
-  const queue = { a: { campaign_id: 'a', state: 'queued', approved_at: '2026-01-02' }, b: { campaign_id: 'b', state: 'queued', approved_at: '2026-01-01' } };
-  assert.equal(queuePosition('a', queue), 2);
-  assert.equal(queuePosition('b', queue), 1);
 });
