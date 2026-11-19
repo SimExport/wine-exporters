@@ -98,6 +98,7 @@ export const campaignEmailEditorFr = {
   status: {
     pending: 'Campagne en cours de validation : l’email n’est plus modifiable.',
     rejected: 'Votre campagne vous a été renvoyée pour modification. Votre crédit est conservé.',
+    scheduled: 'Campagne programmée : envoi prévu le {{date}} (heure de Paris). L’email n’est plus modifiable.',
   },
   savedEmail: 'Email de la campagne',
   mediaInUse: 'Cette image est utilisée dans une campagne déjà soumise ou envoyée : elle ne peut pas être supprimée.',
@@ -236,6 +237,7 @@ export const campaignEmailEditorEn: typeof campaignEmailEditorFr = {
   status: {
     pending: 'Campaign under review: the email can no longer be edited.',
     rejected: 'Your campaign was sent back for changes. Your credit is kept.',
+    scheduled: 'Campaign scheduled: sending on {{date}} (Paris time). The email can no longer be edited.',
   },
   savedEmail: 'Campaign email',
   mediaInUse: 'This image is used in a campaign already submitted or sent: it cannot be deleted.',

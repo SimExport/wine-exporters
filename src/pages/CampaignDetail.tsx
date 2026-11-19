@@ -1,4 +1,4 @@
-import { fetchMySendSlots, displayCampaignStatus, formatParisSlotLong, type SlotMap } from '@/lib/producer-campaign-status';
+import { fetchMySendSlots, displayCampaignStatus, formatParisSlotLong , type SendSlot } from '@/lib/producer-campaign-status';
 import { useEffect, useState } from 'react';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -70,7 +70,7 @@ const CampaignDetail = () => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [sendSlot, setSendSlot] = useState<import('@/lib/producer-campaign-status').SendSlot | null>(null);
+  const [sendSlot, setSendSlot] = useState<SendSlot | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);

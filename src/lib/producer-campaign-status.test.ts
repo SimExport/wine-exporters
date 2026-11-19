@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
 const expect = (a: unknown) => ({ toBe: (b: unknown) => assert.equal(a, b) });
-import { displayCampaignStatus, formatParisSlotLong, fetchMySendSlots } from './producer-campaign-status';
+import { displayCampaignStatus, formatParisSlotLong, fetchMySendSlots, toSlotMap } from './producer-campaign-status';
 
 const roq = { campaign_id: '2f661ab9-0343-4f5c-9c4f-c0a2f17df207', state: 'queued', scheduled_at: '2026-11-20T09:00:00Z' };
 describe('producer campaign status', () => {
@@ -28,4 +28,12 @@ describe('producer campaign status', () => {
     console.error = orig;
     expect(m.size).toBe(0); expect(m2.size).toBe(0);
   });
+});
+
+import { pickCampaignCard } from './dashboard-summary';
+test('dashboard card shows queued Roquefort as scheduled', () => {
+  const slots = toSlotMap([{ campaign_id: 'r', state: 'queued', scheduled_at: '2026-11-20T09:00:00Z' }]);
+  const camps = [{ id: 'r', name: 'Roquefort', status: 'pending_validation', target_markets: [], created_at: '2026-11-17T00:00:00Z' }] as any;
+  const card = pickCampaignCard(camps.map((c: any) => ({ ...c, status: displayCampaignStatus(c.status, slots.get(c.id)) })));
+  expect(card.state).toBe('scheduled');
 });

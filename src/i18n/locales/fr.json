@@ -843,14 +843,18 @@
           "active": "Envoyée",
           "approved": "Validée",
           "pending_validation": "En validation",
-          "results": "Résultats disponibles"
+          "results": "Résultats disponibles",
+          "scheduled": "Programmée",
+          "send_review": "Envoi à vérifier"
         },
         "hints": {
           "sending": "L'envoi est en cours auprès des importateurs.",
           "active": "Les résultats arrivent environ 48–72 h après l'envoi.",
           "approved": "Votre campagne est validée par notre équipe.",
           "pending_validation": "Notre équipe relit votre campagne avant de la valider.",
-          "results": "Consultez les cliqueurs et prospects qualifiés de votre dernière campagne."
+          "results": "Consultez les cliqueurs et prospects qualifiés de votre dernière campagne.",
+          "scheduled": "Votre campagne est validée et son envoi est programmé.",
+          "send_review": "Notre équipe vérifie l'envoi de votre campagne."
         },
         "ctaResults": "Voir les résultats"
       },
@@ -1350,7 +1354,8 @@
         "draft": "Brouillon",
         "pending_validation": "En validation",
         "active": "Active",
-        "results": "Terminée"
+        "results": "Terminée",
+        "scheduled": "Programmées"
       },
       "table": {
         "name": "Nom",
@@ -1378,7 +1383,9 @@
       "failed": "Échec",
       "validatedShort": "Validée",
       "sendingShort": "En cours d'envoi",
-      "failedShort": "Refusée"
+      "failedShort": "Refusée",
+      "scheduled": "Programmée",
+      "send_review": "Envoi à vérifier"
     },
     "toasts": {
       "loadError": "Impossible de charger les campagnes",
@@ -1542,7 +1549,10 @@
       "sendingTitle": "Campagne en cours d'envoi",
       "sendingMessage": "Votre campagne est actuellement en cours d'envoi vers {{count}} prospects.",
       "failedTitle": "Campagne refusée",
-      "failedMessage": "Votre campagne a été refusée. Consultez les commentaires de l'équipe ou contactez le support pour plus d'informations."
+      "failedMessage": "Votre campagne a été refusée. Consultez les commentaires de l'équipe ou contactez le support pour plus d'informations.",
+      "scheduledTitle": "Campagne programmée",
+      "sendReviewTitle": "Envoi à vérifier",
+      "sendReviewMessage": "Notre équipe vérifie l'envoi de votre campagne. Aucune action n'est requise de votre part."
     },
     "sidebar": {
       "marketsCard": "Marchés & Ciblage",
@@ -1571,7 +1581,8 @@
       "availableSince": "Disponible depuis le {{date}}",
       "view": "Voir le rapport",
       "download": "Télécharger"
-    }
+    },
+    "scheduledFor": "Envoi prévu le {{date}} (heure de Paris)"
   },
   "createCampaign": {
     "back": "Retour",

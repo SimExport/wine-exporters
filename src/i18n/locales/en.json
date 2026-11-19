@@ -843,14 +843,18 @@
           "active": "Sent",
           "approved": "Validated",
           "pending_validation": "Under review",
-          "results": "Results available"
+          "results": "Results available",
+          "scheduled": "Scheduled",
+          "send_review": "Send under review"
         },
         "hints": {
           "sending": "Sending to importers is in progress.",
           "active": "Results arrive about 48–72 h after sending.",
           "approved": "Your campaign has been validated by our team.",
           "pending_validation": "Our team is reviewing your campaign before validating it.",
-          "results": "See the clickers and qualified prospects of your latest campaign."
+          "results": "See the clickers and qualified prospects of your latest campaign.",
+          "scheduled": "Your campaign is validated and its sending is scheduled.",
+          "send_review": "Our team is checking the sending of your campaign."
         },
         "ctaResults": "View results"
       },
@@ -1350,7 +1354,8 @@
         "draft": "Draft",
         "pending_validation": "In validation",
         "active": "Active",
-        "results": "Completed"
+        "results": "Completed",
+        "scheduled": "Scheduled"
       },
       "table": {
         "name": "Name",
@@ -1378,7 +1383,9 @@
       "failed": "Failed",
       "validatedShort": "Validated",
       "sendingShort": "Sending",
-      "failedShort": "Rejected"
+      "failedShort": "Rejected",
+      "scheduled": "Scheduled",
+      "send_review": "Send under review"
     },
     "toasts": {
       "loadError": "Could not load campaigns",
@@ -1542,7 +1549,10 @@
       "sendingTitle": "Campaign sending",
       "sendingMessage": "Your campaign is currently being sent to {{count}} prospects.",
       "failedTitle": "Campaign rejected",
-      "failedMessage": "Your campaign was rejected. Check the team's comments or contact support for more information."
+      "failedMessage": "Your campaign was rejected. Check the team's comments or contact support for more information.",
+      "scheduledTitle": "Campaign scheduled",
+      "sendReviewTitle": "Send under review",
+      "sendReviewMessage": "Our team is checking the sending of your campaign. No action is needed from you."
     },
     "sidebar": {
       "marketsCard": "Markets & Targeting",
@@ -1571,7 +1581,8 @@
       "availableSince": "Available since {{date}}",
       "view": "View report",
       "download": "Download"
-    }
+    },
+    "scheduledFor": "Sending scheduled for {{date}} (Paris time)"
   },
   "createCampaign": {
     "back": "Back",

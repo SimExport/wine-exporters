@@ -63,7 +63,8 @@ const Dashboard = () => {
         setOpportunitiesCount(oppError ? 0 : countActiveOpportunities(importerCountRes.count ?? 0, (tendersRes.data ?? []).map(t => t.deadline_answer)));
 
         const allCampaigns = (allCampaignsRes.data ?? []) as DashboardCampaign[];
-        setCampaignCard(pickCampaignCard(allCampaigns));
+        const slots = allCampaignsRes.error ? new Map() : await fetchMySendSlots(supabase as any);
+        setCampaignCard(pickCampaignCard(allCampaigns.map(c => ({ ...c, status: displayCampaignStatus(c.status, slots.get(c.id)) }))));
 
         const campaignIds = allCampaigns.map(c => c.id);
         let statuses: Array<string | null> = [];
