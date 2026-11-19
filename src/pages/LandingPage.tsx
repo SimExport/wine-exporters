@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SpotVideo, SPOT_VIDEO_ENABLED } from "@/components/landing/SpotVideo";
 import {
+  landingTestimonials,
+  testimonialSpansFullWidth,
+} from "@/lib/landing-testimonials";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -357,24 +361,6 @@ const testimonials = [
   { name: "Domaine Saint-Cels", result: "Première commande aux Pays-Bas." },
 ];
 
-const testimonialQuotes = [
-  {
-    quote:
-      "Après avoir essayé différents outils (listings importateurs, CRM, Brevo), nous avons trouvé avec WineExporters la plateforme tout-en-un, et c'est vraiment facile. Pour le moment, nous avons lancé beaucoup de prospections ; les retours sont longs, mais nous avons eu notre première commande pour un contact en Hollande, c'est un bon début ! Nous sommes vraiment satisfaits de cet outil et souhaiterions pouvoir y consacrer plus de temps. Nous allons préparer nos salons avec WineExporters.",
-    author: "Marie Rouanet, Domaine Saint-Cels",
-  },
-  {
-    quote:
-      "La plateforme répond à un vrai besoin pour nous, et nous connaissons la valeur et la pertinence de l'approche de Simon.",
-    author: "Mathilde, vigneronne en Alsace",
-  },
-  {
-    quote:
-      "Ce que j'apprécie le plus : la qualification des leads, tout comme la capacité de la plateforme à s'actualiser pour répondre au plus près de nos besoins.",
-    author: "Arnaud, vigneron à Pessac-Léognan",
-  },
-];
-
 const TestimonialsGrid = () => {
   return (
       <div className="grid md:grid-cols-2 gap-5">
@@ -655,12 +641,25 @@ const LandingPage = () => {
           </FadeIn>
           <TestimonialsGrid />
           <div className="grid md:grid-cols-2 gap-5 mt-10">
-            {testimonialQuotes.map((q, i) => (
-              <FadeIn key={q.author} delay={i * 0.05} className={i === 0 ? "md:col-span-2" : undefined}>
+            {landingTestimonials.map((q, i) => (
+              <FadeIn
+                key={q.author}
+                delay={i * 0.05}
+                className={
+                  testimonialSpansFullWidth(i, landingTestimonials.length) ?
+                  "md:col-span-2" :
+                  undefined
+                }
+              >
                 <Card className="h-full bg-background border border-border">
                   <CardContent className="p-6 flex flex-col gap-3">
                     <p className="text-base leading-relaxed italic">« {q.quote} »</p>
-                    <p className="text-sm font-semibold text-primary">{q.author}</p>
+                    <div className="text-sm">
+                      <p className="font-semibold text-primary">{q.author}</p>
+                      {q.role ?
+                      <p className="text-muted-foreground">{q.role}</p> :
+                      null}
+                    </div>
                   </CardContent>
                 </Card>
               </FadeIn>
