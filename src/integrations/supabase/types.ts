@@ -3077,6 +3077,14 @@ export type Database = {
         Args: { _buyer_contact_id: string }
         Returns: Json
       }
+      get_my_campaign_send_slots: {
+        Args: never
+        Returns: {
+          campaign_id: string
+          scheduled_at: string
+          state: string
+        }[]
+      }
       get_subscription_tier: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { uid: string }; Returns: string }
       get_users_emails_for_admin: {

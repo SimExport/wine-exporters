@@ -1,3 +1,4 @@
+import { fetchMySendSlots, displayCampaignStatus, formatParisSlotLong, type SlotMap } from '@/lib/producer-campaign-status';
 import { useEffect, useState } from 'react';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -67,8 +68,9 @@ const CampaignDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [sendSlot, setSendSlot] = useState<import('@/lib/producer-campaign-status').SendSlot | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,6 +106,8 @@ const CampaignDetail = () => {
         .select('*', { count: 'exact', head: true })
         .eq('campaign_id', id);
 
+      const slotMap = await fetchMySendSlots(supabase as any);
+      setSendSlot(slotMap.get(data.id) ?? null);
       setCampaign({ ...data, prospect_count: count || 0 });
     } catch (error) {
       console.error('Error fetching campaign:', error);
@@ -306,6 +310,8 @@ const CampaignDetail = () => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       draft: 'secondary',
       pending_validation: 'outline',
+      scheduled: 'default',
+      send_review: 'outline',
       approved: 'default',
       sending: 'default',
       results: 'secondary',
@@ -315,6 +321,8 @@ const CampaignDetail = () => {
     const labels: Record<string, string> = {
       draft: t('campaigns.status.draft'),
       pending_validation: t('campaigns.status.pending_validation'),
+      scheduled: t('campaigns.status.scheduled'),
+      send_review: t('campaigns.status.send_review'),
       approved: t('campaigns.status.validatedShort'),
       sending: t('campaigns.status.sendingShort'),
       results: t('campaigns.status.results'),
@@ -348,6 +356,8 @@ const CampaignDetail = () => {
       </div>
     );
   }
+  const shownStatus = displayCampaignStatus(campaign.status, sendSlot);
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -365,7 +375,7 @@ const CampaignDetail = () => {
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">{campaign.name}</h1>
-              {getStatusBadge(campaign.status)}
+              {getStatusBadge(shownStatus)}
             </div>
             <p className="text-muted-foreground">
               {t('campaigns.detail.createdOn', { date: formatDateTime(campaign.created_at) })}
@@ -375,7 +385,8 @@ const CampaignDetail = () => {
 
         {/* Status Banner */}
         <CampaignStatusBanner 
-          status={campaign.status}
+          status={shownStatus}
+          scheduledLabel={formatParisSlotLong(sendSlot?.scheduled_at, i18n.language)}
           validatedAt={campaign.validated_at}
           prospectCount={campaign.prospect_count}
         />
@@ -384,7 +395,8 @@ const CampaignDetail = () => {
           <Card>
             <CardHeader><CardTitle>{t('emailEditor.savedEmail')}</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              {campaign.status === 'pending_validation' && <p className="text-sm text-muted-foreground">{t('emailEditor.status.pending')}</p>}
+              {shownStatus === 'pending_validation' && <p className="text-sm text-muted-foreground">{t('emailEditor.status.pending')}</p>}
+              {shownStatus === 'scheduled' && <p className="text-sm text-muted-foreground">{t('emailEditor.status.scheduled', { date: formatParisSlotLong(sendSlot?.scheduled_at, i18n.language) })}</p>}
               <EmailPreviewFrame html={(campaign as any).message_html} subject={(campaign as any).subject_selected ?? undefined} />
             </CardContent>
           </Card>

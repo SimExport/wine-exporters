@@ -1,3 +1,4 @@
+import { fetchMySendSlots, displayCampaignStatus, formatParisSlotLong, type SlotMap } from '@/lib/producer-campaign-status';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +30,8 @@ interface Campaign {
 const CAMPAIGN_STATUS_COLORS = {
   draft: 'secondary',
   pending_validation: 'yellow',
+  scheduled: 'default',
+  send_review: 'outline',
   approved: 'green',
   sending: 'blue',
   results: 'purple',
@@ -38,11 +41,13 @@ const CAMPAIGN_STATUS_COLORS = {
 const Campaigns = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [slots, setSlots] = useState<SlotMap>(new Map());
+  const shown = (c: Campaign) => displayCampaignStatus(c.status, slots.get(c.id));
 
   useEffect(() => {
     if (user) fetchCampaigns();
@@ -63,6 +68,7 @@ const Campaigns = () => {
         return { ...campaign, prospect_count: count || 0 };
       }));
       setCampaigns(campaignsWithCounts as any);
+      setSlots(await fetchMySendSlots(supabase as any));
     } catch (error) {
       console.error('Error fetching campaigns:', error);
       toast({ title: t('common.error'), description: t('campaigns.toasts.loadError'), variant: "destructive" });
@@ -128,13 +134,14 @@ const Campaigns = () => {
     { key: 'all', label: t('campaigns.list.filters.all'), color: 'bg-muted text-muted-foreground' },
     { key: 'draft', label: t('campaigns.list.filters.draft'), color: 'bg-secondary text-secondary-foreground' },
     { key: 'pending_validation', label: t('campaigns.list.filters.pending_validation'), color: 'bg-yellow-100 text-yellow-800' },
+    { key: 'scheduled', label: t('campaigns.list.filters.scheduled'), color: 'bg-blue-100 text-blue-800' },
     { key: 'active', label: t('campaigns.list.filters.active'), color: 'bg-green-100 text-green-800' },
     { key: 'results', label: t('campaigns.list.filters.results'), color: 'bg-purple-100 text-purple-800' },
   ];
 
   const filteredCampaigns = statusFilter === 'all'
     ? campaigns
-    : campaigns.filter(c => c.status === statusFilter);
+    : campaigns.filter(c => shown(c) === statusFilter);
 
       return <div className="container mx-auto p-6 space-y-6">
           <div className="flex justify-between items-center">
@@ -167,7 +174,7 @@ const Campaigns = () => {
                   <CardTitle>{t('campaigns.list.yoursCount', { count: campaigns.length })}</CardTitle>
                   <div className="flex flex-wrap gap-2">
                     {STATUS_FILTERS.map(f => {
-                      const count = f.key === 'all' ? campaigns.length : campaigns.filter(c => c.status === f.key).length;
+                      const count = f.key === 'all' ? campaigns.length : campaigns.filter(c => shown(c) === f.key).length;
                       const isActive = statusFilter === f.key;
                       return (
                         <button
@@ -221,7 +228,8 @@ const Campaigns = () => {
                           {campaign.name}
                         </TableCell>
                         <TableCell>
-                          {getStatusBadge(campaign.status)}
+                          {getStatusBadge(shown(campaign))}
+                          {shown(campaign) === 'scheduled' && <div className="text-xs text-muted-foreground mt-1">{t('campaigns.scheduledFor', { date: formatParisSlotLong(slots.get(campaign.id)?.scheduled_at, i18n.language) })}</div>}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">

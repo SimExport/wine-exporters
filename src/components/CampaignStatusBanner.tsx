@@ -7,12 +7,14 @@ interface CampaignStatusBannerProps {
   status: string;
   validatedAt?: string;
   prospectCount?: number;
+  scheduledLabel?: string | null;
 }
 
 export const CampaignStatusBanner = ({ 
   status, 
   validatedAt, 
-  prospectCount = 0 
+  prospectCount = 0,
+  scheduledLabel
 }: CampaignStatusBannerProps) => {
   const { t } = useTranslation();
   
@@ -32,6 +34,30 @@ export const CampaignStatusBanner = ({
   const isWithinSevenDays = () => {
     return getDaysSinceValidation() <= 7;
   };
+
+  if (status === 'scheduled' && scheduledLabel) {
+    return (
+      <Alert className="mb-6 border-blue-200 bg-blue-50">
+        <CheckCircle className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-800">
+          <div className="font-medium mb-2">{t('campaigns.banner.scheduledTitle')}</div>
+          <p className="text-sm">{t('campaigns.scheduledFor', { date: scheduledLabel })}</p>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (status === 'send_review') {
+    return (
+      <Alert className="mb-6">
+        <Clock className="h-4 w-4" />
+        <AlertDescription>
+          <div className="font-medium mb-2">{t('campaigns.banner.sendReviewTitle')}</div>
+          <p className="text-sm">{t('campaigns.banner.sendReviewMessage')}</p>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (status === 'pending_validation') {
     return (

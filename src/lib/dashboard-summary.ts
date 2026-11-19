@@ -11,11 +11,11 @@ export interface DashboardCampaign {
   validation_requested_at?: string | null;
 }
 
-export type CampaignCardState = 'sending' | 'active' | 'approved' | 'pending_validation' | 'results' | 'none';
+export type CampaignCardState = 'sending' | 'active' | 'approved' | 'pending_validation' | 'scheduled' | 'send_review' | 'results' | 'none';
 
 const ts = (c: DashboardCampaign) => new Date(c.created_at).getTime();
 const latest = (list: DashboardCampaign[]) => [...list].sort((a, b) => ts(b) - ts(a))[0];
-const IN_FLIGHT = new Set(['sending', 'active', 'approved', 'pending_validation']);
+const IN_FLIGHT = new Set(['sending', 'active', 'approved', 'pending_validation', 'scheduled', 'send_review']);
 
 /** Most recently created in-flight campaign (sending/active/approved/pending); otherwise the latest results. */
 export function pickCampaignCard(campaigns: DashboardCampaign[]): { state: CampaignCardState; campaign: DashboardCampaign | null } {
