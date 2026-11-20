@@ -2931,6 +2931,7 @@ export type Database = {
         }
       }
       approve_campaign_for_queue: { Args: { _id: string }; Returns: string }
+      auto_queue_pending_campaigns: { Args: never; Returns: number }
       campaign_html_is_valid: {
         Args: { _campaign_id: string; _html: string }
         Returns: boolean
