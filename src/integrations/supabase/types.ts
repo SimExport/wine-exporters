@@ -1758,6 +1758,140 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunity_notification_batches: {
+        Row: {
+          accepted_at: string | null
+          attempted_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          idempotency_key: string
+          operation_id: string
+          resend_id: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          attempted_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key: string
+          operation_id: string
+          resend_id?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          attempted_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string
+          operation_id?: string
+          resend_id?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_notification_batches_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_notification_operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_notification_operations: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          expected_total: number | null
+          historical: boolean
+          id: string
+          preload_complete: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          expected_total?: number | null
+          historical?: boolean
+          id?: string
+          preload_complete?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          expected_total?: number | null
+          historical?: boolean
+          id?: string
+          preload_complete?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      opportunity_notification_recipients: {
+        Row: {
+          accepted_at: string | null
+          batch_id: string | null
+          created_at: string
+          email: string
+          id: string
+          operation_id: string
+          resend_id: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          batch_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          operation_id: string
+          resend_id?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          batch_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          operation_id?: string
+          resend_id?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_notification_recipients_operation_id_batch_id_fkey"
+            columns: ["operation_id", "batch_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_notification_batches"
+            referencedColumns: ["operation_id", "id"]
+          },
+          {
+            foreignKeyName: "opportunity_notification_recipients_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_notification_operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunity_views: {
         Row: {
           id: string
@@ -3021,6 +3155,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_opportunity_notification_batch: {
+        Args: { _operation: string }
+        Returns: Json
+      }
       consume_campaign_credit: { Args: never; Returns: number }
       consume_export_credits: { Args: { _count: number }; Returns: number }
       consume_search_credit: { Args: never; Returns: number }
@@ -3041,6 +3179,15 @@ export type Database = {
           excluded_count: number
           retained_count: number
         }[]
+      }
+      finish_opportunity_notification_batch: {
+        Args: {
+          _batch: string
+          _error?: string
+          _resend_id?: string
+          _state: string
+        }
+        Returns: undefined
       }
       get_campaign_public_info: {
         Args: { _campaign_id: string }
@@ -3119,6 +3266,7 @@ export type Database = {
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
       is_test_campaign: { Args: { _id: string }; Returns: boolean }
+      opportunity_notification_summary: { Args: never; Returns: Json }
       reallocate_campaign_send_slots: {
         Args: { _allow_due: boolean; _now: string }
         Returns: number
@@ -3284,6 +3432,10 @@ export type Database = {
           row_data: Json
           total_count: number
         }[]
+      }
+      start_opportunity_notification: {
+        Args: { _admin: string; _emails: string[] }
+        Returns: string
       }
       submit_campaign: {
         Args: { _id: string }

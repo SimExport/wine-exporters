@@ -1,5 +1,10 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
+## Notifications opportunités — reprise ciblée
+- [x] Suivi SQL privé admin, lots 49 BCC, reprise atomique et compteurs ; 7 tests simulés, tests SQL annulés et Deno check réussis ; compilation automatique OK. Contrôle visuel isolé avec réponses simulées, pas de session admin réelle.
+- [x] Préchargement séparé relu : 15 acceptés avec l’ID Resend connu, 50 en attente, zéro adresse fictive persistée.
+- [ ] Déployer uniquement notify-new-opportunities puis publier la page manuellement — attend la validation de Simon ; aucun envoi réel effectué.
+
 ## Guides de marché de l’annuaire public
 - [x] `directory_country_guides` créée et laissée vide ; lecture publique des seuls guides publiés et écriture admin calquée sur `seo_articles`, sans seed ni publication.
 - [x] Guide FR/EN validé sur les pages pays, avec sources, FAQ/JSON-LD, articles publiés liés et CTA analyse ; rendu historique conservé sinon.

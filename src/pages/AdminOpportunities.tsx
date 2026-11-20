@@ -8,7 +8,8 @@ import { ImporterSubmissionsQueue } from '@/components/admin/ImporterSubmissions
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Mail, Loader2, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,42 +24,64 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+type NotificationOperation = {
+  id: string; status: 'active' | 'completed'; blocked: boolean;
+  total: number; accepted: number; remaining: number; failed: number; indeterminate: number;
+};
+
 export default function AdminOpportunities() {
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [operation, setOperation] = useState<NotificationOperation | null>(null);
+  const [trackingReady, setTrackingReady] = useState(false);
+  const [trackingError, setTrackingError] = useState(false);
+
+  const readTracking = async () => {
+    setTrackingReady(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('notify-new-opportunities', { body: { action: 'status' } });
+      if (error) throw error;
+      setOperation(data?.operation ?? null);
+      setTrackingError(false);
+      setTrackingReady(true);
+    } catch {
+      setTrackingError(true);
+      console.error('Suivi des notifications indisponible.');
+    }
+  };
+
+  useEffect(() => { void readTracking(); }, []);
 
   const handleNotify = async () => {
     setSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke('notify-new-opportunities');
-      console.log('notify-new-opportunities response', { data, error });
-      if (error) throw error;
-      const errs: string[] = data?.errors ?? [];
-      if (errs.length > 0) {
-        toast({
-          title: 'Envoi partiel',
-          description: `${data?.sent ?? 0}/${data?.totalRecipients ?? 0} envoyés. Erreurs: ${errs.slice(0, 2).join(' | ')}`,
-          variant: 'destructive',
-        });
-        return;
+      const body = operation?.status === 'active'
+        ? { action: 'resume', operation_id: operation.id }
+        : { action: 'create', confirm_new: true };
+      const { data, error } = await supabase.functions.invoke('notify-new-opportunities', { body });
+      let result = data;
+      if (error instanceof FunctionsHttpError) {
+        try { result = await error.context.json(); } catch { throw error; }
+      } else if (error) {
+        throw error;
       }
-      if ((data?.sent ?? 0) === 0) {
-        toast({
-          title: 'Aucun email envoyé',
-          description: 'La fonction a répondu mais 0 destinataire. Vérifiez les logs.',
-          variant: 'destructive',
-        });
-        return;
-      }
+      if (!result || !('operation' in result)) throw new Error('Suivi indisponible');
+      setOperation(result.operation ?? null);
+      const current = result.operation as NotificationOperation | null;
       toast({
-        title: 'Notifications envoyées',
-        description: `${data?.sent ?? 0} email(s) envoyé(s) sur ${data?.totalRecipients ?? 0} destinataire(s).`,
+        title: result.success ? 'Notifications acceptées par Resend' : 'Envoi incomplet',
+        description: result.error ?? (current
+          ? `${current.accepted} acceptés, ${current.remaining} restants, ${current.failed} en erreur, ${current.indeterminate} à vérifier. Acceptation ≠ livraison.`
+          : 'Suivi indisponible. Rechargez avant toute reprise.'),
+        variant: result.success ? 'default' : 'destructive',
       });
-    } catch (e: any) {
-      console.error('notify-new-opportunities error', e);
-      toast({ title: 'Erreur', description: e.message, variant: 'destructive' });
+      if (!current && !result.success) setTrackingReady(false);
+    } catch {
+      setTrackingReady(false);
+      setTrackingError(true);
+      toast({ title: 'Suivi interrompu', description: 'Rechargez le suivi avant de reprendre. Aucun lot incertain ne sera relancé automatiquement.', variant: 'destructive' });
     } finally {
       setSending(false);
     }
@@ -72,26 +95,40 @@ export default function AdminOpportunities() {
           <h1 className="text-2xl font-semibold">Opportunités</h1>
           <p className="text-sm text-muted-foreground">Importez les demandes directes (Tally) et les appels d'offres (PDF) à publier aux utilisateurs.</p>
         </div>
+        <div className="space-y-2">
+        {operation && <p className="text-sm text-muted-foreground" role="status">
+          {operation.accepted}/{operation.total} acceptés · {operation.remaining} restants · {operation.failed} erreurs · {operation.indeterminate} à vérifier
+        </p>}
+        {operation?.blocked && <p className="text-sm text-destructive">Préchargement historique requis avant reprise.</p>}
+        {Boolean(operation?.indeterminate) && <p className="text-sm text-destructive">Rapprochement Resend requis : aucune reprise automatique du lot incertain.</p>}
+        {trackingError && <p className="text-sm text-destructive">Suivi indisponible.</p>}
+        <div className="flex gap-2 flex-wrap">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button disabled={sending} variant="default">
+            <Button disabled={sending || !trackingReady || operation?.blocked || Boolean(operation?.indeterminate)} variant="default">
               {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-              Notifier les utilisateurs
+              {operation?.status === 'active' ? "Reprendre l'envoi" : 'Notifier les utilisateurs'}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Envoyer la notification ?</AlertDialogTitle>
+              <AlertDialogTitle>{operation?.status === 'active' ? "Reprendre l'envoi partiel ?" : 'Confirmer un nouvel envoi ?'}</AlertDialogTitle>
               <AlertDialogDescription>
-                Un email récapitulatif "Nouvelles opportunités disponibles" sera envoyé à tous les utilisateurs inscrits, avec un lien vers la page Opportunités. À n'utiliser qu'après avoir publié un lot d'opportunités.
+                {operation?.status === 'active'
+                  ? 'Seuls les destinataires non acceptés seront repris. Les acceptés ne recevront pas de nouvel envoi.'
+                  : 'Un nouveau récapitulatif « Nouvelles opportunités disponibles » sera envoyé aux utilisateurs inscrits. Confirmez uniquement après publication de nouvelles opportunités.'}
+                {' '}Une acceptation par Resend ne garantit pas la livraison.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={handleNotify}>Envoyer</AlertDialogAction>
+              <AlertDialogAction onClick={handleNotify}>{operation?.status === 'active' ? 'Reprendre' : 'Confirmer et envoyer'}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        <Button variant="outline" disabled={sending} onClick={() => void readTracking()}>Actualiser le suivi</Button>
+        </div>
+        </div>
       </div>
       <Tabs defaultValue="tally" className="w-full">
         <TabsList>

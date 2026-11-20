@@ -1,13 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { createClient } from "npm:@supabase/supabase-js@2.119.2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.119.2/cors";
+import { z } from "npm:zod@3";
+import { deliverBatches, providerOutcome, notificationResult, type Batch } from "./delivery.ts";
 
 const SENDER = "WineExporters <notifications@exportvins.fr>";
 const APP_URL = "https://wine-exporters.com/opportunites";
@@ -46,96 +41,99 @@ const html = `
   </div>
 `;
 
+const Body = z.object({
+  action: z.enum(['status', 'resume', 'create']).default('status'),
+  operation_id: z.string().uuid().optional(),
+  confirm_new: z.boolean().optional(),
+}).strict();
+const json = (status: number, body: unknown) => new Response(JSON.stringify(body), {
+  status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+});
+
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') return json(405, { success: false, error: 'Method not allowed' });
+  const url = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !serviceKey) return json(503, { success: false, error: 'Configuration serveur indisponible.' });
+  const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  let authorized = false;
+  const readSummary = async () => {
+    const { data, error } = await admin.rpc('opportunity_notification_summary');
+    if (error) throw new Error('Lecture du suivi indisponible.');
+    return data;
+  };
   try {
-    console.log("notify-new-opportunities invoked", { method: req.method });
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Missing Authorization");
-
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr || !userData?.user) throw new Error("Unauthorized");
-    console.log("auth ok", { user: userData.user.email });
-
-    const { data: roleRow } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) throw new Error("Forbidden: admin only");
-    console.log("admin role ok");
-
-    // Collect all user emails (paginated)
-    const emails: string[] = [];
-    let page = 1;
-    const perPage = 1000;
-    while (true) {
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
-      if (error) throw error;
-      const batch = (data?.users || []).map((u: any) => u.email).filter(Boolean) as string[];
-      emails.push(...batch);
-      if (!data || data.users.length < perPage) break;
-      page++;
-      if (page > 50) break; // hard safety
-    }
-
-    const unique = Array.from(new Set(emails.map((e) => e.toLowerCase())));
-    console.log(`recipients collected: ${unique.length}`);
-
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-    // Send via BCC batches; stay well under Resend free tier 2 req/s
-    const chunkSize = 50;
-    let sent = 0;
-    const errors: string[] = [];
-    for (let i = 0; i < unique.length; i += chunkSize) {
-      const chunk = unique.slice(i, i + chunkSize);
-      try {
-        const result = await resend.emails.send({
-          from: SENDER,
-          to: ["notifications@exportvins.fr"],
-          bcc: chunk,
-          subject,
-          html,
-        });
-        const err = (result as any)?.error;
-        const id = (result as any)?.data?.id;
-        if (err) {
-          console.error(`Resend chunk ${i} error:`, JSON.stringify(err));
-          errors.push(JSON.stringify(err));
-        } else {
-          sent += chunk.length;
-          console.log(`Resend chunk ${i} sent id=${id} count=${chunk.length}`);
-        }
-      } catch (e: any) {
-        console.error(`Resend chunk ${i} threw:`, e?.message || e);
-        errors.push(String(e?.message || e));
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) return json(401, { success: false, error: 'Unauthorized' });
+    const { data: userData, error: userErr } = await admin.auth.getUser(authHeader.slice(7));
+    if (userErr || !userData.user) return json(401, { success: false, error: 'Unauthorized' });
+    const { data: role, error: roleError } = await admin.from('user_roles').select('role')
+      .eq('user_id', userData.user.id).eq('role', 'admin').maybeSingle();
+    if (roleError || !role) return json(403, { success: false, error: 'Forbidden: admin only' });
+    authorized = true;
+    let raw: unknown;
+    try { raw = await req.json(); } catch { return json(400, { success: false, error: 'Invalid request' }); }
+    const parsed = Body.safeParse(raw);
+    if (!parsed.success) return json(400, { success: false, error: 'Invalid request' });
+    const input = parsed.data;
+    let operation = await readSummary();
+    if (input.action === 'status') return json(200, { success: !operation?.failed && !operation?.indeterminate, operation });
+    const resendKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendKey) return json(503, { success: false, operation, error: 'RESEND_API_KEY non configurée.' });
+    if (input.action === 'create') {
+      if (input.confirm_new !== true || operation?.status === 'active') return json(409, { success: false, operation, error: 'Terminez le lot actif avant un nouvel envoi confirmé.' });
+      const emails: string[] = [];
+      for (let page = 1; page <= 50; page++) {
+        const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) throw new Error('Lecture des destinataires indisponible.');
+        emails.push(...data.users.flatMap(u => u.email ? [u.email.trim().toLowerCase()] : []));
+        if (data.users.length < 1000) break;
+        if (page === 50) throw new Error('Trop de destinataires ; aucun envoi démarré.');
       }
-      await sleep(600);
+      if (!emails.length) return json(200, { success: false, operation, error: 'Aucun destinataire.' });
+      const { error } = await admin.rpc('start_opportunity_notification', { _emails: [...new Set(emails)], _admin: userData.user.id });
+      if (error) throw new Error('Création du suivi indisponible.');
+      operation = await readSummary();
+    } else if (!operation || operation.id !== input.operation_id || operation.status !== 'active') {
+      return json(409, { success: false, operation, error: 'Le lot actif a changé. Rechargez le suivi.' });
     }
-
-    console.log(`notify-new-opportunities done: sent=${sent} errors=${errors.length}`);
-    return new Response(JSON.stringify({ success: true, sent, totalRecipients: unique.length, errors }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
+    if (!operation || operation.blocked || operation.indeterminate > 0) return json(409, {
+      success: false, operation, error: operation?.blocked ? 'Préchargement historique requis avant reprise.' : 'Issue incertaine : rapprochez le lot avec Resend avant reprise.',
     });
-  } catch (error: any) {
-    console.error("notify-new-opportunities error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: error.message?.includes("Forbidden") ? 403 : 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
+    const operationId = operation.id;
+    await deliverBatches({
+      claim: async () => {
+        const { data, error } = await admin.rpc('claim_opportunity_notification_batch', { _operation: operationId });
+        if (error) throw new Error('Réservation du lot indisponible.');
+        return data as Batch | null;
+      },
+      send: async (batch) => {
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json', 'Idempotency-Key': batch.idempotency_key },
+          body: JSON.stringify({ from: SENDER, to: ['notifications@exportvins.fr'], bcc: batch.emails, subject, html }),
+          signal: AbortSignal.timeout(15000),
+        });
+        let body: unknown;
+        try { body = await response.json(); } catch { return { state: 'indeterminate', error: `Resend HTTP ${response.status}, réponse illisible.` }; }
+        return providerOutcome(response.status, body);
+      },
+      finish: async (batch, outcome) => {
+        const { error } = await admin.rpc('finish_opportunity_notification_batch', {
+          _batch: batch.id, _state: outcome.state, _resend_id: outcome.resendId ?? null, _error: outcome.error ?? null,
+        });
+        if (error) throw new Error('Résultat non enregistré ; rapprochement requis avant reprise.');
+      },
+      pause: () => new Promise(resolve => setTimeout(resolve, 600)),
     });
+    operation = await readSummary();
+    return json(200, notificationResult(operation));
+  } catch (error) {
+    console.error('notify-new-opportunities: suivi interrompu');
+    if (!authorized) return json(401, { success: false, error: 'Unauthorized' });
+    let operation = null;
+    try { operation = await readSummary(); } catch { /* Return explicit unavailable state, never zero counters. */ }
+    return json(500, { success: false, operation, error: error instanceof Error ? error.message : 'Notification interrompue.' });
   }
 };
-
 serve(handler);
