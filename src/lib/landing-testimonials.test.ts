@@ -23,6 +23,19 @@ test('every landing testimonial has a non-empty verbatim and an author', () => {
   }
 });
 
+const ALEXANDRE_QUOTE =
+  "Je trouve que votre site est très bien conçu, notamment en ce qui concerne la partie CRM, que je trouve particulièrement réussie.";
+
+test('Alexandre Pipilis review is published on the landing page', () => {
+  const alexandre = landingTestimonials.find(
+    (t) => t.author === 'Alexandre Pipilis, Domaine Giroud',
+  );
+  assert.ok(alexandre, 'Alexandre Pipilis testimonial is missing');
+  assert.equal(alexandre!.quote, ALEXANDRE_QUOTE);
+  // Added last, so the four previously live reviews keep their order.
+  assert.equal(landingTestimonials[landingTestimonials.length - 1]!.author, 'Alexandre Pipilis, Domaine Giroud');
+});
+
 test('no testimonial is invented: authors stay distinct and quotes are not duplicated', () => {
   const authors = landingTestimonials.map((t) => t.author);
   assert.equal(new Set(authors).size, authors.length);

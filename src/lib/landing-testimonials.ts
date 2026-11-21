@@ -36,6 +36,11 @@ export const landingTestimonials: LandingTestimonial[] = [
     author: "Julien Orosquette",
     role: "Export Manager · Utilisateur WineExporters",
   },
+  {
+    quote:
+      "Je trouve que votre site est très bien conçu, notamment en ce qui concerne la partie CRM, que je trouve particulièrement réussie.",
+    author: "Alexandre Pipilis, Domaine Giroud",
+  },
 ];
 
 /**
