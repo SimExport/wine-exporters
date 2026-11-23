@@ -2,6 +2,7 @@ import { safeWebsiteUrl } from '@/lib/website-url';
 import { useState, useEffect } from 'react'
 import { getLeadOriginLabel } from '@/lib/lead-origin'
 import ImporterInsights from '@/components/prospect/ImporterInsights'
+import ImporterRequestNeeds from '@/components/prospect/ImporterRequestNeeds'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -1088,6 +1089,10 @@ export default function ProspectDetail() {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {(prospect as any).source === 'opportunity_direct' && (
+            <ImporterRequestNeeds sourceRef={(prospect as any).source_ref} snippet={(prospect as any).message_snippet} />
           )}
 
           <ImporterInsights lead={prospect} onChange={(p) => setProspect({ ...(prospect as any), ...p })} />

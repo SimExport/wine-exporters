@@ -2144,6 +2144,7 @@
     }
   },
   "prospectDetail": {
+    "importerNeeds": {"title": "Besoins de l'importateur", "requirements": "Recherche", "styles": "Styles de vins", "origins": "Origines", "volume": "Volume"},
     "back": "Retour",
     "notFound": "Prospect non trouvé",
     "backToProspects": "Retour aux prospects",

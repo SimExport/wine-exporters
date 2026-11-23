@@ -2144,6 +2144,7 @@
     }
   },
   "prospectDetail": {
+    "importerNeeds": {"title": "Importer requirements", "requirements": "Looking for", "styles": "Wine styles", "origins": "Origins", "volume": "Volume"},
     "back": "Back",
     "notFound": "Prospect not found",
     "backToProspects": "Back to prospects",
