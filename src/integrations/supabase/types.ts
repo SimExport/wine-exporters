@@ -3501,6 +3501,36 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      wx_arr_union: { Args: { a: string[]; b: string[] }; Returns: string[] }
+      wx_claim_deep: {
+        Args: { p_batch: string; p_limit?: number; p_top_markets?: number }
+        Returns: {
+          buyer_contact_id: string
+          city: string
+          company_name: string
+          country: string
+          email: string
+          enrichment_status: string
+          market: string
+          market_rank: number
+          named_emails: number
+          people_count: number
+          phone: string
+          website_url: string
+        }[]
+      }
+      wx_jarr: { Args: { j: Json }; Returns: string[] }
+      wx_market_demand: {
+        Args: never
+        Returns: {
+          campaigns: number
+          market: string
+          searches: number
+          users: number
+        }[]
+      }
+      wx_norm_country: { Args: { c: string }; Returns: string }
+      wx_save_deep: { Args: { p: Json }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "free" | "paid"
