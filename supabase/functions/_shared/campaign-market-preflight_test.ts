@@ -30,3 +30,8 @@ Deno.test('a configured ID with another country name is refused, never substitut
   const r = await campaignMarketPreflight(['Canada'], async () => Response.json({ id: 33, name: 'France' }));
   assertEquals(r.failure?.status, 422); assertEquals(r.listIds, []);
 });
+Deno.test('historic Malta/Lithuania/Latvia targeting still uses their exact verified country lists', async () => {
+  const names: Record<number, string> = { 158: 'Malta', 156: 'Lithuania', 155: 'Latvia' };
+  const r = await campaignMarketPreflight(['Malta','Lithuania','Latvia'], async p => Response.json(p.includes('/contacts?') ? usable : { id: Number(p.split('/').at(-1)), name: names[Number(p.split('/').at(-1))] }));
+  assertEquals(r.failure, undefined); assertEquals(r.listIds, [158,156,155]);
+});

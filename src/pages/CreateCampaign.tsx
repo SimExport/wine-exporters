@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { useCampaignEditorAccess } from '@/hooks/useCampaignEditorAccess';
 import { EmailPrepareStep, type EmailStepState } from '@/components/campaigns/email-editor/EmailPrepareStep';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
-import { campaignMarketLabel, campaignMarketOptions, groupCampaignMarkets, unavailableSelectedMarkets, fetchCampaignMarketCounts, type CampaignMarketCount, type CampaignMarketRpc } from '@/lib/campaign-markets';
+import { campaignMarketLabel, campaignMarketOptions, groupCampaignMarkets, unavailableSelectedMarkets, blockedSelectedMarkets, fetchCampaignMarketCounts, type CampaignMarketCount, type CampaignMarketRpc } from '@/lib/campaign-markets';
 import { MIN_CAMPAIGN_MARKETS, MAX_CAMPAIGN_MARKETS, distinctCampaignMarkets, normalizeCampaignMarket, campaignMarketRangeValid } from '../../supabase/functions/_shared/campaign-markets';
 interface Wine {
   id: string;
@@ -106,6 +106,7 @@ const CreateCampaign = () => {
   const [marketsLoading, setMarketsLoading] = useState(true);
   const marketOptions = campaignMarketOptions(marketCounts, i18n.language);
   const unavailableMarkets = unavailableSelectedMarkets(selectedMarkets, marketOptions);
+  const blockedMarkets = blockedSelectedMarkets(selectedMarkets, marketOptions);
   const refreshMarkets = async () => {
     setMarketsLoading(true);
     try { setMarketCounts(await fetchCampaignMarketCounts(supabase as unknown as CampaignMarketRpc)); }
@@ -275,7 +276,7 @@ const CreateCampaign = () => {
       return false;
     }
     if (!campaignMarketRangeValid(selectedMarkets)) {
-      toast({ title: t('createCampaign.toasts.marketsInsufficient.title'), description: t('createCampaign.toasts.marketsInsufficient.description', { min: MIN_MARKETS }), variant: "destructive" });
+      toast({ title: t('createCampaign.toasts.marketsInsufficient.title'), description: t('createCampaign.toasts.marketsRange', { min: MIN_MARKETS, max: MAX_MARKETS }), variant: "destructive" });
       return false;
     }
     if (marketsLoading || unavailableMarkets.length) {
@@ -339,6 +340,7 @@ const CreateCampaign = () => {
   };
   /** Saves the configuration as a draft (never touches the email) and returns its id. */
   const persistDraft = async (): Promise<string> => {
+    if (distinctCampaignMarkets(selectedMarkets).length > MAX_MARKETS) throw new Error('campaigns_markets_count_check');
     {
       const campaignData = {
         name: campaignName,
@@ -405,6 +407,10 @@ const CreateCampaign = () => {
       return;
     }
     if (!validateStep1()) return;
+    if (marketCounts === null || blockedMarkets.length) {
+      toast({ title: t('createCampaign.markets.unavailable'), variant: 'destructive' });
+      return;
+    }
     if (editorEnabled && (emailState.dirty || !emailState.hasSavedEmail)) {
       toast({ title: t('emailEditor.mustHaveEmail'), variant: 'destructive' });
       setStep(2);
@@ -593,7 +599,7 @@ const CreateCampaign = () => {
                           <p className="text-sm font-semibold">{t(`createCampaign.continents.${continentKey}`)}</p>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-3">
-                          {markets.map(({ value: name, label, flag }) => {
+                          {markets.map(({ value: name, label, flag, sendBlockReason }) => {
                             const isSelected = selectedMarkets.some(m => normalizeCampaignMarket(m) === normalizeCampaignMarket(name));
                             const isDisabled = !isSelected && selectedMarkets.length >= MAX_MARKETS;
                             return (
@@ -603,8 +609,10 @@ const CreateCampaign = () => {
                                 key={name}
                                 onClick={() => !isDisabled && handleMarketToggle(name)}
                                 disabled={isDisabled}
+                                aria-pressed={isSelected}
+                                title={sendBlockReason ? `${label} — ${t(`createCampaign.markets.blockReasons.${sendBlockReason}`)}` : label}
                                 className={cn(
-                                  'flex items-center justify-between gap-2 px-3 py-2 rounded-md border text-sm text-left transition-colors',
+                                  'flex h-auto min-h-12 items-center justify-between gap-2 px-3 py-2 rounded-md border text-sm text-left transition-colors',
                                   isSelected
                                     ? 'border-primary bg-primary/10 text-primary font-medium'
                                     : 'border-border bg-card hover:bg-muted/50',
@@ -613,7 +621,7 @@ const CreateCampaign = () => {
                               >
                                 <span className="flex items-center gap-2 min-w-0">
                                   <span aria-hidden className="text-base leading-none">{flag}</span>
-                                  <span className="truncate">{label}</span>
+                                  <span className="min-w-0 whitespace-normal break-words leading-snug">{label}{sendBlockReason && <span className="block text-xs font-normal text-muted-foreground">{t(`createCampaign.markets.blockReasons.${sendBlockReason}`)}</span>}</span>
                                 </span>
                                 {isSelected && <Check className="h-4 w-4 shrink-0" />}
                               </Button>
@@ -627,6 +635,7 @@ const CreateCampaign = () => {
                   {marketsLoading && <p className="mt-3 text-sm text-muted-foreground" role="status">{t('createCampaign.markets.loading')}</p>}
                   {!marketsLoading && marketCounts === null && <div className="mt-3 flex items-center gap-2"><p className="text-sm text-muted-foreground" role="alert">{t('createCampaign.markets.loadError')}</p><Button type="button" variant="ghost" size="sm" onClick={refreshMarkets}>{t('createCampaign.markets.retry')}</Button></div>}
                   {unavailableMarkets.length > 0 && <div className="mt-3 space-y-2"><p className="text-sm text-muted-foreground" role="alert">{t('createCampaign.markets.savedUnavailable')}</p><div className="flex flex-wrap gap-2">{unavailableMarkets.map(value => <Button key={value} type="button" variant="outline" size="sm" onClick={() => handleMarketToggle(value)} aria-label={t('createCampaign.markets.remove', { market: campaignMarketLabel(value, i18n.language) })}>{campaignMarketLabel(value, i18n.language)} <span aria-hidden>×</span></Button>)}</div></div>}
+                  {blockedMarkets.length > 0 && <div className="mt-3 space-y-1 text-sm text-muted-foreground" role="status"><p>{t('createCampaign.markets.draftOnly')}</p><ul className="list-disc pl-5">{blockedMarkets.map(m => <li key={m.code}>{m.label} — {t(`createCampaign.markets.blockReasons.${m.sendBlockReason}`)}</li>)}</ul></div>}
 
                   {/* Open to other markets */}
                   <Separator className="my-4" />

@@ -299,5 +299,17 @@ export const CAMPAIGN_MARKET_READINESS: Record<string, MarketReadiness> = {
   "AZ": {
     "listIds": [],
     "nonBlockedContacts": 0
+  },
+  "MT": {
+    "listIds": [158],
+    "nonBlockedContacts": 1
+  },
+  "LT": {
+    "listIds": [156],
+    "nonBlockedContacts": 4
+  },
+  "LV": {
+    "listIds": [155],
+    "nonBlockedContacts": 3
   }
 };

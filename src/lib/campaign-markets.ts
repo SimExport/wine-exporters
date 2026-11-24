@@ -1,9 +1,10 @@
 import { COUNTRIES } from '../components/importers/country-data';
-import { CAMPAIGN_MARKETS, CAMPAIGN_MARKET_GROUPS, CAMPAIGN_MARKET_EXTENSION_ENABLED, MIN_CAMPAIGN_EMAILS, findCampaignMarket, normalizeCampaignMarket, distinctCampaignMarkets, type CampaignMarket } from '../../supabase/functions/_shared/campaign-markets';
+import { CAMPAIGN_MARKETS, CAMPAIGN_MARKET_GROUPS, CAMPAIGN_MARKET_EXTENSION_ENABLED, CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED, MIN_CAMPAIGN_EMAILS, findCampaignMarket, normalizeCampaignMarket, distinctCampaignMarkets, type CampaignMarket } from '../../supabase/functions/_shared/campaign-markets';
 import { CAMPAIGN_MARKET_READINESS, type MarketReadiness } from '../../supabase/functions/_shared/campaign-market-readiness';
 
 export interface CampaignMarketCount { country: string; usable_email_count: number | string }
-export interface CampaignMarketOption extends CampaignMarket { label: string; flag: string }
+export type CampaignMarketBlockReason = 'missing_list' | 'no_audience' | 'unverified' | 'no_contacts' | 'sender_update_required';
+export interface CampaignMarketOption extends CampaignMarket { label: string; flag: string; sendBlockReason: CampaignMarketBlockReason | null }
 export type CampaignMarketRpc = { rpc: (name: string) => PromiseLike<{ data: unknown; error: unknown }> };
 
 export function campaignMarketLabel(value: string, language: string): string {
@@ -18,12 +19,24 @@ export function marketIsReady(market: CampaignMarket, readiness: Record<string, 
   const r = readiness[market.code];
   return !!r && r.nonBlockedContacts > 0 && market.listIds.length > 0 && r.listIds.length === market.listIds.length && market.listIds.every(id => r.listIds.includes(id));
 }
-export function campaignMarketOptions(counts: readonly CampaignMarketCount[] | null, language: string, readiness = CAMPAIGN_MARKET_READINESS, extensionEnabled = CAMPAIGN_MARKET_EXTENSION_ENABLED): CampaignMarketOption[] {
+export function campaignMarketOptions(counts: readonly CampaignMarketCount[] | null, language: string, readiness = CAMPAIGN_MARKET_READINESS, extensionEnabled = CAMPAIGN_MARKET_EXTENSION_ENABLED, sendExtensionEnabled = CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED): CampaignMarketOption[] {
   const eligible = new Set((counts ?? []).filter(c => Number(c.usable_email_count) >= MIN_CAMPAIGN_EMAILS).map(c => normalizeCampaignMarket(c.country)));
-  // Until separate Brevo setup/deployment approval, preserve the exact original 44 choices.
-  // The future enabled path is fail-closed and never offers an unprepared new country.
-  return CAMPAIGN_MARKETS.filter(m => extensionEnabled ? marketIsReady(m, readiness) && (m.existing || eligible.has(normalizeCampaignMarket(m.value))) : m.existing)
-    .map(m => ({ ...m, label: campaignMarketLabel(m.value, language), flag: campaignMarketFlag(m.code) }));
+  // Every approved market can be explored/saved in a draft, even below 50 contacts.
+  // Availability is explicit and submission stays blocked until the whole audience is ready.
+  return CAMPAIGN_MARKETS.filter(m => extensionEnabled || m.existing).map(m => {
+    const r = readiness[m.code];
+    const sendBlockReason: CampaignMarketBlockReason | null = !m.listIds.length ? 'missing_list'
+      : !r || r.listIds.length !== m.listIds.length || !m.listIds.every(id => r.listIds.includes(id)) ? 'unverified'
+      : !marketIsReady(m, readiness) ? 'no_audience'
+      : !m.existing && counts === null ? 'unverified'
+      : !m.existing && !eligible.has(normalizeCampaignMarket(m.value)) ? 'no_contacts'
+      : !m.existing && !sendExtensionEnabled ? 'sender_update_required' : null;
+    return { ...m, label: campaignMarketLabel(m.value, language), flag: campaignMarketFlag(m.code), sendBlockReason };
+  });
+}
+export function blockedSelectedMarkets(selected: readonly string[], options: readonly CampaignMarketOption[]): CampaignMarketOption[] {
+  const keys = new Set(selected.map(normalizeCampaignMarket));
+  return options.filter(m => keys.has(normalizeCampaignMarket(m.value)) && m.sendBlockReason !== null);
 }
 export function groupCampaignMarkets(options: readonly CampaignMarketOption[]) {
   return CAMPAIGN_MARKET_GROUPS.map(group => [group, options.filter(m => m.group === group)] as const);

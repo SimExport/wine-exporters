@@ -1587,11 +1587,19 @@
   "createCampaign": {
     "markets": {
       "loading": "Loading markets…",
-      "loadError": "New markets are temporarily unavailable.",
+      "loadError": "Audience availability is temporarily unavailable.",
       "retry": "Retry",
       "unavailable": "Some selected markets are unavailable for sending.",
       "savedUnavailable": "Saved markets currently unavailable:",
-      "remove": "Remove {{market}}"
+      "remove": "Remove {{market}}",
+      "draftOnly": "These markets remain in your draft. Their audience must be ready before submission:",
+      "blockReasons": {
+        "missing_list": "Audience setup required",
+        "no_audience": "No sendable contacts",
+        "unverified": "Audience check required",
+        "no_contacts": "No usable email in the database",
+        "sender_update_required": "Sending activation required"
+      }
     },
     "back": "Back",
     "title": "Create a campaign",
@@ -1603,9 +1611,13 @@
       "southAmerica": "South America",
       "latinAmerica": "Latin America",
       "asia": "Asia",
-      "oceaniaAfrica": "Oceania & Africa"
+      "oceaniaAfrica": "Oceania & Africa",
+      "middleEast": "Middle East",
+      "africa": "Africa",
+      "oceania": "Oceania"
     },
     "toasts": {
+      "marketsRange": "Select between {{min}} and {{max}} markets.",
       "maxReached": {
         "title": "Maximum reached",
         "description": "You can select up to {{max}} markets."

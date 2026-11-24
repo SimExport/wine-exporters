@@ -1,11 +1,11 @@
 // One React-free catalogue for the producer chooser, reconciliation and both send paths.
 export const MIN_CAMPAIGN_MARKETS = 5;
-export const MAX_CAMPAIGN_MARKETS = 15;
-export const MIN_CAMPAIGN_EMAILS = 50;
-// Explicit rollout gate: user authorised code/tests only. Enable only AFTER all historical
-// lists are ready and all deployed send paths carry this catalogue; never by an audit alone.
-export const CAMPAIGN_MARKET_EXTENSION_ENABLED = false;
-export const CAMPAIGN_MARKET_GROUPS = ['europe', 'northAmerica', 'latinAmerica', 'asia', 'oceaniaAfrica'] as const;
+export const MAX_CAMPAIGN_MARKETS = 20;
+export const MIN_CAMPAIGN_EMAILS = 1;
+// Simon authorised the extended draft chooser, not deployment or live sending.
+export const CAMPAIGN_MARKET_EXTENSION_ENABLED = true;
+export const CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED = false;
+export const CAMPAIGN_MARKET_GROUPS = ['europe', 'northAmerica', 'latinAmerica', 'asia', 'middleEast', 'africa', 'oceania'] as const;
 export type CampaignMarketGroup = typeof CAMPAIGN_MARKET_GROUPS[number];
 export interface CampaignMarket {
   code: string;
@@ -30,13 +30,38 @@ export const CAMPAIGN_MARKETS: readonly CampaignMarket[] = [
   market('CO', 'Colombia', 'latinAmerica', [140]), market('PE', 'Peru', 'latinAmerica', []),
   market('CN', 'China', 'asia', [139]), market('HK', 'Hong Kong', 'asia', [38]), market('IN', 'India', 'asia', [151]),
   market('JP', 'Japan', 'asia', [154]), market('SG', 'Singapore', 'asia', [166]), market('KR', 'South Korea', 'asia', [169]),
-  market('TW', 'Taiwan', 'asia', [173]), market('TH', 'Thailand', 'asia', [174]), market('AE', 'UAE', 'asia', []), market('VN', 'Vietnam', 'asia', [177]),
-  market('AU', 'Australia', 'oceaniaAfrica', [135]), market('MA', 'Morocco', 'oceaniaAfrica', []),
-  market('NG', 'Nigeria', 'oceaniaAfrica', []), market('ZA', 'South Africa', 'oceaniaAfrica', [168]),
+  market('TW', 'Taiwan', 'asia', [173]), market('TH', 'Thailand', 'asia', [174]), market('AE', 'UAE', 'middleEast', []), market('VN', 'Vietnam', 'asia', [177]),
+  market('AU', 'Australia', 'oceania', [135]), market('MA', 'Morocco', 'africa', []),
+  market('NG', 'Nigeria', 'africa', []), market('ZA', 'South Africa', 'africa', [168]),
   market('PH', 'Philippines', 'asia', [], false), market('SK', 'Slovakia', 'europe', [167], false),
   market('ID', 'Indonesia', 'asia', [], false), market('BG', 'Bulgaria', 'europe', [21], false), market('CY', 'Cyprus', 'europe', [142], false),
   market('MY', 'Malaysia', 'asia', [], false), market('LU', 'Luxembourg', 'europe', [157], false),
   market('IS', 'Iceland', 'europe', [], false), market('AZ', 'Azerbaijan', 'asia', [], false),
+  market('SI', 'Slovenia', 'europe', [], false), market('MT', 'Malta', 'europe', [158], false),
+  market('LT', 'Lithuania', 'europe', [156], false), market('LV', 'Latvia', 'europe', [155], false),
+  market('NZ', 'New Zealand', 'oceania', [], false), market('IL', 'Israel', 'middleEast', [], false),
+  market('KH', 'Cambodia', 'asia', [], false), market('AL', 'Albania', 'europe', [], false),
+  market('CR', 'Costa Rica', 'latinAmerica', [], false), market('PR', 'Puerto Rico', 'latinAmerica', [], false),
+  market('KE', 'Kenya', 'africa', [], false), market('EC', 'Ecuador', 'latinAmerica', [], false),
+  market('UY', 'Uruguay', 'latinAmerica', [], false), market('DO', 'Dominican Republic', 'latinAmerica', [], false),
+  market('TR', 'Turkey', 'middleEast', [], false), market('ME', 'Montenegro', 'europe', [], false),
+  market('PA', 'Panama', 'latinAmerica', [], false), market('MU', 'Mauritius', 'africa', [], false),
+  market('KZ', 'Kazakhstan', 'asia', [], false), market('SC', 'Seychelles', 'africa', [], false),
+  market('MV', 'Maldives', 'asia', [], false), market('MO', 'Macau', 'asia', [], false),
+  market('GT', 'Guatemala', 'latinAmerica', [], false), market('UA', 'Ukraine', 'europe', [], false),
+  market('AM', 'Armenia', 'asia', [], false), market('LB', 'Lebanon', 'middleEast', [], false),
+  market('BA', 'Bosnia and Herzegovina', 'europe', [], false), market('MK', 'North Macedonia', 'europe', [], false),
+  market('JM', 'Jamaica', 'latinAmerica', [], false), market('BH', 'Bahrain', 'middleEast', [], false),
+  market('JO', 'Jordan', 'middleEast', [], false), market('PF', 'French Polynesia', 'oceania', [], false),
+  market('NC', 'New Caledonia', 'oceania', [], false), market('AD', 'Andorra', 'europe', [], false),
+  market('SM', 'San Marino', 'europe', [], false), market('NA', 'Namibia', 'africa', [], false),
+  market('PY', 'Paraguay', 'latinAmerica', [], false), market('SV', 'El Salvador', 'latinAmerica', [], false),
+  market('HN', 'Honduras', 'latinAmerica', [], false), market('FJ', 'Fiji', 'oceania', [], false),
+  market('NI', 'Nicaragua', 'latinAmerica', [], false), market('CW', 'Curacao', 'latinAmerica', [], false),
+  market('AW', 'Aruba', 'latinAmerica', [], false), market('GH', 'Ghana', 'africa', [], false),
+  market('SN', 'Senegal', 'africa', [], false), market('TZ', 'Tanzania', 'africa', [], false),
+  market('BS', 'Bahamas', 'latinAmerica', [], false), market('BB', 'Barbados', 'latinAmerica', [], false),
+  market('TT', 'Trinidad and Tobago', 'latinAmerica', [], false),
 ];
 
 const ALIASES: Record<string, string> = {
@@ -44,17 +69,22 @@ const ALIASES: Record<string, string> = {
   'united states of america': 'united states', 'états-unis': 'united states', 'etats-unis': 'united states',
   uk: 'united kingdom', gb: 'united kingdom', 'u.k.': 'united kingdom', 'great britain': 'united kingdom',
   'england (uk)': 'united kingdom', 'scotland (uk)': 'united kingdom', 'wales (uk)': 'united kingdom',
+  england: 'united kingdom', scotland: 'united kingdom', wales: 'united kingdom', 'northern ireland': 'united kingdom',
   'northern ireland (uk)': 'united kingdom', 'royaume-uni': 'united kingdom',
   uae: 'united arab emirates', 'émirats arabes unis': 'united arab emirates',
   czechia: 'czech republic', 'république tchèque': 'czech republic',
   'the netherlands': 'netherlands', 'pays-bas': 'netherlands',
   'bosnia-herzegovina': 'bosnia and herzegovina',
+  'bosnia herzegovina': 'bosnia and herzegovina', 'bosnia & herzegovina': 'bosnia and herzegovina',
+  'bosnia and hercegovina': 'bosnia and herzegovina', 'bosnie-herzégovine': 'bosnia and herzegovina',
+  türkiye: 'turkey', turkiye: 'turkey', turquie: 'turkey', macao: 'macau', curaçao: 'curacao',
+  'republic of north macedonia': 'north macedonia', macedonia: 'north macedonia',
   slovaquie: 'slovakia', indonésie: 'indonesia', bulgarie: 'bulgaria', chypre: 'cyprus',
   malaisie: 'malaysia', islande: 'iceland', 'azerbaïdjan': 'azerbaijan',
 };
 export function normalizeCampaignMarket(value: unknown): string {
   if (typeof value !== 'string') return '';
-  const key = value.replace(/\s+/g, ' ').trim().toLowerCase();
+  const key = value.normalize('NFKC').replace(/[‐‑–—]/g, '-').replace(/\s+/g, ' ').trim().toLowerCase();
   return ALIASES[key] ?? key;
 }
 export function findCampaignMarket(value: string): CampaignMarket | undefined {
@@ -75,7 +105,7 @@ export function campaignMarketRangeValid(values: readonly string[]): boolean {
   return count >= MIN_CAMPAIGN_MARKETS && count <= MAX_CAMPAIGN_MARKETS;
 }
 // Historical maps not selectable in the chooser are retained for already saved campaigns.
-const LEGACY_LISTS: Record<string, number> = { france: 147, latvia: 155, lithuania: 156, malta: 158, russia: 164 };
+const LEGACY_LISTS: Record<string, number> = { france: 147, russia: 164 };
 export function mapCampaignMarkets(values: readonly string[]): { listIds: number[]; unmatched: string[] } {
   const ids = new Set<number>(); const unmatched: string[] = [];
   for (const value of distinctCampaignMarkets(values)) {

@@ -1,10 +1,11 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
 ## Marchés de création de campagne — extension ciblée
-- [x] Catalogue 44 marchés conservés + 9 candidats ≥50, normalisation FR/EN et RPC agrégée sécurisée ; activation différée.
-- [x] Mapping partagé et contrôle Brevo complet avant création/envoi ; tests Bun/Deno simulés et SQL avec annulation réussis, aucune fixture persistée.
-- [ ] Réconciliation des listes manquantes/vides — l’utilisateur a confirmé « Code et tests seulement » ; création/import Brevo non autorisés, activation différée.
-- [x] Documentation et compilation automatique OK ; rendu FR/EN isolé sans vraie session, sélection 5–15 et checkbox vérifiées ; publication/déploiement non autorisés.
+- [x] Instruction Simon du 24/11 : 44 marchés conservés, 58 ajouts vérifiés sans seuil de 50, catalogue 102 et sélection 5–20 en prévisualisation.
+- [x] Existence/alias vérifiés en lecture Supabase ; inventaire et 3 audiences additionnelles Brevo vérifiés sans import ni envoi.
+- [x] Catalogue, validations UI et FR/EN adaptés ; migrations 5–20 et alias préparées/testées dans PostgreSQL isolé, non appliquées au Supabase live.
+- [x] Tests 5/20/21, historique et ciblage simulé ; rendu FR/EN ordinateur/mobile sans débordement, compilation automatique OK. Parcours connecté non vérifiable.
+- [ ] Mise en service réelle — limite Supabase live encore 15, 51 nouvelles listes absentes, 2 vides, déploiements et revue légale des destinations attendent une autorisation distincte ; pas de publication.
 
 ## Notifications opportunités — reprise ciblée
 - [x] Suivi SQL privé admin, lots 49 BCC, reprise atomique et compteurs ; 7 tests simulés, tests SQL annulés et Deno check réussis ; compilation automatique OK. Contrôle visuel isolé avec réponses simulées, pas de session admin réelle.
