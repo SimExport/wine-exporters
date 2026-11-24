@@ -3,7 +3,7 @@ import { campaignMarketPreflight } from './campaign-market-preflight.ts';
 const usable = { contacts: [{ email: 'buyer@example.org', emailBlacklisted: false }] };
 Deno.test('one unmapped country blocks every country before even a provider GET', async () => {
   let reads = 0;
-  const r = await campaignMarketPreflight(['Germany','Philippines'], async () => { reads++; return new Response('{}'); });
+  const r = await campaignMarketPreflight(['Germany','Belarus'], async () => { reads++; return new Response('{}'); });
   assertEquals(r.failure?.status, 422); assertEquals(r.listIds, []); assertEquals(reads, 0);
 });
 Deno.test('Canada is actually targeted; aliases never duplicate a list', async () => {

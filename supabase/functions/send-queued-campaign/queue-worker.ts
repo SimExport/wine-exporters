@@ -21,11 +21,11 @@ export async function countRealSendsToday(admin: any, now: Date): Promise<number
 }
 
 export async function runQueueOnce(deps: QueueDeps): Promise<{ status: number; body: Record<string, unknown> }> {
-  const { admin, now } = deps;
+  const { admin } = deps;
   const iso = () => new Date().toISOString();
 
-  if (await countRealSendsToday(admin, now) >= 1) return { status: 200, body: { result: "quota_reached" } };
-
+  // Slots (10:00/15:00 Europe/Paris), the 2-per-Paris-day quota (manual sends included) and the global lock
+  // are authoritative in the database claim; the worker never re-implements or relaxes them.
   const { data: claimed, error: claimErr } = await admin.rpc("claim_campaign_send");
   if (claimErr) throw claimErr;
   const row = Array.isArray(claimed) ? claimed[0] : claimed;
@@ -37,12 +37,6 @@ export async function runQueueOnce(deps: QueueDeps): Promise<{ status: number; b
     await setQueue({ state, error });
     return { status: 200, body: { result: state, campaignId: id, error, ...extra } };
   };
-
-  // Re-evaluate the quota just before sending: a manual send may have landed meanwhile.
-  if (await countRealSendsToday(admin, now) >= 1) {
-    await admin.from("campaign_send_queue").update({ state: "queued", attempted_at: null, updated_at: iso() }).eq("campaign_id", id).eq("state", "sending");
-    return { status: 200, body: { result: "quota_reached" } };
-  }
 
   const { data: c } = await admin.from("campaigns").select("*").eq("id", id).maybeSingle();
   const { data: testFlag } = await admin.rpc("is_test_campaign", { _id: id });

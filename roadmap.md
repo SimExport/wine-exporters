@@ -5,7 +5,8 @@
 - [x] Existence/alias vérifiés en lecture Supabase ; inventaire et 3 audiences additionnelles Brevo vérifiés sans import ni envoi.
 - [x] Catalogue, validations UI et FR/EN adaptés ; migrations 5–20 et alias préparées/testées dans PostgreSQL isolé, non appliquées au Supabase live.
 - [x] Tests 5/20/21, historique et ciblage simulé ; rendu FR/EN ordinateur/mobile sans débordement, compilation automatique OK. Parcours connecté non vérifiable.
-- [ ] Mise en service réelle — limite Supabase live encore 15, 51 nouvelles listes absentes, 2 vides, déploiements et revue légale des destinations attendent une autorisation distincte ; pas de publication.
+- [x] Mise en service du 24/11 (OK Simon) : limite 1–20 / soumission 5–20 appliquée et testée en base avec annulation ; 56 listes pays créées, 12 complétées (1 780 contacts créés, 16 rattachés, 137 bloqués laissés intacts) ; 102 marchés ciblables vérifiés en lecture ; 3 fonctions d'envoi déployées ; aucun envoi.
+- [ ] Publication du frontend — à faire par Simon après relecture ; première exécution planifiée réelle du worker redéployé : 25/11 10h Paris, à surveiller.
 
 ## Notifications opportunités — reprise ciblée
 - [x] Suivi SQL privé admin, lots 49 BCC, reprise atomique et compteurs ; 7 tests simulés, tests SQL annulés et Deno check réussis ; compilation automatique OK. Contrôle visuel isolé avec réponses simulées, pas de session admin réelle.

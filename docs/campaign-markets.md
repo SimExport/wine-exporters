@@ -1,6 +1,19 @@
 # WineExporters — marchés de création de campagne
 
-## Livraison préparée, pas mise en service
+## Mise en service du 24 novembre 2026 (autorisée par Simon) — état actuel
+
+Cette section remplace les mentions « non appliqué / non déployé / bloqué » des sections historiques plus bas.
+
+- **Base** : migration appliquée (sauvegarde 1–20, soumission 5–20 pays distincts, normaliseur complété). Test réel avec annulation : 4 refusé, 5 accepté, 16 enregistré, 20 accepté, 21 refusé, variantes comptées une fois ; campagnes, crédits et file inchangés (empreintes identiques). Aucune règle d'accès modifiée ; fonction de garde non exécutable par anon/authenticated.
+- **Brevo** : 56 listes pays créées dans le dossier 178 (51 nouveaux marchés + Chili 180, Pérou 181, UAE 182, Maroc 183, Nigeria 184 ; nouveaux marchés 185–235), 12 listes existantes complétées (Grèce, Serbie, Argentine, Colombie, Inde, Slovaquie, Bulgarie, Chypre, Luxembourg, Malte, Lituanie, Lettonie). 1 780 contacts créés, 16 contacts existants non bloqués rattachés, 137 contacts bloqués laissés intacts et jamais rattachés, 43 déjà présents. Aucun contact existant modifié (ni attributs ni statut), aucune liste supprimée ou vidée.
+- **Sources et exclusions** : uniquement buyer_contacts des 68 pays concernés, alias normalisés, emails multiples séparés et dédoublonnés ; statuts do_not_mail / invalid / bounced / blocked / unsubscribed / suppressed / abuse exclus ; syntaxe stricte. Russie et Biélorussie non ajoutées. Listes BWI, VINATY, Blocklist (18), onboarding (75, 76) et test (179) jamais touchées.
+- **Automatisations** : seules deux automatisations existent (Onboarding FR/EN), déclenchées uniquement par l'ajout aux listes 75 et 76. Aucune campagne Brevo en file avant/après ; dernière campagne envoyée inchangée (373).
+- **Catalogue** : chaque marché a exactement une liste ; relevé de disponibilité régénéré (102/102 avec au moins un contact envoyable). `CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED=true` (reste l'interrupteur unique pour refermer les nouveaux marchés).
+- **Fonctions déployées** : `send-queued-campaign`, `send-campaign`, `create-campaign` avec le précontrôle commun. Le worker planifié ne recalcule plus de quota : créneaux 10h/15h, quota 2/jour et verrou restent dans la réclamation en base. Appels sans secret/session : refusés.
+- **Effet sur les campagnes déjà planifiées** (non modifiées) : les pays qu'elles avaient choisis et qui étaient jusqu'ici ignorés faute d'audience (Serbie le 25/11 10h, Nigeria le 26/11 10h, UAE le 26/11 15h) seront désormais réellement ciblés. Précontrôle en lecture des 4 campagnes : OK.
+- **Reste à faire** : publier le frontend ; surveiller le premier départ planifié du 25/11 10h Paris. Les campagnes Brevo anciennes à l'état « suspendu » ciblent certaines listes complétées (ex. 149, 134, 21) : ne pas les reprendre. La base légale de prospection par pays relève de la décision de Simon.
+
+## Historique — livraison préparée (avant mise en service)
 
 La nouvelle instruction Simon du 24 novembre remplace le plan précédent : **102 choix en prévisualisation = 44 historiques + les 58 ajouts explicitement demandés**, sélection minimum 5/maximum 20. Aucun import, création de liste, envoi, publication ou changement du Supabase live. `CAMPAIGN_MARKET_EXTENSION_ENABLED=true` ouvre le catalogue de brouillon ; `CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED=false` empêche la soumission des nouveaux marchés avant la mise en service séparément approuvée. Les valeurs historiques, leur ordre relatif et la checkbox autres marchés sont conservés. Afrique, Océanie et Moyen-Orient ont leurs groupes distincts.
 

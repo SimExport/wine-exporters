@@ -1,4 +1,5 @@
 -- Isolated PostgreSQL/PGlite fixture only: never run against production.
+-- The live equivalent (4/5/16/20/21, aliases, history/credits/queue hashes) was run once on 2026-11-24 in a DO block ending in RAISE, fully rolled back.
 -- The runner first creates a minimal public.campaigns fixture and applies the draft SQL.
 BEGIN;
 DO $test$

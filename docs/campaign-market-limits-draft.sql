@@ -1,4 +1,4 @@
--- DRAFT ONLY: not applied to Supabase. Submit through the migration tool on approval.
+-- APPLIED to the live Supabase project on 2026-11-24 through the migration tool (kept for reference; the versioned copy is under supabase/migrations).
 -- No data updates, RLS changes, email calls, credit changes or scheduling changes.
 BEGIN;
 

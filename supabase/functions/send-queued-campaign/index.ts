@@ -1,6 +1,6 @@
-// Edge Function: send-queued-campaign — daily FIFO drain of campaign_send_queue.
+// Edge Function: send-queued-campaign — sends the campaign whose persisted slot is due (campaign_send_queue.scheduled_at).
 // Auth: internal secret only (x-campaign-queue-secret, stored in Vault + env). No JWT, no service_role exposure.
-// Quota: at most ONE real send per Europe/Paris civil day, counting manual sends (legacy + custom) of the day.
+// Quota: enforced by the database claim (2 slots per Europe/Paris day, manual sends included); never re-implemented here.
 // Test campaigns are never sent here (RPC + eligibility re-check). Uncertain Brevo outcomes block the
 // queue entry in needs_review for manual handling — never retried automatically.
 import { matchesInternalSecret, resultJson, serviceClient } from "../_shared/campaign-results-auth.ts";

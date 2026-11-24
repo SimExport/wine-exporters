@@ -2,9 +2,9 @@
 export const MIN_CAMPAIGN_MARKETS = 5;
 export const MAX_CAMPAIGN_MARKETS = 20;
 export const MIN_CAMPAIGN_EMAILS = 1;
-// Simon authorised the extended draft chooser, not deployment or live sending.
+// Simon authorised go-live on 24/11/2026: audiences prepared, senders deployed with the fail-closed preflight.
 export const CAMPAIGN_MARKET_EXTENSION_ENABLED = true;
-export const CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED = false;
+export const CAMPAIGN_MARKET_SEND_EXTENSION_ENABLED = true;
 export const CAMPAIGN_MARKET_GROUPS = ['europe', 'northAmerica', 'latinAmerica', 'asia', 'middleEast', 'africa', 'oceania'] as const;
 export type CampaignMarketGroup = typeof CAMPAIGN_MARKET_GROUPS[number];
 export interface CampaignMarket {
@@ -15,7 +15,7 @@ export interface CampaignMarket {
   listIds: readonly number[];
 }
 const market = (code: string, value: string, group: CampaignMarketGroup, listIds: number[], existing = true): CampaignMarket => ({ code, value, group, listIds, existing });
-// IDs were read from Brevo, never inferred. Empty arrays require separately authorised setup.
+// IDs were read from Brevo or returned by its list creation, never inferred. An empty array blocks the market.
 export const CAMPAIGN_MARKETS: readonly CampaignMarket[] = [
   market('AT', 'Austria', 'europe', [136]), market('BE', 'Belgium', 'europe', [137]), market('HR', 'Croatia', 'europe', [141]),
   market('CZ', 'Czech Republic', 'europe', [143]), market('DK', 'Denmark', 'europe', [144]), market('EE', 'Estonia', 'europe', [145]),
@@ -26,42 +26,42 @@ export const CAMPAIGN_MARKETS: readonly CampaignMarket[] = [
   market('ES', 'Spain', 'europe', [170]), market('SE', 'Sweden', 'europe', [171]), market('CH', 'Switzerland', 'europe', [172]),
   market('GB', 'United Kingdom', 'europe', [176]),
   market('CA', 'Canada', 'northAmerica', [33]), market('MX', 'Mexico', 'northAmerica', [159]), market('US', 'United States', 'northAmerica', [175]),
-  market('AR', 'Argentina', 'latinAmerica', [134]), market('BR', 'Brazil', 'latinAmerica', [138]), market('CL', 'Chile', 'latinAmerica', []),
-  market('CO', 'Colombia', 'latinAmerica', [140]), market('PE', 'Peru', 'latinAmerica', []),
+  market('AR', 'Argentina', 'latinAmerica', [134]), market('BR', 'Brazil', 'latinAmerica', [138]), market('CL', 'Chile', 'latinAmerica', [180]),
+  market('CO', 'Colombia', 'latinAmerica', [140]), market('PE', 'Peru', 'latinAmerica', [181]),
   market('CN', 'China', 'asia', [139]), market('HK', 'Hong Kong', 'asia', [38]), market('IN', 'India', 'asia', [151]),
   market('JP', 'Japan', 'asia', [154]), market('SG', 'Singapore', 'asia', [166]), market('KR', 'South Korea', 'asia', [169]),
-  market('TW', 'Taiwan', 'asia', [173]), market('TH', 'Thailand', 'asia', [174]), market('AE', 'UAE', 'middleEast', []), market('VN', 'Vietnam', 'asia', [177]),
-  market('AU', 'Australia', 'oceania', [135]), market('MA', 'Morocco', 'africa', []),
-  market('NG', 'Nigeria', 'africa', []), market('ZA', 'South Africa', 'africa', [168]),
-  market('PH', 'Philippines', 'asia', [], false), market('SK', 'Slovakia', 'europe', [167], false),
-  market('ID', 'Indonesia', 'asia', [], false), market('BG', 'Bulgaria', 'europe', [21], false), market('CY', 'Cyprus', 'europe', [142], false),
-  market('MY', 'Malaysia', 'asia', [], false), market('LU', 'Luxembourg', 'europe', [157], false),
-  market('IS', 'Iceland', 'europe', [], false), market('AZ', 'Azerbaijan', 'asia', [], false),
-  market('SI', 'Slovenia', 'europe', [], false), market('MT', 'Malta', 'europe', [158], false),
+  market('TW', 'Taiwan', 'asia', [173]), market('TH', 'Thailand', 'asia', [174]), market('AE', 'UAE', 'middleEast', [182]), market('VN', 'Vietnam', 'asia', [177]),
+  market('AU', 'Australia', 'oceania', [135]), market('MA', 'Morocco', 'africa', [183]),
+  market('NG', 'Nigeria', 'africa', [184]), market('ZA', 'South Africa', 'africa', [168]),
+  market('PH', 'Philippines', 'asia', [185], false), market('SK', 'Slovakia', 'europe', [167], false),
+  market('ID', 'Indonesia', 'asia', [186], false), market('BG', 'Bulgaria', 'europe', [21], false), market('CY', 'Cyprus', 'europe', [142], false),
+  market('MY', 'Malaysia', 'asia', [187], false), market('LU', 'Luxembourg', 'europe', [157], false),
+  market('IS', 'Iceland', 'europe', [188], false), market('AZ', 'Azerbaijan', 'asia', [189], false),
+  market('SI', 'Slovenia', 'europe', [190], false), market('MT', 'Malta', 'europe', [158], false),
   market('LT', 'Lithuania', 'europe', [156], false), market('LV', 'Latvia', 'europe', [155], false),
-  market('NZ', 'New Zealand', 'oceania', [], false), market('IL', 'Israel', 'middleEast', [], false),
-  market('KH', 'Cambodia', 'asia', [], false), market('AL', 'Albania', 'europe', [], false),
-  market('CR', 'Costa Rica', 'latinAmerica', [], false), market('PR', 'Puerto Rico', 'latinAmerica', [], false),
-  market('KE', 'Kenya', 'africa', [], false), market('EC', 'Ecuador', 'latinAmerica', [], false),
-  market('UY', 'Uruguay', 'latinAmerica', [], false), market('DO', 'Dominican Republic', 'latinAmerica', [], false),
-  market('TR', 'Turkey', 'middleEast', [], false), market('ME', 'Montenegro', 'europe', [], false),
-  market('PA', 'Panama', 'latinAmerica', [], false), market('MU', 'Mauritius', 'africa', [], false),
-  market('KZ', 'Kazakhstan', 'asia', [], false), market('SC', 'Seychelles', 'africa', [], false),
-  market('MV', 'Maldives', 'asia', [], false), market('MO', 'Macau', 'asia', [], false),
-  market('GT', 'Guatemala', 'latinAmerica', [], false), market('UA', 'Ukraine', 'europe', [], false),
-  market('AM', 'Armenia', 'asia', [], false), market('LB', 'Lebanon', 'middleEast', [], false),
-  market('BA', 'Bosnia and Herzegovina', 'europe', [], false), market('MK', 'North Macedonia', 'europe', [], false),
-  market('JM', 'Jamaica', 'latinAmerica', [], false), market('BH', 'Bahrain', 'middleEast', [], false),
-  market('JO', 'Jordan', 'middleEast', [], false), market('PF', 'French Polynesia', 'oceania', [], false),
-  market('NC', 'New Caledonia', 'oceania', [], false), market('AD', 'Andorra', 'europe', [], false),
-  market('SM', 'San Marino', 'europe', [], false), market('NA', 'Namibia', 'africa', [], false),
-  market('PY', 'Paraguay', 'latinAmerica', [], false), market('SV', 'El Salvador', 'latinAmerica', [], false),
-  market('HN', 'Honduras', 'latinAmerica', [], false), market('FJ', 'Fiji', 'oceania', [], false),
-  market('NI', 'Nicaragua', 'latinAmerica', [], false), market('CW', 'Curacao', 'latinAmerica', [], false),
-  market('AW', 'Aruba', 'latinAmerica', [], false), market('GH', 'Ghana', 'africa', [], false),
-  market('SN', 'Senegal', 'africa', [], false), market('TZ', 'Tanzania', 'africa', [], false),
-  market('BS', 'Bahamas', 'latinAmerica', [], false), market('BB', 'Barbados', 'latinAmerica', [], false),
-  market('TT', 'Trinidad and Tobago', 'latinAmerica', [], false),
+  market('NZ', 'New Zealand', 'oceania', [191], false), market('IL', 'Israel', 'middleEast', [192], false),
+  market('KH', 'Cambodia', 'asia', [193], false), market('AL', 'Albania', 'europe', [194], false),
+  market('CR', 'Costa Rica', 'latinAmerica', [195], false), market('PR', 'Puerto Rico', 'latinAmerica', [196], false),
+  market('KE', 'Kenya', 'africa', [197], false), market('EC', 'Ecuador', 'latinAmerica', [198], false),
+  market('UY', 'Uruguay', 'latinAmerica', [199], false), market('DO', 'Dominican Republic', 'latinAmerica', [200], false),
+  market('TR', 'Turkey', 'middleEast', [201], false), market('ME', 'Montenegro', 'europe', [202], false),
+  market('PA', 'Panama', 'latinAmerica', [203], false), market('MU', 'Mauritius', 'africa', [204], false),
+  market('KZ', 'Kazakhstan', 'asia', [205], false), market('SC', 'Seychelles', 'africa', [206], false),
+  market('MV', 'Maldives', 'asia', [207], false), market('MO', 'Macau', 'asia', [208], false),
+  market('GT', 'Guatemala', 'latinAmerica', [209], false), market('UA', 'Ukraine', 'europe', [210], false),
+  market('AM', 'Armenia', 'asia', [211], false), market('LB', 'Lebanon', 'middleEast', [212], false),
+  market('BA', 'Bosnia and Herzegovina', 'europe', [213], false), market('MK', 'North Macedonia', 'europe', [214], false),
+  market('JM', 'Jamaica', 'latinAmerica', [215], false), market('BH', 'Bahrain', 'middleEast', [216], false),
+  market('JO', 'Jordan', 'middleEast', [217], false), market('PF', 'French Polynesia', 'oceania', [218], false),
+  market('NC', 'New Caledonia', 'oceania', [219], false), market('AD', 'Andorra', 'europe', [220], false),
+  market('SM', 'San Marino', 'europe', [221], false), market('NA', 'Namibia', 'africa', [222], false),
+  market('PY', 'Paraguay', 'latinAmerica', [223], false), market('SV', 'El Salvador', 'latinAmerica', [224], false),
+  market('HN', 'Honduras', 'latinAmerica', [225], false), market('FJ', 'Fiji', 'oceania', [226], false),
+  market('NI', 'Nicaragua', 'latinAmerica', [227], false), market('CW', 'Curacao', 'latinAmerica', [228], false),
+  market('AW', 'Aruba', 'latinAmerica', [229], false), market('GH', 'Ghana', 'africa', [230], false),
+  market('SN', 'Senegal', 'africa', [231], false), market('TZ', 'Tanzania', 'africa', [232], false),
+  market('BS', 'Bahamas', 'latinAmerica', [233], false), market('BB', 'Barbados', 'latinAmerica', [234], false),
+  market('TT', 'Trinidad and Tobago', 'latinAmerica', [235], false),
 ];
 
 const ALIASES: Record<string, string> = {

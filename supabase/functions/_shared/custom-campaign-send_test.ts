@@ -47,7 +47,7 @@ function fixture(markets: string[], behavior: 'ok' | 'empty' | 'deleted' | 'netw
   return { writes, calls, c, context: { admin, fetchFn, brevoKey: 'fake-test-only', reviewerId: 'admin', testListId: '179' } };
 }
 Deno.test('partial mapping never creates or sends a campaign and never writes to the database', async () => {
-  const f = fixture(['Germany','Philippines']);
+  const f = fixture(['Germany','Belarus']);
   assertEquals((await sendCustomCampaign(f.context, f.c, { testRequested: false, isTest: false })).status, 422);
   assertEquals(f.calls.length, 0); assertEquals(f.writes.length, 0);
 });
@@ -71,7 +71,7 @@ Deno.test('manual send preserves HTML and actually targets Canada, Germany and U
   assertEquals(f.calls.filter(c => c.path.endsWith('/sendNow')).length, 1);
 });
 Deno.test('test mode uses the test list exclusively, even with an unmapped real country', async () => {
-  const f = fixture(['Philippines']);
+  const f = fixture(['Belarus']);
   const r = await sendCustomCampaign(f.context, f.c, { testRequested: true, isTest: false });
   assertEquals(r.body.test, true);
   assertEquals(f.calls.find(c => c.path === '/emailCampaigns')?.body?.recipients, { listIds: [179] });

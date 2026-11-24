@@ -135,17 +135,8 @@ Deno.test("empty queue → no claim result, no Brevo call", async () => {
   assertEquals(f.calls.length, 0);
 });
 
-Deno.test("quota: a manual send already live today (Paris) blocks the queue", async () => {
-  const s = baseState({ campaigns: [customCampaign(CID2, { status: "active", launched_at: TODAY_PARIS })], queue: [queuedRow()] });
-  const f = mockFetch();
-  const r = await runQueueOnce(deps(s, f));
-  assertEquals(r.body.result, "quota_reached");
-  assertEquals(s.queue[0].state, "queued");
-  assertEquals(f.calls.length, 0);
-});
-
-Deno.test("quota: yesterday 22:30 UTC (still yesterday in Paris) does NOT count", async () => {
-  const s = baseState({ campaigns: [customCampaign(CID2, { status: "active", launched_at: YESTERDAY_PARIS }), customCampaign()], queue: [queuedRow()] });
+Deno.test("quota lives in the database claim: a second send the same Paris day is not blocked by the worker", async () => {
+  const s = baseState({ campaigns: [customCampaign(CID2, { status: "active", launched_at: TODAY_PARIS }), customCampaign()], queue: [queuedRow()] });
   const r = await runQueueOnce(deps(s));
   assertEquals(r.body.result, "sent");
 });

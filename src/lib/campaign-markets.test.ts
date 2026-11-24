@@ -41,19 +41,26 @@ test('an empty candidate aggregate never proves a new audience ready', () => {
   const m = campaignMarketOptions([{ country: 'Malta', usable_email_count: 0 }], 'en', allReady, true, true).find(m => m.code === 'MT');
   assert.equal(m?.sendBlockReason, 'no_contacts');
 });
-test('missing list remains selectable in draft but is flagged as blocked for sending', () => {
-  const options = campaignMarketOptions([{ country: 'Philippines', usable_email_count: 173 }], 'fr', allReady);
-  assert.equal(options.find(m => m.code === 'PH')?.sendBlockReason, 'missing_list');
+test('a market without a verified audience record stays selectable in draft but blocked for sending', () => {
+  const options = campaignMarketOptions([{ country: 'Philippines', usable_email_count: 173 }], 'fr', {});
+  assert.equal(options.find(m => m.code === 'PH')?.sendBlockReason, 'unverified');
   assert.deepEqual(blockedSelectedMarkets(['Philippines'], options).map(m => m.code), ['PH']);
+});
+test('every catalogue market has exactly one distinct country list', () => {
+  const ids = CAMPAIGN_MARKETS.flatMap(m => m.listIds);
+  assert.equal(CAMPAIGN_MARKETS.every(m => m.listIds.length === 1), true);
+  assert.equal(new Set(ids).size, CAMPAIGN_MARKETS.length);
+  assert.equal(ids.some(id => [18, 75, 76, 179].includes(id)), false); // never blocklist, onboarding automations or test list
 });
 test('empty and mismatched lists are not presented as ready', () => {
   const options = campaignMarketOptions(null, 'fr', { CY: { listIds: [142], nonBlockedContacts: 0 }, SK: { listIds: [130], nonBlockedContacts: 29 } });
   assert.equal(options.find(m => m.code === 'CY')?.sendBlockReason, 'no_audience');
   assert.equal(options.find(m => m.code === 'SK')?.sendBlockReason, 'unverified');
 });
-test('preview approval does not enable sending new countries even with a real audience', () => {
-  const options = campaignMarketOptions([{ country: 'Slovakia ', usable_email_count: 139 }], 'fr', allReady);
-  assert.equal(options.find(m => m.code === 'SK')?.sendBlockReason, 'sender_update_required');
+test('new countries with a real audience are open after go-live; the switch can still close them', () => {
+  const counts = [{ country: 'Slovakia ', usable_email_count: 139 }];
+  assert.equal(campaignMarketOptions(counts, 'fr', allReady).find(m => m.code === 'SK')?.sendBlockReason, null);
+  assert.equal(campaignMarketOptions(counts, 'fr', allReady, true, false).find(m => m.code === 'SK')?.sendBlockReason, 'sender_update_required');
 });
 test('minimum remains 5; 4 is refused', () => {
   assert.equal(MIN_CAMPAIGN_MARKETS, 5);
@@ -104,7 +111,7 @@ test('mapping retains historical IDs including no-longer-selectable legacy campa
 });
 test('new country mappings use only verified lists; no substitute is invented', () => {
   assert.deepEqual(mapCampaignMarkets(['Malta','Lithuania','Latvia']).listIds, [158,156,155]);
-  assert.deepEqual(mapCampaignMarkets(['Philippines','UAE','Bosnia-Herzegovina','Atlantis']).unmatched, ['Philippines','UAE','Bosnia-Herzegovina','Atlantis']);
+  assert.deepEqual(mapCampaignMarkets(['Philippines','UAE','Bosnia-Herzegovina','Atlantis']), { listIds: [185,182,213], unmatched: ['Atlantis'] });
 });
 test('countries outside the approved catalogue are not added by their raw database count', () => {
   const options = campaignMarketOptions([{ country: 'Russia', usable_email_count: 34 }, { country: 'Belarus', usable_email_count: 26 }], 'en');
@@ -129,9 +136,9 @@ test('RPC exceptions and malformed data return null without crashing', async () 
   assert.equal(await fetchCampaignMarketCounts({ rpc: async () => ({ data: [{ country: 'SK', usable_email_count: 'bad' }], error: null }) }), null);
   assert.deepEqual(await fetchCampaignMarketCounts({ rpc: async () => ({ data: [{ country: 'slovakia', usable_email_count: '139' }], error: null }) }), [{ country: 'slovakia', usable_email_count: 139 }]);
 });
-test('missing new market blocks targeting before any provider call', async () => {
+test('unmapped country blocks targeting before any provider call', async () => {
   let reads = 0;
-  const r = await campaignMarketPreflight(['Germany','Philippines'], async () => { reads++; return new Response('{}'); });
+  const r = await campaignMarketPreflight(['Germany','Belarus'], async () => { reads++; return new Response('{}'); });
   assert.equal(r.failure?.status, 422); assert.deepEqual(r.listIds, []); assert.equal(reads, 0);
 });
 test('mapped niche keeps historical targeting semantics with mocked Brevo', async () => {
