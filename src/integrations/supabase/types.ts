@@ -3189,6 +3189,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_campaign_market_counts: {
+        Args: never
+        Returns: {
+          country: string
+          usable_email_count: number
+        }[]
+      }
       get_campaign_public_info: {
         Args: { _campaign_id: string }
         Returns: {
@@ -3266,6 +3273,10 @@ export type Database = {
       }
       is_exportvins_trial_user: { Args: { _user_id: string }; Returns: boolean }
       is_test_campaign: { Args: { _id: string }; Returns: boolean }
+      normalize_campaign_market_country: {
+        Args: { _country: string }
+        Returns: string
+      }
       opportunity_notification_summary: { Args: never; Returns: Json }
       reallocate_campaign_send_slots: {
         Args: { _allow_due: boolean; _now: string }
