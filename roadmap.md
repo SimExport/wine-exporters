@@ -1,5 +1,11 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
+## Appels d’offres — recherche et filtres V1
+- [x] Audit en lecture seule : 150 appels publiés, 33 échéances absentes, aucune date de début ; chargement par lots sur toute la collection.
+- [x] Recherche sur les champs FR/EN, marchés/types normalisés, échéances, tri et pagination de dix résultats ; demandes directes, archives et actions CRM préservées.
+- [x] Tests unitaires et rendu FR/EN ordinateur/mobile sur 350 appels fictifs, recherche au-delà de la première page, reprise après erreur et actions CRM/archives simulées ; compilation automatique réussie, aucune publication ni écriture réelle.
+- [ ] Contrôle avec un vrai compte producteur — session non disponible pour le Supabase externe ; pas de filtre « à venir » car aucune date de début n’existe.
+
 ## Marchés de création de campagne — extension ciblée
 - [x] Instruction Simon du 24/11 : 44 marchés conservés, 58 ajouts vérifiés sans seuil de 50, catalogue 102 et sélection 5–20 en prévisualisation.
 - [x] Existence/alias vérifiés en lecture Supabase ; inventaire et 3 audiences additionnelles Brevo vérifiés sans import ni envoi.

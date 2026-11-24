@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,12 +12,14 @@ import { canonicalCountry, countryLabel, splitMulti, buildOptions, matchesFilter
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { differenceInDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { SEO } from '@/components/SEO';
 import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
 import { cleanBuyerRequirements } from '@/lib/opportunity-display';
+import { TenderFilters, TenderPagination } from '@/components/TenderFilters';
+import { EMPTY_TENDER_FILTERS, fetchAllTenderPages, filterTenders, tenderDeadlineLabel, tenderDeadlineState, tenderFilterOptions, tenderMarketLabel, tenderPage, type TenderFilters as TenderFilterState } from '@/lib/tender-discovery';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'suede': '🇸🇪', 'suède': '🇸🇪', 'sweden': '🇸🇪',
@@ -153,21 +155,57 @@ export default function Opportunities() {
   >(null);
   const [tab, setTab] = useState('direct');
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const [tenderFilters, setTenderFilters] = useState<TenderFilterState>({ ...EMPTY_TENDER_FILTERS });
+  const [tenderPageNumber, setTenderPageNumber] = useState(1);
+  const [tendersLoading, setTendersLoading] = useState(true);
+  const [tendersError, setTendersError] = useState(false);
+  const [tenderReload, setTenderReload] = useState(0);
+  const [tenderNow, setTenderNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setTenderNow(new Date()), 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setTenders([]);
+    setTendersError(false);
+    setTendersLoading(Boolean(user));
+    if (!user) return;
+    (async () => {
+      try {
+        const rows = await fetchAllTenderPages<TenderRequest>(async (from, to) => {
+          const result = await supabase.from('tender_requests')
+            .select('*, created_at, agent:tender_agents(name, company, email, phone, address)')
+            .eq('status', 'published')
+            .order('created_at', { ascending: false, nullsFirst: false })
+            .order('id', { ascending: true })
+            .range(from, to);
+          return { data: result.data, error: result.error };
+        });
+        if (!cancelled) setTenders(rows);
+      } catch {
+        if (!cancelled) {
+          console.error('[tenders] Could not load all published tenders');
+          setTendersError(true);
+        }
+      } finally {
+        if (!cancelled) setTendersLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, tenderReload]);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       setArchivesReady(false);
       setArchivedKeys(new Set());
-      const [imp, ten, leads, views, archives] = await Promise.all([
+      const [imp, leads, views, archives] = await Promise.all([
         supabase
           .from('importer_requests')
           .select('*, created_at')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false, nullsFirst: false }),
-        supabase
-          .from('tender_requests')
-          .select('*, created_at, agent:tender_agents(name, company, email, phone, address)')
           .eq('status', 'published')
           .order('created_at', { ascending: false, nullsFirst: false }),
         supabase
@@ -188,7 +226,6 @@ export default function Opportunities() {
         setArchivesReady(true);
       }
       setImporters((imp.data ?? []) as any);
-      setTenders((ten.data ?? []) as any);
       setAddedRefs(new Set((leads.data ?? []).map((l: any) => l.source_ref)));
       setViewedKeys(new Set((views.data ?? []).map((v: any) => `${v.opportunity_type}:${v.opportunity_id}`)));
     })();
@@ -302,14 +339,9 @@ export default function Opportunities() {
     }
   };
 
-  const deadlineBadge = (date: string | null) => {
-    if (!date) return null;
-    const days = differenceInDays(new Date(date), new Date());
-    if (days < 0) return <Badge variant="outline">{tr('opportunitiesPage.states.closed')}</Badge>;
-    const lbl = tr('opportunitiesPage.states.daysLeft', { count: days });
-    if (days < 30) return <Badge variant="destructive">{lbl}</Badge>;
-    if (days < 60) return <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-transparent">{lbl}</Badge>;
-    return <Badge variant="secondary">{lbl}</Badge>;
+  const deadlineBadge = (tender: TenderRequest) => {
+    const state = tenderDeadlineState(tender, tenderNow);
+    return <Badge variant={state === 'open' ? 'secondary' : 'outline'}>{tr(`opportunitiesUi.tenderControls.${state}Badge`)}</Badge>;
   };
 
   const dateLocale = i18n.language === 'en' ? enUS : fr;
@@ -362,6 +394,10 @@ export default function Opportunities() {
 
   const importersPartition = partitionOpportunities(importers, 'importer', archivedKeys);
   const tendersPartition = partitionOpportunities(tenders, 'tender', archivedKeys);
+  const tenderOptions = useMemo(() => tenderFilterOptions(tendersPartition.active, lang, key => tr(`opportunitiesUi.tenderControls.wines.${key}`)), [tenders, archivedKeys, lang, tr]);
+  const matchedTenders = useMemo(() => filterTenders(tendersPartition.active, tenderFilters, tenderNow), [tenders, archivedKeys, tenderFilters, tenderNow]);
+  const pagedTenders = tenderPage(matchedTenders, tenderPageNumber);
+  const changeTenderFilters = (next: TenderFilterState) => { setTenderFilters(next); setTenderPageNumber(1); };
   const renderImporters = (rows: ImporterRequest[]) => rows.map(r => {
                 const added = addedRefs.has(r.id);
                 const viewed = viewedKeys.has(`importer:${r.id}`);
@@ -444,26 +480,28 @@ export default function Opportunities() {
                 const tCategory = pick(t, 'category');
                 const tDesignation = pick(t, 'designation_origin');
                 const tVolume = pick(t, 'available_volume');
+                const answerDeadline = tenderDeadlineLabel(t.deadline_answer, lang);
                 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-                  <div className="flex items-baseline gap-2">
-                    <span className={`${labelCol} w-32 shrink-0`}>{label}</span>
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-2">
+                    <span className={`${labelCol} sm:w-32 shrink-0`}>{label}</span>
                     <div className="flex-1 min-w-0">{children}</div>
                   </div>
                 );
                 return (
-                  <Card key={t.id} className="flex flex-col border-primary/20">
+                  <Card key={t.id} className="flex min-w-0 flex-col border-primary/20">
                     <CardContent className="pt-5 px-5 pb-4 flex-1 space-y-3">
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row">
                         <div className="min-w-0">
                           <h3 className="text-lg font-bold leading-snug text-foreground break-words">{t.agent?.company || t.reference}</h3>
                           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[15px] text-muted-foreground">
-                            <span className="flex items-center gap-1.5"><span className="text-lg leading-none" aria-hidden>{countryFlag(t.market)}</span>{countryLabel(canonicalCountry(t.market), t.market, locale)}</span>
+                            <span className="flex items-center gap-1.5"><span className="text-lg leading-none" aria-hidden>{countryFlag(t.market)}</span>{tenderMarketLabel(t.market, lang)}</span>
                             <span className="font-mono text-[13px]">{t.reference}</span>
                           </div>
                         </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1 text-[13px]">
+                        <div className="flex flex-col items-start gap-1 text-[13px] sm:items-end">
                           <Badge variant="outline" className="border-primary/40 text-primary text-[12px] font-semibold">{ui('badgeTender')}</Badge>
-                          {deadlineBadge(t.deadline_answer)}
+                          {deadlineBadge(t)}
+                          {answerDeadline && <span className="text-foreground">{tr('opportunitiesUi.tenderControls.answerDeadline', { date: answerDeadline })}</span>}
                           {t.created_at && (
                             <span className="text-muted-foreground">
                               {ui('publishedOn', { date: format(new Date(t.created_at), 'd MMM yyyy', { locale: dateLocale }) })}
@@ -508,7 +546,7 @@ export default function Opportunities() {
                       </div>
                       {tReq && <ExpandableText text={tReq} more={ui('showMore')} less={ui('showLess')} />}
                     </CardContent>
-                    <div className="px-5 pb-2 flex gap-2">
+                    <div className="px-5 pb-2 flex flex-col gap-2 sm:flex-row">
                       <Button variant="outline" className="flex-1 text-sm" onClick={() => { markViewed('tender', t.id); setContactDialog({ kind: 'tender', data: t }); }}>
                         {ui('replyTender')}
                       </Button>
@@ -544,11 +582,11 @@ export default function Opportunities() {
       <Tabs value={tab} onValueChange={changeTab} className="w-full">
         <TabsList className="h-auto flex flex-wrap justify-start gap-1">
           <TabsTrigger value="direct" className="text-sm">{tr('opportunitiesPage.tabs.direct')} ({fImporters(importersPartition.active).length})</TabsTrigger>
-          <TabsTrigger value="tender" className="text-sm">{tr('opportunitiesPage.tabs.tender')} ({fTenders(tendersPartition.active).length})</TabsTrigger>
+          <TabsTrigger value="tender" className="text-sm">{tr('opportunitiesPage.tabs.tender')} ({matchedTenders.length})</TabsTrigger>
           <TabsTrigger value="archives" className="text-sm"><Archive className="h-4 w-4 mr-2" />{tr('opportunitiesPage.tabs.archives')} ({fImporters(importersPartition.archived).length + fTenders(tendersPartition.archived).length})</TabsTrigger>
         </TabsList>
 
-        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
+        {tab === 'tender' ? <TenderFilters filters={tenderFilters} onChange={changeTenderFilters} markets={tenderOptions.markets} wines={tenderOptions.wines} count={matchedTenders.length} total={tendersPartition.active.length} /> : <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
           <div className="relative sm:col-span-2 lg:col-span-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={filters.q} onChange={e => setFilters(f => ({ ...f, q: e.target.value }))} placeholder={ui('searchPlaceholder')} aria-label={ui('searchPlaceholder')} className="h-10 pl-9 text-sm" />
@@ -577,7 +615,7 @@ export default function Opportunities() {
           <Button variant="ghost" className="h-10 gap-2 text-sm" disabled={!activeFilters} onClick={() => setFilters(EMPTY_FILTERS)}>
             <RotateCcw className="h-4 w-4" />{ui('reset')}
           </Button>
-        </div>
+        </div>}
 
         <TabsContent value="direct" className="mt-5">
           {importersPartition.active.length === 0 ? (
@@ -592,15 +630,18 @@ export default function Opportunities() {
         </TabsContent>
 
         <TabsContent value="tender" className="mt-5">
-          {tendersPartition.active.length === 0 ? (
+          {tendersLoading ? <p className="py-12 text-center text-muted-foreground" role="status">{ui('tenderControls.loading')}</p> : tendersError ? (
+            <div className="space-y-3 py-12 text-center" role="alert"><p className="text-muted-foreground">{ui('tenderControls.loadError')}</p><Button variant="outline" onClick={() => setTenderReload(value => value + 1)}>{ui('tenderControls.retry')}</Button></div>
+          ) : tendersPartition.active.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyTender')}</CardContent></Card>
-          ) : fTenders(tendersPartition.active).length === 0 ? (
+          ) : matchedTenders.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{ui('noResults')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {renderTenders(fTenders(tendersPartition.active))}
+              {renderTenders(pagedTenders.rows)}
             </div>
           )}
+          <TenderPagination page={pagedTenders.page} pages={pagedTenders.pages} onChange={setTenderPageNumber} />
         </TabsContent>
         <TabsContent value="archives" className="mt-5 space-y-6">
           {fImporters(importersPartition.archived).length + fTenders(tendersPartition.archived).length === 0 && (
