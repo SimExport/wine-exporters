@@ -516,13 +516,13 @@ const CreateCampaign = () => {
   return <div className="min-h-screen bg-background">
       <div className={cn("mx-auto p-6", editorEnabled && step === 2 ? "max-w-7xl" : "max-w-4xl")}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div className="flex min-w-0 items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/campaigns')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t('createCampaign.back')}
             </Button>
-            <h1 className="text-2xl font-bold">{t('createCampaign.title')}</h1>
+            <h1 className="min-w-0 text-2xl font-bold">{t('createCampaign.title')}</h1>
           </div>
           
           <div className="flex gap-2">

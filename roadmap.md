@@ -1,10 +1,10 @@
 # Roadmap — Passerelle ExportVins (essai CRM 30 jours)
 
 ## Marchés de création de campagne — extension ciblée
-- [ ] Catalogue 44 marchés conservés + candidats ≥50, normalisation, FR/EN et lecture agrégée sécurisée.
-- [ ] Mapping intégral et contrôle Brevo avant toute création/envoi, tests simulés et SQL avec annulation.
+- [x] Catalogue 44 marchés conservés + 9 candidats ≥50, normalisation FR/EN et RPC agrégée sécurisée ; activation différée.
+- [x] Mapping partagé et contrôle Brevo complet avant création/envoi ; tests Bun/Deno simulés et SQL avec annulation réussis, aucune fixture persistée.
 - [ ] Réconciliation des listes manquantes/vides — l’utilisateur a confirmé « Code et tests seulement » ; création/import Brevo non autorisés, activation différée.
-- [ ] Vérifications visuelles, tests et compilation automatique, documentation ; publication/déploiement non autorisés.
+- [x] Documentation et compilation automatique OK ; rendu FR/EN isolé sans vraie session, sélection 5–15 et checkbox vérifiées ; publication/déploiement non autorisés.
 
 ## Notifications opportunités — reprise ciblée
 - [x] Suivi SQL privé admin, lots 49 BCC, reprise atomique et compteurs ; 7 tests simulés, tests SQL annulés et Deno check réussis ; compilation automatique OK. Contrôle visuel isolé avec réponses simulées, pas de session admin réelle.
