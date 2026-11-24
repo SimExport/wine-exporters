@@ -1585,6 +1585,14 @@
     "scheduledFor": "Envoi prévu le {{date}} (heure de Paris)"
   },
   "createCampaign": {
+    "markets": {
+      "loading": "Chargement des marchés…",
+      "loadError": "Les nouveaux marchés sont momentanément indisponibles.",
+      "retry": "Réessayer",
+      "unavailable": "Certains marchés sélectionnés sont indisponibles pour l’envoi.",
+      "savedUnavailable": "Marchés enregistrés actuellement indisponibles :",
+      "remove": "Retirer {{market}}"
+    },
     "back": "Retour",
     "title": "Créer une campagne",
     "saveDraft": "Enregistrer brouillon",

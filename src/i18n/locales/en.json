@@ -1585,6 +1585,14 @@
     "scheduledFor": "Sending scheduled for {{date}} (Paris time)"
   },
   "createCampaign": {
+    "markets": {
+      "loading": "Loading markets…",
+      "loadError": "New markets are temporarily unavailable.",
+      "retry": "Retry",
+      "unavailable": "Some selected markets are unavailable for sending.",
+      "savedUnavailable": "Saved markets currently unavailable:",
+      "remove": "Remove {{market}}"
+    },
     "back": "Back",
     "title": "Create a campaign",
     "saveDraft": "Save draft",

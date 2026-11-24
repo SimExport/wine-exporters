@@ -1,24 +1,5 @@
 // Shared campaign email helpers (create-campaign, generate-campaign-email, send-campaign).
-export const BREVO_LIST_IDS: Record<string, number> = {
-  argentina: 134, australia: 135, austria: 136, belgium: 137, brazil: 138,
-  china: 139, colombia: 140, croatia: 141, cyprus: 142, "czech republic": 143,
-  denmark: 144, estonia: 145, finland: 146, france: 147, germany: 148,
-  greece: 149, hungary: 150, india: 151, ireland: 152, italy: 153,
-  japan: 154, latvia: 155, lithuania: 156, luxembourg: 157, malta: 158,
-  mexico: 159, netherlands: 160, norway: 161, poland: 162, romania: 163,
-  russia: 164, serbia: 165, singapore: 166, slovakia: 167, "south africa": 168,
-  "south korea": 169, spain: 170, sweden: 171, switzerland: 172, taiwan: 173,
-  thailand: 174, usa: 175, "united kingdom": 176, vietnam: 177,
-};
-
-export function normalizeCountry(c: string): string {
-  return c.trim().toLowerCase()
-    .replace(/^the\s+/, "")
-    .replace(/^united states.*$/, "usa")
-    .replace(/^u\.?s\.?a?\.?$/, "usa")
-    .replace(/^uk$/, "united kingdom")
-    .replace(/^great britain$/, "united kingdom");
-}
+export { normalizeCampaignMarket as normalizeCountry } from './campaign-markets.ts';
 
 export function extractSubject(html: string, fallback: string): string {
   const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
@@ -125,14 +106,7 @@ export function missingEmailTags(html: string, subject: string, campaignId: stri
   return missing;
 }
 
-export function mapMarketsToLists(markets: string[]): { listIds: number[]; unmatched: string[] } {
-  const listIds: number[] = []; const unmatched: string[] = [];
-  for (const m of markets) {
-    const id = BREVO_LIST_IDS[normalizeCountry(m)];
-    if (id) { if (!listIds.includes(id)) listIds.push(id); } else unmatched.push(m);
-  }
-  return { listIds, unmatched };
-}
+export { mapCampaignMarkets as mapMarketsToLists } from './campaign-markets.ts';
 
 // Allow only <strong>/<b>/<em>/<br>/<a href="http(s)"> in rich text; escape the rest.
 export function sanitizeInline(s: string): string {

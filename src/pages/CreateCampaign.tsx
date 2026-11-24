@@ -23,6 +23,8 @@ import { useTranslation } from 'react-i18next';
 import { useCampaignEditorAccess } from '@/hooks/useCampaignEditorAccess';
 import { EmailPrepareStep, type EmailStepState } from '@/components/campaigns/email-editor/EmailPrepareStep';
 import { EmailPreviewFrame } from '@/components/campaigns/email-editor/EmailPreviewFrame';
+import { campaignMarketLabel, campaignMarketOptions, groupCampaignMarkets, unavailableSelectedMarkets, fetchCampaignMarketCounts, type CampaignMarketCount, type CampaignMarketRpc } from '@/lib/campaign-markets';
+import { MIN_CAMPAIGN_MARKETS, MAX_CAMPAIGN_MARKETS, distinctCampaignMarkets, normalizeCampaignMarket, campaignMarketRangeValid } from '../../supabase/functions/_shared/campaign-markets';
 interface Wine {
   id: string;
   name: string;
@@ -36,40 +38,10 @@ interface Document {
   category: string;
   file_name: string;
 }
-type MarketEntry = { name: string; flag: string };
-const MARKETS_BY_CONTINENT: Record<string, MarketEntry[]> = {
-  europe: [
-    { name: 'Austria', flag: '🇦🇹' }, { name: 'Belgium', flag: '🇧🇪' }, { name: 'Croatia', flag: '🇭🇷' },
-    { name: 'Czech Republic', flag: '🇨🇿' }, { name: 'Denmark', flag: '🇩🇰' }, { name: 'Estonia', flag: '🇪🇪' },
-    { name: 'Finland', flag: '🇫🇮' }, { name: 'Germany', flag: '🇩🇪' }, { name: 'Greece', flag: '🇬🇷' },
-    { name: 'Hungary', flag: '🇭🇺' }, { name: 'Ireland', flag: '🇮🇪' }, { name: 'Italy', flag: '🇮🇹' },
-    { name: 'Netherlands', flag: '🇳🇱' }, { name: 'Norway', flag: '🇳🇴' }, { name: 'Poland', flag: '🇵🇱' },
-    { name: 'Portugal', flag: '🇵🇹' }, { name: 'Romania', flag: '🇷🇴' }, { name: 'Serbia', flag: '🇷🇸' },
-    { name: 'Spain', flag: '🇪🇸' }, { name: 'Sweden', flag: '🇸🇪' }, { name: 'Switzerland', flag: '🇨🇭' },
-    { name: 'United Kingdom', flag: '🇬🇧' },
-  ],
-  northAmerica: [
-    { name: 'Canada', flag: '🇨🇦' }, { name: 'Mexico', flag: '🇲🇽' }, { name: 'United States', flag: '🇺🇸' },
-  ],
-  latinAmerica: [
-    { name: 'Argentina', flag: '🇦🇷' }, { name: 'Brazil', flag: '🇧🇷' }, { name: 'Chile', flag: '🇨🇱' },
-    { name: 'Colombia', flag: '🇨🇴' }, { name: 'Peru', flag: '🇵🇪' },
-  ],
-  asia: [
-    { name: 'China', flag: '🇨🇳' }, { name: 'Hong Kong', flag: '🇭🇰' }, { name: 'India', flag: '🇮🇳' },
-    { name: 'Japan', flag: '🇯🇵' }, { name: 'Singapore', flag: '🇸🇬' }, { name: 'South Korea', flag: '🇰🇷' },
-    { name: 'Taiwan', flag: '🇹🇼' }, { name: 'Thailand', flag: '🇹🇭' },
-    { name: 'UAE', flag: '🇦🇪' }, { name: 'Vietnam', flag: '🇻🇳' },
-  ],
-  oceaniaAfrica: [
-    { name: 'Australia', flag: '🇦🇺' }, { name: 'Morocco', flag: '🇲🇦' },
-    { name: 'Nigeria', flag: '🇳🇬' }, { name: 'South Africa', flag: '🇿🇦' },
-  ],
-};
-const MAX_MARKETS = 15;
-const MIN_MARKETS = 5;
+const MAX_MARKETS = MAX_CAMPAIGN_MARKETS;
+const MIN_MARKETS = MIN_CAMPAIGN_MARKETS;
 const CreateCampaign = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('id');
@@ -130,6 +102,24 @@ const CreateCampaign = () => {
   const [clientNote, setClientNote] = useState('');
   const [campaignId, setCampaignId] = useState<string | null>(editId);
   const [loadingDraft, setLoadingDraft] = useState(!!editId);
+  const [marketCounts, setMarketCounts] = useState<CampaignMarketCount[] | null>(null);
+  const [marketsLoading, setMarketsLoading] = useState(true);
+  const marketOptions = campaignMarketOptions(marketCounts, i18n.language);
+  const unavailableMarkets = unavailableSelectedMarkets(selectedMarkets, marketOptions);
+  const refreshMarkets = async () => {
+    setMarketsLoading(true);
+    try { setMarketCounts(await fetchCampaignMarketCounts(supabase as unknown as CampaignMarketRpc)); }
+    finally { setMarketsLoading(false); }
+  };
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    setMarketsLoading(true);
+    void fetchCampaignMarketCounts(supabase as unknown as CampaignMarketRpc).then(counts => {
+      if (!cancelled) { setMarketCounts(counts); setMarketsLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [user?.id]);
   useEffect(() => {
     if (user) {
       fetchWines();
@@ -163,7 +153,7 @@ const CreateCampaign = () => {
       setCampaignId(data.id);
       setCreditAlreadyConsumed(Boolean((data as any).credit_consumed_at));
       setCampaignName(data.name || '');
-      setSelectedMarkets(data.target_markets || []);
+      setSelectedMarkets(distinctCampaignMarkets(data.target_markets || []));
       setOpenToOtherMarkets(!!data.open_to_other_markets);
       setSelectedWines(data.selected_wines || []);
       setPresentationDoc(data.doc_presentation || '');
@@ -265,7 +255,7 @@ const CreateCampaign = () => {
   };
   const handleMarketToggle = (market: string) => {
     setSelectedMarkets(prev => {
-      if (prev.includes(market)) return prev.filter(m => m !== market);
+      if (prev.some(m => normalizeCampaignMarket(m) === normalizeCampaignMarket(market))) return prev.filter(m => normalizeCampaignMarket(m) !== normalizeCampaignMarket(market));
       if (prev.length >= MAX_MARKETS) {
         toast({ title: t('createCampaign.toasts.maxReached.title'), description: t('createCampaign.toasts.maxReached.description', { max: MAX_MARKETS }), variant: "destructive" });
         return prev;
@@ -284,8 +274,12 @@ const CreateCampaign = () => {
       toast({ title: t('createCampaign.toasts.nameRequired.title'), description: t('createCampaign.toasts.nameRequired.description'), variant: "destructive" });
       return false;
     }
-    if (selectedMarkets.length < MIN_MARKETS) {
+    if (!campaignMarketRangeValid(selectedMarkets)) {
       toast({ title: t('createCampaign.toasts.marketsInsufficient.title'), description: t('createCampaign.toasts.marketsInsufficient.description', { min: MIN_MARKETS }), variant: "destructive" });
+      return false;
+    }
+    if (marketsLoading || unavailableMarkets.length) {
+      toast({ title: t('createCampaign.markets.unavailable'), variant: 'destructive' });
       return false;
     }
     if (selectedWines.length === 0) {
@@ -593,17 +587,18 @@ const CreateCampaign = () => {
                   </div>
 
                   <div className="space-y-4 mt-3">
-                    {Object.entries(MARKETS_BY_CONTINENT).map(([continentKey, markets]) => (
+                    {groupCampaignMarkets(marketOptions).filter(([, markets]) => markets.length > 0).map(([continentKey, markets]) => (
                       <div key={continentKey} className="rounded-lg border bg-card overflow-hidden">
                         <div className="bg-muted/60 px-3 py-2 border-b">
                           <p className="text-sm font-semibold">{t(`createCampaign.continents.${continentKey}`)}</p>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-3">
-                          {markets.map(({ name, flag }) => {
-                            const isSelected = selectedMarkets.includes(name);
+                          {markets.map(({ value: name, label, flag }) => {
+                            const isSelected = selectedMarkets.some(m => normalizeCampaignMarket(m) === normalizeCampaignMarket(name));
                             const isDisabled = !isSelected && selectedMarkets.length >= MAX_MARKETS;
                             return (
-                              <button
+                              <Button
+                                variant="outline"
                                 type="button"
                                 key={name}
                                 onClick={() => !isDisabled && handleMarketToggle(name)}
@@ -618,16 +613,20 @@ const CreateCampaign = () => {
                               >
                                 <span className="flex items-center gap-2 min-w-0">
                                   <span aria-hidden className="text-base leading-none">{flag}</span>
-                                  <span className="truncate">{name}</span>
+                                  <span className="truncate">{label}</span>
                                 </span>
                                 {isSelected && <Check className="h-4 w-4 shrink-0" />}
-                              </button>
+                              </Button>
                             );
                           })}
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {marketsLoading && <p className="mt-3 text-sm text-muted-foreground" role="status">{t('createCampaign.markets.loading')}</p>}
+                  {!marketsLoading && marketCounts === null && <div className="mt-3 flex items-center gap-2"><p className="text-sm text-muted-foreground" role="alert">{t('createCampaign.markets.loadError')}</p><Button type="button" variant="ghost" size="sm" onClick={refreshMarkets}>{t('createCampaign.markets.retry')}</Button></div>}
+                  {unavailableMarkets.length > 0 && <div className="mt-3 space-y-2"><p className="text-sm text-muted-foreground" role="alert">{t('createCampaign.markets.savedUnavailable')}</p><div className="flex flex-wrap gap-2">{unavailableMarkets.map(value => <Button key={value} type="button" variant="outline" size="sm" onClick={() => handleMarketToggle(value)} aria-label={t('createCampaign.markets.remove', { market: campaignMarketLabel(value, i18n.language) })}>{campaignMarketLabel(value, i18n.language)} <span aria-hidden>×</span></Button>)}</div></div>}
 
                   {/* Open to other markets */}
                   <Separator className="my-4" />
@@ -858,7 +857,7 @@ const CreateCampaign = () => {
                   <div>
                     <Label className="font-medium">{t('createCampaign.step2.marketsLabel', { count: selectedMarkets.length })}</Label>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {selectedMarkets.join(', ')}
+                      {selectedMarkets.map(value => campaignMarketLabel(value, i18n.language)).join(', ')}
                     </p>
                   </div>
 

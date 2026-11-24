@@ -2,7 +2,8 @@
 // and send-queued-campaign (internal secret, daily cron). No Claude, no HTML transformation.
 // Idempotent: DB lock + Brevo id persisted before sendNow; uncertain outcomes are never
 // retried automatically (manual check required). markCampaignLive notifies only on confirmed send.
-import { mapMarketsToLists, missingEmailTags } from "./campaign-email.ts";
+import { missingEmailTags } from "./campaign-email.ts";
+import { campaignMarketPreflight } from './campaign-market-preflight.ts';
 import { buildLaunchEmail, langOf, sendOnce } from "./campaign-notify.ts";
 
 export interface SendContext {
@@ -68,8 +69,9 @@ export async function sendCustomCampaign(ctx: SendContext, campaign: any, opts: 
     listIds = [Number(raw)];
   } else {
     if (isTest) return { status: 409, body: { error: "Test campaign: use the test send only" } };
-    ({ listIds, unmatched } = mapMarketsToLists((c.target_markets?.length ? c.target_markets : c.markets) ?? []));
-    if (!listIds.length) return { status: 422, body: { error: "No Brevo lists matched target markets", unmatched } };
+    const targets = await campaignMarketPreflight((c.target_markets?.length ? c.target_markets : c.markets) ?? [], path => brevo(path));
+    if (targets.failure) return { status: targets.failure.status, body: { ...targets.failure } };
+    listIds = targets.listIds;
   }
 
   const { data: locked } = await admin.from("campaigns").update({ send_started_at: new Date().toISOString(), send_error: null })

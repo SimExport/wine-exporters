@@ -15,8 +15,8 @@ const json = (status: number, body: unknown) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-// Brevo list IDs per country (exact mapping provided in spec).
-import { BREVO_LIST_IDS, normalizeCountry, extractSubject, buildAnthropicUserMessage, buildOwnerEmailHtml } from "../_shared/campaign-email.ts";
+import { extractSubject, buildAnthropicUserMessage, buildOwnerEmailHtml } from "../_shared/campaign-email.ts";
+import { campaignMarketPreflight } from '../_shared/campaign-market-preflight.ts';
 
 const SYSTEM_PROMPT = `You are an expert email copywriter specializing in French wine export outreach. Your task is to generate a complete HTML email campaign targeting international wine importers on behalf of a French wine producer.
 
@@ -129,6 +129,15 @@ Deno.serve(async (req) => {
       return json(409, { error: "Campaign already sent or send in progress", brevoCampaignId: campaign.brevo_campaign_id });
     }
 
+    // Read-only targeting checks BEFORE Claude, provider POSTs and any campaign mutation.
+    const rawMarkets: string[] = (campaign.target_markets?.length ? campaign.target_markets : campaign.markets) ?? [];
+    const targets = await campaignMarketPreflight(rawMarkets, path => fetch(`https://api.brevo.com/v3${path}`, {
+      headers: { 'api-key': BREVO_API_KEY, accept: 'application/json' }, signal: AbortSignal.timeout(30_000),
+    }));
+    if (targets.failure) return json(targets.failure.status, targets.failure);
+    const listIds = targets.listIds;
+    const unmatched: string[] = [];
+
     step = "fetch_profile";
     const { data: profile, error: pErr } = await admin
       .from("profiles").select("*").eq("user_id", campaign.user_id).maybeSingle();
@@ -187,19 +196,6 @@ Deno.serve(async (req) => {
     const subject = extractSubject(htmlContent, campaign.name);
 
     // Step 3 — Brevo
-    step = "brevo_map_markets";
-    const rawMarkets: string[] = (campaign.target_markets?.length ? campaign.target_markets : campaign.markets) ?? [];
-    const listIds: number[] = [];
-    const unmatched: string[] = [];
-    for (const m of rawMarkets) {
-      const key = normalizeCountry(m);
-      const id = BREVO_LIST_IDS[key];
-      if (id) { if (!listIds.includes(id)) listIds.push(id); }
-      else unmatched.push(m);
-    }
-    if (unmatched.length) console.warn("Unmatched Brevo markets:", unmatched);
-    if (listIds.length === 0) throw new Error("No Brevo lists matched target_markets");
-
     step = "brevo_create";
     const createResp = await fetch("https://api.brevo.com/v3/emailCampaigns", {
       method: "POST",
