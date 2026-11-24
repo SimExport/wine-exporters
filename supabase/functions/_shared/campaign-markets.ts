@@ -2,6 +2,9 @@
 export const MIN_CAMPAIGN_MARKETS = 5;
 export const MAX_CAMPAIGN_MARKETS = 15;
 export const MIN_CAMPAIGN_EMAILS = 50;
+// Explicit rollout gate: user authorised code/tests only. Enable only AFTER all historical
+// lists are ready and all deployed send paths carry this catalogue; never by an audit alone.
+export const CAMPAIGN_MARKET_EXTENSION_ENABLED = false;
 export const CAMPAIGN_MARKET_GROUPS = ['europe', 'northAmerica', 'latinAmerica', 'asia', 'oceaniaAfrica'] as const;
 export type CampaignMarketGroup = typeof CAMPAIGN_MARKET_GROUPS[number];
 export interface CampaignMarket {

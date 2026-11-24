@@ -1,4 +1,4 @@
-import { CAMPAIGN_EMAIL_RE, mapCampaignMarkets } from './campaign-markets.ts';
+import { CAMPAIGN_EMAIL_RE, mapCampaignMarkets, normalizeCampaignMarket } from './campaign-markets.ts';
 
 export interface MarketPreflightError { status: number; error: string; unmatched?: string[]; listId?: number; details?: string }
 export type BrevoRead = (path: string) => Promise<Response>;
@@ -14,7 +14,8 @@ export async function campaignMarketPreflight(markets: string[], read: BrevoRead
       const metadata = await read(`/contacts/lists/${listId}`);
       if (!metadata.ok) return { listIds: [], failure: { status: metadata.status === 404 ? 422 : 502, error: 'Target list unavailable', listId, details: `Brevo HTTP ${metadata.status}` } };
       const info = await metadata.json();
-      if (info.id !== listId) return { listIds: [], failure: { status: 422, error: 'Target list identity mismatch', listId } };
+      const expectedMarket = markets.find(value => mapCampaignMarkets([value]).listIds.includes(listId));
+      if (info.id !== listId || !expectedMarket || normalizeCampaignMarket(info.name) !== normalizeCampaignMarket(expectedMarket)) return { listIds: [], failure: { status: 422, error: 'Target list identity mismatch', listId } };
       let usable = false;
       for (let offset = 0; ; offset += 500) {
         const response = await read(`/contacts/lists/${listId}/contacts?limit=500&offset=${offset}`);

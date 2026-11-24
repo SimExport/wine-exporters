@@ -3,7 +3,7 @@
 ## Marchés de création de campagne — extension ciblée
 - [ ] Catalogue 44 marchés conservés + candidats ≥50, normalisation, FR/EN et lecture agrégée sécurisée.
 - [ ] Mapping intégral et contrôle Brevo avant toute création/envoi, tests simulés et SQL avec annulation.
-- [ ] Réconciliation des listes manquantes/vides — import en attente d’autorisation explicite ; aucun envoi.
+- [ ] Réconciliation des listes manquantes/vides — l’utilisateur a confirmé « Code et tests seulement » ; création/import Brevo non autorisés, activation différée.
 - [ ] Vérifications visuelles, tests et compilation automatique, documentation ; publication/déploiement non autorisés.
 
 ## Notifications opportunités — reprise ciblée

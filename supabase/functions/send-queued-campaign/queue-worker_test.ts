@@ -82,6 +82,10 @@ function mockFetch(b: FetchBehavior = {}) {
   const fn = (async (url: any, init?: RequestInit) => {
     const u = String(url); const method = init?.method ?? "GET";
     calls.push({ url: u, method });
+    if (method === 'GET' && u.includes('/contacts/lists/')) {
+      const id = Number(u.match(/\/contacts\/lists\/(\d+)/)?.[1]);
+      return Response.json(u.includes('/contacts?') ? { contacts: [{ email: 'buyer@example.org', emailBlacklisted: false }] } : { id, name: 'France' });
+    }
     if (u.includes("resend.com")) return new Response("{}", { status: 200 });
     if (u.endsWith("/emailCampaigns") && method === "POST") {
       if (b.createThrows) throw new Error("network down");

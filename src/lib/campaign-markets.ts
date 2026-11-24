@@ -1,5 +1,5 @@
 import { COUNTRIES } from '../components/importers/country-data';
-import { CAMPAIGN_MARKETS, CAMPAIGN_MARKET_GROUPS, MIN_CAMPAIGN_EMAILS, findCampaignMarket, normalizeCampaignMarket, distinctCampaignMarkets, type CampaignMarket } from '../../supabase/functions/_shared/campaign-markets';
+import { CAMPAIGN_MARKETS, CAMPAIGN_MARKET_GROUPS, CAMPAIGN_MARKET_EXTENSION_ENABLED, MIN_CAMPAIGN_EMAILS, findCampaignMarket, normalizeCampaignMarket, distinctCampaignMarkets, type CampaignMarket } from '../../supabase/functions/_shared/campaign-markets';
 import { CAMPAIGN_MARKET_READINESS, type MarketReadiness } from '../../supabase/functions/_shared/campaign-market-readiness';
 
 export interface CampaignMarketCount { country: string; usable_email_count: number | string }
@@ -18,9 +18,11 @@ export function marketIsReady(market: CampaignMarket, readiness: Record<string, 
   const r = readiness[market.code];
   return !!r && r.nonBlockedContacts > 0 && market.listIds.length > 0 && r.listIds.length === market.listIds.length && market.listIds.every(id => r.listIds.includes(id));
 }
-export function campaignMarketOptions(counts: readonly CampaignMarketCount[] | null, language: string, readiness = CAMPAIGN_MARKET_READINESS): CampaignMarketOption[] {
+export function campaignMarketOptions(counts: readonly CampaignMarketCount[] | null, language: string, readiness = CAMPAIGN_MARKET_READINESS, extensionEnabled = CAMPAIGN_MARKET_EXTENSION_ENABLED): CampaignMarketOption[] {
   const eligible = new Set((counts ?? []).filter(c => Number(c.usable_email_count) >= MIN_CAMPAIGN_EMAILS).map(c => normalizeCampaignMarket(c.country)));
-  return CAMPAIGN_MARKETS.filter(m => marketIsReady(m, readiness) && (m.existing || eligible.has(normalizeCampaignMarket(m.value))))
+  // Until separate Brevo setup/deployment approval, preserve the exact original 44 choices.
+  // The future enabled path is fail-closed and never offers an unprepared new country.
+  return CAMPAIGN_MARKETS.filter(m => extensionEnabled ? marketIsReady(m, readiness) && (m.existing || eligible.has(normalizeCampaignMarket(m.value))) : m.existing)
     .map(m => ({ ...m, label: campaignMarketLabel(m.value, language), flag: campaignMarketFlag(m.code) }));
 }
 export function groupCampaignMarkets(options: readonly CampaignMarketOption[]) {
