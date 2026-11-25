@@ -1,0 +1,1 @@
+- Opportunity "For my estate" view reads the deterministic `we-opportunity-matches` Edge Function once per user id through `src/lib/opportunity-matches.ts`; only forte/ouverte/a_explorer are recommended, existing filters/pagination run on that subset, archives ignore it, and any failure falls back to all opportunities without retry so nothing is ever hidden.
