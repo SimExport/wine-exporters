@@ -2086,48 +2086,8 @@
     "contactCTA": "Envoyer un e-mail"
   },
   "roadmap": {
-    "title": "Fonctionnalités à venir",
-    "subtitle": "Découvrez nos projets pour accélérer votre export. Votez pour vos outils préférés !",
-    "databaseUpdate": "🗄️ Base de données mise à jour chaque mois — nouveaux importateurs et acheteurs ajoutés régulièrement dans +140 pays.",
-    "timeline": {
-      "title": "Notre feuille de route",
-      "disclaimer": "Planning prévisionnel, susceptible d'évoluer",
-      "status": {
-        "done": "Lancé",
-        "current": "En cours",
-        "upcoming": "À venir"
-      },
-      "steps": [
-        {
-          "date": "Mai 2026",
-          "title": "Lancement de la plateforme"
-        },
-        {
-          "date": "Juin 2026",
-          "title": "Opportunités importateurs"
-        },
-        {
-          "date": "Été 2026",
-          "title": "Générateur de Fiches Techniques"
-        },
-        {
-          "date": "Été 2026",
-          "title": "Fiches Marchés"
-        },
-        {
-          "date": "Automne 2026",
-          "title": "Guides & Vidéos Export"
-        },
-        {
-          "date": "Automne 2026",
-          "title": "Calculateur Prix Export"
-        },
-        {
-          "date": "Fin 2026",
-          "title": "Appels d'Offres"
-        }
-      ]
-    },
+    "title": "Les évolutions de WineExporters",
+    "subtitle": "Découvrez les outils déjà disponibles, nos priorités d'amélioration et les évolutions envisagées. Votez pour les fonctionnalités qui vous seraient les plus utiles.",
     "voteSuccess": {
       "title": "Merci pour votre vote !",
       "description": "Votre intérêt a été enregistré."
@@ -2142,25 +2102,65 @@
     "interested": "Je suis intéressé",
     "features": {
       "marketplace": {
-        "title": "Marketplace",
-        "description": "Connectez-vous directement aux importateurs via un catalogue de cuvées digital et interactif."
+        "title": "Catalogue de vins accessible aux importateurs",
+        "description": "Faciliter la découverte de votre domaine et de vos cuvées par les acheteurs professionnels."
       },
       "tenders": {
         "title": "Appels d'Offres",
         "description": "Un outil simple qui liste tous les appels d'offres disponibles et vous propose d'y répondre de manière intuitive."
       },
       "calculator": {
-        "title": "Calculateur Prix Export",
-        "description": "Sachez exactement à combien vendre vos vins sur quels marchés en intégrant taxes et marges."
+        "title": "Calculateur de prix export",
+        "description": "Anticiper les prix de vente sur les marchés internationaux en tenant compte des taxes et des marges."
       },
       "tech-sheets": {
-        "title": "Générateur Fiches Techniques",
-        "description": "Créez des fiches techniques modernes, adaptées et traduites automatiquement en plusieurs langues."
+        "title": "Générateur de fiches techniques multilingues",
+        "description": "Créer rapidement des documents commerciaux adaptés aux acheteurs étrangers."
       },
       "market-guides": {
         "title": "Fiches Marchés",
         "description": "Guides détaillés par pays pour savoir où prospecter et comment pénétrer le marché."
+      },
+      "prospecting-follow-up": {
+        "title": "Assistant de prospection et de relance",
+        "description": "Vous accompagner dans votre suivi commercial grâce à des relances personnalisées et des actions recommandées."
       }
+    },
+    "available": {
+      "title": "Déjà disponible",
+      "description": "Les outils pour développer votre prospection export dès aujourd'hui.",
+      "items": {
+        "database": "Base de données importateurs",
+        "research": "Recherches sur mesure",
+        "campaigns": "Campagnes email",
+        "crm": "CRM export",
+        "opportunities": "Opportunités importateurs",
+        "tenders": "Appels d'offres",
+        "resources": "Ressources et guides export"
+      }
+    },
+    "continuous": {
+      "title": "Amélioration continue",
+      "description": "Notre priorité : améliorer la qualité et l'efficacité des outils que vous utilisez déjà.",
+      "items": {
+        "database": {
+          "title": "Enrichissement de la base importateurs",
+          "description": "Davantage de décisionnaires, d'emails professionnels et d'informations commerciales."
+        },
+        "research": {
+          "title": "Pertinence des recherches sur mesure",
+          "description": "Amélioration de la sélection et du matching entre votre domaine et les importateurs."
+        },
+        "campaigns": {
+          "title": "Optimisation des campagnes",
+          "description": "Personnalisation, délivrabilité et qualification des prospects."
+        }
+      }
+    },
+    "planned": {
+      "title": "Évolutions envisagées",
+      "description": "Quels outils vous aideraient le plus ? Vos votes nous aident à prioriser les prochaines évolutions.",
+      "disclaimer": "Ces pistes sont à l'étude. Leur développement et leur calendrier dépendront des besoins des utilisateurs."
     }
   },
   "prospectDetail": {
