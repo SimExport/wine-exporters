@@ -2086,48 +2086,8 @@
     "contactCTA": "Send an email"
   },
   "roadmap": {
-    "title": "Upcoming features",
-    "subtitle": "Discover our projects to accelerate your exports. Vote for your favorite tools!",
-    "databaseUpdate": "🗄️ Database updated every month — new importers and buyers regularly added across 140+ countries.",
-    "timeline": {
-      "title": "Our roadmap",
-      "disclaimer": "Tentative schedule, subject to change",
-      "status": {
-        "done": "Launched",
-        "current": "In progress",
-        "upcoming": "Coming soon"
-      },
-      "steps": [
-        {
-          "date": "May 2026",
-          "title": "Platform launch"
-        },
-        {
-          "date": "June 2026",
-          "title": "Importer opportunities"
-        },
-        {
-          "date": "Summer 2026",
-          "title": "Tech Sheet Generator"
-        },
-        {
-          "date": "Summer 2026",
-          "title": "Market Reports"
-        },
-        {
-          "date": "Fall 2026",
-          "title": "Export Guides & Videos"
-        },
-        {
-          "date": "Fall 2026",
-          "title": "Export Price Calculator"
-        },
-        {
-          "date": "End 2026",
-          "title": "Tenders"
-        }
-      ]
-    },
+    "title": "What's next for WineExporters",
+    "subtitle": "Discover the tools already available, our improvement priorities and potential new features. Vote for the tools that would help you most.",
     "voteSuccess": {
       "title": "Thanks for your vote!",
       "description": "Your interest has been recorded."
@@ -2142,25 +2102,65 @@
     "interested": "I'm interested",
     "features": {
       "marketplace": {
-        "title": "Marketplace",
-        "description": "Connect directly with importers via a digital and interactive wine catalog."
+        "title": "Wine catalog for importers",
+        "description": "Help professional buyers discover your winery and your wines."
       },
       "tenders": {
         "title": "Tenders",
         "description": "A simple tool that lists all available tenders and lets you respond intuitively."
       },
       "calculator": {
-        "title": "Export Price Calculator",
-        "description": "Know exactly how much to sell your wines on each market by including taxes and margins."
+        "title": "Export price calculator",
+        "description": "Estimate selling prices in international markets, taking taxes and margins into account."
       },
       "tech-sheets": {
-        "title": "Tech Sheets Generator",
-        "description": "Create modern tech sheets, automatically adapted and translated into multiple languages."
+        "title": "Multilingual technical sheet generator",
+        "description": "Quickly create commercial documents tailored to international buyers."
       },
       "market-guides": {
         "title": "Market Guides",
         "description": "Detailed country guides to know where to prospect and how to enter each market."
+      },
+      "prospecting-follow-up": {
+        "title": "Prospecting and follow-up assistant",
+        "description": "Support your commercial follow-up with personalized messages and recommended next steps."
       }
+    },
+    "available": {
+      "title": "Already available",
+      "description": "Tools to grow your export prospecting today.",
+      "items": {
+        "database": "Importer database",
+        "research": "Tailored importer searches",
+        "campaigns": "Email campaigns",
+        "crm": "Export CRM",
+        "opportunities": "Importer opportunities",
+        "tenders": "Tenders",
+        "resources": "Export resources and guides"
+      }
+    },
+    "continuous": {
+      "title": "Continuous improvement",
+      "description": "Our priority is to improve the quality and effectiveness of the tools you already use.",
+      "items": {
+        "database": {
+          "title": "Importer database enrichment",
+          "description": "More decision-makers, professional email addresses and commercial information."
+        },
+        "research": {
+          "title": "More relevant tailored searches",
+          "description": "Improving importer selection and matching with your winery."
+        },
+        "campaigns": {
+          "title": "Campaign optimization",
+          "description": "Personalization, deliverability and prospect qualification."
+        }
+      }
+    },
+    "planned": {
+      "title": "Potential new features",
+      "description": "Which tools would help you most? Your votes help us prioritize future improvements.",
+      "disclaimer": "These ideas are under consideration. Development and timing will depend on user needs."
     }
   },
   "prospectDetail": {
