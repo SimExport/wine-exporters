@@ -19,14 +19,10 @@ import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
 import { cleanBuyerRequirements } from '@/lib/opportunity-display';
 import { TenderFilters, TenderPagination } from '@/components/TenderFilters';
-import { matchCautions, matchKey, matchReasons, orderByRecommendation, parseMatchesResponse, recommendationIndex, selectRecommended, type CautionKey, type OpportunityMatch, type RecommendedCategory } from '@/lib/opportunity-matches';
-import { EMPTY_TENDER_FILTERS, fetchAllTenderPages, filterTenders, tenderDeadlineLabel, tenderDeadlineState, tenderFilterOptions, tenderMarketLabel, tenderPage, type TenderFilters as TenderFilterState } from '@/lib/tender-discovery';
+import { matchCautions, matchKey, matchReasons, orderByRecommendation, parseMatchesResponse, recommendationIndex, selectRecommended, type OpportunityMatch, type RecommendedCategory } from '@/lib/opportunity-matches';
+import { EMPTY_TENDER_FILTERS, TENDER_PAGE_SIZE, fetchAllTenderPages, filterTenders, tenderDeadlineLabel, tenderDeadlineState, tenderFilterOptions, tenderMarketLabel, tenderPage, type TenderFilters as TenderFilterState } from '@/lib/tender-discovery';
+import { pageContaining, parseOpportunityDeepLink, resolveOpportunityDeepLink } from '@/lib/opportunity-deep-link';
 
-const CAUTION_CODES: Record<string, CautionKey> = {
-  upcoming: 'upcoming', next_calendar: 'upcoming', upcoming_calendar: 'upcoming',
-  deadline_missing: 'deadlineMissing', no_deadline: 'deadlineMissing', missing_deadline: 'deadlineMissing',
-  admin_requirements_unverified: 'adminUnverified', administrative_requirements_unverified: 'adminUnverified', admin_unverified: 'adminUnverified',
-};
 const MATCH_BADGE: Record<RecommendedCategory, string> = {
   forte: 'border-primary bg-primary text-primary-foreground',
   ouverte: 'border-primary/40 bg-primary/10 text-primary',
@@ -165,7 +161,14 @@ export default function Opportunities() {
     | { kind: 'tender'; data: TenderRequest }
     | null
   >(null);
-  const [tab, setTab] = useState('direct');
+  // Weekly email deep link (`?weType=direct|tender&weId=<uuid>`), read once on mount; invalid values are ignored.
+  const [deepLink] = useState(() => typeof window === 'undefined' ? null : parseOpportunityDeepLink(window.location.search));
+  const [tab, setTab] = useState<string>(() => deepLink?.tab ?? 'direct');
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const [deepLinkNotice, setDeepLinkNotice] = useState<'missing' | 'archived' | null>(null);
+  const deepLinkDoneRef = useRef(false);
+  const focusPagedRef = useRef(false);
+  const [directReady, setDirectReady] = useState(false);
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [tenderFilters, setTenderFilters] = useState<TenderFilterState>({ ...EMPTY_TENDER_FILTERS });
   const [tenderPageNumber, setTenderPageNumber] = useState(1);
@@ -245,6 +248,7 @@ export default function Opportunities() {
     if (!user) return;
     (async () => {
       setArchivesReady(false);
+      setDirectReady(false);
       setArchivedKeys(new Set());
       const [imp, leads, views, archives] = await Promise.all([
         supabase
@@ -272,6 +276,7 @@ export default function Opportunities() {
       setImporters((imp.data ?? []) as any);
       setAddedRefs(new Set((leads.data ?? []).map((l: any) => l.source_ref)));
       setViewedKeys(new Set((views.data ?? []).map((v: any) => `${v.opportunity_type}:${v.opportunity_id}`)));
+      setDirectReady(true);
     })();
   }, [user]);
 
@@ -446,12 +451,50 @@ export default function Opportunities() {
     const filtered = filterTenders(tenderBase, tenderFilters, tenderNow);
     return mine ? orderByRecommendation(filtered, 'tender', matchIndex) : filtered;
   }, [tenderBase, tenderFilters, tenderNow, mine, matchIndex]);
+  // Resolve the deep link once rows, archives and suggestions have settled; only already-readable rows are searched.
+  useEffect(() => {
+    if (!deepLink || deepLinkDoneRef.current || !userId || !directReady) return;
+    if (matchStatus !== 'ready' && matchStatus !== 'error') return;
+    if (deepLink.type === 'tender' && tendersLoading) return;
+    deepLinkDoneRef.current = true;
+    const rows: { id: string }[] = deepLink.type === 'importer' ? importers : tenders;
+    const res = resolveOpportunityDeepLink(deepLink, rows, archivedKeys, key => matchStatus === 'ready' && matchIndex.has(key));
+    if (res.status === 'missing') { setDeepLinkNotice('missing'); return; }
+    setFilters(EMPTY_FILTERS);
+    setTenderFilters({ ...EMPTY_TENDER_FILTERS });
+    setFocusKey(res.key);
+    if (res.status === 'archived') { setTab('archives'); setDeepLinkNotice('archived'); return; }
+    modeChosenRef.current = true;
+    setViewMode(res.mode);
+    setTab(deepLink.tab);
+  }, [deepLink, userId, directReady, matchStatus, tendersLoading, importers, tenders, archivedKeys, matchIndex]);
+  // Tenders are paginated: open the page holding the linked card once.
+  useEffect(() => {
+    if (!focusKey || focusPagedRef.current || deepLink?.type !== 'tender' || tab !== 'tender') return;
+    const page = pageContaining(matchedTenders, 'tender', focusKey, TENDER_PAGE_SIZE);
+    if (page) { focusPagedRef.current = true; setTenderPageNumber(page); }
+  }, [focusKey, matchedTenders, tab, deepLink]);
+  // Best-effort scroll once the card is rendered; silently gives up if it never appears.
+  useEffect(() => {
+    if (!focusKey) return;
+    let tries = 0;
+    let timer = 0;
+    const attempt = () => {
+      const el = document.querySelector(`[data-opportunity-key="${focusKey}"]`);
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+      if (++tries < 15) timer = window.setTimeout(attempt, 200);
+    };
+    timer = window.setTimeout(attempt, 100);
+    return () => window.clearTimeout(timer);
+  }, [focusKey]);
+  const focusClass = (key: string) => focusKey === key ? ' ring-2 ring-primary ring-offset-2 ring-offset-background' : '';
   const chooseMode = (next: 'mine' | 'all') => { modeChosenRef.current = true; setViewMode(next); setTenderPageNumber(1); };
   const matchBlock = (type: OpportunityType, id: string) => {
     const m = matchIndex.get(matchKey(type, id));
     if (!m) return null;
-    const reasons = matchReasons(m, code => i18n.exists(`opportunitiesUi.matching.reasons.${code}`) ? ui(`matching.reasons.${code}`) : null);
-    const cautions = matchCautions(m, CAUTION_CODES);
+    // Server sentences are French: known ones are localized, unknown ones are shown only in the FR UI.
+    const reasons = matchReasons(m, key => ui(`matching.reasons.${key}`), lang === 'fr');
+    const cautions = matchCautions(m, lang === 'fr');
     return (
       <div className="space-y-2 rounded-md border border-primary/15 bg-muted/40 p-3 text-sm">
         <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold ${MATCH_BADGE[m.category]}`}><Sparkles className="h-3.5 w-3.5" aria-hidden />{ui(`matching.categories.${m.category}`)}</span>
@@ -485,7 +528,7 @@ export default function Opportunities() {
                 const origins = splitMulti(pick(r, 'origins'));
                 const volumeDisplay = pick(r, 'volume');
                 return (
-                  <Card key={r.id} className="flex flex-col">
+                  <Card key={r.id} data-opportunity-key={`importer:${r.id}`} aria-current={focusKey === `importer:${r.id}` ? 'true' : undefined} className={`flex flex-col scroll-mt-24${focusClass(`importer:${r.id}`)}`}>
                     <CardContent className="pt-5 px-5 pb-4 flex-1 space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -568,7 +611,7 @@ export default function Opportunities() {
                   </div>
                 );
                 return (
-                  <Card key={t.id} className="flex min-w-0 flex-col border-primary/20">
+                  <Card key={t.id} data-opportunity-key={`tender:${t.id}`} aria-current={focusKey === `tender:${t.id}` ? 'true' : undefined} className={`flex min-w-0 flex-col border-primary/20 scroll-mt-24${focusClass(`tender:${t.id}`)}`}>
                     <CardContent className="pt-5 px-5 pb-4 flex-1 space-y-3">
                       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row">
                         <div className="min-w-0">
@@ -667,6 +710,7 @@ export default function Opportunities() {
           <TabsTrigger value="archives" className="text-sm"><Archive className="h-4 w-4 mr-2" />{tr('opportunitiesPage.tabs.archives')} ({fImporters(importersPartition.archived).length + fTenders(tendersPartition.archived).length})</TabsTrigger>
         </TabsList>
 
+        {deepLinkNotice && <p className="mt-4 flex items-start gap-1.5 text-[13px] text-muted-foreground" role="status"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />{ui(`deepLink.${deepLinkNotice}`)}</p>}
         {tab !== 'archives' && userId && (
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             <div role="group" aria-label={ui('matching.groupLabel')} className="inline-flex w-full rounded-md border border-border bg-muted p-1 sm:w-auto">

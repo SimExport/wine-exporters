@@ -81,33 +81,59 @@ export function orderByRecommendation<T extends { id: string }>(rows: T[], type:
 }
 
 export type CautionKey = 'upcoming' | 'deadlineMissing' | 'adminUnverified';
+export type ReasonKey = 'openToSeveralProfiles' | 'originCompatible' | 'regionCompatible' | 'styleCompatible' | 'priorityMarket' | 'criteriaLight';
 const CODE_RE = /^[a-z0-9]+(?:[_.-][a-z0-9]+)*$/;
+
+/** Accent-, case- and punctuation-insensitive form of a server phrase (the service sends unaccented French sentences). */
+export const normalizePhrase = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/** Known French reason sentences sent by `we-opportunity-matches`, mapped to localized labels. */
+const REASON_PHRASES: Record<string, ReasonKey> = {
+  'demande ouverte a plusieurs types de domaines': 'openToSeveralProfiles',
+  'origine du domaine compatible': 'originCompatible',
+  'region ou appellation compatible': 'regionCompatible',
+  'style de vin compatible': 'styleCompatible',
+  'marche prioritaire du domaine': 'priorityMarket',
+  'criteres acheteur peu detailles': 'criteriaLight',
+};
+export const reasonKey = (phrase: string): ReasonKey | null => REASON_PHRASES[normalizePhrase(phrase)] ?? null;
+
+/** Known French caution sentences (and legacy codes), recognised by their key words. */
+export function cautionKey(phrase: string): CautionKey | null {
+  const n = normalizePhrase(phrase);
+  if (/\b(calendrier|calendar|upcoming)\b/.test(n)) return 'upcoming';
+  if (/\badministrati/.test(n) || /\badmin\b/.test(n) || (/\bexigences?\b/.test(n) && /\bverifi/.test(n))) return 'adminUnverified';
+  if (/\b(cloture|echeance|deadline)\b/.test(n) || (/\bdate\b/.test(n) && /\b(limite|renseignee|manquante|absente|inconnue)\b/.test(n))) return 'deadlineMissing';
+  return null;
+}
 
 /**
  * Cautions shown on a recommended card. Important ones are derived from structured fields so the wording stays
  * prudent and localized: next calendar announced, missing tender closing date, administrative requirements unverified.
- * Free-text server cautions are kept; unknown technical codes are dropped rather than shown raw.
+ * Known server sentences are mapped to the same localized keys. Other free-text cautions are French-only, so they are
+ * shown only when `allowFreeText` (FR UI); technical codes are never shown raw.
  */
-export function matchCautions(m: OpportunityMatch, knownCodes: Record<string, CautionKey>): { keys: CautionKey[]; texts: string[] } {
+export function matchCautions(m: OpportunityMatch, allowFreeText: boolean): { keys: CautionKey[]; texts: string[] } {
   const keys = new Set<CautionKey>();
   if (m.upcoming) keys.add('upcoming');
   if (m.opportunity_type === 'tender' && !m.deadline && !m.upcoming) keys.add('deadlineMissing');
   if (m.opportunity_type === 'tender') keys.add('adminUnverified');
   const texts: string[] = [];
   for (const c of m.cautions) {
-    const known = knownCodes[c.toLowerCase()];
+    const known = cautionKey(c);
     if (known) keys.add(known);
-    else if (!CODE_RE.test(c)) texts.push(c);
+    else if (allowFreeText && !CODE_RE.test(c)) texts.push(c);
   }
   return { keys: [...keys], texts: texts.slice(0, 1) };
 }
 
-/** At most two reasons; technical codes without translation are not displayed. */
-export function matchReasons(m: OpportunityMatch, translate: (code: string) => string | null): string[] {
+/** At most two reasons. Known sentences are localized; unknown French sentences only appear in the FR UI; codes never. */
+export function matchReasons(m: OpportunityMatch, label: (key: ReasonKey) => string, allowFreeText: boolean): string[] {
   const out: string[] = [];
   for (const r of m.reasons) {
-    const label = CODE_RE.test(r) ? translate(r.toLowerCase()) : r;
-    if (label && !out.includes(label)) out.push(label);
+    const key = reasonKey(r);
+    const text = key ? label(key) : allowFreeText && !CODE_RE.test(r) ? r : null;
+    if (text && !out.includes(text)) out.push(text);
     if (out.length === 2) break;
   }
   return out;
