@@ -2812,6 +2812,7 @@ export type Database = {
           updated_at: string
           user_id: string
           weekly_importer_emails_enabled: boolean
+          weekly_opportunity_emails_enabled: boolean
         }
         Insert: {
           created_at?: string
@@ -2828,6 +2829,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           weekly_importer_emails_enabled?: boolean
+          weekly_opportunity_emails_enabled?: boolean
         }
         Update: {
           created_at?: string
@@ -2844,6 +2846,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weekly_importer_emails_enabled?: boolean
+          weekly_opportunity_emails_enabled?: boolean
         }
         Relationships: []
       }
@@ -2949,6 +2952,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      weekly_opportunity_digest_items: {
+        Row: {
+          opportunity_id: string
+          opportunity_type: string
+          sent_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          opportunity_id: string
+          opportunity_type: string
+          sent_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          opportunity_id?: string
+          opportunity_type?: string
+          sent_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      weekly_opportunity_digest_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          resend_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          resend_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          resend_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
       }
       wines: {
         Row: {
@@ -3511,6 +3571,21 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      we_opportunity_digest_candidates: {
+        Args: { p_user_id: string }
+        Returns: {
+          cautions: string[]
+          deadline: string
+          market: string
+          match_category: string
+          opportunity_id: string
+          opportunity_title: string
+          opportunity_type: string
+          priority_score: number
+          published_at: string
+          reasons: string[]
+        }[]
       }
       we_opportunity_matches_preview: {
         Args: { p_limit?: number; p_user_id: string }
