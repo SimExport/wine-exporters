@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Store, Megaphone, Calculator, FileText, Globe, ThumbsUp, Check } from "lucide-react";
+import { Store, Calculator, FileText, ThumbsUp, Check, RefreshCw, Lightbulb, Send } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -8,24 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { SEO } from "@/components/SEO";
 
+const AVAILABLE = ["database", "research", "campaigns", "crm", "opportunities", "tenders", "resources"] as const;
+const IMPROVEMENTS = ["database", "research", "campaigns"] as const;
 const FEATURES = [
-  { id: "marketplace", icon: Store },
-  { id: "tenders", icon: Megaphone },
+  { id: "prospecting-follow-up", icon: Send },
   { id: "calculator", icon: Calculator },
   { id: "tech-sheets", icon: FileText },
-  { id: "market-guides", icon: Globe },
+  { id: "marketplace", icon: Store },
 ] as const;
-
-type StepStatus = "done" | "current" | "upcoming";
-const STEP_STATUSES: StepStatus[] = [
-  "done",
-  "current",
-  "upcoming",
-  "upcoming",
-  "upcoming",
-  "upcoming",
-  "upcoming",
-];
 
 const Roadmap = () => {
   const { t } = useTranslation();
@@ -80,155 +70,106 @@ const Roadmap = () => {
     setLoading(null);
   };
 
-  const steps = (t("roadmap.timeline.steps", { returnObjects: true }) as Array<{ date: string; title: string }>) || [];
-  const currentIndex = STEP_STATUSES.indexOf("current");
-  const progressPct = steps.length > 1 ? (currentIndex / (steps.length - 1)) * 100 : 0;
-
   return (
-    <div className="p-8 lg:p-10 space-y-10">
+    <div className="p-4 sm:p-8 lg:p-10 space-y-8">
       <SEO title={t("seo.roadmap.title")} description={t("seo.roadmap.description")} path="/roadmap" />
-      <div className="mb-12">
-        <h1 className="text-4xl font-bold text-foreground">{t("roadmap.title")}</h1>
-        <p className="text-muted-foreground mt-3 text-lg">
-          {t("roadmap.subtitle")}
-        </p>
-      </div>
+      <header>
+        <h1 className="text-3xl lg:text-4xl font-bold text-foreground">{t("roadmap.title")}</h1>
+        <p className="text-muted-foreground mt-3 text-lg">{t("roadmap.subtitle")}</p>
+      </header>
 
-      <section aria-label={t("roadmap.timeline.title")} className="rounded-xl border bg-card p-6 lg:p-10">
-        <h2 className="text-2xl font-bold text-foreground mb-8">{t("roadmap.timeline.title")}</h2>
-
-        {/* Desktop horizontal timeline */}
-        <div className="hidden md:block">
-          <div className="relative px-2">
-            {/* Background line */}
-            <div className="absolute left-0 right-0 top-[78px] h-0.5 bg-muted-foreground/25" />
-            {/* Progress line */}
-            <div
-              className="absolute left-0 top-[78px] h-0.5 bg-primary transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-            <ol className="relative grid" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
-              {steps.map((step, idx) => {
-                const status = STEP_STATUSES[idx] ?? "upcoming";
-                return (
-                  <li key={idx} className="flex flex-col items-center text-center px-2">
-                    <span className="text-xs font-medium text-muted-foreground mb-3 h-8 flex items-end">
-                      {step.date}
-                    </span>
-                    <span
-                      className={`relative z-10 flex h-5 w-5 items-center justify-center rounded-full ${
-                        status === "done"
-                          ? "bg-primary"
-                          : status === "current"
-                          ? "bg-primary animate-pulse-ring ring-4 ring-primary/20"
-                          : "border-2 border-muted-foreground/40 bg-background"
-                      }`}
-                      aria-label={t(`roadmap.timeline.status.${status}`)}
-                    >
-                      {status === "done" && <Check className="h-3 w-3 text-primary-foreground" />}
-                    </span>
-                    <span
-                      className={`mt-4 text-sm font-semibold leading-snug max-w-[150px] ${
-                        status === "upcoming" ? "text-muted-foreground" : "text-foreground"
-                      }`}
-                    >
-                      {step.title}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+      <section aria-labelledby="roadmap-available" className="rounded-xl border bg-card p-5 lg:p-8 space-y-5">
+        <div>
+          <h2 id="roadmap-available" className="flex items-center gap-3 text-xl lg:text-2xl font-bold">
+            <Check className="h-6 w-6 text-primary shrink-0" aria-hidden="true" />
+            {t("roadmap.available.title")}
+          </h2>
+          <p className="text-muted-foreground mt-2">{t("roadmap.available.description")}</p>
         </div>
-
-        {/* Mobile vertical timeline */}
-        <ol className="md:hidden relative space-y-6 pl-8">
-          <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-muted-foreground/25" />
-          <div
-            className="absolute left-[11px] top-2 w-0.5 bg-primary transition-all duration-500"
-            style={{ height: `calc(${progressPct}% - 0.5rem)` }}
-          />
-          {steps.map((step, idx) => {
-            const status = STEP_STATUSES[idx] ?? "upcoming";
-            return (
-              <li key={idx} className="relative">
-                <span
-                  className={`absolute -left-8 top-1 flex h-5 w-5 items-center justify-center rounded-full ${
-                    status === "done"
-                      ? "bg-primary"
-                      : status === "current"
-                      ? "bg-primary animate-pulse-ring ring-4 ring-primary/20"
-                      : "border-2 border-muted-foreground/40 bg-background"
-                  }`}
-                >
-                  {status === "done" && <Check className="h-3 w-3 text-primary-foreground" />}
-                </span>
-                <p className="text-xs font-medium text-muted-foreground">{step.date}</p>
-                <p
-                  className={`text-sm font-semibold ${
-                    status === "upcoming" ? "text-muted-foreground" : "text-foreground"
-                  }`}
-                >
-                  {step.title}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
-
-        <p className="mt-8 text-xs italic text-muted-foreground text-center">
-          {t("roadmap.timeline.disclaimer")}
-        </p>
+        <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {AVAILABLE.map((item) => (
+            <li key={item} className="flex items-center gap-2 rounded-lg border bg-background p-3 text-sm font-medium">
+              <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              {t(`roadmap.available.items.${item}`)}
+            </li>
+          ))}
+        </ul>
       </section>
 
-      <div className="rounded-lg border border-border/60 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-        {t("roadmap.databaseUpdate")}
-      </div>
-
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((feature) => {
-          const voted = votedFeatures.has(feature.id);
-          const count = voteCounts[feature.id] || 0;
-          return (
-            <Card key={feature.id} className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-              <CardHeader className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">{t(`roadmap.features.${feature.id}.title`)}</CardTitle>
-                </div>
-                <CardDescription>{t(`roadmap.features.${feature.id}.description`)}</CardDescription>
-                {count > 0 && (
-                  <p className="mt-3 text-sm font-medium text-amber-600 dark:text-amber-400">
-                    {t(count > 1 ? "roadmap.interestedOther" : "roadmap.interestedOne", { count })}
-                  </p>
-                )}
+      <section aria-labelledby="roadmap-continuous" className="rounded-xl border bg-card p-5 lg:p-8 space-y-5">
+        <div>
+          <h2 id="roadmap-continuous" className="flex items-center gap-3 text-xl lg:text-2xl font-bold">
+            <RefreshCw className="h-6 w-6 text-primary shrink-0" aria-hidden="true" />
+            {t("roadmap.continuous.title")}
+          </h2>
+          <p className="text-muted-foreground mt-2">{t("roadmap.continuous.description")}</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {IMPROVEMENTS.map((item) => (
+            <Card key={item} className="bg-background">
+              <CardHeader>
+                <CardTitle className="text-base leading-snug">{t(`roadmap.continuous.items.${item}.title`)}</CardTitle>
+                <CardDescription>{t(`roadmap.continuous.items.${item}.description`)}</CardDescription>
               </CardHeader>
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={voted ? "secondary" : "default"}
-                  disabled={voted || loading === feature.id}
-                  onClick={() => handleVote(feature.id)}
-                >
-                  {voted ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      {t("roadmap.voted")}
-                    </>
-                  ) : (
-                    <>
-                      <ThumbsUp className="mr-2 h-4 w-4" />
-                      {t("roadmap.interested")}
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
             </Card>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="roadmap-planned" className="space-y-5">
+        <div>
+          <h2 id="roadmap-planned" className="flex items-center gap-3 text-xl lg:text-2xl font-bold">
+            <Lightbulb className="h-6 w-6 text-primary shrink-0" aria-hidden="true" />
+            {t("roadmap.planned.title")}
+          </h2>
+          <p className="text-muted-foreground mt-2">{t("roadmap.planned.description")}</p>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          {FEATURES.map((feature) => {
+            const voted = votedFeatures.has(feature.id);
+            const count = voteCounts[feature.id] || 0;
+            return (
+              <Card key={feature.id} className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+                <CardHeader className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <feature.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-lg">{t(`roadmap.features.${feature.id}.title`)}</CardTitle>
+                  </div>
+                  <CardDescription>{t(`roadmap.features.${feature.id}.description`)}</CardDescription>
+                  {count > 0 && (
+                    <p className="mt-3 text-sm font-medium text-amber-600 dark:text-amber-400">
+                      {t(count > 1 ? "roadmap.interestedOther" : "roadmap.interestedOne", { count })}
+                    </p>
+                  )}
+                </CardHeader>
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    variant={voted ? "secondary" : "default"}
+                    disabled={voted || loading === feature.id}
+                    onClick={() => handleVote(feature.id)}
+                  >
+                    {voted ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        {t("roadmap.voted")}
+                      </>
+                    ) : (
+                      <>
+                        <ThumbsUp className="mr-2 h-4 w-4" />
+                        {t("roadmap.interested")}
+                      </>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+        <p className="text-sm text-muted-foreground">{t("roadmap.planned.disclaimer")}</p>
+      </section>
     </div>
   );
 };
