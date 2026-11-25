@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye, Archive, ArchiveRestore, Search, RotateCcw, Send, ShieldCheck } from 'lucide-react';
+import { Mail, Phone, MapPin, Plus, CheckCircle2, Eye, Archive, ArchiveRestore, Search, RotateCcw, Send, ShieldCheck, Sparkles, Info, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { canonicalCountry, countryLabel, splitMulti, buildOptions, matchesFilters, hasActiveFilters, EMPTY_FILTERS, isMediatedEmail, buildMailto, type FilterState, type FilterableItem } from '@/lib/opportunity-filters';
@@ -19,7 +19,19 @@ import { getOrCreateManualCampaign } from '@/lib/manual-campaign';
 import { opportunityKey, partitionOpportunities, type OpportunityType } from '@/lib/opportunity-archives';
 import { cleanBuyerRequirements } from '@/lib/opportunity-display';
 import { TenderFilters, TenderPagination } from '@/components/TenderFilters';
+import { matchCautions, matchKey, matchReasons, orderByRecommendation, parseMatchesResponse, recommendationIndex, selectRecommended, type CautionKey, type OpportunityMatch, type RecommendedCategory } from '@/lib/opportunity-matches';
 import { EMPTY_TENDER_FILTERS, fetchAllTenderPages, filterTenders, tenderDeadlineLabel, tenderDeadlineState, tenderFilterOptions, tenderMarketLabel, tenderPage, type TenderFilters as TenderFilterState } from '@/lib/tender-discovery';
+
+const CAUTION_CODES: Record<string, CautionKey> = {
+  upcoming: 'upcoming', next_calendar: 'upcoming', upcoming_calendar: 'upcoming',
+  deadline_missing: 'deadlineMissing', no_deadline: 'deadlineMissing', missing_deadline: 'deadlineMissing',
+  admin_requirements_unverified: 'adminUnverified', administrative_requirements_unverified: 'adminUnverified', admin_unverified: 'adminUnverified',
+};
+const MATCH_BADGE: Record<RecommendedCategory, string> = {
+  forte: 'border-primary bg-primary text-primary-foreground',
+  ouverte: 'border-primary/40 bg-primary/10 text-primary',
+  a_explorer: 'border-border bg-muted text-foreground',
+};
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'suede': '🇸🇪', 'suède': '🇸🇪', 'sweden': '🇸🇪',
@@ -161,6 +173,38 @@ export default function Opportunities() {
   const [tendersError, setTendersError] = useState(false);
   const [tenderReload, setTenderReload] = useState(0);
   const [tenderNow, setTenderNow] = useState(() => new Date());
+  const [viewMode, setViewMode] = useState<'mine' | 'all'>('all');
+  const [matchStatus, setMatchStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [matchIndex, setMatchIndex] = useState<Map<string, OpportunityMatch & { category: RecommendedCategory }>>(() => new Map());
+  const modeChosenRef = useRef(false);
+  const userId = user?.id ?? null;
+
+  // One request per signed-in user; reset on user change. Failure never hides opportunities and is not retried in a loop.
+  useEffect(() => {
+    let cancelled = false;
+    modeChosenRef.current = false;
+    setViewMode('all');
+    setMatchIndex(new Map());
+    if (!userId) { setMatchStatus('idle'); return; }
+    setMatchStatus('loading');
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('we-opportunity-matches', { body: {} });
+        if (error) throw error;
+        const index = recommendationIndex(parseMatchesResponse(data));
+        if (cancelled) return;
+        setMatchIndex(index);
+        setMatchStatus('ready');
+        if (!modeChosenRef.current) setViewMode('mine');
+      } catch {
+        if (cancelled) return;
+        console.error('[opportunity-matches] Suggestions unavailable, showing all opportunities');
+        setMatchStatus('error');
+        setViewMode('all');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setTenderNow(new Date()), 60_000);
@@ -394,11 +438,46 @@ export default function Opportunities() {
 
   const importersPartition = partitionOpportunities(importers, 'importer', archivedKeys);
   const tendersPartition = partitionOpportunities(tenders, 'tender', archivedKeys);
-  const tenderOptions = useMemo(() => tenderFilterOptions(tendersPartition.active, lang, key => tr(`opportunitiesUi.tenderControls.wines.${key}`)), [tenders, archivedKeys, lang, tr]);
-  const matchedTenders = useMemo(() => filterTenders(tendersPartition.active, tenderFilters, tenderNow), [tenders, archivedKeys, tenderFilters, tenderNow]);
+  const mine = viewMode === 'mine' && matchStatus === 'ready';
+  const directBase = mine ? selectRecommended(importersPartition.active, 'importer', matchIndex) : importersPartition.active;
+  const tenderBase = useMemo(() => mine ? selectRecommended(tendersPartition.active, 'tender', matchIndex) : tendersPartition.active, [tenders, archivedKeys, mine, matchIndex]);
+  const tenderOptions = useMemo(() => tenderFilterOptions(tenderBase, lang, key => tr(`opportunitiesUi.tenderControls.wines.${key}`)), [tenderBase, lang, tr]);
+  const matchedTenders = useMemo(() => {
+    const filtered = filterTenders(tenderBase, tenderFilters, tenderNow);
+    return mine ? orderByRecommendation(filtered, 'tender', matchIndex) : filtered;
+  }, [tenderBase, tenderFilters, tenderNow, mine, matchIndex]);
+  const chooseMode = (next: 'mine' | 'all') => { modeChosenRef.current = true; setViewMode(next); setTenderPageNumber(1); };
+  const matchBlock = (type: OpportunityType, id: string) => {
+    const m = matchIndex.get(matchKey(type, id));
+    if (!m) return null;
+    const reasons = matchReasons(m, code => i18n.exists(`opportunitiesUi.matching.reasons.${code}`) ? ui(`matching.reasons.${code}`) : null);
+    const cautions = matchCautions(m, CAUTION_CODES);
+    return (
+      <div className="space-y-2 rounded-md border border-primary/15 bg-muted/40 p-3 text-sm">
+        <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold ${MATCH_BADGE[m.category]}`}><Sparkles className="h-3.5 w-3.5" aria-hidden />{ui(`matching.categories.${m.category}`)}</span>
+        {reasons.length > 0 && (
+          <ul className="space-y-1 text-foreground" aria-label={ui('matching.reasonsLabel')}>
+            {reasons.map((r, i) => <li key={i} className="flex items-start gap-1.5"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden /><span className="min-w-0 break-words">{r}</span></li>)}
+          </ul>
+        )}
+        {(cautions.keys.length > 0 || cautions.texts.length > 0) && (
+          <ul className="space-y-1 text-[13px] text-muted-foreground">
+            {cautions.keys.map(k => <li key={k} className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden /><span>{ui(`matching.cautions.${k}`)}</span></li>)}
+            {cautions.texts.map((c, i) => <li key={`t${i}`} className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden /><span className="min-w-0 break-words">{c}</span></li>)}
+          </ul>
+        )}
+      </div>
+    );
+  };
+  const suggestionsEmpty = (
+    <Card><CardContent className="space-y-4 py-12 text-center">
+      <p className="text-muted-foreground">{ui('matching.empty')}</p>
+      <Button variant="outline" onClick={() => chooseMode('all')}>{ui('matching.seeAll')}</Button>
+    </CardContent></Card>
+  );
   const pagedTenders = tenderPage(matchedTenders, tenderPageNumber);
   const changeTenderFilters = (next: TenderFilterState) => { setTenderFilters(next); setTenderPageNumber(1); };
-  const renderImporters = (rows: ImporterRequest[]) => rows.map(r => {
+  const renderImporters = (rows: ImporterRequest[], withMatch = false) => rows.map(r => {
                 const added = addedRefs.has(r.id);
                 const viewed = viewedKeys.has(`importer:${r.id}`);
                 const req = cleanBuyerRequirements(pick(r, 'requirements'));
@@ -431,6 +510,7 @@ export default function Opportunities() {
                           )}
                         </div>
                       </div>
+                      {withMatch && matchBlock('importer', r.id)}
                       {req && <ExpandableText text={req} more={ui('showMore')} less={ui('showLess')} />}
                       {styles.length > 0 && (
                         <div>
@@ -472,7 +552,7 @@ export default function Opportunities() {
                 );
               });
 
-  const renderTenders = (rows: TenderRequest[]) => rows.map(t => {
+  const renderTenders = (rows: TenderRequest[], withMatch = false) => rows.map(t => {
                 const added = addedRefs.has(t.id);
                 const viewed = viewedKeys.has(`tender:${t.id}`);
                 const styleProfile = (pick(t, 'style_profile') ?? '').trim();
@@ -515,6 +595,7 @@ export default function Opportunities() {
                           )}
                         </div>
                       </div>
+                      {withMatch && matchBlock('tender', t.id)}
                       {(t.category || t.designation_origin) && (
                         <div className="flex flex-wrap gap-1.5">
                           {t.category && <span className={`bg-primary text-primary-foreground ${chip}`} title={tr('opportunitiesPage.labels.category')}>{tCategory}</span>}
@@ -581,12 +662,28 @@ export default function Opportunities() {
 
       <Tabs value={tab} onValueChange={changeTab} className="w-full">
         <TabsList className="h-auto flex flex-wrap justify-start gap-1">
-          <TabsTrigger value="direct" className="text-sm">{tr('opportunitiesPage.tabs.direct')} ({fImporters(importersPartition.active).length})</TabsTrigger>
+          <TabsTrigger value="direct" className="text-sm">{tr('opportunitiesPage.tabs.direct')} ({fImporters(directBase).length})</TabsTrigger>
           <TabsTrigger value="tender" className="text-sm">{tr('opportunitiesPage.tabs.tender')} ({matchedTenders.length})</TabsTrigger>
           <TabsTrigger value="archives" className="text-sm"><Archive className="h-4 w-4 mr-2" />{tr('opportunitiesPage.tabs.archives')} ({fImporters(importersPartition.archived).length + fTenders(tendersPartition.archived).length})</TabsTrigger>
         </TabsList>
 
-        {tab === 'tender' ? <TenderFilters filters={tenderFilters} onChange={changeTenderFilters} markets={tenderOptions.markets} wines={tenderOptions.wines} count={matchedTenders.length} total={tendersPartition.active.length} /> : <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
+        {tab !== 'archives' && userId && (
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <div role="group" aria-label={ui('matching.groupLabel')} className="inline-flex w-full rounded-md border border-border bg-muted p-1 sm:w-auto">
+              <Button type="button" size="sm" variant={mine ? 'default' : 'ghost'} aria-pressed={mine} disabled={matchStatus !== 'ready'} onClick={() => chooseMode('mine')} className="flex-1 gap-1.5 text-sm sm:flex-none">
+                <Sparkles className="h-4 w-4" aria-hidden />{ui('matching.mine')}
+              </Button>
+              <Button type="button" size="sm" variant={mine ? 'ghost' : 'default'} aria-pressed={!mine} onClick={() => chooseMode('all')} className="flex-1 text-sm sm:flex-none">
+                {ui('matching.all')}
+              </Button>
+            </div>
+            {matchStatus === 'loading' && <p className="text-[13px] text-muted-foreground" role="status">{ui('matching.loading')}</p>}
+            {matchStatus === 'error' && <p className="flex items-start gap-1.5 text-[13px] text-muted-foreground" role="status"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />{ui('matching.unavailable')}</p>}
+            {mine && <p className="flex items-start gap-1.5 text-[13px] text-muted-foreground"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />{ui('matching.hint')}</p>}
+          </div>
+        )}
+
+        {tab === 'tender' ? <TenderFilters filters={tenderFilters} onChange={changeTenderFilters} markets={tenderOptions.markets} wines={tenderOptions.wines} count={matchedTenders.length} total={tenderBase.length} /> : <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
           <div className="relative sm:col-span-2 lg:col-span-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={filters.q} onChange={e => setFilters(f => ({ ...f, q: e.target.value }))} placeholder={ui('searchPlaceholder')} aria-label={ui('searchPlaceholder')} className="h-10 pl-9 text-sm" />
@@ -620,11 +717,11 @@ export default function Opportunities() {
         <TabsContent value="direct" className="mt-5">
           {importersPartition.active.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyDirect')}</CardContent></Card>
-          ) : fImporters(importersPartition.active).length === 0 ? (
+          ) : mine && directBase.length === 0 ? suggestionsEmpty : fImporters(directBase).length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{ui('noResults')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {renderImporters(fImporters(importersPartition.active))}
+              {renderImporters(fImporters(directBase), mine)}
             </div>
           )}
         </TabsContent>
@@ -634,11 +731,11 @@ export default function Opportunities() {
             <div className="space-y-3 py-12 text-center" role="alert"><p className="text-muted-foreground">{ui('tenderControls.loadError')}</p><Button variant="outline" onClick={() => setTenderReload(value => value + 1)}>{ui('tenderControls.retry')}</Button></div>
           ) : tendersPartition.active.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{tr('opportunitiesPage.states.emptyTender')}</CardContent></Card>
-          ) : matchedTenders.length === 0 ? (
+          ) : mine && tenderBase.length === 0 ? suggestionsEmpty : matchedTenders.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">{ui('noResults')}</CardContent></Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {renderTenders(pagedTenders.rows)}
+              {renderTenders(pagedTenders.rows, mine)}
             </div>
           )}
           <TenderPagination page={pagedTenders.page} pages={pagedTenders.pages} onChange={setTenderPageNumber} />
