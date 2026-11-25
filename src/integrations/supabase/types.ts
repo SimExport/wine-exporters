@@ -3512,6 +3512,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      we_opportunity_matches_preview: {
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: {
+          announced_upcoming: boolean
+          cautions: string[]
+          deadline: string
+          market: string
+          match_category: string
+          matching_wine_id: string
+          opportunity_id: string
+          opportunity_title: string
+          opportunity_type: string
+          priority_score: number
+          reasons: string[]
+          source_scope: string
+        }[]
+      }
       wx_arr_union: { Args: { a: string[]; b: string[] }; Returns: string[] }
       wx_claim_deep: {
         Args: { p_batch: string; p_limit?: number; p_top_markets?: number }
