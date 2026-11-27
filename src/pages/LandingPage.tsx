@@ -385,9 +385,9 @@ const FeaturedTestimonial = () => {
   return (
     <figure className="rounded-2xl bg-primary text-primary-foreground p-6 sm:p-10 shadow-sm">
       <span aria-hidden="true" className="block font-display text-5xl leading-none text-gold mb-2">“</span>
-      <blockquote lang="fr" className="space-y-4 max-w-4xl">
-        <p className="font-display text-xl sm:text-3xl font-semibold leading-snug">{featuredLandingTestimonial.quote.split(" […] ")[0]}</p>
-        <p className="text-base leading-relaxed opacity-90">{featuredLandingTestimonial.quote.split(" […] ").slice(1).join(" […] ")}</p>
+      <p className="font-display text-xl sm:text-3xl font-semibold leading-snug max-w-4xl">{featuredLandingTestimonial.quote.split(" […] ")[0]}</p>
+      <blockquote lang="fr" className="mt-4 max-w-4xl text-base leading-relaxed opacity-90">
+        {featuredLandingTestimonial.quote.split(" […] ").slice(1).join(" […] ")}
       </blockquote>
       <figcaption className="mt-6 flex items-center gap-3">
         <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 text-sm font-bold">JP</span>
