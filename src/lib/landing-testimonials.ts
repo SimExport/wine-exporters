@@ -14,7 +14,13 @@ export type LandingTestimonial = {
   role?: string;
 };
 
+export const featuredLandingTestimonial: LandingTestimonial = {
+  quote: "Hvidovre Vinhus, au Danemark, me commande déjà sa 2e palette. C'est vraiment super […] J'apprécie beaucoup le partage d'opportunité. […] En tout cas, j'apprecie vraiment notre collaboration, et je la recommande à tout le monde",
+  author: "Jérôme Petitjean, Famille Petitjean",
+};
+
 export const landingTestimonials: LandingTestimonial[] = [
+  featuredLandingTestimonial,
   {
     quote:
       "Après avoir essayé différents outils (listings importateurs, CRM, Brevo), nous avons trouvé avec WineExporters la plateforme tout-en-un, et c'est vraiment facile. Pour le moment, nous avons lancé beaucoup de prospections ; les retours sont longs, mais nous avons eu notre première commande pour un contact en Hollande, c'est un bon début ! Nous sommes vraiment satisfaits de cet outil et souhaiterions pouvoir y consacrer plus de temps. Nous allons préparer nos salons avec WineExporters.",

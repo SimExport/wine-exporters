@@ -2621,7 +2621,25 @@
     },
     "testimonials": {
       "title": "New markets. Not just new contacts.",
-      "subtitle": "A few examples of markets opened through our ExportVins support and the tools now brought together in WineExporters."
+      "subtitle": "A few examples of markets opened through our ExportVins support and the tools now brought together in WineExporters.",
+      "intro": "Hear from producers using WineExporters to develop international sales.",
+      "featuredLabel": "Customer story · November 2026",
+      "customerRole": "WineExporters user",
+      "reportedResults": "Results reported by the producer",
+      "denmark": "Denmark",
+      "sweden": "Sweden",
+      "canada": "Canada",
+      "order": "Second pallet ordered",
+      "shortlist": "Shortlisted",
+      "samples": "Samples sent",
+      "denmarkDetail": "A repeat order and a second shipment of samples to another buyer.",
+      "swedenDetail": "Champagne and Gigondas shortlisted.",
+      "canadaDetail": "An interested buyer; samples sent.",
+      "earlyResult": "Second pallet ordered in Denmark",
+      "earlyAttribution": "Jérôme Petitjean · Famille Petitjean",
+      "readReviews": "Read customer stories",
+      "otherReviews": "More producer testimonials",
+      "historicalTitle": "More examples of markets opened"
     },
     "pricing": {
       "title": "One subscription. The whole platform.",
