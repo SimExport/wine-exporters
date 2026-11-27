@@ -382,39 +382,20 @@ const TestimonialsGrid = () => {
 
 const FeaturedTestimonial = () => {
   const { t } = useTranslation();
-  const outcomes = [
-    { flag: "🇩🇰", market: "denmark", result: "order", detail: "denmarkDetail" },
-    { flag: "🇸🇪", market: "sweden", result: "shortlist", detail: "swedenDetail" },
-    { flag: "🇨🇦", market: "canada", result: "samples", detail: "canadaDetail" },
-  ] as const;
   return (
-    <figure className="rounded-2xl overflow-hidden bg-primary text-primary-foreground shadow-lg">
-      <div className="grid lg:grid-cols-[1.35fr_1fr]">
-        <div className="p-6 sm:p-10 flex flex-col justify-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold mb-5">{t("landing.testimonials.featuredLabel")}</p>
-          <blockquote lang="fr" className="space-y-4">
-            <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight">« {featuredLandingTestimonial.quote.split(" […] ")[0]} »</p>
-            <p className="text-base leading-relaxed opacity-90">« {featuredLandingTestimonial.quote.split(" […] ").slice(1).join(" […] ")} »</p>
-          </blockquote>
-          <figcaption className="mt-6 flex items-center gap-3">
-            <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 text-sm font-bold">JP</span>
-            <div><p className="font-semibold">{featuredLandingTestimonial.author}</p><p className="text-sm opacity-80">{t("landing.testimonials.customerRole")}</p></div>
-          </figcaption>
+    <figure className="rounded-2xl bg-primary text-primary-foreground p-6 sm:p-10 shadow-sm">
+      <span aria-hidden="true" className="block font-display text-5xl leading-none text-gold mb-2">“</span>
+      <blockquote lang="fr" className="space-y-4 max-w-4xl">
+        <p className="font-display text-xl sm:text-3xl font-semibold leading-snug">{featuredLandingTestimonial.quote.split(" […] ")[0]}</p>
+        <p className="text-base leading-relaxed opacity-90">{featuredLandingTestimonial.quote.split(" […] ").slice(1).join(" […] ")}</p>
+      </blockquote>
+      <figcaption className="mt-6 flex items-center gap-3">
+        <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 text-sm font-bold">JP</span>
+        <div>
+          <p className="font-semibold">{featuredLandingTestimonial.author}</p>
+          <p className="text-sm opacity-80">{t("landing.testimonials.customerRole")}</p>
         </div>
-        <div className="bg-card text-card-foreground p-5 sm:p-8 m-2 rounded-xl flex flex-col justify-center gap-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("landing.testimonials.reportedResults")}</p>
-          {outcomes.map((item) => (
-            <div key={item.market} className="rounded-xl border border-border bg-background p-4 flex items-start gap-3">
-              <span aria-hidden="true" className="text-2xl leading-none">{item.flag}</span>
-              <div className="min-w-0">
-                <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">{t(`landing.testimonials.${item.market}`)}</p>
-                <p className="text-base font-bold text-primary mt-1">{t(`landing.testimonials.${item.result}`)}</p>
-                <p className="text-sm text-muted-foreground mt-1">{t(`landing.testimonials.${item.detail}`)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </figcaption>
     </figure>
   );
 };
@@ -536,6 +517,9 @@ const LandingPage = () => {
               <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("landing.hero.haveAccount")}
               </Link>
+              <a href="#testimonials" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                {t("landing.testimonials.readReviews")}<ArrowRight aria-hidden="true" className="h-4 w-4" />
+              </a>
             </div>
           </FadeIn>
         </div>
@@ -546,15 +530,6 @@ const LandingPage = () => {
         )}
         </div>
       </section>
-
-      {/* ── Early customer proof ── */}
-      <aside className="px-6 pb-10 sm:pb-14">
-        <a href="#testimonials" className="group mx-auto max-w-4xl rounded-xl border border-border bg-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:border-primary/50 transition-colors">
-          <span className="flex items-center gap-2 text-primary font-semibold text-sm shrink-0"><Package aria-hidden="true" className="h-5 w-5" />{t("landing.testimonials.earlyResult")}</span>
-          <span className="min-w-0 flex-1 text-sm text-muted-foreground">{t("landing.testimonials.earlyAttribution")}</span>
-          <span className="flex items-center gap-2 text-sm font-semibold text-primary">{t("landing.testimonials.readReviews")}<ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" /></span>
-        </a>
-      </aside>
 
       {/* ── A. BANDEAU MARQUEE ── */}
       <Marquee items={marqueeItems} />
@@ -716,11 +691,6 @@ const LandingPage = () => {
             <h3 className="font-display text-xl sm:text-2xl font-bold mb-2">{t("landing.testimonials.historicalTitle")}</h3>
             <p className="text-sm text-muted-foreground mb-5">{t("landing.testimonials.subtitle")}</p>
             <TestimonialsGrid />
-          </div>
-          <div className="mt-10 text-center">
-            <Button size="lg" asChild className="whitespace-normal h-auto py-3 max-w-full">
-              <Link to="/market-analysis">{t("landing.hero.ctaPrimary")}<ArrowRight aria-hidden="true" className="ml-2 h-5 w-5 shrink-0" /></Link>
-            </Button>
           </div>
         </div>
       </section>
