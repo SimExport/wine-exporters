@@ -2688,7 +2688,10 @@
       ]
     },
     "punchline": {
-      "two": "5 ans à ouvrir des marchés pour des domaines comme le vôtre. Pas en théorie, en commandes signées."
+      "two": "5 ans à ouvrir des marchés pour des domaines comme le vôtre. Pas en théorie, en commandes signées.",
+      "founderRole": "Fondateur de WineExporters et d'ExportVins",
+      "founderBio": "Après deux années d’expérience commerciale au Canada dans le secteur du vin, Simon accompagne depuis 2021 les domaines viticoles dans leur développement international avec ExportVins.",
+      "founderMission": "WineExporters est né de cette expérience de terrain : rendre la prospection export plus accessible, plus efficace et permettre aux vignerons de développer leurs ventes en toute autonomie."
     },
     "bigStats": {
       "title": "Une plateforme construite sur plusieurs années de prospection export.",

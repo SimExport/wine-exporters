@@ -88,19 +88,6 @@ const Marquee = ({ items }: { items: string[] }) => {
   );
 };
 
-const Punchline = ({ text, tone }: { text: string; tone: "cream" | "primary" }) => (
-  <section
-    className={`py-24 sm:py-32 px-6 ${
-      tone === "cream" ? "bg-cream text-cream-foreground" : "bg-primary text-primary-foreground"
-    }`}>
-    <FadeIn>
-      <p className="font-display max-w-5xl mx-auto text-center text-3xl sm:text-5xl lg:text-6xl leading-[1.15] font-semibold text-balance">
-        {text}
-      </p>
-    </FadeIn>
-  </section>
-);
-
 const BigStats = ({
   items,
   title,
@@ -677,7 +664,26 @@ const LandingPage = () => {
       </section>
 
       {/* ── D. PUNCHLINE PLEIN ÉCRAN (placeholder à valider) ── */}
-      <Punchline text={t("landing.punchline.two")} tone="primary" />
+      <section className="bg-primary text-primary-foreground px-6 py-16 sm:py-24" aria-labelledby="founder-title">
+        <div className="max-w-5xl mx-auto">
+          <FadeIn>
+            <h2 id="founder-title" className="font-display text-3xl sm:text-4xl lg:text-5xl leading-tight font-semibold text-center text-balance mb-10 sm:mb-14">
+              {t("landing.punchline.two")}
+            </h2>
+          </FadeIn>
+          <div className="grid md:grid-cols-[220px_1fr] items-center gap-6 sm:gap-10 max-w-3xl mx-auto">
+            <img src="/founder-simon.webp" alt="Simon Lemonnier" width={256} height={289} loading="lazy" decoding="async" className="w-full max-w-[220px] mx-auto rounded-xl shadow-md object-cover" />
+            <div className="space-y-4 text-center md:text-left">
+              <div>
+                <h3 className="font-display text-2xl sm:text-3xl font-semibold">Simon Lemonnier</h3>
+                <p className="text-gold text-sm font-medium mt-1">{t("landing.punchline.founderRole")}</p>
+              </div>
+              <p className="text-base sm:text-lg leading-relaxed opacity-90">{t("landing.punchline.founderBio")}</p>
+              <p className="text-base sm:text-lg leading-relaxed opacity-90">{t("landing.punchline.founderMission")}</p>
+            </div>
+          </div>
+        </div>
+      </section>
       <div className="bg-primary pb-24 sm:pb-28 -mt-10 flex justify-center px-6">
         <VideoCtaButton label={t("landing.hero.ctaVideo")} variant="secondary" />
       </div>
