@@ -10,11 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SpotVideo, SPOT_VIDEO_ENABLED } from "@/components/landing/SpotVideo";
-import {
-  featuredLandingTestimonial,
-  landingTestimonials,
-  testimonialSpansFullWidth,
-} from "@/lib/landing-testimonials";
+import { landingTestimonials, type LandingTestimonial } from "@/lib/landing-testimonials";
 import {
   Accordion,
   AccordionContent,
@@ -380,20 +376,22 @@ const TestimonialsGrid = () => {
 };
 
 
-const FeaturedTestimonial = () => {
+const TestimonialCard = ({ testimonial }: { testimonial: LandingTestimonial }) => {
   const { t } = useTranslation();
+  const initials = testimonial.author.split(" ").map((part) => part.charAt(0)).slice(0, 2).join("");
   return (
-    <figure className="rounded-2xl bg-primary text-primary-foreground p-6 sm:p-10 shadow-sm">
-      <span aria-hidden="true" className="block font-display text-5xl leading-none text-gold mb-2">“</span>
-      <p className="font-display text-xl sm:text-3xl font-semibold leading-snug max-w-4xl">{featuredLandingTestimonial.quote.split(" […] ")[0]}</p>
-      <blockquote lang="fr" className="mt-4 max-w-4xl text-base leading-relaxed opacity-90">
-        {featuredLandingTestimonial.quote.split(" […] ").slice(1).join(" […] ")}
-      </blockquote>
-      <figcaption className="mt-6 flex items-center gap-3">
-        <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 text-sm font-bold">JP</span>
-        <div>
-          <p className="font-semibold">{featuredLandingTestimonial.author}</p>
-          <p className="text-sm opacity-80">{t("landing.testimonials.customerRole")}</p>
+    <figure className="h-full rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm flex flex-col gap-4">
+      <span aria-hidden="true" className="block font-display text-5xl leading-none text-primary/70">“</span>
+      <div className="flex-1 space-y-3">
+        {testimonial.headline && <p className="font-semibold text-lg text-primary">{testimonial.headline}</p>}
+        <blockquote lang="fr" className="text-base leading-relaxed text-card-foreground">{testimonial.quote}</blockquote>
+      </div>
+      <figcaption className="border-t border-border pt-4 flex items-center gap-3">
+        <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">{initials}</span>
+        <div className="min-w-0">
+          <p className="font-semibold text-primary">{testimonial.author}</p>
+          <p className="text-sm text-card-foreground">{testimonial.domain}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("landing.testimonials.customerRole")}</p>
         </div>
       </figcaption>
     </figure>
@@ -663,27 +661,10 @@ const LandingPage = () => {
               {t("landing.testimonials.intro")}
             </p>
           </FadeIn>
-          <FeaturedTestimonial />
-          <h3 className="font-display text-xl sm:text-2xl font-bold mt-12 mb-5">{t("landing.testimonials.otherReviews")}</h3>
-          <div className="grid md:grid-cols-2 gap-4">
-            {landingTestimonials.slice(1).map((q, i) => (
-              <FadeIn
-                key={q.author}
-                delay={i * 0.05}
-                className={
-                  testimonialSpansFullWidth(i, landingTestimonials.length - 1) ?
-                  "md:col-span-2" :
-                  undefined
-                }
-              >
-                <figure className="h-full bg-card rounded-xl border border-border p-5 sm:p-6 flex flex-col gap-4">
-                  <span aria-hidden="true" className="font-display text-4xl leading-none text-primary/60">“</span>
-                  <blockquote lang="fr" className="text-base leading-relaxed flex-1">{q.quote}</blockquote>
-                  <figcaption className="text-sm border-t border-border pt-4">
-                    <p className="font-semibold text-primary">{q.author}</p>
-                    {q.role ? <p className="text-muted-foreground mt-1">{q.role}</p> : null}
-                  </figcaption>
-                </figure>
+          <div className="grid md:grid-cols-2 gap-5">
+            {landingTestimonials.map((testimonial, i) => (
+              <FadeIn key={testimonial.author} delay={(i % 2) * 0.05} className="h-full">
+                <TestimonialCard testimonial={testimonial} />
               </FadeIn>
             ))}
           </div>
