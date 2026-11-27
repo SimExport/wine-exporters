@@ -15,7 +15,7 @@ export type LandingTestimonial = {
 };
 
 export const featuredLandingTestimonial: LandingTestimonial = {
-  quote: "Hvidovre Vinhus, au Danemark, me commande déjà sa 2e palette. C'est vraiment super […] J'apprécie beaucoup le partage d'opportunité. […] En tout cas, j'apprecie vraiment notre collaboration, et je la recommande à tout le monde",
+  quote: "[Un importateur] au Danemark me commande déjà sa 2e palette. C'est vraiment super […] J'apprécie beaucoup le partage d'opportunité. […] En tout cas, j'apprecie vraiment notre collaboration, et je la recommande à tout le monde",
   author: "Jérôme Petitjean, Famille Petitjean",
 };
 
