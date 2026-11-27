@@ -15,7 +15,7 @@ export type LandingTestimonial = {
 };
 
 export const featuredLandingTestimonial: LandingTestimonial = {
-  quote: "Deuxième commande au Danemark ! C'est vraiment super […] J'apprécie beaucoup le partage d'opportunité. […] En tout cas, j'apprécie vraiment notre collaboration, et je la recommande à tout le monde",
+  quote: "Deuxième commande au Danemark […] J'apprécie beaucoup le partage d'opportunité. […] En tout cas, j'apprécie vraiment notre collaboration, et je la recommande à tout le monde",
   author: "Jérôme Petitjean, Famille Petitjean",
 };
 
