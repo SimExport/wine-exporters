@@ -5,6 +5,8 @@ on:
     paths:
       - 'src/pages/McpConsent.tsx'
       - 'src/App.tsx'
+      - 'supabase/config.toml'
+      - 'docs/mcp/**'
       - 'public/.well-known/oauth-authorization-server'
       - 'supabase/functions/_shared/wine-mcp-isolated/**'
       - 'supabase/functions/wineexporters-mcp-isolated/**'
