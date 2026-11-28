@@ -22,6 +22,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Reconcile existing dependency lock for isolated build check
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - run: npm ci
       - run: npm run build
       - name: Check OAuth discovery output
