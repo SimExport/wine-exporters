@@ -53,7 +53,7 @@ export function authorizationMetadata(config: Config){
   const endpoints=config.endpointBase||config.issuer;
   return {issuer:config.issuer,authorization_response_iss_parameter_supported:true,
     authorization_endpoint:endpoints+'/authorize',token_endpoint:endpoints+'/token',revocation_endpoint:endpoints+'/revoke',
-    response_types_supported:['code'],grant_types_supported:['authorization_code'],code_challenge_methods_supported:['S256'],
+    response_types_supported:['code'],grant_types_supported:['authorization_code','refresh_token'],code_challenge_methods_supported:['S256'],
     token_endpoint_auth_methods_supported:['none'],revocation_endpoint_auth_methods_supported:['none'],scopes_supported:SCOPES};
 }
 export function createBroker(config: Config, store: Store, identity: Identity) {
@@ -130,18 +130,26 @@ export function createBroker(config: Config, store: Store, identity: Identity) {
           "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
       }
       if (path === "/token") {
-        allowedKeys(p, ["grant_type", "client_id", "code", "redirect_uri", "resource", "code_verifier"]);
         if (req.headers.has("authorization")) throw new OAuthError("invalid_client", 401);
-        if (one(p, "grant_type") !== "authorization_code") throw new OAuthError("unsupported_grant_type");
-        const v = one(p, "code_verifier"), code = one(p, "code");
-        if (!verifier.test(v) || !opaque.test(code)) throw new OAuthError("invalid_grant");
-        if (one(p, "resource") !== config.resource) throw new OAuthError("invalid_target");
-        const token = "wemcp_" + random();
-        const result = await store("exchange", { code_hash: await hash(code), challenge: await hash(v),
-          client_id: one(p, "client_id"), redirect_uri: one(p, "redirect_uri"), resource: config.resource,
-          token_hash: await hash(token) });
+        const grant = one(p, "grant_type");
+        if (grant !== "authorization_code" && grant !== "refresh_token") throw new OAuthError("unsupported_grant_type");
+        allowedKeys(p, grant === "authorization_code" ? ["grant_type","client_id","code","redirect_uri","resource","code_verifier"] : ["grant_type","client_id","refresh_token","resource"]);
+        const requestedResource = one(p, "resource", grant === "authorization_code");
+        if (requestedResource && requestedResource !== config.resource) throw new OAuthError("invalid_target");
+        const token = "wemcp_" + random(), refresh = "wermcp_" + random();
+        const common = { client_id: one(p,"client_id"), resource: config.resource, token_hash: await hash(token), new_refresh_hash: await hash(refresh) };
+        let result;
+        if (grant === "authorization_code") {
+          const v = one(p,"code_verifier"), code = one(p,"code");
+          if (!verifier.test(v) || !opaque.test(code)) throw new OAuthError("invalid_grant");
+          result = await store("exchange",{...common,code_hash:await hash(code),challenge:await hash(v),redirect_uri:one(p,"redirect_uri")});
+        } else {
+          const old = one(p,"refresh_token");
+          if (!/^wermcp_[A-Za-z0-9_-]{43}$/.test(old)) throw new OAuthError("invalid_grant");
+          result = await store("refresh",{...common,refresh_hash:await hash(old)});
+        }
         if (!result) throw new OAuthError("invalid_grant");
-        return json({ access_token: token, token_type: "Bearer", expires_in: TOKEN_TTL, scope: result.scopes.join(" ") });
+        return json({access_token:token,refresh_token:refresh,token_type:"Bearer",expires_in:TOKEN_TTL,scope:result.scopes.join(" ")});
       }
       if (path === "/revoke") {
         allowedKeys(p, ["token", "client_id", "token_type_hint"]);
