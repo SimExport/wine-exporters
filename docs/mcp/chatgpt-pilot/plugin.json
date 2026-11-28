@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "wineexporters",
+  "version": "0.1.0",
+  "description": "Pilote privé WineExporters : trouver des importateurs, préparer les échanges, suivre et relancer ses prospects.",
+  "author": {
+    "name": "WineExporters",
+    "url": "https://wine-exporters.com"
+  },
+  "homepage": "https://wine-exporters.com"
+}
