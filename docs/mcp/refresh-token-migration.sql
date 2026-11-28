@@ -73,114 +73,13 @@ begin
    update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id;
    return null;
   end if;
-  if coalesce(p->>'token_hash','') !~ '^[A-Za-z0-9_-]{43}
-  select g0.* into g from wine_mcp_private.grants g0
-  where g0.client_id=p->>'client_id' and (exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.token_hash=p->>'token_hash') or exists(select 1 from wine_mcp_private.refresh_tokens rt0 where rt0.grant_id=g0.id and rt0.token_hash=p->>'token_hash')) for update of g0;
-  if found then update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id; end if;
-  return '{}';
- elsif op in ('connections','disconnect') then
-  uid:=(p->>'user_id')::uuid; sid:=(p->>'session_id')::uuid;
-  if not wine_mcp_private.actor(uid,sid) then raise exception 'invalid session'; end if;
-  if op='disconnect' then
-   update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=(p->>'grant_id')::uuid and user_id=uid and revoked_at is null;
-   return '{}';
-  end if;
-  select coalesce(jsonb_agg(jsonb_build_object('grant_id',g0.id,'client_name',c0.name,'scopes',g0.scopes,'created_at',g0.created_at)), '[]') into result
-  from wine_mcp_private.grants g0 join wine_mcp_private.clients c0 on c0.id=g0.client_id
-  where g0.user_id=uid and g0.revoked_at is null and (exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp()) or exists(select 1 from wine_mcp_private.refresh_tokens r0 where r0.grant_id=g0.id and r0.used_at is null and r0.expires_at>clock_timestamp()));
-  return result;
- end if;
- raise exception 'unsupported operation';
-end;
-$function$
- or coalesce(p->>'new_refresh_hash','') !~ '^[A-Za-z0-9_-]{43}
-  select g0.* into g from wine_mcp_private.tokens t0 join wine_mcp_private.grants g0 on g0.id=t0.grant_id
-  where t0.token_hash=p->>'token_hash' and g0.client_id=p->>'client_id' for update of g0;
-  if found then update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id; end if;
-  return '{}';
- elsif op in ('connections','disconnect') then
-  uid:=(p->>'user_id')::uuid; sid:=(p->>'session_id')::uuid;
-  if not wine_mcp_private.actor(uid,sid) then raise exception 'invalid session'; end if;
-  if op='disconnect' then
-   update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=(p->>'grant_id')::uuid and user_id=uid and revoked_at is null;
-   return '{}';
-  end if;
-  select coalesce(jsonb_agg(jsonb_build_object('grant_id',g0.id,'client_name',c0.name,'scopes',g0.scopes,'created_at',g0.created_at)), '[]') into result
-  from wine_mcp_private.grants g0 join wine_mcp_private.clients c0 on c0.id=g0.client_id
-  where g0.user_id=uid and g0.revoked_at is null and exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp());
-  return result;
- end if;
- raise exception 'unsupported operation';
-end;
-$function$
- or p->>'token_hash'=p->>'new_refresh_hash' then return null; end if;
+  if coalesce(p->>'token_hash','') !~ '^[A-Za-z0-9_-]{43}$' or coalesce(p->>'new_refresh_hash','') !~ '^[A-Za-z0-9_-]{43}$' or p->>'token_hash'=p->>'new_refresh_hash' then return null; end if;
   update wine_mcp_private.codes set used_at=clock_timestamp() where code_hash=a.code_hash;
   insert into wine_mcp_private.tokens(token_hash,grant_id) values(p->>'token_hash',g.id);
   insert into wine_mcp_private.refresh_tokens(token_hash,grant_id,expires_at) values(p->>'new_refresh_hash',g.id,least(clock_timestamp()+interval '7 days',g.created_at+interval '30 days'));
   return jsonb_build_object('scopes',g.scopes);
  elsif op='refresh' then
-  if coalesce(p->>'refresh_hash','') !~ '^[A-Za-z0-9_-]{43}
-  select g0.* into g from wine_mcp_private.tokens t0 join wine_mcp_private.grants g0 on g0.id=t0.grant_id
-  where t0.token_hash=p->>'token_hash' and g0.client_id=p->>'client_id' for update of g0;
-  if found then update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id; end if;
-  return '{}';
- elsif op in ('connections','disconnect') then
-  uid:=(p->>'user_id')::uuid; sid:=(p->>'session_id')::uuid;
-  if not wine_mcp_private.actor(uid,sid) then raise exception 'invalid session'; end if;
-  if op='disconnect' then
-   update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=(p->>'grant_id')::uuid and user_id=uid and revoked_at is null;
-   return '{}';
-  end if;
-  select coalesce(jsonb_agg(jsonb_build_object('grant_id',g0.id,'client_name',c0.name,'scopes',g0.scopes,'created_at',g0.created_at)), '[]') into result
-  from wine_mcp_private.grants g0 join wine_mcp_private.clients c0 on c0.id=g0.client_id
-  where g0.user_id=uid and g0.revoked_at is null and exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp());
-  return result;
- end if;
- raise exception 'unsupported operation';
-end;
-$function$
- or coalesce(p->>'token_hash','') !~ '^[A-Za-z0-9_-]{43}
-  select g0.* into g from wine_mcp_private.tokens t0 join wine_mcp_private.grants g0 on g0.id=t0.grant_id
-  where t0.token_hash=p->>'token_hash' and g0.client_id=p->>'client_id' for update of g0;
-  if found then update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id; end if;
-  return '{}';
- elsif op in ('connections','disconnect') then
-  uid:=(p->>'user_id')::uuid; sid:=(p->>'session_id')::uuid;
-  if not wine_mcp_private.actor(uid,sid) then raise exception 'invalid session'; end if;
-  if op='disconnect' then
-   update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=(p->>'grant_id')::uuid and user_id=uid and revoked_at is null;
-   return '{}';
-  end if;
-  select coalesce(jsonb_agg(jsonb_build_object('grant_id',g0.id,'client_name',c0.name,'scopes',g0.scopes,'created_at',g0.created_at)), '[]') into result
-  from wine_mcp_private.grants g0 join wine_mcp_private.clients c0 on c0.id=g0.client_id
-  where g0.user_id=uid and g0.revoked_at is null and exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp());
-  return result;
- end if;
- raise exception 'unsupported operation';
-end;
-$function$
- or coalesce(p->>'new_refresh_hash','') !~ '^[A-Za-z0-9_-]{43}
-  select g0.* into g from wine_mcp_private.tokens t0 join wine_mcp_private.grants g0 on g0.id=t0.grant_id
-  where t0.token_hash=p->>'token_hash' and g0.client_id=p->>'client_id' for update of g0;
-  if found then update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id; end if;
-  return '{}';
- elsif op in ('connections','disconnect') then
-  uid:=(p->>'user_id')::uuid; sid:=(p->>'session_id')::uuid;
-  if not wine_mcp_private.actor(uid,sid) then raise exception 'invalid session'; end if;
-  if op='disconnect' then
-   update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=(p->>'grant_id')::uuid and user_id=uid and revoked_at is null;
-   return '{}';
-  end if;
-  select coalesce(jsonb_agg(jsonb_build_object('grant_id',g0.id,'client_name',c0.name,'scopes',g0.scopes,'created_at',g0.created_at)), '[]') into result
-  from wine_mcp_private.grants g0 join wine_mcp_private.clients c0 on c0.id=g0.client_id
-  where g0.user_id=uid and g0.revoked_at is null and exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp());
-  return result;
- end if;
- raise exception 'unsupported operation';
-end;
-$function$
- or p->>'token_hash'=p->>'new_refresh_hash' or p->>'refresh_hash'=p->>'new_refresh_hash' then return null; end if;
-  -- Lock the grant first, consistently with resource operations and revocation.
+  if coalesce(p->>'refresh_hash','') !~ '^[A-Za-z0-9_-]{43}$' or coalesce(p->>'token_hash','') !~ '^[A-Za-z0-9_-]{43}$' or coalesce(p->>'new_refresh_hash','') !~ '^[A-Za-z0-9_-]{43}$' or p->>'token_hash'=p->>'new_refresh_hash' or p->>'refresh_hash'=p->>'new_refresh_hash' then return null; end if;
   select grant_id into gid from wine_mcp_private.refresh_tokens where token_hash=p->>'refresh_hash';
   if not found then return null; end if;
   select * into g from wine_mcp_private.grants where id=gid for update;
@@ -201,8 +100,8 @@ $function$
   insert into wine_mcp_private.refresh_tokens(token_hash,grant_id,expires_at) values(p->>'new_refresh_hash',g.id,refresh_expiry);
   return jsonb_build_object('scopes',g.scopes);
  elsif op='revoke' then
-  select g0.* into g from wine_mcp_private.tokens t0 join wine_mcp_private.grants g0 on g0.id=t0.grant_id
-  where t0.token_hash=p->>'token_hash' and g0.client_id=p->>'client_id' for update of g0;
+  select g0.* into g from wine_mcp_private.grants g0
+  where g0.client_id=p->>'client_id' and (exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.token_hash=p->>'token_hash') or exists(select 1 from wine_mcp_private.refresh_tokens rt0 where rt0.grant_id=g0.id and rt0.token_hash=p->>'token_hash')) for update of g0;
   if found then update wine_mcp_private.grants set revoked_at=clock_timestamp() where id=g.id; end if;
   return '{}';
  elsif op in ('connections','disconnect') then
@@ -214,7 +113,7 @@ $function$
   end if;
   select coalesce(jsonb_agg(jsonb_build_object('grant_id',g0.id,'client_name',c0.name,'scopes',g0.scopes,'created_at',g0.created_at)), '[]') into result
   from wine_mcp_private.grants g0 join wine_mcp_private.clients c0 on c0.id=g0.client_id
-  where g0.user_id=uid and g0.revoked_at is null and exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp());
+  where g0.user_id=uid and g0.revoked_at is null and (exists(select 1 from wine_mcp_private.tokens t0 where t0.grant_id=g0.id and t0.expires_at>clock_timestamp()) or exists(select 1 from wine_mcp_private.refresh_tokens r0 where r0.grant_id=g0.id and r0.used_at is null and r0.expires_at>clock_timestamp()));
   return result;
  end if;
  raise exception 'unsupported operation';
