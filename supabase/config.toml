@@ -95,3 +95,10 @@ verify_jwt = false
 
 [functions.monitor-system-incidents]
 verify_jwt = false
+
+# The isolated MCP validates its own opaque tokens; keep the Supabase gateway from requiring website JWTs.
+[functions.wineexporters-oauth-broker]
+verify_jwt = false
+
+[functions.wineexporters-mcp-isolated]
+verify_jwt = false
