@@ -57,6 +57,7 @@ import TastingFollowUp from "./pages/resources/TastingFollowUp";
 import GettingStarted from "./pages/resources/GettingStarted";
 import CampaignInterestForm from "./pages/CampaignInterestForm";
 import OAuthConsent from "./pages/OAuthConsent";
+import McpConsent, { McpConnections } from "./pages/McpConsent";
 import NotFound from "./pages/NotFound";
 import PublicDirectory from "./pages/PublicDirectory";
 import { PremiumGate, TrialHomeRedirect, TrialReadonly } from "@/components/trial/TrialGate";
@@ -113,6 +114,8 @@ const App = ({ Router = BrowserRouter as RouterComponent }: { Router?: RouterCom
             <Route path="/market-analysis/result/:id" element={<MarketAnalysisResult />} />
             <Route path="/interest/:campaignId" element={<CampaignInterestForm />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+            <Route path="/mcp/consent" element={<McpConsent />} />
+            <Route path="/mcp/connections" element={<McpConnections />} />
             <Route path="/demo" element={<Navigate to="/demande-demo" replace />} />
             <Route
               path="/register"

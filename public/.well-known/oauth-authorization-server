@@ -1,0 +1,29 @@
+{
+  "issuer": "https://wine-exporters.com",
+  "authorization_response_iss_parameter_supported": true,
+  "authorization_endpoint": "https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/wineexporters-oauth-broker/authorize",
+  "token_endpoint": "https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/wineexporters-oauth-broker/token",
+  "revocation_endpoint": "https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/wineexporters-oauth-broker/revoke",
+  "response_types_supported": [
+    "code"
+  ],
+  "grant_types_supported": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "code_challenge_methods_supported": [
+    "S256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "none"
+  ],
+  "revocation_endpoint_auth_methods_supported": [
+    "none"
+  ],
+  "scopes_supported": [
+    "wineexporters:account",
+    "wineexporters:importers",
+    "wineexporters:crm:read",
+    "wineexporters:crm:write"
+  ]
+}

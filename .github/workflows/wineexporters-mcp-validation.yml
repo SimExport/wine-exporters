@@ -1,0 +1,37 @@
+name: WineExporters MCP validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/pages/McpConsent.tsx'
+      - 'src/App.tsx'
+      - 'supabase/config.toml'
+      - 'docs/mcp/**'
+      - 'public/.well-known/oauth-authorization-server'
+      - 'supabase/functions/_shared/wine-mcp-isolated/**'
+      - 'supabase/functions/wineexporters-mcp-isolated/**'
+      - 'supabase/functions/wineexporters-oauth-broker/**'
+      - '.github/workflows/wineexporters-mcp-validation.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reconcile existing dependency lock for isolated build check
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - run: npm ci
+      - run: npm run build
+      - name: Check OAuth discovery output
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; const p="dist/.well-known/oauth-authorization-server"; const m=JSON.parse(fs.readFileSync(p,"utf8")); if(m.issuer!=="https://wine-exporters.com" || !m.code_challenge_methods_supported.includes("S256")) throw Error("Missing or invalid discovery output");'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: '2.x'
+      - run: deno test supabase/functions/_shared/wine-mcp-isolated/validation.test.ts
