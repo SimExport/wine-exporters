@@ -25,5 +25,6 @@
     "wineexporters:importers",
     "wineexporters:crm:read",
     "wineexporters:crm:write"
-  ]
+  ],
+  "client_id_metadata_document_supported": true
 }
