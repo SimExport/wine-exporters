@@ -1,0 +1,29 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "wineexporters": {
+      "type": "streamable-http",
+      "url": "https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/wineexporters-mcp-isolated",
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "oauth",
+            "client": {
+              "mode": "provided",
+              "clientId": "wineexporters-chatgpt-pilot",
+              "tokenEndpointAuthMethod": "none"
+            },
+            "authorizationServerBase": "https://wine-exporters.com",
+            "resource": "https://dmgafmigqfycyaopdviw.supabase.co/functions/v1/wineexporters-mcp-isolated",
+            "baseScopes": [
+              "wineexporters:account",
+              "wineexporters:importers",
+              "wineexporters:crm:read",
+              "wineexporters:crm:write"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
