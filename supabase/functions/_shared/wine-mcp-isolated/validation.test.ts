@@ -14,6 +14,7 @@ function form(path:string, fields:Record<string,string>, extra:Record<string,str
 }
 Deno.test("OAuth broker: actual HTTP handlers, PKCE, binding, code exchange, denial and revocation",async()=>{
  let pending:any=null, grant:any=null, revoked=false, used=false;
+ let refreshHash="", previousRefreshHash="";
  const mockStore=async(op:string,d:Record<string,unknown>)=>{
   if(op==="pending"){
    if(d.client_id!==client||d.redirect_uri!==redirect||d.resource!==resource)return null;
@@ -28,7 +29,13 @@ Deno.test("OAuth broker: actual HTTP handlers, PKCE, binding, code exchange, den
   }
   if(op==="exchange"){
    if(!grant||d.code_hash!==grant.code_hash||d.challenge!==grant.challenge||d.client_id!==client||d.redirect_uri!==redirect||d.resource!==resource||revoked||used)return null;
-   used=true;return {scopes:grant.scopes};
+   used=true;refreshHash=String(d.new_refresh_hash);return {scopes:grant.scopes};
+  }
+  if(op==="refresh"){
+   if(!grant||d.client_id!==client||d.resource!==resource||revoked)return null;
+   if(d.refresh_hash===previousRefreshHash){revoked=true;return null;}
+   if(d.refresh_hash!==refreshHash)return null;
+   previousRefreshHash=refreshHash;refreshHash=String(d.new_refresh_hash);return {scopes:grant.scopes};
   }
   if(op==="revoke"){revoked=true;return {};}
   throw Error("unexpected operation");
@@ -51,7 +58,13 @@ Deno.test("OAuth broker: actual HTTP handlers, PKCE, binding, code exchange, den
  const exchange={grant_type:"authorization_code",client_id:client,code:callback.searchParams.get("code")!,redirect_uri:redirect,resource,code_verifier:verifier};
  const bad=await broker(form("/token",{...exchange,code_verifier:"x".repeat(43)}));assert(bad.status===400);
  const result=await broker(form("/token",exchange));assert(result.status===200);const token=await result.json();
- assert(/^wemcp_[A-Za-z0-9_-]{43}$/.test(token.access_token)&&token.expires_in===TOKEN_TTL&&!token.refresh_token&&!token.access_token.includes("."));
+ assert(/^wemcp_[A-Za-z0-9_-]{43}$/.test(token.access_token)&&token.expires_in===TOKEN_TTL&&/^wermcp_[A-Za-z0-9_-]{43}$/.test(token.refresh_token)&&!token.access_token.includes("."));
+ const refreshRequest={grant_type:"refresh_token",client_id:client,refresh_token:token.refresh_token};
+ const wrong=await broker(form("/token",{...refreshRequest,resource:"https://wrong.example.invalid"}));assert(wrong.status===400);
+ const refreshed=await broker(form("/token",refreshRequest));assert(refreshed.status===200);const pair=await refreshed.json();
+ assert(pair.access_token!==token.access_token&&pair.refresh_token!==token.refresh_token&&/^wermcp_[A-Za-z0-9_-]{43}$/.test(pair.refresh_token));
+ assert((await broker(form("/token",refreshRequest))).status===400&&revoked);
+ assert((await broker(form("/token",{...refreshRequest,refresh_token:pair.refresh_token}))).status===400);
  assert((await broker(form("/token",exchange))).status===400);
  assert((await broker(form("/revoke",{client_id:client,token:token.access_token}))).status===200&&revoked);
  const again=await open();const id=new URLSearchParams(new URL(again.headers.get("Location")!).hash.slice(1)).get("request")!;
